@@ -184,7 +184,12 @@ class AutonomousAgentWorkflow:
         self._is_paused.set()  # Unblock if paused
         if self._task and not self._task.done():
             self._task.cancel()
-        self.log("stop", "Agent execution stopped and cancelled by user.", level="error")
+        self.log("stop", "Agent execution stopped and cancelled by user.", level="warning")
+        if self.on_update:
+            try:
+                self.on_update(self.state)
+            except Exception:
+                pass
         return self.state
 
     async def _check_pause_and_stop(self):
@@ -403,6 +408,9 @@ class AutonomousAgentWorkflow:
                     self.log("auto_crop", f"Batch crop notice: {crop_err}", level="warning")
 
             max_panels = self.request.max_panels
+            if not max_panels and self.request.video_format == "shorts":
+                # YouTube Shorts strictly require videos under 60 seconds (8 panels @ ~4s each = ~32s)
+                max_panels = 8
 
             if cropped_slices:
                 slices_to_use = cropped_slices[:max_panels] if (max_panels and max_panels > 0) else cropped_slices
@@ -558,6 +566,17 @@ class AutonomousAgentWorkflow:
             await self._render_and_publish()
             return self.state
 
+        except asyncio.CancelledError:
+            logger.info(f"[Agent {self.run_id}] Execution cancelled/stopped by user.")
+            self.state.status = "stopped"
+            self.state.current_action = "Agent execution stopped by user."
+            self.log("stop", "Agent execution stopped by user.", level="warning")
+            if self.on_update:
+                try:
+                    self.on_update(self.state)
+                except Exception:
+                    pass
+            return self.state
         except Exception as e:
             logger.error(f"[Agent {self.run_id}] Error in execution: {e}", exc_info=True)
             self.state.status = "failed"
@@ -591,6 +610,16 @@ class AutonomousAgentWorkflow:
                 target_height=target_h,
                 voice=self.request.voice,
             )
+        except asyncio.CancelledError:
+            self.state.status = "stopped"
+            self.state.current_action = "Video render stopped by user."
+            self.log("video_render", "Video compilation cancelled by user.", level="warning")
+            if self.on_update:
+                try:
+                    self.on_update(self.state)
+                except Exception:
+                    pass
+            raise
         except Exception as render_err:
             logger.error(f"[Agent Render] Video compilation failed: {render_err}", exc_info=True)
             self.state.status = "failed"

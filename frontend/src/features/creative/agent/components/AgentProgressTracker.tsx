@@ -20,6 +20,8 @@ interface AgentProgressTrackerProps {
   currentAction: string;
   onApprove?: () => void;
   onReset?: () => void;
+  onRestart?: () => void;
+  onStop?: () => void;
   isReviewAwaiting?: boolean;
 }
 
@@ -68,6 +70,8 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
   currentAction,
   onApprove,
   onReset,
+  onRestart,
+  onStop,
   isReviewAwaiting = false,
 }) => {
   const getStageStatus = (stageKey: string, index: number) => {
@@ -76,6 +80,7 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
 
     if (status === "completed") return "done";
     if (status === "failed") return currentIndex === index ? "failed" : currentIndex > index ? "done" : "pending";
+    if (status === "stopped") return currentIndex === index ? "stopped" : currentIndex > index ? "done" : "pending";
     if (status === "awaiting_review" && index <= 3) return "done";
 
     if (currentIndex === -1) return "pending";
@@ -91,7 +96,7 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
             <span className="relative flex h-3 w-3">
-              {status !== "completed" && status !== "failed" && status !== "awaiting_review" && (
+              {status !== "completed" && status !== "failed" && status !== "stopped" && status !== "awaiting_review" && (
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3B82F6] opacity-75" />
               )}
               <span
@@ -100,6 +105,8 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
                     ? "bg-[#10B981]"
                     : status === "failed"
                     ? "bg-[#EF4444]"
+                    : status === "stopped"
+                    ? "bg-[#F59E0B]"
                     : status === "awaiting_review"
                     ? "bg-[#F59E0B]"
                     : "bg-[#3B82F6]"
@@ -121,6 +128,8 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
                   ? "bg-[#10B981]/10 border-[#10B981]/30 text-[#10B981]"
                   : status === "failed"
                   ? "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"
+                  : status === "stopped"
+                  ? "bg-[#F59E0B]/10 border-[#F59E0B]/30 text-[#F59E0B]"
                   : status === "awaiting_review"
                   ? "bg-[#F59E0B]/10 border-[#F59E0B]/30 text-[#F59E0B]"
                   : "bg-[#3B82F6]/10 border-[#3B82F6]/30 text-[#3B82F6] animate-pulse"
@@ -139,6 +148,8 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
                 ? "bg-[#10B981]"
                 : status === "failed"
                 ? "bg-[#EF4444]"
+                : status === "stopped"
+                ? "bg-[#F59E0B]"
                 : status === "awaiting_review"
                 ? "bg-[#F59E0B]"
                 : "bg-gradient-to-r from-[#3B82F6] to-[#60A5FA]"
@@ -169,6 +180,8 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
                   ? "bg-[#121212] border-[#3B82F6] text-[#3B82F6] ring-1 ring-[#3B82F6]/40 shadow-md shadow-[#3B82F6]/10"
                   : stageState === "failed"
                   ? "bg-[#121212] border-[#EF4444]/40 text-[#EF4444]"
+                  : stageState === "stopped"
+                  ? "bg-[#121212] border-amber-500/40 text-amber-400"
                   : "bg-[#121212] border-[#2F2F2F] text-[#6B7280]"
               }`}
             >
@@ -179,6 +192,8 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
                       ? "bg-[#10B981]/20 text-[#10B981]"
                       : stageState === "active"
                       ? "bg-[#3B82F6]/20 text-[#3B82F6] animate-pulse"
+                      : stageState === "stopped"
+                      ? "bg-amber-500/20 text-amber-400"
                       : "bg-[#1E1E1E] text-[#6B7280]"
                   }`}
                 >
@@ -190,6 +205,12 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
                 )}
                 {stageState === "active" && (
                   <div className="w-3.5 h-3.5 border-2 border-[#3B82F6] border-t-transparent rounded-full animate-spin" />
+                )}
+                {stageState === "stopped" && (
+                  <AlertCircle className="w-4 h-4 text-amber-400" />
+                )}
+                {stageState === "failed" && (
+                  <AlertCircle className="w-4 h-4 text-[#EF4444]" />
                 )}
                 {stageState === "pending" && (
                   <Clock className="w-3.5 h-3.5 text-[#6B7280]" />
@@ -209,6 +230,56 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
           );
         })}
       </div>
+
+      {/* ── Stopped / Failed Checkpoint Actions ── */}
+      {(status === "stopped" || status === "failed") && (
+        <div
+          className={`p-4 rounded-xl bg-[#121212] border ${
+            status === "stopped" ? "border-amber-500/40" : "border-[#EF4444]/40"
+          } flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in`}
+        >
+          <div className="flex items-center gap-3">
+            <AlertCircle
+              className={`w-6 h-6 flex-shrink-0 ${
+                status === "stopped" ? "text-amber-400" : "text-[#EF4444]"
+              }`}
+            />
+            <div>
+              <h4 className="text-sm font-bold text-[#E5E5E5]">
+                {status === "stopped" ? "Agent Execution Stopped" : "Agent Execution Failed"}
+              </h4>
+              <p className="text-xs text-[#9CA3AF] font-sans">
+                {status === "stopped"
+                  ? "The pipeline was stopped by user. Click 'Restart Agent' to restart from step 1 with the same chapter, or 'Discard Run' to clear."
+                  : (currentAction || "An unexpected error occurred during execution. Click 'Restart Agent' to retry from step 1.")}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 self-start sm:self-center">
+            {onReset && (
+              <button
+                type="button"
+                onClick={onReset}
+                className="px-4 py-2.5 rounded-xl bg-[#262626] hover:bg-[#333] border border-[#3F3F3F] text-[#E5E5E5] font-bold text-xs font-mono uppercase tracking-wide transition-all shadow-sm cursor-pointer active:scale-95"
+                title="Discard this run"
+              >
+                Discard Run
+              </button>
+            )}
+            {onRestart && (
+              <button
+                type="button"
+                onClick={onRestart}
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs font-mono uppercase tracking-wide transition-all shadow-md shadow-blue-500/20 cursor-pointer active:scale-95 flex items-center gap-1.5"
+                title="Restart this agent from scratch"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Restart Agent</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Review Checkpoint Prompt if Paused */}
       {isReviewAwaiting && onApprove && (

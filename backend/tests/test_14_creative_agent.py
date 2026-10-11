@@ -97,3 +97,41 @@ def test_launch_creative_agent_all_panels_endpoint(client, user_headers):
     data = response.json()
     assert "run_id" in data
     assert data["status"] in ("initializing", "scraping", "processing_images", "awaiting_review", "completed")
+
+
+def test_stop_creative_agent_endpoint(client, user_headers):
+    """POST /api/v1/creative/agent/stop/{run_id} - stops and cancels active run."""
+    launch_res = client.post(
+        "/api/v1/creative/agent/run",
+        json={"url": "https://example.com/stop-test", "review_mode": True, "max_panels": 2},
+        headers=user_headers,
+    )
+    assert launch_res.status_code == 200
+    run_id = launch_res.json()["run_id"]
+
+    stop_res = client.post(f"/api/v1/creative/agent/stop/{run_id}", headers=user_headers)
+    assert stop_res.status_code == 200
+    stop_data = stop_res.json()
+    assert stop_data["run_id"] == run_id
+    assert stop_data["status"] == "stopped"
+
+
+def test_restart_creative_agent_endpoint(client, user_headers):
+    """POST /api/v1/creative/agent/restart/{run_id} - restarts an agent run from scratch."""
+    launch_res = client.post(
+        "/api/v1/creative/agent/run",
+        json={"url": "https://example.com/restart-test", "review_mode": True, "max_panels": 2},
+        headers=user_headers,
+    )
+    assert launch_res.status_code == 200
+    run_id = launch_res.json()["run_id"]
+
+    # Stop it first
+    client.post(f"/api/v1/creative/agent/stop/{run_id}", headers=user_headers)
+
+    # Now restart it
+    restart_res = client.post(f"/api/v1/creative/agent/restart/{run_id}", headers=user_headers)
+    assert restart_res.status_code == 200
+    restart_data = restart_res.json()
+    assert restart_data["run_id"] == run_id
+    assert restart_data["status"] in ("initializing", "scraping", "processing_images", "awaiting_review", "completed")

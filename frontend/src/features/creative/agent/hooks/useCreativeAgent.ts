@@ -11,6 +11,9 @@ import {
   getAgentStatus,
   approveAgent,
   getAgentHistory,
+  deleteAgentRun,
+  stopAgent,
+  restartAgent,
 } from "../services/agentApi";
 
 const ACTIVE_STATUSES = [
@@ -98,6 +101,12 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
             `Agent "${updated.scraped_title || updated.run_id.slice(-6)}" failed: ${updated.error || "Unknown error"}`,
             "error"
           );
+        } else if (updated.status === "stopped" && !notifiedRunsRef.current.has(notifyKey)) {
+          notifiedRunsRef.current.add(notifyKey);
+          addNotification?.(
+            `Agent "${updated.scraped_title || updated.run_id.slice(-6)}": Execution stopped.`,
+            "warning"
+          );
         } else if (updated.status === "awaiting_review" && !notifiedRunsRef.current.has(notifyKey)) {
           notifiedRunsRef.current.add(notifyKey);
           addNotification?.(
@@ -120,7 +129,7 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
         const pastRuns = await getAgentHistory(fetchWithInterceptor);
         setHistory(pastRuns);
 
-        // Check if any background run completed/failed/reached review
+        // Check if any background run completed/failed/reached review/stopped
         for (const run of pastRuns) {
           const notifyKey = `${run.run_id}:${run.status}`;
           if (notifiedRunsRef.current.has(notifyKey)) continue;
@@ -136,6 +145,12 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
             addNotification?.(
               `Agent "${run.scraped_title || run.run_id.slice(-6)}": Paused at review checkpoint!`,
               "info"
+            );
+          } else if (run.status === "stopped") {
+            notifiedRunsRef.current.add(notifyKey);
+            addNotification?.(
+              `Agent "${run.scraped_title || run.run_id.slice(-6)}": Stopped.`,
+              "warning"
             );
           } else if (run.status === "failed") {
             notifiedRunsRef.current.add(notifyKey);
@@ -253,11 +268,58 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     setActiveRun(run);
   }, []);
 
-  const handleReset = useCallback(() => {
+  const handleReset = useCallback(async (runIdToDiscard?: string) => {
     stopPolling();
+    const targetId = runIdToDiscard || activeRun?.run_id;
+    if (targetId) {
+      try {
+        await deleteAgentRun(fetchWithInterceptor, targetId);
+      } catch {
+        // Continue clearing locally even if backend fails
+      }
+    }
     setActiveRun(null);
     setIsCreatingNew(true);
-  }, [stopPolling]);
+    setUrl("");
+    setTitleOverride("");
+    fetchHistory();
+  }, [activeRun?.run_id, fetchWithInterceptor, fetchHistory, stopPolling]);
+
+  const handleStop = useCallback(async (targetRunId?: string) => {
+    const runId = targetRunId || activeRun?.run_id;
+    if (!runId) return;
+    try {
+      setIsLoading(true);
+      const stoppedRun = await stopAgent(fetchWithInterceptor, runId);
+      if (activeRun?.run_id === runId) {
+        setActiveRun(stoppedRun);
+      }
+      stopPolling();
+      addNotification?.(`Agent "${stoppedRun.scraped_title || runId.slice(-6)}" stopped.`, "info");
+      fetchHistory();
+    } catch (err: any) {
+      addNotification?.(err.message || "Failed to stop agent execution.", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeRun?.run_id, fetchWithInterceptor, addNotification, fetchHistory, stopPolling]);
+
+  const handleRestart = useCallback(async (targetRunId?: string) => {
+    const runId = targetRunId || activeRun?.run_id;
+    if (!runId) return;
+    try {
+      setIsLoading(true);
+      const restartedRun = await restartAgent(fetchWithInterceptor, runId);
+      setActiveRun(restartedRun);
+      setIsCreatingNew(false);
+      addNotification?.(`Agent "${restartedRun.scraped_title || runId.slice(-6)}" restarted!`, "info");
+      fetchHistory();
+    } catch (err: any) {
+      addNotification?.(err.message || "Failed to restart agent.", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeRun?.run_id, fetchWithInterceptor, addNotification, fetchHistory]);
 
   const selectHistoryRun = useCallback((run: AgentRunResponse) => {
     setIsCreatingNew(false);
@@ -294,6 +356,8 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     handleLaunch,
     handleApprove,
     handleReset,
+    handleStop,
+    handleRestart,
     sendToBackgroundAndStartNew,
     startNewAgent,
     switchToRun,

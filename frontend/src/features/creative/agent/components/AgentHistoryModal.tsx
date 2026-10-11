@@ -85,6 +85,12 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
           color: "bg-rose-500/10 text-rose-400 border-rose-500/30",
           icon: <AlertCircle className="w-3 h-3 text-rose-400" />,
         };
+      case "stopped":
+        return {
+          label: "Stopped",
+          color: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+          icon: <AlertCircle className="w-3 h-3 text-amber-400" />,
+        };
       case "awaiting_review":
         return {
           label: "Awaiting Review",

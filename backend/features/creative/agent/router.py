@@ -82,5 +82,31 @@ async def get_agent_history_endpoint(
     return AgentHistoryListResponse(runs=runs, total=len(runs))
 
 
+@router.delete("/run/{run_id}", summary="Delete / Discard Agent Run")
+async def delete_agent_run_endpoint(run_id: str):
+    """Deletes an agent run and cleans up active workflows."""
+    success = agent_service.delete_agent_run(run_id)
+    return {"success": success, "run_id": run_id}
+
+
+@router.post("/stop/{run_id}", response_model=AgentRunResponse, summary="Stop / Cancel Agent Run")
+async def stop_agent_endpoint(run_id: str):
+    """Stops and cancels an active running agent."""
+    state = agent_service.stop_agent_run(run_id)
+    if not state:
+        raise HTTPException(status_code=404, detail=f"Agent run '{run_id}' not found.")
+    return state
+
+
+@router.post("/restart/{run_id}", response_model=AgentRunResponse, summary="Restart Agent Run")
+async def restart_agent_endpoint(run_id: str):
+    """Restarts an agent run from the beginning using its saved parameters."""
+    state = agent_service.restart_agent_run(run_id)
+    if not state:
+        raise HTTPException(status_code=404, detail=f"Agent run '{run_id}' not found.")
+    return state
+
+
 agent_router = router
 __all__ = ["agent_router", "router"]
+

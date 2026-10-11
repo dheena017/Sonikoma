@@ -10,7 +10,7 @@ import {
   AgentHistoryModal,
   AgentBackgroundActionModal,
 } from "../components";
-import { Sparkles, Trash2, Smartphone, Monitor } from "lucide-react";
+import { Sparkles, Trash2, Smartphone, Monitor, Square, RotateCcw } from "lucide-react";
 
 interface CreativeAgentPageProps {
   fetchWithInterceptor?: any;
@@ -52,6 +52,8 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
     handleLaunch,
     handleApprove,
     handleReset,
+    handleStop,
+    handleRestart,
     sendToBackgroundAndStartNew,
     startNewAgent,
     switchToRun,
@@ -73,9 +75,19 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
 
   const isCompleted = activeRun?.status === "completed";
   const isReviewAwaiting = activeRun?.status === "awaiting_review";
+  const isStopped = activeRun?.status === "stopped";
+  const isRunning = [
+    "initializing",
+    "scraping",
+    "processing_images",
+    "generating_narrative",
+    "synthesizing_audio",
+    "rendering_video",
+    "publishing_youtube",
+  ].includes(activeRun?.status || "");
 
   const handlePromptDiscard = () => {
-    if (activeRun && activeRun.status !== "completed") {
+    if (activeRun && activeRun.status !== "completed" && activeRun.status !== "failed" && activeRun.status !== "stopped") {
       setShowBackgroundModal(true);
     } else {
       handleReset();
@@ -158,17 +170,44 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
                 )}
               </div>
 
-              {/* Action Buttons: Background & New vs Discard */}
+              {/* Action Buttons: Stop / Restart / Background / Discard */}
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={sendToBackgroundAndStartNew}
-                  className="px-4 py-2 rounded-xl text-xs font-bold font-mono text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-500/20 border border-blue-400/40 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-                  title="Let this agent run in the background and configure another video"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-blue-200" />
-                  <span>Run in Background &amp; Create New</span>
-                </button>
+                {isRunning && (
+                  <button
+                    type="button"
+                    onClick={() => handleStop()}
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold font-mono text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
+                    title="Stop and cancel current agent execution"
+                  >
+                    <Square className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    <span>Stop</span>
+                  </button>
+                )}
+
+                {(isStopped || activeRun.status === "failed") && (
+                  <button
+                    type="button"
+                    onClick={() => handleRestart()}
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold font-mono text-blue-200 bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/50 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
+                    title="Restart this agent pipeline from step 1"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5 text-blue-300" />
+                    <span>Restart</span>
+                  </button>
+                )}
+
+                {isRunning && (
+                  <button
+                    type="button"
+                    onClick={sendToBackgroundAndStartNew}
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold font-mono text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-500/20 border border-blue-400/40 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                    title="Let this agent run in the background and configure another video"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-blue-200" />
+                    <span>Run in Background</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={handlePromptDiscard}
@@ -187,6 +226,8 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
               currentAction={activeRun.current_action}
               onApprove={handleApprove}
               onReset={handlePromptDiscard}
+              onRestart={() => handleRestart()}
+              onStop={() => handleStop()}
               isReviewAwaiting={isReviewAwaiting}
             />
 

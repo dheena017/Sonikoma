@@ -76,9 +76,42 @@ class CreativeAgentService:
                 conn.execute(
                     "CREATE INDEX IF NOT EXISTS idx_creative_agent_runs_created_at ON creative_agent_runs(created_at DESC)"
                 )
+                # Recover any orphaned runs left in active state when server reloads
+                conn.execute(
+                    """
+                    UPDATE creative_agent_runs
+                    SET status = 'failed',
+                        error = 'Interrupted by server reload. You can retry or discard.',
+                        updated_at = ?
+                    WHERE status IN (
+                        'initializing', 'scraping', 'processing_images',
+                        'generating_narrative', 'synthesizing_audio',
+                        'rendering_video', 'publishing_youtube'
+                    )
+                    """,
+                    (time.time(),),
+                )
                 conn.commit()
         except Exception as e:
             logger.error(f"[CreativeAgentService] Failed to ensure creative_agent_runs table: {e}")
+
+    def delete_agent_run(self, run_id: str) -> bool:
+        """Stops any active background workflow and removes the run from DB."""
+        if run_id in self._workflows:
+            try:
+                self._workflows[run_id].stop()
+            except Exception:
+                pass
+            del self._workflows[run_id]
+
+        try:
+            with get_db_connection() as conn:
+                conn.execute("DELETE FROM creative_agent_runs WHERE run_id = ?", (run_id,))
+                conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f"[CreativeAgentService] Failed to delete run {run_id}: {e}")
+            return False
 
     def save_run(self, state: AgentRunResponse) -> None:
         """Persists or updates an agent run in the SQLite database."""
@@ -217,8 +250,8 @@ class CreativeAgentService:
         # Persist initial state immediately
         self.save_run(workflow.state)
 
-        # Launch background task
-        asyncio.create_task(workflow.execute())
+        # Launch background task and store handle
+        workflow._task = asyncio.create_task(workflow.execute())
         logger.info(f"[CreativeAgentService] Started agent run {run_id} for user {user_id}")
         return workflow.state
 
@@ -241,6 +274,104 @@ class CreativeAgentService:
             logger.error(f"[CreativeAgentService] Error reading run {run_id} from DB: {e}")
 
         return None
+
+    def stop_agent_run(self, run_id: str) -> Optional[AgentRunResponse]:
+        """Stops and cancels an active running agent workflow and updates DB to stopped status."""
+        workflow = self._workflows.get(run_id)
+        if workflow:
+            state = workflow.stop()
+            self.save_run(state)
+            logger.info(f"[CreativeAgentService] Stopped in-memory agent run {run_id}")
+            return state
+
+        # If not active in memory, update stored status in DB
+        try:
+            stored = self.get_agent_run(run_id)
+            if not stored:
+                return None
+            if stored.status not in ("completed", "failed", "stopped"):
+                stored.status = "stopped"
+                stored.current_action = "Agent execution stopped by user."
+                stored.updated_at = time.time()
+                stored.logs.append(
+                    AgentLogMessage(
+                        timestamp=stored.updated_at,
+                        stage="stop",
+                        level="warning",
+                        message="Agent execution stopped by user.",
+                    )
+                )
+                self.save_run(stored)
+                logger.info(f"[CreativeAgentService] Marked DB agent run {run_id} as stopped")
+            return stored
+        except Exception as e:
+            logger.error(f"[CreativeAgentService] Failed to stop run {run_id}: {e}")
+            return None
+
+    def restart_agent_run(self, run_id: str) -> Optional[AgentRunResponse]:
+        """Stops any running execution and restarts the agent workflow from scratch using saved parameters."""
+        # 1. Stop existing if running
+        if run_id in self._workflows:
+            try:
+                self._workflows[run_id].stop()
+            except Exception:
+                pass
+            del self._workflows[run_id]
+
+        # 2. Retrieve existing run parameters from DB / state
+        stored = self.get_agent_run(run_id)
+        if not stored:
+            return None
+
+        # 3. Create fresh workflow with same parameters
+        req = AgentRunRequest(
+            url=stored.source_url or "",
+            video_format="shorts" if stored.video_format == "shorts" else "landscape",
+            language=stored.language or "en",
+            voice=stored.voice or "alloy",
+            privacy_status="unlisted",
+            review_mode=False,
+            title_override=stored.scraped_title or None,
+        )
+
+        workflow = AutonomousAgentWorkflow(
+            run_id=run_id,
+            request=req,
+            user_id=stored.user_id,
+            on_update=self.save_run,
+        )
+
+        # Preserve series/chapter titles if already known
+        if stored.scraped_title:
+            workflow.state.scraped_title = stored.scraped_title
+        if stored.series_title:
+            workflow.state.series_title = stored.series_title
+        if stored.chapter_title:
+            workflow.state.chapter_title = stored.chapter_title
+
+        workflow.state.status = "initializing"
+        workflow.state.progress = 0
+        workflow.state.current_action = f"Restarting autonomous pipeline for '{stored.scraped_title or run_id}'..."
+        workflow.state.error = None
+        workflow.state.video_url = None
+        workflow.state.video_filename = None
+        workflow.state.youtube_url = None
+        workflow.state.logs = [
+            AgentLogMessage(
+                timestamp=time.time(),
+                stage="restart",
+                level="info",
+                message="Agent execution restarted by user. Relaunching autonomous pipeline...",
+            )
+        ]
+
+        self._workflows[run_id] = workflow
+        self.save_run(workflow.state)
+
+        # 4. Launch background execution task
+        workflow._task = asyncio.create_task(workflow.execute())
+        logger.info(f"[CreativeAgentService] Restarted agent run {run_id}")
+        return workflow.state
 
     async def approve_and_resume_run(
         self, run_id: str, approve_data: Optional[AgentApproveRequest] = None
@@ -281,7 +412,7 @@ class CreativeAgentService:
 
         workflow.log("review", "User approved! Resuming video render and YouTube publish...", level="info")
         self.save_run(workflow.state)
-        asyncio.create_task(workflow._render_and_publish())
+        workflow._task = asyncio.create_task(workflow._render_and_publish())
         return workflow.state
 
     def list_agent_runs(self, user_id: Optional[str] = None, limit: int = 50) -> List[AgentRunResponse]:

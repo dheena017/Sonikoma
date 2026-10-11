@@ -11,7 +11,9 @@ export type AgentStage =
   | "rendering_video"
   | "publishing_youtube"
   | "completed"
-  | "failed";
+  | "failed"
+  | "stopped"
+  | "paused";
 
 export interface AgentRunRequest {
   url: string;

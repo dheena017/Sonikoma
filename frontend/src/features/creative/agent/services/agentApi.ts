@@ -73,3 +73,47 @@ export async function getAgentHistory(
   const data = await response.json().catch(() => ({ runs: [] }));
   return data.runs || [];
 }
+
+export async function deleteAgentRun(
+  fetchWithInterceptor: any,
+  runId: string
+): Promise<boolean> {
+  const fetcher = fetchWithInterceptor || window.fetch.bind(window);
+  const response = await fetcher(`${BASE_URL}/run/${encodeURIComponent(runId)}`, {
+    method: "DELETE",
+  });
+  return response.ok;
+}
+
+export async function stopAgent(
+  fetchWithInterceptor: any,
+  runId: string
+): Promise<AgentRunResponse> {
+  const fetcher = fetchWithInterceptor || window.fetch.bind(window);
+  const response = await fetcher(`${BASE_URL}/stop/${encodeURIComponent(runId)}`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to stop agent execution.");
+  }
+  return response.json();
+}
+
+export async function restartAgent(
+  fetchWithInterceptor: any,
+  runId: string
+): Promise<AgentRunResponse> {
+  const fetcher = fetchWithInterceptor || window.fetch.bind(window);
+  const response = await fetcher(`${BASE_URL}/restart/${encodeURIComponent(runId)}`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to restart agent.");
+  }
+  return response.json();
+}
+
