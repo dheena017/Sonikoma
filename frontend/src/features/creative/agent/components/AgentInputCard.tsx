@@ -478,11 +478,11 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
                 </div>
               )}
 
-              {/* Excessive Range Warning Notice (e.g. 297 when comic only has ~149) */}
+              {/* Large Batch Range Notice (Dynamic calculation based on selected range) */}
               {isRangeTooLarge && !isInvalidInvertedRange && !isRangeMismatched && (
                 <div className="p-2.5 rounded-lg bg-amber-950/40 border border-amber-800/40 text-[11px] text-amber-300 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <span>
-                    ⚠️ Range Warning: "To Ep" (<strong>{chapterRangeEnd}</strong>) is {chapterRangeEnd! - (chapterRangeStart || detectedEp || 1)} episodes ahead! This comic has ~149 total episodes.
+                    ⚠️ Large Batch Notice: <strong>{chapterRangeEnd! - (chapterRangeStart || detectedEp || 1) + 1} episodes</strong> selected ({chapterRangeStart || detectedEp || 1} → {chapterRangeEnd}). Processing large batches may significantly extend rendering time.
                   </span>
                   <div className="flex items-center gap-2">
                     <button
@@ -551,7 +551,7 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
                     value={chapterRangeStart ?? ""}
                     onChange={(e) => setChapterRangeStart?.(e.target.value ? parseInt(e.target.value) : undefined)}
                     placeholder={detectedEp ? `e.g. ${detectedEp}` : "1"}
-                    className="flex-1 bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#525252] outline-none"
+                    className="flex-1 bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#525252] outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="hidden sm:flex text-[#525252] font-mono text-xs select-none">→</div>
@@ -569,7 +569,7 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
                       }
                     }}
                     placeholder={detectedEp ? `e.g. ${detectedEp + 2}` : "3"}
-                    className="flex-1 bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#525252] outline-none"
+                    className="flex-1 bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#525252] outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
@@ -577,7 +577,15 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
               {url && (
                 <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-[#222]">
                   <span className="text-[10px] text-[#6B7280] font-mono">
-                    Scraping range starts directly from target Episode <strong>{detectedEp || chapterRangeStart || 1}</strong>.
+                    {chapterRangeEnd && chapterRangeEnd > (chapterRangeStart || detectedEp || 1) ? (
+                      <>
+                        Batch range: Episodes <strong>{chapterRangeStart || detectedEp || 1}</strong> to <strong>{chapterRangeEnd}</strong> ({chapterRangeEnd - (chapterRangeStart || detectedEp || 1) + 1} chapters total).
+                      </>
+                    ) : (
+                      <>
+                        Scraping starts directly from target Episode <strong>{detectedEp || chapterRangeStart || 1}</strong>.
+                      </>
+                    )}
                   </span>
                   <a
                     href={`/chapter-scraper?url=${encodeURIComponent(url)}`}
