@@ -81,6 +81,7 @@ const MODULES: QuickActionModule[] = [
     badge: "Episodic Engine",
     description: "Generate multi-chapter series with consistent character DNA and closed story arcs.",
     path: "/ai-series",
+    logo: WORKFLOW_LOGOS.series,
     icon: Layers,
   },
 ];

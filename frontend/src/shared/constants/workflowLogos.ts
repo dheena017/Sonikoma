@@ -15,6 +15,11 @@ export const WORKFLOW_LOGOS = {
   narrative: "/workflow-logos/simple_narrative_logo.jpg",
   voice: "/workflow-logos/simple_voice_logo.jpg",
   render: "/workflow-logos/simple_video_render_logo.jpg",
+  youtube: "/workflow-logos/simple_youtube_logo.jpg",
+  thumbnails: "/workflow-logos/simple_thumbnail_logo.jpg",
+  translation: "/workflow-logos/simple_translation_logo.jpg",
+  characters: "/workflow-logos/simple_character_logo.svg",
+  series: "/workflow-logos/simple_series_studio_logo.svg",
 } as const;
 
 export interface WorkflowStageMeta {

@@ -69,7 +69,7 @@ const STAGES = [
     label: "YouTube Publish",
     desc: "SEO headers & channel push",
     icon: Youtube,
-    logo: null,
+    logo: WORKFLOW_LOGOS.youtube,
   },
 ];
 

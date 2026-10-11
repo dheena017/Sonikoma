@@ -135,6 +135,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
       path: "/creative-suite/thumbnails",
       requiresPanels: false,
       badge: "Vision AI",
+      logo: WORKFLOW_LOGOS.thumbnails,
     },
     {
       id: "translation",
@@ -144,7 +145,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
       path: "/creative-suite/translation",
       requiresPanels: true,
       badge: "Visual",
-      logo: WORKFLOW_LOGOS.narrative,
+      logo: WORKFLOW_LOGOS.translation,
     },
     {
       id: "youtube",
@@ -154,6 +155,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
       path: "/creative-suite/youtube",
       requiresPanels: false,
       badge: "Distribution",
+      logo: WORKFLOW_LOGOS.youtube,
     },
   ];
 

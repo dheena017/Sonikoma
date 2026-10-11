@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#14121d" />
+      <stop offset="100%" stop-color="#08070b" />
+    </radialGradient>
+    <linearGradient id="purpleGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc" />
+      <stop offset="50%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#bgGrad)" />
+
+  <!-- Outer Neon Ring with Sound Waves -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="url(#purpleGlow)" stroke-width="4" stroke-opacity="0.3" />
+  <circle cx="256" cy="256" r="160" fill="none" stroke="url(#purpleGlow)" stroke-width="6" stroke-linecap="round" stroke-dasharray="30 20 80 25" filter="url(#glow)" />
+
+  <!-- Persona Mask / Character Silhouette -->
+  <g filter="url(#glow)" stroke="url(#purpleGlow)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Stylized Head Profile / Crown -->
+    <path d="M256 130 C205 130 170 170 170 225 C170 270 195 305 230 320 L230 355 L282 355 L282 320 C317 305 342 270 342 225 C342 170 307 130 256 130 Z" fill="#1e1833" fill-opacity="0.6" />
+    
+    <!-- Cyber Mask Visor -->
+    <path d="M200 220 L312 220" stroke="#f3e8ff" stroke-width="6" />
+    <polygon points="256,180 275,210 237,210" fill="url(#purpleGlow)" stroke="none" />
+
+    <!-- Audio Frequency Waves radiating outward -->
+    <path d="M120 230 C120 210 135 190 145 180" stroke-width="5" />
+    <path d="M100 240 C100 200 120 170 135 155" stroke-width="4" stroke-opacity="0.6" />
+    <path d="M392 230 C392 210 377 190 367 180" stroke-width="5" />
+    <path d="M412 240 C412 200 392 170 377 155" stroke-width="4" stroke-opacity="0.6" />
+
+    <!-- Voice Nodes -->
+    <circle cx="256" cy="285" r="10" fill="url(#purpleGlow)" stroke="none" />
+  </g>
+</svg>
