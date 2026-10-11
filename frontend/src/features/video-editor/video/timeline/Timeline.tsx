@@ -57,7 +57,7 @@ const Timeline: React.FC<TimelineProps> = ({
     const total =
       durations.reduce((acc, d) => acc + d, 0) || panels.length * 3.0 || 1;
 
-    const pxPerSec = 30;
+    const pxPerSec = s.zoomLevel ?? 30;
     return panels.map((panel, index) => {
       const duration = durations[index];
       const startTime = currentTime;
@@ -78,7 +78,7 @@ const Timeline: React.FC<TimelineProps> = ({
         widthPx,
       };
     });
-  }, [panels, s.clipDurations]);
+  }, [panels, s.clipDurations, s.zoomLevel]);
 
   const totalDuration = useMemo(() => {
     let max =
@@ -92,7 +92,8 @@ const Timeline: React.FC<TimelineProps> = ({
       const baseStart = t.startTime;
 
       // Account for drag offset on V1 (story panels)
-      const v1OffsetSecs = (s.clipOffsets[`v1-${idx}`] ?? 0) / 30;
+      const v1OffsetSecs =
+        (s.clipOffsets[`v1-${idx}`] ?? 0) / (s.zoomLevel ?? 30);
       const v1End = baseStart + v1OffsetSecs + t.duration;
 
       const v2End =

@@ -161,7 +161,8 @@ export const TimelineStoryPanelsTrack: React.FC<
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
-      const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
+      const deltaSecs =
+        side === "right" ? deltaX / pxPerSec : -deltaX / pxPerSec;
       const nextDuration = Math.max(
         0.5,
         Math.min(60, initialDuration + deltaSecs)
@@ -195,11 +196,10 @@ export const TimelineStoryPanelsTrack: React.FC<
 
   const clipLanes = useMemo(() => {
     const allClips = panels.map((panel: any, i: number) => {
-      const k = `panel-${i}`;
+      const k = `v1-${i}`;
       const t = panelTimings?.[i];
       const dur = t?.duration ?? panel.duration ?? 0;
-      const baseLeft =
-        t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * pxPerSec;
+      const baseLeft = (t?.startTime ?? i * dur) * pxPerSec;
       const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
       const isResizingThis = resizingInfo?.idx === i;
       const resizeLeftDelta =
@@ -299,10 +299,7 @@ export const TimelineStoryPanelsTrack: React.FC<
               const key = `v1-${idx}`;
               const isResizing = resizingInfo?.idx === idx;
 
-              const baseLeftPx =
-                timing.startPx !== undefined
-                  ? timing.startPx
-                  : timing.startTime * pxPerSec;
+              const baseLeftPx = timing.startTime * pxPerSec;
 
               const activeDur =
                 isResizing && resizingInfo
@@ -404,8 +401,8 @@ export const TimelineStoryPanelsTrack: React.FC<
                     {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
                       <span className="text-[7.5px] font-mono font-bold text-white bg-[#3B82F6] px-1.5 py-0.5 rounded border border-[#60A5FA]/40 shadow-xs animate-pulse">
                         {movingInfo.deltaPx > 0
-                          ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
-                          : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
+                          ? `+${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`
+                          : `${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`}
                       </span>
                     )}
 

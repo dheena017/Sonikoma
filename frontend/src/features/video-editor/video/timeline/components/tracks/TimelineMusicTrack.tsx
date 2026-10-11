@@ -125,7 +125,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
-      const delta = side === "right" ? deltaX / 30 : -deltaX / 30;
+      const delta = side === "right" ? deltaX / pxPerSec : -deltaX / pxPerSec;
       const nextDuration = Math.max(1, initialDuration + delta);
       const rounded = parseFloat(nextDuration.toFixed(1));
       latestDuration = rounded;
@@ -136,7 +136,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
     const onMouseUp = () => {
       if (side === "left") {
         const durDiff = initialDuration - latestDuration;
-        const shiftPx = durDiff * 30;
+        const shiftPx = durDiff * pxPerSec;
         setClipOffsets((prev) => ({
           ...prev,
           ["a1-0"]: (prev["a1-0"] ?? 0) + shiftPx,
@@ -292,8 +292,8 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                 {movingInfo && movingInfo.deltaPx !== 0 && (
                   <span className="text-[7.5px] font-mono font-bold text-emerald-100 bg-emerald-900/90 px-1.5 py-0.5 rounded-md border border-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.7)] animate-pulse">
                     {movingInfo.deltaPx > 0
-                      ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
-                      : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
+                      ? `+${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`
+                      : `${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`}
                   </span>
                 )}
 

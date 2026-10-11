@@ -138,7 +138,8 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
-      const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
+      const deltaSecs =
+        side === "right" ? deltaX / pxPerSec : -deltaX / pxPerSec;
       const nextDuration = Math.max(
         0.5,
         Math.min(60, initialDuration + deltaSecs)
@@ -158,7 +159,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
       onDurationChange?.(key, latestDuration);
       if (side === "left") {
         const durDiff = initialDuration - latestDuration;
-        const shiftPx = durDiff * 30;
+        const shiftPx = durDiff * pxPerSec;
         setClipOffsets((prev) => ({
           ...prev,
           [key]: (prev[key] ?? 0) + shiftPx,
@@ -194,8 +195,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
           p.camera_duration ||
           p.fx_duration ||
           (t?.duration ?? p.duration ?? 0);
-        const baseLeft =
-          t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * pxPerSec;
+        const baseLeft = (t?.startTime ?? 0) * pxPerSec;
         const offset = clipOffsets[k] ?? 0;
         const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
         const isResizingThis = resizingInfo?.key === k;
@@ -285,10 +285,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
             const isSelected = selectedClip === key;
             const isResizing = resizingInfo?.key === key;
 
-            const baseLeftPx =
-              timing.startPx !== undefined
-                ? timing.startPx
-                : timing.startTime * pxPerSec;
+            const baseLeftPx = timing.startTime * pxPerSec;
             const offsetPx = clipOffsets[key] ?? 0;
 
             const activeDur =
@@ -361,8 +358,8 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                   {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
                     <span className="text-[7px] font-mono font-bold text-white bg-neutral-900/90 px-1 py-0.2 rounded border border-[#3B82F6] shadow-[0_0_8px_rgba(129,140,248,0.7)] animate-pulse">
                       {movingInfo.deltaPx > 0
-                        ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
-                        : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
+                        ? `+${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`
+                        : `${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`}
                     </span>
                   )}
 

@@ -129,7 +129,8 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
-      const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
+      const deltaSecs =
+        side === "right" ? deltaX / pxPerSec : -deltaX / pxPerSec;
       const nextDuration = Math.max(
         0.5,
         Math.min(60, initialDuration + deltaSecs)
@@ -149,7 +150,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
       onDurationChange?.(key, latestDuration);
       if (side === "left") {
         const durDiff = initialDuration - latestDuration;
-        const shiftPx = durDiff * 30;
+        const shiftPx = durDiff * pxPerSec;
         setClipOffsets((prev) => ({
           ...prev,
           [key]: (prev[key] ?? 0) + shiftPx,
@@ -186,8 +187,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
         const t: PanelTiming | undefined = panelTimings[i];
         const k = `v3-${i}`;
         const dur = p.subtitle_duration || t?.duration || p.duration || 0;
-        const baseLeft =
-          t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * pxPerSec;
+        const baseLeft = (t?.startTime ?? 0) * pxPerSec;
         const offset = clipOffsets[k] ?? 0;
         const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
         const isResizingThis = resizingInfo?.key === k;
@@ -283,10 +283,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
 
             const key = `v3-${idx}`;
             const isResizing = resizingInfo?.key === key;
-            const baseLeftPx =
-              timing.startPx !== undefined
-                ? timing.startPx
-                : timing.startTime * pxPerSec;
+            const baseLeftPx = timing.startTime * pxPerSec;
             const offsetPx = clipOffsets[key] ?? 0;
 
             const activeDur =
@@ -365,8 +362,8 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                   {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
                     <span className="text-[7px] font-mono font-bold text-[#3B82F6] bg-[#2A2A2A] px-1 py-0.2 rounded border border-[#2F2F2F]  animate-pulse">
                       {movingInfo.deltaPx > 0
-                        ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
-                        : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
+                        ? `+${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`
+                        : `${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`}
                     </span>
                   )}
 
