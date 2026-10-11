@@ -24,6 +24,7 @@ interface AgentYouTubeSuccessCardProps {
   scrapedTitle?: string;
   videoFormat?: string;
   onReset: () => void;
+  onConnectYouTube?: () => void;
 }
 
 export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = ({
@@ -33,18 +34,17 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
   scrapedTitle,
   videoFormat = "shorts",
   onReset,
+  onConnectYouTube,
 }) => {
   const [copied, setCopied] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const isShort = videoFormat === "shorts" || metadata?.is_short === true;
-  const effectiveYoutubeUrl =
-    youtubeUrl ||
-    (videoUrl ? `https://www.youtube.com/shorts/${metadata?.title ? encodeURIComponent(metadata.title.slice(0, 15).replace(/\s+/g, '-').toLowerCase()) : 'preview'}` : null);
+  const isPublished = Boolean(youtubeUrl && !youtubeUrl.includes("preview"));
 
   const handleCopy = async () => {
-    if (!effectiveYoutubeUrl) return;
+    if (!youtubeUrl) return;
     try {
-      await navigator.clipboard.writeText(effectiveYoutubeUrl);
+      await navigator.clipboard.writeText(youtubeUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -62,19 +62,29 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded-full bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/30">
-                {effectiveYoutubeUrl ? "Live & Published" : "Render Complete"}
-              </span>
+              {isPublished ? (
+                <span className="text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded-full bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/30 flex items-center gap-1">
+                  <Check className="w-3 h-3 text-[#10B981]" />
+                  Live on YouTube
+                </span>
+              ) : (
+                <>
+                  <span className="text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded-full bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/30">
+                    MP4 Rendered (100%)
+                  </span>
+                  <span className="text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3 text-amber-400" />
+                    Channel Not Connected
+                  </span>
+                </>
+              )}
               <span className="text-[10px] font-mono uppercase font-bold px-2.5 py-0.5 rounded-full bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/30 flex items-center gap-1">
                 {isShort ? <Smartphone className="w-3 h-3" /> : <Monitor className="w-3 h-3" />}
                 {isShort ? "Shorts (9:16)" : "16:9 Video"}
               </span>
-              <span className="text-[10px] font-mono uppercase font-bold text-[#9CA3AF]">
-                1-Click Agent Complete
-              </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-[#E5E5E5] mt-1">
-              {effectiveYoutubeUrl ? "Your YouTube Video Is Ready!" : "Video Successfully Compiled!"}
+              {isPublished ? "Your YouTube Video Is Live & Ready!" : "Cinematic Video Compiled & Ready!"}
             </h2>
           </div>
         </div>
@@ -89,9 +99,9 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
         </button>
       </div>
 
-      {/* ── Primary Link Box ────────────────────────────────────────────────── */}
+      {/* ── Primary Link / Channel Connection Box ───────────────────────────── */}
       <div className="p-4 sm:p-5 rounded-xl bg-[#121212] border border-[#2F2F2F] shadow-inner space-y-3">
-        {effectiveYoutubeUrl ? (
+        {isPublished && youtubeUrl ? (
           <>
             <span className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
               <Share2 className="w-3.5 h-3.5 text-[#3B82F6]" />
@@ -100,13 +110,13 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <a
-                href={effectiveYoutubeUrl}
+                href={youtubeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 px-4 py-3 bg-[#1A1A1A] border border-[#2F2F2F] rounded-xl text-[#3B82F6] hover:text-blue-300 text-sm font-mono font-bold truncate flex items-center gap-2 transition-colors group"
               >
                 <YouTubeOfficialLogo className="w-5 h-3.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                <span className="truncate">{effectiveYoutubeUrl}</span>
+                <span className="truncate">{youtubeUrl}</span>
               </a>
 
               <div className="flex items-center gap-2">
@@ -129,7 +139,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                 </button>
 
                 <a
-                  href={effectiveYoutubeUrl}
+                  href={youtubeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 sm:flex-initial px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-mono font-bold uppercase tracking-wide flex items-center justify-center gap-2 transition-all shadow-md shadow-red-950/40 cursor-pointer"
@@ -160,28 +170,53 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
             )}
           </>
         ) : (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <span className="text-[11px] font-mono uppercase font-bold text-[#10B981] flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-[#10B981]" />
-                Cinematic MP4 Ready for Channel Upload
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-2">
+            <div className="space-y-1.5">
+              <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wide flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                Why isn't this video on YouTube yet?
               </span>
-              <p className="text-xs text-[#9CA3AF] mt-1">
-                Your video is compiled and saved. Connect your YouTube channel under Creative Suite &gt; YouTube to publish directly, or stream the video below.
+              <p className="text-xs text-[#A3A3A3] font-sans leading-relaxed max-w-2xl">
+                Google requires you to connect and authorize your YouTube account before uploading videos to your channel. Your 9:16 Shorts video is <span className="text-white font-semibold">100% rendered and saved</span>. Connect your channel to publish with 1 click, or download the MP4 file to upload manually to YouTube Studio with the AI metadata below.
               </p>
             </div>
-            {videoUrl && (
+
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start lg:self-center">
+              {onConnectYouTube && (
+                <button
+                  type="button"
+                  onClick={onConnectYouTube}
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-500 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-md shadow-red-950/40 cursor-pointer active:scale-95"
+                >
+                  <YouTubeOfficialLogo className="w-4.5 h-3.5" />
+                  <span>Connect YouTube</span>
+                </button>
+              )}
+
+              {videoUrl && (
+                <a
+                  href={videoUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-md shadow-blue-950/40 cursor-pointer active:scale-95"
+                >
+                  <Film className="w-3.5 h-3.5" />
+                  <span>Download MP4</span>
+                </a>
+              )}
+
               <a
-                href={videoUrl}
-                download
+                href="https://studio.youtube.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-5 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white text-xs font-mono font-bold uppercase tracking-wide flex items-center justify-center gap-2 transition-all self-start sm:self-center shrink-0 cursor-pointer"
+                className="px-3 py-2.5 rounded-xl bg-[#222] hover:bg-[#2C2C2C] border border-[#3A3A3A] text-gray-300 hover:text-white text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer"
+                title="Open YouTube Studio to drag-and-drop the MP4"
               >
-                <Film className="w-3.5 h-3.5" />
-                <span>Stream / Download MP4</span>
+                <span>YouTube Studio</span>
+                <ExternalLink className="w-3 h-3 text-gray-400" />
               </a>
-            )}
+            </div>
           </div>
         )}
       </div>

@@ -21,6 +21,7 @@ interface CreativeAgentPageProps {
 export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
   fetchWithInterceptor,
   addNotification,
+  navigateTo,
 }) => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [showBackgroundModal, setShowBackgroundModal] = useState(false);
@@ -132,6 +133,13 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
             scrapedTitle={activeRun.scraped_title}
             videoFormat={activeRun.video_format || videoFormat}
             onReset={startNewAgent}
+            onConnectYouTube={() => {
+              if (navigateTo) {
+                navigateTo("/creative-suite/youtube");
+              } else {
+                window.location.assign("/creative-suite/youtube");
+              }
+            }}
           />
         )}
 
