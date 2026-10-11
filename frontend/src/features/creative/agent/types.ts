@@ -84,3 +84,11 @@ export interface AgentApproveRequest {
   title_override?: string;
   privacy_status?: PrivacyStatus;
 }
+
+export interface AgentReuploadRequest {
+  title?: string;
+  description?: string;
+  tags?: string[];
+  privacy_status?: PrivacyStatus;
+}
+

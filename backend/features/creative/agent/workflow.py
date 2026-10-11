@@ -645,43 +645,107 @@ class AutonomousAgentWorkflow:
         self.log("youtube", "Calling Gemini AI to synthesize high-CTR viral YouTube headers, timestamps, and tags...", progress=92)
 
         title = self.state.scraped_title or "Webtoon Climax Recap"
-        narrative_summary = " ".join([p.speech_text for p in self.state.panels if p.speech_text])[:400]
+        narrative_summary = " ".join([p.speech_text for p in self.state.panels if p.speech_text])[:600]
 
-        seo_prompt = f"""You are an elite YouTube CTR & SEO Strategist specializing in Manga/Webtoon recaps.
-Analyze:
-- Series Title: "{title}"
-- Story Summary: "{narrative_summary}"
-- Video Format: "{'Shorts (9:16 vertical)' if is_short else 'Standard (16:9 widescreen)'}"
-- Source URL: "{self.request.url}"
+        # Calculate exact timeline markers from panels
+        cumulative_sec = 0.0
+        timeline_beats = []
+        for idx, p in enumerate(self.state.panels):
+            mm = int(cumulative_sec // 60)
+            ss = int(cumulative_sec % 60)
+            t_str = f"{mm:02d}:{ss:02d}"
+            snippet = (p.speech_text or f"Scene {idx + 1}").strip().replace("\n", " ")
+            if len(snippet) > 55:
+                snippet = snippet[:52] + "..."
+            timeline_beats.append((t_str, snippet, cumulative_sec))
+            p_dur = getattr(p, "duration", 3.5) or 3.5
+            cumulative_sec += p_dur
 
-Generate high-CTR, viral YouTube metadata:
-1. "title": Catchy, curiosity-gap title (under 90 chars, all caps emphasis, include #Shorts if shorts).
-2. "description": Professional description with chapter recap summary, original chapter source link ({self.request.url}), timestamps, and viral hashtags (#webtoon #manhwa #animerecap).
-3. "tags": 10-15 high-ranking YouTube search tags as a list of strings.
+        total_duration_sec = max(int(cumulative_sec), int(self.state.duration or 0), 10)
+
+        # Build official YouTube chapter markers (YouTube requires starting at 00:00 and spaced >= 10s)
+        chapter_anchors = []
+        last_sec = -999.0
+        for t_str, snippet, sec in timeline_beats:
+            if sec - last_sec >= 10.0 or len(chapter_anchors) == 0:
+                chapter_anchors.append((t_str, snippet))
+                last_sec = sec
+        if not chapter_anchors or chapter_anchors[0][0] != "00:00":
+            chapter_anchors.insert(0, ("00:00", "Story Introduction & Hook"))
+
+        timeline_cues_text = "\n".join([f"- [{t}] {cue}" for t, cue in chapter_anchors[:8]])
+
+        seo_prompt = f"""You are a master YouTube CTR & SEO Algorithm Strategist for top Anime & Webtoon recap channels.
+
+STORY & EPISODE PROFILE:
+- Title: "{title}"
+- Summary: "{narrative_summary}"
+- Aspect Ratio: "{'Vertical 9:16 Shorts' if is_short else 'Widescreen 16:9 Standard'}"
+- Video Runtime: ~{total_duration_sec} seconds
+- Key Story Beats:
+{timeline_cues_text}
+- Source URL: {self.request.url}
+
+TASK:
+Generate viral, algorithm-optimized YouTube metadata designed to maximize Click-Through Rate (CTR) and Audience Retention.
+
+REQUIREMENTS:
+1. "title":
+   {"- SHORTS: Under 60 chars. Ultra-punchy, all-caps emotional hook or shocking question, must include '#Shorts'. (E.g. 'HE HID S-RANK POWERS UNTIL THIS MOMENT! 😱 #Shorts')" if is_short else "- STANDARD 16:9: 60-80 chars. Unstoppable curiosity gap, highlighting the unexpected betrayal, hidden power, or jaw-dropping revelation. (E.g. 'When The Weakest Hunter Awakens The Forbidden Sovereign Power... | Full Recap')"}
+
+2. "description":
+   A complete, high-converting YouTube description structured as follows:
+   - LINE 1-2 (Hook): A dramatic, suspenseful summary opening sentence before the 'Show More' fold.
+   - EPISODE RECAP: 2 rich paragraphs summarizing the plot stakes, character growth, and intense showdown without spoiling the final cliffhanger.
+   - TIMESTAMPS / CHAPTERS:
+     Include clean YouTube clickable chapter timestamps starting strictly with:
+     00:00 - [Intriguing Chapter Name]
+     Followed by 3 to 6 actual timestamps from the timeline beats above (e.g. 00:15 - [Dramatic Chapter Name], etc.).
+   - OFFICIAL SOURCE ATTRIBUTION:
+     Original Webtoon / Chapter Link: {self.request.url}
+   - VIEWER ENGAGEMENT:
+     Ask a compelling question for viewers to discuss in the comments.
+   - VIRAL HASHTAGS:
+     5-8 targeted hashtags (#webtoon #manhwa #animerecap #manhwarecap #webtoonrecap #anime).
+
+3. "tags":
+   12-18 high-volume search tags (e.g. ["webtoon recap", "manhwa recap", "anime recap", "overpowered mc", "system manhwa", "manhwa recommendation"]).
 
 Return STRICT JSON:
 {{
   "title": "...",
   "description": "...",
-  "tags": ["webtoon recap", "manhwa", "anime recap"]
+  "tags": ["webtoon recap", "manhwa recap", "anime recap"]
 }}
 """
 
-        yt_title = f"{title.upper()} - THE UNTOLD POWER! [Full Recap]"
-        if is_short and "#Shorts" not in yt_title:
-            yt_title = f"{yt_title[:80]} #Shorts"
+        fallback_timestamps = "\n".join([f"{t} - {cue}" for t, cue in chapter_anchors[:6]])
+        if is_short:
+            yt_title = f"{title.upper()} - THE UNTOLD POWER AWAKENS! 🔥 #Shorts"
+        else:
+            yt_title = f"When The Weakest Awakens The Forbidden Sovereign Power... | {title} Full Recap"
 
         yt_desc = (
-            f"Full story recap of {title}.\n\n"
-            f"Original Chapter Source: {self.request.url}\n\n"
-            f"TIMESTAMPS:\n"
-            f"00:00 - Story Introduction\n"
-            f"00:15 - Rising Tension\n"
-            f"00:35 - Climax Awakening\n"
-            f"00:50 - Cliffhanger Ending\n\n"
-            f"#webtoon #manhwa #animerecap #webtoonrecap"
+            f"🔥 When everyone looked down on him, an ancient power awoke that changed everything...\n"
+            f"Watch the full recap of {title}!\n\n"
+            f"📖 CHAPTER SUMMARY:\n"
+            f"{narrative_summary or f'An intense recap covering the pivotal chapter of {title}.'}\n\n"
+            f"⏱️ TIMESTAMPS:\n"
+            f"{fallback_timestamps}\n\n"
+            f"🔗 ORIGINAL SOURCE:\n"
+            f"Read the official chapter here: {self.request.url}\n\n"
+            f"💬 Who had the best moment in this chapter? Drop your thoughts in the comments below! Don't forget to like and subscribe for Part 2!\n\n"
+            f"#webtoon #manhwa #animerecap #manhwarecap #webtoonrecap{' #shorts' if is_short else ''}"
         )
-        yt_tags = ["webtoon recap", "manhwa recap", "anime recap", "op mc", "webtoon adaptation"]
+        yt_tags = [
+            "webtoon recap",
+            "manhwa recap",
+            "anime recap",
+            "op mc",
+            "webtoon adaptation",
+            "manhwa recommendation",
+            "webtoon climax",
+        ]
 
         try:
             raw_seo = await self._call_llm(

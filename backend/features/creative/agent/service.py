@@ -455,9 +455,15 @@ class CreativeAgentService:
         return all_states[:limit]
 
     async def reupload_video_to_youtube(
-        self, run_id: str, user_id: Optional[str] = None
+        self,
+        run_id: str,
+        user_id: Optional[str] = None,
+        title_override: Optional[str] = None,
+        description_override: Optional[str] = None,
+        tags_override: Optional[List[str]] = None,
+        privacy_override: Optional[str] = None,
     ) -> Optional[AgentRunResponse]:
-        """Re-attempts uploading the already-rendered video to YouTube."""
+        """Re-attempts uploading the already-rendered video to YouTube with optional metadata overrides."""
         state = self.get_agent_run(run_id)
         if not state:
             return None
@@ -466,14 +472,25 @@ class CreativeAgentService:
             raise ValueError("No rendered video available for this run.")
 
         meta = state.youtube_metadata or AgentYouTubeMetadata(
-            title=state.scraped_title or "Webtoon Climax Recap #Shorts",
-            description=f"Story recap of {state.scraped_title or 'Webtoon'}.\n\n#webtoon #manhwa #shorts #animerecap",
-            tags=["webtoon recap", "manhwa", "anime recap", "shorts"],
+            title=title_override or state.scraped_title or "Webtoon Climax Recap #Shorts",
+            description=description_override or f"Story recap of {state.scraped_title or 'Webtoon'}.\n\n#webtoon #manhwa #shorts #animerecap",
+            tags=tags_override or ["webtoon recap", "manhwa", "anime recap", "shorts"],
             category_id="1",
-            privacy_status="unlisted",
+            privacy_status=privacy_override or "unlisted",
             is_short=(state.video_format == "shorts"),
             thumbnail_url=state.cover_image or (state.panels[0].image_url if state.panels else None),
         )
+
+        if title_override:
+            meta.title = title_override
+        if description_override:
+            meta.description = description_override
+        if tags_override:
+            meta.tags = tags_override
+        if privacy_override:
+            meta.privacy_status = privacy_override
+
+        state.youtube_metadata = meta
 
         effective_user_id = user_id or state.user_id or "anonymous"
         from features.creative.service import creative_service

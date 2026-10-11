@@ -18,6 +18,7 @@ from features.creative.agent.schemas import (
     AgentRunRequest,
     AgentRunResponse,
     AgentApproveRequest,
+    AgentReuploadRequest,
     AgentHistoryListResponse,
 )
 from features.creative.agent.service import agent_service
@@ -110,12 +111,20 @@ async def restart_agent_endpoint(run_id: str):
 @router.post("/reupload/{run_id}", response_model=AgentRunResponse, summary="Re-upload Video to YouTube")
 async def reupload_agent_video_endpoint(
     run_id: str,
+    reupload_data: Optional[AgentReuploadRequest] = None,
     current_user: Optional[dict] = Depends(get_optional_current_user),
 ):
-    """Re-attempts uploading the already-rendered video to YouTube."""
+    """Re-attempts uploading the already-rendered video to YouTube with optional metadata overrides."""
     user_id = _extract_user_id(current_user)
     try:
-        state = await agent_service.reupload_video_to_youtube(run_id=run_id, user_id=user_id)
+        state = await agent_service.reupload_video_to_youtube(
+            run_id=run_id,
+            user_id=user_id,
+            title_override=reupload_data.title if reupload_data else None,
+            description_override=reupload_data.description if reupload_data else None,
+            tags_override=reupload_data.tags if reupload_data else None,
+            privacy_override=reupload_data.privacy_status if reupload_data else None,
+        )
         if not state:
             raise HTTPException(status_code=404, detail=f"Agent run '{run_id}' not found.")
         return state
@@ -124,6 +133,7 @@ async def reupload_agent_video_endpoint(
     except Exception as e:
         logger.error(f"[Agent Router] Failed to reupload video to YouTube: {e}", exc_info=True)
         raise HTTPException(status_code=400, detail=str(e))
+
 
 
 agent_router = router

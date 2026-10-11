@@ -122,6 +122,14 @@ class AgentApproveRequest(BaseModel):
     privacy_status: Optional[Literal["unlisted", "public", "private"]] = None
 
 
+class AgentReuploadRequest(BaseModel):
+    """Payload to re-upload video with optional updated title, description, tags, or privacy."""
+    title: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    privacy_status: Optional[Literal["unlisted", "public", "private"]] = None
+
+
 class AgentHistoryListResponse(BaseModel):
     """List of recent agent execution runs."""
     runs: List[AgentRunResponse]
@@ -135,5 +143,7 @@ __all__ = [
     "AgentYouTubeMetadata",
     "AgentRunResponse",
     "AgentApproveRequest",
+    "AgentReuploadRequest",
     "AgentHistoryListResponse",
 ]
+

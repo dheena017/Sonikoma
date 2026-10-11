@@ -142,7 +142,7 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
                 window.location.assign("/creative-suite/youtube");
               }
             }}
-            onReupload={() => handleReupload(activeRun.run_id)}
+            onReupload={(customMeta) => handleReupload(activeRun.run_id, customMeta)}
             isReuploading={isReuploading}
           />
         )}

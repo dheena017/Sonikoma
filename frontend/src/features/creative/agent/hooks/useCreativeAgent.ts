@@ -5,6 +5,7 @@ import {
   VideoFormat,
   PrivacyStatus,
   AgentApproveRequest,
+  AgentReuploadRequest,
 } from "../types";
 import {
   launchAgent,
@@ -328,13 +329,16 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     setActiveRun(run);
   }, []);
 
-  const handleReupload = useCallback(async (targetRunId?: string) => {
+  const handleReupload = useCallback(async (
+    targetRunId?: string,
+    customMeta?: AgentReuploadRequest
+  ) => {
     const runId = targetRunId || activeRun?.run_id;
     if (!runId) return;
     try {
       setIsReuploading(true);
-      addNotification?.("Uploading video to YouTube...", "info");
-      const updated = await reuploadAgentVideo(fetchWithInterceptor, runId);
+      addNotification?.("Uploading video to YouTube with AI metadata...", "info");
+      const updated = await reuploadAgentVideo(fetchWithInterceptor, runId, customMeta);
       setActiveRun(updated);
       if (updated.youtube_url) {
         addNotification?.("🎉 Video successfully uploaded to YouTube!", "success");

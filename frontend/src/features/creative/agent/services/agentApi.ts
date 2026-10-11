@@ -2,6 +2,7 @@ import {
   AgentRunRequest,
   AgentRunResponse,
   AgentApproveRequest,
+  AgentReuploadRequest,
 } from "../types";
 
 const BASE_URL = "/api/v1/creative/agent";
@@ -119,11 +120,14 @@ export async function restartAgent(
 
 export async function reuploadAgentVideo(
   fetchWithInterceptor: any,
-  runId: string
+  runId: string,
+  data?: AgentReuploadRequest
 ): Promise<AgentRunResponse> {
   const fetcher = fetchWithInterceptor || window.fetch.bind(window);
   const response = await fetcher(`${BASE_URL}/reupload/${encodeURIComponent(runId)}`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data || {}),
   });
 
   if (!response.ok) {
