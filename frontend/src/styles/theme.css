@@ -154,7 +154,6 @@ button.btn-primary:not(:disabled):hover {
   background-color: #2563eb !important;
   border-color: #3b82f6 !important;
   color: #ffffff !important;
-  transform: translateY(-1.5px) !important;
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.45), 0 8px 22px rgba(0, 0, 0, 0.4) !important;
   filter: none !important;
 }
@@ -164,7 +163,6 @@ button.btn-primary:hover svg,
 a.btn-primary:hover svg {
   color: #ffffff !important;
   stroke: #ffffff !important;
-  transform: scale(1.1) !important;
 }
 
 .btn-primary:active,
@@ -206,7 +204,6 @@ button.btn-secondary:hover {
   background-color: #333333 !important;
   border-color: #4b5563 !important;
   color: #ffffff !important;
-  transform: translateY(-1px) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -231,7 +228,6 @@ button.btn-danger:hover {
   background-color: #ef4444 !important;
   border-color: #f87171 !important;
   color: #ffffff !important;
-  transform: translateY(-1px) !important;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
 }
 
@@ -251,7 +247,6 @@ button.btn-success:hover {
   background-color: #059669 !important;
   border-color: #34d399 !important;
   color: #ffffff !important;
-  transform: translateY(-1px) !important;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
 }
 
