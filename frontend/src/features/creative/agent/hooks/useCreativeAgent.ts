@@ -14,6 +14,7 @@ import {
   deleteAgentRun,
   stopAgent,
   restartAgent,
+  reuploadAgentVideo,
 } from "../services/agentApi";
 
 const ACTIVE_STATUSES = [
@@ -41,6 +42,7 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
   const [activeRun, setActiveRun] = useState<AgentRunResponse | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isReuploading, setIsReuploading] = useState(false);
   const [history, setHistory] = useState<AgentRunResponse[]>([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
 
@@ -326,6 +328,25 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     setActiveRun(run);
   }, []);
 
+  const handleReupload = useCallback(async (targetRunId?: string) => {
+    const runId = targetRunId || activeRun?.run_id;
+    if (!runId) return;
+    try {
+      setIsReuploading(true);
+      addNotification?.("Uploading video to YouTube...", "info");
+      const updated = await reuploadAgentVideo(fetchWithInterceptor, runId);
+      setActiveRun(updated);
+      if (updated.youtube_url) {
+        addNotification?.("🎉 Video successfully uploaded to YouTube!", "success");
+      }
+      fetchHistory();
+    } catch (err: any) {
+      addNotification?.(err.message || "Failed to upload video to YouTube.", "error");
+    } finally {
+      setIsReuploading(false);
+    }
+  }, [activeRun?.run_id, fetchWithInterceptor, addNotification, fetchHistory]);
+
   return {
     // Form fields
     url,
@@ -349,6 +370,7 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     isCreatingNew,
     setIsCreatingNew,
     isLoading,
+    isReuploading,
     history,
     isHistoryLoading,
     fetchHistory,
@@ -358,6 +380,7 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     handleReset,
     handleStop,
     handleRestart,
+    handleReupload,
     sendToBackgroundAndStartNew,
     startNewAgent,
     switchToRun,

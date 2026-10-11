@@ -107,6 +107,25 @@ async def restart_agent_endpoint(run_id: str):
     return state
 
 
+@router.post("/reupload/{run_id}", response_model=AgentRunResponse, summary="Re-upload Video to YouTube")
+async def reupload_agent_video_endpoint(
+    run_id: str,
+    current_user: Optional[dict] = Depends(get_optional_current_user),
+):
+    """Re-attempts uploading the already-rendered video to YouTube."""
+    user_id = _extract_user_id(current_user)
+    try:
+        state = await agent_service.reupload_video_to_youtube(run_id=run_id, user_id=user_id)
+        if not state:
+            raise HTTPException(status_code=404, detail=f"Agent run '{run_id}' not found.")
+        return state
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Agent Router] Failed to reupload video to YouTube: {e}", exc_info=True)
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 agent_router = router
 __all__ = ["agent_router", "router"]
 

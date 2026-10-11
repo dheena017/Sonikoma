@@ -454,6 +454,64 @@ class CreativeAgentService:
         all_states.sort(key=lambda s: s.created_at, reverse=True)
         return all_states[:limit]
 
+    async def reupload_video_to_youtube(
+        self, run_id: str, user_id: Optional[str] = None
+    ) -> Optional[AgentRunResponse]:
+        """Re-attempts uploading the already-rendered video to YouTube."""
+        state = self.get_agent_run(run_id)
+        if not state:
+            return None
+
+        if not state.video_url and not state.video_filename:
+            raise ValueError("No rendered video available for this run.")
+
+        meta = state.youtube_metadata or AgentYouTubeMetadata(
+            title=state.scraped_title or "Webtoon Climax Recap #Shorts",
+            description=f"Story recap of {state.scraped_title or 'Webtoon'}.\n\n#webtoon #manhwa #shorts #animerecap",
+            tags=["webtoon recap", "manhwa", "anime recap", "shorts"],
+            category_id="1",
+            privacy_status="unlisted",
+            is_short=(state.video_format == "shorts"),
+            thumbnail_url=state.cover_image or (state.panels[0].image_url if state.panels else None),
+        )
+
+        effective_user_id = user_id or state.user_id or "anonymous"
+        from features.creative.service import creative_service
+
+        pub_result = await creative_service.publish_video(
+            user_id=effective_user_id,
+            video_url=state.video_url,
+            title=meta.title,
+            synopsis=meta.description,
+            tags=meta.tags,
+            privacy_status=meta.privacy_status,
+            category_id=meta.category_id,
+            is_short=meta.is_short,
+            thumbnail_url=meta.thumbnail_url,
+        )
+
+        if pub_result and isinstance(pub_result, dict) and pub_result.get("youtube_url"):
+            state.youtube_url = pub_result["youtube_url"]
+            state.logs.append(
+                AgentLogMessage(
+                    timestamp=time.time(),
+                    stage="youtube",
+                    level="success",
+                    message=f"🎉 Success! Video re-uploaded and published to YouTube Channel: {pub_result['youtube_url']}",
+                )
+            )
+            state.updated_at = time.time()
+            self.save_run(state)
+            if run_id in self._workflows:
+                self._workflows[run_id].state = state
+            return state
+        else:
+            err_msg = (
+                (pub_result.get("error") if isinstance(pub_result, dict) else None)
+                or "YouTube account is not connected or authorization expired. Please connect your YouTube account."
+            )
+            raise ValueError(err_msg)
+
 
 agent_service = CreativeAgentService()
 

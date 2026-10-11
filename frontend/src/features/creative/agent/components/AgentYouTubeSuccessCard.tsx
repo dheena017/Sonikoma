@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Smartphone,
   Monitor,
+  Upload,
 } from "lucide-react";
 import { AgentYouTubeMetadata } from "../types";
 import YouTubeOfficialLogo from "@/features/creative/youtube/components/YouTubeOfficialLogo";
@@ -25,6 +26,8 @@ interface AgentYouTubeSuccessCardProps {
   videoFormat?: string;
   onReset: () => void;
   onConnectYouTube?: () => void;
+  onReupload?: () => void;
+  isReuploading?: boolean;
 }
 
 export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = ({
@@ -35,6 +38,8 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
   videoFormat = "shorts",
   onReset,
   onConnectYouTube,
+  onReupload,
+  isReuploading = false,
 }) => {
   const [copied, setCopied] = useState(false);
   const [videoError, setVideoError] = useState(false);
@@ -120,6 +125,28 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
               </a>
 
               <div className="flex items-center gap-2">
+                {onReupload && (
+                  <button
+                    type="button"
+                    onClick={onReupload}
+                    disabled={isReuploading}
+                    className="flex-1 sm:flex-initial px-4 py-3 rounded-xl bg-[#1E1E1E] hover:bg-[#252525] border border-[#2F2F2F] text-[#E5E5E5] text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                    title="Re-upload this video to YouTube"
+                  >
+                    {isReuploading ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5 text-blue-400" />
+                        <span>Re-upload</span>
+                      </>
+                    )}
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={handleCopy}
@@ -182,11 +209,34 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start lg:self-center">
+              {onReupload && (
+                <button
+                  type="button"
+                  onClick={onReupload}
+                  disabled={isReuploading}
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-500 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-md shadow-red-950/40 cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Upload / retry uploading this rendered video to your YouTube channel"
+                >
+                  {isReuploading ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Uploading to YouTube...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-3.5 h-3.5 text-white" />
+                      <span>Re-upload to YouTube</span>
+                    </>
+                  )}
+                </button>
+              )}
+
               {onConnectYouTube && (
                 <button
                   type="button"
                   onClick={onConnectYouTube}
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-500 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-md shadow-red-950/40 cursor-pointer active:scale-95"
+                  className="px-3.5 py-2.5 rounded-xl bg-[#1E1E1E] hover:bg-[#282828] border border-[#3A3A3A] hover:border-red-500/50 text-[#E5E5E5] hover:text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-sm cursor-pointer active:scale-95"
+                  title="Connect and authorize YouTube account"
                 >
                   <YouTubeOfficialLogo className="w-4.5 h-3.5" />
                   <span>Connect YouTube</span>

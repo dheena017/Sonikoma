@@ -55,6 +55,8 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
     handleReset,
     handleStop,
     handleRestart,
+    handleReupload,
+    isReuploading,
     sendToBackgroundAndStartNew,
     startNewAgent,
     switchToRun,
@@ -140,6 +142,8 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
                 window.location.assign("/creative-suite/youtube");
               }
             }}
+            onReupload={() => handleReupload(activeRun.run_id)}
+            isReuploading={isReuploading}
           />
         )}
 

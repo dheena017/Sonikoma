@@ -117,3 +117,20 @@ export async function restartAgent(
   return response.json();
 }
 
+export async function reuploadAgentVideo(
+  fetchWithInterceptor: any,
+  runId: string
+): Promise<AgentRunResponse> {
+  const fetcher = fetchWithInterceptor || window.fetch.bind(window);
+  const response = await fetcher(`${BASE_URL}/reupload/${encodeURIComponent(runId)}`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to upload video to YouTube.");
+  }
+  return response.json();
+}
+
+
