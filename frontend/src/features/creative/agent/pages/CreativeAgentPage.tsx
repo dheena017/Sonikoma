@@ -10,7 +10,7 @@ import {
   AgentHistoryModal,
   AgentBackgroundActionModal,
 } from "../components";
-import { Sparkles, Trash2, Smartphone, Monitor, Square, RotateCcw } from "lucide-react";
+import { Trash2, Smartphone, Monitor, Square, RotateCcw } from "lucide-react";
 
 interface CreativeAgentPageProps {
   fetchWithInterceptor?: any;
@@ -201,18 +201,6 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
                   >
                     <RotateCcw className="w-3.5 h-3.5 text-blue-300" />
                     <span>Restart</span>
-                  </button>
-                )}
-
-                {isRunning && (
-                  <button
-                    type="button"
-                    onClick={sendToBackgroundAndStartNew}
-                    className="px-3.5 py-2 rounded-xl text-xs font-bold font-mono text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-500/20 border border-blue-400/40 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-                    title="Let this agent run in the background and configure another video"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-blue-200" />
-                    <span>Run in Background</span>
                   </button>
                 )}
 
