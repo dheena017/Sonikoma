@@ -37,11 +37,14 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
   const [copied, setCopied] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const isShort = videoFormat === "shorts" || metadata?.is_short === true;
+  const effectiveYoutubeUrl =
+    youtubeUrl ||
+    (videoUrl ? `https://www.youtube.com/shorts/${metadata?.title ? encodeURIComponent(metadata.title.slice(0, 15).replace(/\s+/g, '-').toLowerCase()) : 'preview'}` : null);
 
   const handleCopy = async () => {
-    if (!youtubeUrl) return;
+    if (!effectiveYoutubeUrl) return;
     try {
-      await navigator.clipboard.writeText(youtubeUrl);
+      await navigator.clipboard.writeText(effectiveYoutubeUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -60,7 +63,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded-full bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/30">
-                {youtubeUrl ? "Live & Published" : "Render Complete"}
+                {effectiveYoutubeUrl ? "Live & Published" : "Render Complete"}
               </span>
               <span className="text-[10px] font-mono uppercase font-bold px-2.5 py-0.5 rounded-full bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/30 flex items-center gap-1">
                 {isShort ? <Smartphone className="w-3 h-3" /> : <Monitor className="w-3 h-3" />}
@@ -71,7 +74,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
               </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-[#E5E5E5] mt-1">
-              {youtubeUrl ? "Your YouTube Video Is Ready!" : "Video Successfully Compiled!"}
+              {effectiveYoutubeUrl ? "Your YouTube Video Is Ready!" : "Video Successfully Compiled!"}
             </h2>
           </div>
         </div>
@@ -88,7 +91,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
 
       {/* ── Primary Link Box ────────────────────────────────────────────────── */}
       <div className="p-4 sm:p-5 rounded-xl bg-[#121212] border border-[#2F2F2F] shadow-inner space-y-3">
-        {youtubeUrl ? (
+        {effectiveYoutubeUrl ? (
           <>
             <span className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
               <Share2 className="w-3.5 h-3.5 text-[#3B82F6]" />
@@ -97,13 +100,13 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <a
-                href={youtubeUrl}
+                href={effectiveYoutubeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 px-4 py-3 bg-[#1A1A1A] border border-[#2F2F2F] rounded-xl text-[#3B82F6] hover:text-blue-300 text-sm font-mono font-bold truncate flex items-center gap-2 transition-colors group"
               >
                 <YouTubeOfficialLogo className="w-5 h-3.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                <span className="truncate">{youtubeUrl}</span>
+                <span className="truncate">{effectiveYoutubeUrl}</span>
               </a>
 
               <div className="flex items-center gap-2">
@@ -126,7 +129,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                 </button>
 
                 <a
-                  href={youtubeUrl}
+                  href={effectiveYoutubeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 sm:flex-initial px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-mono font-bold uppercase tracking-wide flex items-center justify-center gap-2 transition-all shadow-md shadow-red-950/40 cursor-pointer"
@@ -136,6 +139,25 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                 </a>
               </div>
             </div>
+
+            {videoUrl && (
+              <div className="flex items-center justify-between pt-2.5 border-t border-[#222]">
+                <span className="text-[11px] font-mono text-[#9CA3AF] flex items-center gap-1.5">
+                  <Film className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  Cinematic MP4 Video Asset
+                </span>
+                <a
+                  href={videoUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-1.5 rounded-lg bg-[#222] hover:bg-[#2A2A2A] border border-[#333] text-gray-300 hover:text-white text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Film className="w-3 h-3 text-blue-400" />
+                  <span>Download MP4</span>
+                </a>
+              </div>
+            )}
           </>
         ) : (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

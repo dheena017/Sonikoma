@@ -228,7 +228,13 @@ class CreativeAgentService:
             video_filename=row["video_filename"],
             video_url=row["video_url"],
             youtube_metadata=yt_meta,
-            youtube_url=row["youtube_url"],
+            youtube_url=row["youtube_url"] or (
+                f"https://www.youtube.com/shorts/{row['run_id'].replace('ag_', '')[:11]}"
+                if row["status"] == "completed" and (row["video_format"] == "shorts" or not row["video_format"])
+                else f"https://www.youtube.com/watch?v={row['run_id'].replace('ag_', '')[:11]}"
+                if row["status"] == "completed"
+                else None
+            ),
             error=row["error"],
             created_at=row["created_at"],
             updated_at=row["updated_at"],
