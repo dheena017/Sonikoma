@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   BookOpen,
   ExternalLink,
+  X,
 } from "lucide-react";
 import { VideoFormat, PrivacyStatus } from "../types";
 import { CyberSelect, CyberSelectOption } from "@/shared/ui/common/CyberSelect";
@@ -166,7 +167,7 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
             <Link className="w-4 h-4 text-[#3B82F6]" />
             Series / Chapter URL
           </span>
-          <span className="text-[11px] text-[#60A5FA] font-mono flex items-center gap-1">
+          <span className="text-[11px] text-[#60A5FA] font-mono flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 shadow-sm">
             <ShieldCheck className="w-3.5 h-3.5" /> Serious Manhwa Dubbing Active
           </span>
         </label>
@@ -180,6 +181,20 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
             className="flex-1 min-w-0 bg-transparent text-xs sm:text-sm text-[#E5E5E5] placeholder-[#6B7280] outline-none font-mono"
             disabled={isLoading}
           />
+          {url && (
+            <button
+              type="button"
+              onClick={() => {
+                setUrl("");
+                setChapterRangeStart?.(undefined);
+                setChapterRangeEnd?.(undefined);
+              }}
+              className="p-1 rounded-md text-[#6B7280] hover:text-[#E5E5E5] hover:bg-[#1E1E1E] transition-all cursor-pointer"
+              title="Clear URL"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
           <button
             type="button"
             onClick={handlePaste}
@@ -276,7 +291,7 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
               Character Voice Continuity Casting
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-800/40 w-fit">
+          <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 w-fit shadow-sm">
             <Volume2 className="w-3 h-3" />
             <span>Zero Random Voices • Locked Continuity</span>
           </div>
@@ -527,20 +542,21 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
                 </div>
               )}
 
-              <div className="flex items-center gap-3">
-                <div className="flex-1 flex items-center gap-2 h-10 px-3 bg-[#121212] border border-[#2F2F2F] rounded-lg">
-                  <span className="text-xs font-mono text-[#6B7280]">From Ep:</span>
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <div className="flex-1 w-full flex items-center gap-2.5 h-11 px-3.5 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
+                  <span className="text-xs font-mono font-bold text-[#9CA3AF] shrink-0">From Ep:</span>
                   <input
                     type="number"
                     min={1}
                     value={chapterRangeStart ?? ""}
                     onChange={(e) => setChapterRangeStart?.(e.target.value ? parseInt(e.target.value) : undefined)}
-                    placeholder={detectedEp ? `e.g. ${detectedEp}` : "e.g. 1"}
-                    className="w-full bg-transparent text-xs font-mono text-[#E5E5E5] outline-none"
+                    placeholder={detectedEp ? `e.g. ${detectedEp}` : "1"}
+                    className="flex-1 bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#525252] outline-none"
                   />
                 </div>
-                <div className="flex-1 flex items-center gap-2 h-10 px-3 bg-[#121212] border border-[#2F2F2F] rounded-lg">
-                  <span className="text-xs font-mono text-[#6B7280]">To Ep:</span>
+                <div className="hidden sm:flex text-[#525252] font-mono text-xs select-none">→</div>
+                <div className="flex-1 w-full flex items-center gap-2.5 h-11 px-3.5 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
+                  <span className="text-xs font-mono font-bold text-[#9CA3AF] shrink-0">To Ep:</span>
                   <input
                     type="number"
                     min={chapterRangeStart || 1}
@@ -552,8 +568,8 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
                         setChapterRangeStart?.(detectedEp);
                       }
                     }}
-                    placeholder={detectedEp ? `e.g. ${detectedEp + 2}` : "e.g. 3"}
-                    className="w-full bg-transparent text-xs font-mono text-[#E5E5E5] outline-none"
+                    placeholder={detectedEp ? `e.g. ${detectedEp + 2}` : "3"}
+                    className="flex-1 bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#525252] outline-none"
                   />
                 </div>
               </div>
@@ -578,29 +594,53 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
               )}
             </div>
 
-            {/* Title Override & Review Mode */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            {/* Title Override & Review Mode — Perfectly Symmetrical 2-Column Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-mono uppercase text-[#9CA3AF]">Custom Title Override</label>
-                <input
-                  type="text"
-                  value={titleOverride ?? ""}
-                  onChange={(e) => setTitleOverride?.(e.target.value)}
-                  placeholder="Optional custom title..."
-                  className="w-full h-10 px-3 bg-[#121212] border border-[#2F2F2F] rounded-lg text-xs font-mono text-[#E5E5E5] outline-none focus:border-[#3B82F6]"
-                />
-              </div>
-              <div className="flex items-center justify-between p-3 bg-[#121212] border border-[#2F2F2F] rounded-lg">
-                <div className="text-left">
-                  <div className="text-xs font-mono font-bold text-[#E5E5E5]">Review Checkpoint</div>
-                  <div className="text-[10px] text-[#6B7280]">Pause before render &amp; upload</div>
+                <label className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  <span>Custom Title Override</span>
+                </label>
+                <div className="flex items-center h-11 px-3.5 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
+                  <input
+                    type="text"
+                    value={titleOverride ?? ""}
+                    onChange={(e) => setTitleOverride?.(e.target.value)}
+                    placeholder="Optional custom title..."
+                    className="w-full bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#525252] outline-none"
+                  />
                 </div>
-                <input
-                  type="checkbox"
-                  checked={reviewMode ?? false}
-                  onChange={(e) => setReviewMode?.(e.target.checked)}
-                  className="w-4 h-4 accent-[#3B82F6] cursor-pointer"
-                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#3B82F6]" />
+                    <span>Pipeline Control</span>
+                  </span>
+                  <span className="text-[10px] text-[#60A5FA] font-mono">Human-in-the-Loop</span>
+                </label>
+                <div
+                  onClick={() => setReviewMode?.(!reviewMode)}
+                  className="flex items-center justify-between h-11 px-3.5 bg-[#121212] hover:bg-[#161616] border border-[#2F2F2F] hover:border-[#3B82F6]/40 rounded-xl cursor-pointer transition-all select-none shadow-sm"
+                  title="Toggle review checkpoint before final video render & upload"
+                >
+                  <div className="text-left">
+                    <div className="text-xs font-mono font-bold text-[#E5E5E5]">Review Checkpoint</div>
+                    <div className="text-[10px] text-[#9CA3AF]">Pause before render &amp; upload</div>
+                  </div>
+                  <div
+                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200 ease-in-out ${
+                      reviewMode ? "bg-[#3B82F6] shadow-sm shadow-[#3B82F6]/40" : "bg-[#262626] border border-[#3A3A3A]"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-md transition duration-200 ease-in-out ${
+                        reviewMode ? "translate-x-4.5" : "translate-x-0.5"
+                      }`}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -613,10 +653,10 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
           type="button"
           onClick={onLaunch}
           disabled={isLoading || !url.trim() || isInvalidInvertedRange}
-          className={`w-full h-13 py-3.5 sm:py-4 px-6 rounded-xl text-white font-black text-xs sm:text-sm tracking-wider uppercase font-mono flex items-center justify-center gap-3 shadow-lg active:scale-[0.99] transition-all border ${
+          className={`w-full h-12 sm:h-13 py-3.5 px-6 rounded-xl text-white font-black text-xs sm:text-sm tracking-wider uppercase font-mono flex items-center justify-center gap-3 shadow-lg active:scale-[0.99] transition-all border ${
             isInvalidInvertedRange
               ? "bg-red-900/60 border-red-700/60 text-red-200 cursor-not-allowed"
-              : "bg-gradient-to-r from-[#3B82F6] to-[#2563EB] hover:from-[#2563EB] hover:to-[#1D4ED8] shadow-[#3B82F6]/25 border-[#60A5FA]/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              : "bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#2563EB] hover:to-[#1E40AF] shadow-[0_0_24px_rgba(59,130,246,0.25)] hover:shadow-[0_0_36px_rgba(59,130,246,0.4)] border-[#60A5FA]/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           }`}
         >
           {isLoading ? (
