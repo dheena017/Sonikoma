@@ -20,6 +20,7 @@ import {
   RotateCw,
 } from "lucide-react";
 import { AgentRunResponse } from "../types";
+import YouTubeOfficialLogo from "@/features/creative/youtube/components/YouTubeOfficialLogo";
 
 interface AgentHistoryModalProps {
   isOpen: boolean;
@@ -131,7 +132,7 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
         return {
           label: `Publishing YouTube (${progress}%)`,
           color: "bg-red-500/10 text-red-400 border-red-500/30",
-          icon: <Loader2 className="w-3 h-3 text-red-400 animate-spin" />,
+          icon: <YouTubeOfficialLogo className="w-3.5 h-2.5" />,
         };
       default:
         return {

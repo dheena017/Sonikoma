@@ -13,6 +13,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { AgentStage } from "../types";
+import YouTubeOfficialLogo from "@/features/creative/youtube/components/YouTubeOfficialLogo";
 
 interface AgentProgressTrackerProps {
   status: AgentStage;
@@ -187,17 +188,23 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
             >
               <div className="flex items-center justify-between mb-2">
                 <div
-                  className={`p-2 rounded-lg ${
+                  className={`p-2 rounded-lg flex items-center justify-center ${
                     stageState === "done"
                       ? "bg-[#10B981]/20 text-[#10B981]"
                       : stageState === "active"
                       ? "bg-[#3B82F6]/20 text-[#3B82F6] animate-pulse"
+                      : stageState === "failed"
+                      ? "bg-[#EF4444]/20 text-[#EF4444]"
                       : stageState === "stopped"
                       ? "bg-amber-500/20 text-amber-400"
                       : "bg-[#1E1E1E] text-[#6B7280]"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  {s.key === "publishing_youtube" ? (
+                    <YouTubeOfficialLogo className="w-4.5 h-3.5 object-contain" />
+                  ) : (
+                    <Icon className="w-4 h-4" />
+                  )}
                 </div>
 
                 {stageState === "done" && (

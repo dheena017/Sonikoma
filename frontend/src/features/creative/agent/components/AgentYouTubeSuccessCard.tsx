@@ -15,6 +15,7 @@ import {
   Monitor,
 } from "lucide-react";
 import { AgentYouTubeMetadata } from "../types";
+import YouTubeOfficialLogo from "@/features/creative/youtube/components/YouTubeOfficialLogo";
 
 interface AgentYouTubeSuccessCardProps {
   youtubeUrl?: string | null;
@@ -53,8 +54,8 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
       {/* ── Top Success Ribbon ──────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#2F2F2F]">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-red-600/10 border border-red-500/30 rounded-xl text-red-500 shadow-inner">
-            <Youtube className="w-6 h-6 fill-current" />
+          <div className="p-2.5 bg-red-600/10 border border-red-500/30 rounded-xl shadow-inner flex items-center justify-center">
+            <YouTubeOfficialLogo className="w-8 h-6" />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -101,7 +102,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                 rel="noopener noreferrer"
                 className="flex-1 px-4 py-3 bg-[#1A1A1A] border border-[#2F2F2F] rounded-xl text-[#3B82F6] hover:text-blue-300 text-sm font-mono font-bold truncate flex items-center gap-2 transition-colors group"
               >
-                <Youtube className="w-4 h-4 text-red-500 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                <YouTubeOfficialLogo className="w-5 h-3.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
                 <span className="truncate">{youtubeUrl}</span>
               </a>
 
