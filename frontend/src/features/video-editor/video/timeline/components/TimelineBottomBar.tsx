@@ -117,7 +117,7 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
             <button
               onClick={onZoomOut}
               aria-label="Zoom Out"
-              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90"
+              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white transition-all cursor-pointer"
             >
               <ZoomOut className="h-3 w-3" />
             </button>
@@ -138,7 +138,7 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
             <button
               onClick={onZoomIn}
               aria-label="Zoom In"
-              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90"
+              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white transition-all cursor-pointer"
             >
               <ZoomIn className="h-3 w-3" />
             </button>
@@ -158,7 +158,7 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
             <button
               onClick={handleScrollLeft}
               aria-label="Scroll timeline left"
-              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-[#3B82F6] border border-white/10 hover:border-[#2F2F2F] text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
+              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-[#3B82F6] border border-white/10 hover:border-[#2F2F2F] text-neutral-300 hover:text-white transition-all cursor-pointer shadow-sm"
             >
               <ChevronLeft className="h-3.5 w-3.5 stroke-[2.5]" />
             </button>
@@ -174,7 +174,7 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
             <button
               onClick={handleScrollRight}
               aria-label="Scroll timeline right"
-              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-[#3B82F6] border border-white/10 hover:border-[#2F2F2F] text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
+              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-[#3B82F6] border border-white/10 hover:border-[#2F2F2F] text-neutral-300 hover:text-white transition-all cursor-pointer shadow-sm"
             >
               <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
             </button>

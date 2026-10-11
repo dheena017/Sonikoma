@@ -363,12 +363,12 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
   // Animation origin class based on placement
   const getAnimationClass = (place: TooltipPlacement) => {
     if (place.startsWith("right"))
-      return "animate-in fade-in-0 zoom-in-95 duration-150";
+      return "animate-in fade-in-0 duration-150";
     if (place.startsWith("left"))
-      return "animate-in fade-in-0 zoom-in-95 duration-150";
+      return "animate-in fade-in-0 duration-150";
     if (place.startsWith("top"))
-      return "animate-in fade-in-0 zoom-in-95 duration-150";
-    return "animate-in fade-in-0 zoom-in-95 duration-150";
+      return "animate-in fade-in-0 duration-150";
+    return "animate-in fade-in-0 duration-150";
   };
 
   const getArrowStyle = (): {

@@ -4,7 +4,7 @@ a,
 [role="button"],
 .btn-clickable,
 .cursor-pointer {
-  transition: transform 0.05s ease-out, opacity 0.05s ease-out;
+  transition: opacity 0.05s ease-out;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -15,7 +15,6 @@ a:active,
 [role="button"]:active:not([aria-disabled="true"]),
 .btn-clickable:active,
 .cursor-pointer:active {
-  transform: scale(0.97) translateZ(0);
   opacity: 0.85;
 }
 
