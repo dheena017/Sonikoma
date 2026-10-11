@@ -249,6 +249,34 @@ CREATE TABLE IF NOT EXISTS creative_style_profiles (
   updated_at                TEXT DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS creative_agent_runs (
+  run_id            TEXT PRIMARY KEY,
+  user_id           TEXT,
+  status            TEXT NOT NULL,
+  progress          INTEGER NOT NULL DEFAULT 0,
+  current_action    TEXT NOT NULL DEFAULT '',
+  scraped_title     TEXT,
+  series_title      TEXT,
+  chapter_title     TEXT,
+  source_url        TEXT,
+  video_format      TEXT DEFAULT 'shorts',
+  language          TEXT DEFAULT 'en',
+  voice             TEXT DEFAULT 'alloy',
+  cover_image       TEXT,
+  duration          REAL,
+  raw_images_count  INTEGER DEFAULT 0,
+  video_filename    TEXT,
+  video_url         TEXT,
+  youtube_metadata  TEXT DEFAULT '{}',
+  youtube_url       TEXT,
+  error             TEXT,
+  logs              TEXT DEFAULT '[]',
+  panels            TEXT DEFAULT '[]',
+  created_at        REAL NOT NULL,
+  updated_at        REAL NOT NULL
+);
+
+
 CREATE TABLE IF NOT EXISTS platform_series (
   id          TEXT    PRIMARY KEY,
   user_id     TEXT    NOT NULL,
@@ -492,3 +520,6 @@ CREATE INDEX IF NOT EXISTS idx_intelligence_ledger_created_at ON intelligence_le
 CREATE INDEX IF NOT EXISTS idx_platform_scrape_sessions_scraped_at ON platform_scrape_sessions(scraped_at);
 CREATE INDEX IF NOT EXISTS idx_creative_youtube_publications_published_at ON creative_youtube_publications(published_at);
 CREATE INDEX IF NOT EXISTS idx_platform_system_logs_created_at ON platform_system_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_creative_agent_runs_user_id ON creative_agent_runs(user_id);
+CREATE INDEX IF NOT EXISTS idx_creative_agent_runs_created_at ON creative_agent_runs(created_at DESC);
+

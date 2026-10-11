@@ -100,10 +100,17 @@ def extract_title_from_url(url: str) -> str:
 class AutonomousAgentWorkflow:
     """Manages the full lifecycle of an autonomous Webtoon-to-YouTube agent run with real APIs."""
 
-    def __init__(self, run_id: str, request: AgentRunRequest, user_id: Optional[str] = None):
+    def __init__(
+        self,
+        run_id: str,
+        request: AgentRunRequest,
+        user_id: Optional[str] = None,
+        on_update: Optional[Any] = None,
+    ):
         self.run_id = run_id
         self.request = request
         self.user_id = user_id
+        self.on_update = on_update
         now = time.time()
         initial_title = request.title_override or extract_title_from_url(request.url)
         series_name = initial_title.split(":")[0].strip() if ":" in initial_title else initial_title
@@ -199,6 +206,12 @@ class AutonomousAgentWorkflow:
             AgentLogMessage(timestamp=now, stage=stage, level=level, message=message)
         )
         logger.info(f"[Agent {self.run_id}] [{stage.upper()}] {message}")
+        if self.on_update:
+            try:
+                self.on_update(self.state)
+            except Exception as update_err:
+                logger.debug(f"[Agent {self.run_id}] on_update callback error: {update_err}")
+
 
     async def _call_llm(self, prompt: str, system_instruction: Optional[str] = None) -> Optional[str]:
         """Calls real AI LLMs with multi-provider fallback (Gemini API -> AIHub / Multi-Provider)."""
@@ -726,6 +739,11 @@ Return STRICT JSON:
             )
 
         self.state.status = "completed"
+        if self.on_update:
+            try:
+                self.on_update(self.state)
+            except Exception:
+                pass
 
 
 __all__ = ["AutonomousAgentWorkflow"]

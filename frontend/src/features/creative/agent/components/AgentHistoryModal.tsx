@@ -17,6 +17,7 @@ import {
   Loader2,
   Play,
   ArrowRight,
+  RotateCw,
 } from "lucide-react";
 import { AgentRunResponse } from "../types";
 
@@ -25,6 +26,8 @@ interface AgentHistoryModalProps {
   onClose: () => void;
   history: AgentRunResponse[];
   onSelectRun: (run: AgentRunResponse) => void;
+  onRefresh?: () => void;
+  isLoading?: boolean;
 }
 
 export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
@@ -32,9 +35,12 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
   onClose,
   history,
   onSelectRun,
+  onRefresh,
+  isLoading,
 }) => {
   useEffect(() => {
     if (!isOpen) return;
+    onRefresh?.();
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const container = document.getElementById("main-scroll-container");
@@ -161,14 +167,28 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-neutral-400 hover:text-white bg-neutral-900/60 hover:bg-neutral-800 p-2 rounded-full transition-all cursor-pointer border border-white/5 active:scale-95"
-            aria-label="Close modal"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            {onRefresh && (
+              <button
+                type="button"
+                onClick={onRefresh}
+                disabled={isLoading}
+                className="text-neutral-400 hover:text-white bg-neutral-900/60 hover:bg-neutral-800 p-2 rounded-full transition-all cursor-pointer border border-white/5 active:scale-95 disabled:opacity-50"
+                title="Refresh history"
+                aria-label="Refresh history"
+              >
+                <RotateCw className={`h-4 w-4 ${isLoading ? "animate-spin text-blue-400" : ""}`} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-neutral-400 hover:text-white bg-neutral-900/60 hover:bg-neutral-800 p-2 rounded-full transition-all cursor-pointer border border-white/5 active:scale-95"
+              aria-label="Close modal"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* List of Runs */}
@@ -184,6 +204,17 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
                   Launch your first 1-click autonomous motion comic agent to see episode history here.
                 </p>
               </div>
+              {onRefresh && (
+                <button
+                  type="button"
+                  onClick={onRefresh}
+                  disabled={isLoading}
+                  className="mt-2 px-3.5 py-1.5 rounded-xl text-xs font-medium bg-neutral-900 hover:bg-neutral-800 border border-white/10 text-neutral-300 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50"
+                >
+                  <RotateCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-blue-400" : ""}`} />
+                  <span>Refresh Records</span>
+                </button>
+              )}
             </div>
           ) : (
             history.map((run) => {

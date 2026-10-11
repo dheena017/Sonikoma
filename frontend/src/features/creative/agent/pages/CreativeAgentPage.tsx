@@ -8,7 +8,6 @@ import {
   AgentPanelsPreview,
   AgentYouTubeSuccessCard,
   AgentHistoryModal,
-  AgentActiveRunsBar,
   AgentBackgroundActionModal,
 } from "../components";
 import { Sparkles, Trash2, Smartphone, Monitor } from "lucide-react";
@@ -45,8 +44,11 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
     setTitleOverride,
     activeRun,
     isCreatingNew,
+    setIsCreatingNew,
     isLoading,
     history,
+    isHistoryLoading,
+    fetchHistory,
     handleLaunch,
     handleApprove,
     handleReset,
@@ -55,6 +57,19 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
     switchToRun,
     selectHistoryRun,
   } = useCreativeAgent(fetchWithInterceptor, addNotification);
+
+  const runningJob = history.find((r) =>
+    [
+      "initializing",
+      "scraping",
+      "processing_images",
+      "generating_narrative",
+      "synthesizing_audio",
+      "rendering_video",
+      "publishing_youtube",
+      "awaiting_review",
+    ].includes(r.status)
+  );
 
   const isCompleted = activeRun?.status === "completed";
   const isReviewAwaiting = activeRun?.status === "awaiting_review";
@@ -73,20 +88,28 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
       <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative text-left">
         {/* ── Top Hero Header ── */}
         <AgentHeroBanner
-          onOpenHistory={() => setIsHistoryOpen(true)}
+          onOpenHistory={() => {
+            fetchHistory();
+            setIsHistoryOpen(true);
+          }}
           historyCount={history.length}
+          onStartNew={() => {
+            if (activeRun && !isCreatingNew) {
+              sendToBackgroundAndStartNew();
+            } else {
+              startNewAgent();
+            }
+          }}
+          isCreatingNew={isCreatingNew || !activeRun}
+          hasActiveRun={!!activeRun || !!runningJob}
+          onViewActiveRun={() => {
+            if (activeRun) {
+              setIsCreatingNew(false);
+            } else if (runningJob) {
+              switchToRun(runningJob);
+            }
+          }}
         />
-
-        {/* ── Multi-Agent Background Switcher Bar ── */}
-        {history.length > 0 && (
-          <AgentActiveRunsBar
-            runs={history}
-            activeRunId={activeRun?.run_id}
-            isCreatingNew={isCreatingNew || !activeRun}
-            onSelectRun={switchToRun}
-            onStartNew={startNewAgent}
-          />
-        )}
 
         {/* ── Completed YouTube Success Card ── */}
         {!isCreatingNew && isCompleted && activeRun && (
@@ -211,6 +234,8 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
         onClose={() => setIsHistoryOpen(false)}
         history={history}
         onSelectRun={selectHistoryRun}
+        onRefresh={fetchHistory}
+        isLoading={isHistoryLoading}
       />
 
       {/* ── Multi-Agent Background Transition / Discard Modal ── */}

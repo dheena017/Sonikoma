@@ -285,9 +285,11 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     // Execution & Multi-Agent state
     activeRun,
     isCreatingNew,
+    setIsCreatingNew,
     isLoading,
     history,
     isHistoryLoading,
+    fetchHistory,
     // Actions
     handleLaunch,
     handleApprove,
