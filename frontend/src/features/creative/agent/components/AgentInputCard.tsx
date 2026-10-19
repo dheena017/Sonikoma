@@ -10,15 +10,12 @@ import {
   Sparkles,
   Users,
   Layers,
-  ChevronDown,
-  ChevronUp,
   Volume2,
   ShieldCheck,
   BookOpen,
   ExternalLink,
   X,
   CheckCircle2,
-  SlidersHorizontal,
   ArrowRight,
   Film,
   Zap,
@@ -115,14 +112,11 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
   onLaunch,
   isLoading,
 }) => {
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [targetPlatforms, setTargetPlatforms] = useState<string[]>([
     "youtube",
     "tiktok",
     "instagram",
   ]);
-  const [scheduleMode, setScheduleMode] = useState<"instant" | "peak_hour">("peak_hour");
-  const [enableABTesting, setEnableABTesting] = useState<boolean>(true);
 
   // Auto-detect chapter/episode number from target URL (e.g. episode_no=146)
   const detectedEp = React.useMemo(() => {
@@ -616,62 +610,6 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
                 );
               })}
             </div>
-
-            {/* Scheduler & A/B Testing Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-              {/* Smart Peak Hour Scheduler */}
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#242424] flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-mono font-bold text-[#E5E5E5] flex items-center gap-1.5">
-                    <Zap className="w-3.5 h-3.5 text-amber-400" />
-                    Smart Peak Scheduler
-                  </div>
-                  <div className="text-[10px] text-neutral-400 font-mono">
-                    {scheduleMode === "peak_hour" ? "Auto-queue at 7:30 PM (Peak)" : "Instant publish on finish"}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setScheduleMode(scheduleMode === "peak_hour" ? "instant" : "peak_hour")
-                  }
-                  className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold cursor-pointer transition-all border ${
-                    scheduleMode === "peak_hour"
-                      ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                      : "bg-[#202020] text-neutral-400 border-[#303030]"
-                  }`}
-                >
-                  {scheduleMode === "peak_hour" ? "Peak 7:30 PM" : "Instant"}
-                </button>
-              </div>
-
-              {/* AI Thumbnail A/B Testing Toggle */}
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#242424] flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-mono font-bold text-[#E5E5E5] flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                    AI Thumbnail A/B Test
-                  </div>
-                  <div className="text-[10px] text-neutral-400 font-mono">
-                    3 Visual Variants with CTR Scores
-                  </div>
-                </div>
-
-                <div
-                  onClick={() => setEnableABTesting(!enableABTesting)}
-                  className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
-                    enableABTesting ? "bg-[#3B82F6]" : "bg-[#262626] border border-[#3A3A3A]"
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-md transition duration-200 ${
-                      enableABTesting ? "translate-x-4.5" : "translate-x-0.5"
-                    }`}
-                  />
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -745,74 +683,6 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
             </div>
           </div>
         </section>
-
-        {/* ── CARD 4: ADVANCED PRODUCTION CONTROLS (COLLAPSIBLE) ─────────────── */}
-        <section className="bg-[#181818]/60 border border-[#242424] rounded-2xl p-4 sm:p-5 transition-all">
-          <button
-            type="button"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between text-xs font-mono text-[#9CA3AF] hover:text-[#E5E5E5] transition-colors cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-[#3B82F6]" />
-              <span className="font-bold uppercase tracking-wider">Advanced Production Controls</span>
-            </div>
-            {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-
-          {showAdvanced && (
-            <div className="mt-4 pt-4 border-t border-[#242424] grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
-              {/* Custom Title */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
-                  Custom Title Override
-                </label>
-                <div className="flex items-center h-11 px-3.5 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
-                  <input
-                    type="text"
-                    value={titleOverride ?? ""}
-                    onChange={(e) => setTitleOverride?.(e.target.value)}
-                    placeholder="Auto-generated from chapter title..."
-                    className="w-full bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#555] outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Review Checkpoint Switch */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#3B82F6]" />
-                    Review Checkpoint
-                  </span>
-                  <span className="text-[10px] text-[#60A5FA] font-mono">Human-in-the-Loop</span>
-                </label>
-                <div
-                  onClick={() => setReviewMode?.(!reviewMode)}
-                  className="flex items-center justify-between h-11 px-3.5 bg-[#121212] hover:bg-[#161616] border border-[#2F2F2F] hover:border-[#3B82F6]/40 rounded-xl cursor-pointer transition-all select-none shadow-sm"
-                  title="Pause execution to preview panels and audio before final render & upload"
-                >
-                  <div className="text-left">
-                    <div className="text-xs font-mono font-bold text-[#E5E5E5]">Pause Before Publish</div>
-                    <div className="text-[10px] text-[#888]">Review video timeline before release</div>
-                  </div>
-                  <div
-                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200 ease-in-out ${
-                      reviewMode ? "bg-[#3B82F6] shadow-sm shadow-[#3B82F6]/40" : "bg-[#262626] border border-[#3A3A3A]"
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-md transition duration-200 ease-in-out ${
-                        reviewMode ? "translate-x-4.5" : "translate-x-0.5"
-                      }`}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </section>
       </div>
 
       {/* ──────────────────────────────────────────────────────────────────────────
@@ -843,49 +713,6 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
             )}
           </div>
 
-          {/* Visual Aspect Ratio Mini Mockup */}
-          <div className="p-4 rounded-xl bg-[#121212] border border-[#242424] flex items-center justify-center min-h-[130px] relative overflow-hidden">
-            {videoFormat === "shorts" ? (
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-28 rounded-lg border-2 border-[#3B82F6]/60 bg-[#1A1A1A] p-1 flex flex-col justify-between ">
-                  <div className="w-full h-8 rounded bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-[8px] text-blue-300 font-mono font-bold">
-                    Panel
-                  </div>
-                  <div className="w-full h-8 rounded bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-[8px] text-purple-300 font-mono font-bold">
-                    Dub
-                  </div>
-                  <div className="w-full h-2 rounded bg-neutral-800" />
-                </div>
-                <div className="text-left space-y-1">
-                  <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <Smartphone className="w-3.5 h-3.5 text-[#3B82F6]" />
-                    Vertical 9:16
-                  </div>
-                  <div className="text-[11px] text-[#9CA3AF]">Smart Panel Cropping</div>
-                  <div className="text-[10px] text-[#60A5FA] font-mono">1080 × 1920 HD</div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-2.5">
-                <div className="w-44 h-22 rounded-lg border-2 border-[#3B82F6]/60 bg-[#1A1A1A] p-1.5 flex items-center justify-between gap-1.5 ">
-                  <div className="flex-1 h-full rounded bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-[9px] text-blue-300 font-mono font-bold">
-                    Left Panel
-                  </div>
-                  <div className="flex-1 h-full rounded bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-[9px] text-purple-300 font-mono font-bold">
-                    Right Panel
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-[#9CA3AF]">
-                  <span className="font-bold text-white flex items-center gap-1">
-                    <Monitor className="w-3.5 h-3.5 text-[#3B82F6]" />
-                    Widescreen 16:9
-                  </span>
-                  <span className="text-[10px] text-[#60A5FA] font-mono">1920 × 1080 Full HD</span>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Configuration Parameters Checklist */}
           <div className="space-y-2 text-xs font-mono">
             <div className="flex items-center justify-between py-1 border-b border-[#222]">
@@ -912,50 +739,11 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
               <span className="text-[#93C5FD] font-semibold">{currentProtagonistLabel}</span>
             </div>
 
-            <div className="flex items-center justify-between py-1 border-b border-[#222]">
+            <div className="flex items-center justify-between py-1">
               <span className="text-[#888]">Platforms</span>
               <span className="text-white font-bold uppercase text-[11px]">
                 {targetPlatforms.map((p) => (p === "youtube" ? "YT" : p === "tiktok" ? "TT" : "IG")).join(" • ")}
               </span>
-            </div>
-
-            <div className="flex items-center justify-between py-1 border-b border-[#222]">
-              <span className="text-[#888]">Timing</span>
-              <span className={scheduleMode === "peak_hour" ? "text-amber-400 font-bold" : "text-[#E5E5E5]"}>
-                {scheduleMode === "peak_hour" ? "Peak 7:30 PM 🔥" : "Instant Release"}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between py-1 border-b border-[#222]">
-              <span className="text-[#888]">A/B Thumbnails</span>
-              <span className={enableABTesting ? "text-purple-400 font-bold" : "text-[#888]"}>
-                {enableABTesting ? "3 Variants (CTR Scored)" : "Single"}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between py-1">
-              <span className="text-[#888]">Checkpoint</span>
-              <span className={reviewMode ? "text-[#60A5FA] font-semibold" : "text-[#888]"}>
-                {reviewMode ? "Enabled (Pause & Review)" : "Instant Auto-Pilot"}
-              </span>
-            </div>
-          </div>
-
-          {/* 5-Stage Mini Pipeline Breadcrumb */}
-          <div className="p-3 rounded-xl bg-[#121212] border border-[#242424] space-y-2">
-            <div className="text-[10px] font-mono uppercase text-[#888] font-bold">
-              Automated 5-Stage Pipeline
-            </div>
-            <div className="flex items-center justify-between text-[10px] font-mono text-[#9CA3AF]">
-              <span className="text-white font-bold">1. Scrape</span>
-              <span>→</span>
-              <span>2. Crop</span>
-              <span>→</span>
-              <span>3. Dub</span>
-              <span>→</span>
-              <span>4. Render</span>
-              <span>→</span>
-              <span className="text-[#60A5FA]">5. Publish</span>
             </div>
           </div>
 
@@ -985,9 +773,6 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
                 </>
               )}
             </button>
-            <p className="text-[10px] text-center text-[#6B7280] font-mono mt-2">
-              Zero-touch workflow: Scrapes, dubs &amp; publishes to YouTube
-            </p>
           </div>
         </div>
       </div>
