@@ -52,7 +52,7 @@ export const WorkspaceLayoutHeader: React.FC<HeaderProps> = ({
   return (
     <div className="px-3.5 py-2.5 border-b border-[#2F2F2F] bg-neutral-950/70 backdrop-blur-md flex items-center justify-between shrink-0 shadow-sm">
       <div className="flex items-center gap-2">
-        <span className="h-2 w-2 rounded-full bg-[#3B82F6] shadow-[0_0_6px_rgba(59,130,246,0.8)]" />
+        <span className="h-2 w-2 rounded-full bg-[#3B82F6] " />
         <h2 className="text-xs font-black text-white uppercase tracking-wider font-mono">
           {title}
         </h2>
@@ -68,7 +68,7 @@ export const WorkspaceLayoutHeader: React.FC<HeaderProps> = ({
           <Star
             className={`h-3.5 w-3.5 transition-all ${
               isStarred
-                ? "text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]"
+                ? "text-amber-400 fill-amber-400 "
                 : "text-neutral-500 hover:text-amber-300"
             }`}
           />
@@ -173,7 +173,7 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
               }`}
             >
               {isActive && (
-                <span className="h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,1)] animate-pulse" />
+                <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
               )}
               <span>{tab}</span>
             </button>
@@ -188,7 +188,7 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
           title="Scroll right"
           className="shrink-0 h-6 w-6 rounded-full bg-neutral-900/90 border border-[#3B82F6]/40 text-[#60A5FA] hover:text-white hover:bg-[#3B82F6] hover:border-neutral-700 hover: transition-all cursor-pointer flex items-center justify-center active:scale-90 shadow-md"
         >
-          <ChevronRight className="h-3.5 w-3.5 drop-shadow-[0_0_4px_rgba(59,130,246,0.8)]" />
+          <ChevronRight className="h-3.5 w-3.5 " />
         </button>
       )}
     </div>

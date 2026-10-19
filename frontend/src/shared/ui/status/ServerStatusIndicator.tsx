@@ -43,7 +43,7 @@ export const ServerStatusIndicator: React.FC<ServerStatusIndicatorProps> = ({
           textColor: "text-[#00f59b]",
           ringBg: "bg-emerald-950/80",
           ringBorder: "border-emerald-500/40",
-          shadow: "shadow-[0_0_8px_rgba(16,185,129,0.7)]",
+          shadow: "",
         };
       case "offline":
         return {
@@ -52,7 +52,7 @@ export const ServerStatusIndicator: React.FC<ServerStatusIndicatorProps> = ({
           textColor: "text-rose-400",
           ringBg: "bg-rose-950/80",
           ringBorder: "border-rose-500/40",
-          shadow: "shadow-[0_0_8px_rgba(244,63,94,0.7)]",
+          shadow: "",
         };
       case "checking":
         return {
@@ -61,7 +61,7 @@ export const ServerStatusIndicator: React.FC<ServerStatusIndicatorProps> = ({
           textColor: "text-amber-400",
           ringBg: "bg-amber-950/80",
           ringBorder: "border-amber-500/40",
-          shadow: "shadow-[0_0_8px_rgba(245,158,11,0.7)]",
+          shadow: "",
         };
     }
   };

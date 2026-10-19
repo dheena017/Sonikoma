@@ -205,7 +205,7 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
               key={st.name}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 i === currentStageIndex
-                  ? "w-8 bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]"
+                  ? "w-8 bg-cyan-400 "
                   : i < currentStageIndex
                   ? "w-4 bg-blue-500/80"
                   : "w-3 bg-white/15"
@@ -219,7 +219,7 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
         <div className="w-48 space-y-1.5 z-10">
           <div className="h-1.5 w-full bg-[#252525] rounded-full overflow-hidden p-0.5 border border-white/10">
             <div
-              className="h-full bg-gradient-to-r from-blue-600 via-cyan-400 to-indigo-500 rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(6,182,212,0.6)]"
+              className="h-full bg-gradient-to-r from-blue-600 via-cyan-400 to-indigo-500 rounded-full transition-all duration-500 ease-out "
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -273,7 +273,7 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
 
         {/* Website Logo with Ambient Pod */}
         <div className="mb-3.5 relative transform group-hover:scale-105 transition-transform duration-300">
-          <div className="w-14 h-14 rounded-2xl bg-[#202020] border border-white/10 flex items-center justify-center shadow-lg group-hover:border-blue-500/50 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] transition-all">
+          <div className="w-14 h-14 rounded-2xl bg-[#202020] border border-white/10 flex items-center justify-center shadow-lg group-hover:border-blue-500/50 transition-all">
             <SonikomaLogo iconOnly size="md" />
           </div>
         </div>
@@ -994,7 +994,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                 onClick={() => setShowSpeechBubbles(!showSpeechBubbles)}
                 className={`px-2.5 py-1 rounded-lg border text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
                   showSpeechBubbles
-                    ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-[0_0_8px_rgba(16,185,129,0.2)]"
+                    ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300 "
                     : "bg-white/5 border-white/10 text-neutral-400 hover:text-white"
                 }`}
                 title="Toggle Speech Bubbles Overlay"
@@ -1193,7 +1193,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                     }}
                     className={`relative rounded-2xl bg-[#090A13] border transition-all overflow-hidden shadow-2xl group cursor-pointer flex flex-col items-center justify-center max-w-full ${isManhwa ? "aspect-[2/3]" : isComic ? "aspect-[3/4]" : "aspect-video"
                       } ${isSelected
-                        ? "ring-2 ring-blue-500 border-blue-400 z-10 shadow-[0_0_35px_rgba(59,130,246,0.35)]"
+                        ? "ring-2 ring-blue-500 border-blue-400 z-10 "
                         : "border-white/10 hover:border-white/30"
                       }`}
                   >
@@ -1292,7 +1292,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                       setIsPanelInspectorOpen(true);
                     }}
                     className={`relative rounded-2xl overflow-hidden border bg-[#090A13] cursor-pointer transition-all group flex flex-col ${isSelected
-                      ? "border-blue-500 shadow-[0_0_25px_rgba(59,130,246,0.35)] ring-2 ring-blue-500/50 scale-[1.02] z-10"
+                      ? "border-blue-500  ring-2 ring-blue-500/50 scale-[1.02] z-10"
                       : "border-white/10 hover:border-white/30 hover:shadow-xl"
                       }`}
                   >

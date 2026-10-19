@@ -41,7 +41,7 @@ const KeyframeDiamond: React.FC<KeyframeDiamondProps> = ({
       <div
         className={`w-2.5 h-2.5 rotate-45 border shadow-sm transition-transform ${colorClass} ${
           selected
-            ? "ring-2 ring-white scale-125 shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+            ? "ring-2 ring-white scale-125 "
             : "hover:scale-110"
         }`}
       />

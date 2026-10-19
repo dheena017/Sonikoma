@@ -321,7 +321,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
                 className={`group absolute flex items-center justify-between gap-1 select-none truncate rounded-md border text-[9px] font-mono font-bold px-2.5 bg-[#2A2A2A] border-[#2F2F2F] text-neutral-200 z-10 ${
                   isMoving
-                    ? "cursor-grabbing shadow-[0_4px_20px_rgba(129,140,248,0.4)] z-40 scale-[1.01]"
+                    ? "cursor-grabbing  z-40 scale-[1.01]"
                     : isResizing
                     ? "cursor-col-resize border-[#3B82F6] shadow-sm z-30"
                     : selectedClip === key
@@ -356,7 +356,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                 >
                   {/* Live Drag Delta Display */}
                   {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
-                    <span className="text-[7px] font-mono font-bold text-white bg-neutral-900/90 px-1 py-0.2 rounded border border-[#3B82F6] shadow-[0_0_8px_rgba(129,140,248,0.7)] animate-pulse">
+                    <span className="text-[7px] font-mono font-bold text-white bg-neutral-900/90 px-1 py-0.2 rounded border border-[#3B82F6] animate-pulse">
                       {movingInfo.deltaPx > 0
                         ? `+${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`
                         : `${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`}
@@ -384,7 +384,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                         e.stopPropagation();
                         onContextMenu(e, key, idx);
                       }}
-                      className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-neutral-700 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(129,140,248,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                      className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-neutral-700 shadow-[0_2px_6px_rgba(0,0,0,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                       title="Camera FX Options"
                     >
                       <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />

@@ -45,20 +45,9 @@
   justify-content: center;
 }
 
-/* Ambient Radial Glow Behind Logo */
+/* Ambient Radial Glow Behind Logo - Disabled */
 .loading-logo-glow {
-  position: absolute;
-  inset: -18px;
-  border-radius: 36px;
-  background: radial-gradient(
-    circle,
-    rgba(59, 130, 246, 0.3) 0%,
-    rgba(59, 130, 246, 0.15) 50%,
-    transparent 70%
-  );
-  filter: blur(20px);
-  animation: loading-glow-pulse 3.2s ease-in-out infinite;
-  pointer-events: none;
+  display: none;
 }
 
 /* Logo Image Shell */
@@ -138,7 +127,6 @@
   height: 8px;
   border-radius: 9999px;
   background-color: #3b82f6;
-  box-shadow: 0 0 8px #3b82f6;
   animation: loading-dot-pulse 1.6s ease-in-out infinite;
 }
 
@@ -311,7 +299,6 @@
   right: 0;
   height: 3px;
   background: linear-gradient(90deg, #3b82f6 0%, #ec4899 50%, #f59e0b 100%);
-  box-shadow: 0 0 14px rgba(59, 130, 246, 0.9), 0 0 4px rgba(236, 72, 153, 0.6);
   z-index: 9999;
   pointer-events: none;
   overflow: hidden;

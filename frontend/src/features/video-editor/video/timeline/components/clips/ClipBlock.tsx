@@ -82,7 +82,7 @@ const ClipBlock: React.FC<ClipBlockProps> = ({
       <div className="flex items-center gap-1 shrink-0 ml-1">
         {hasKeyframes && (
           <span
-            className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.8)]"
+            className="w-1.5 h-1.5 rounded-full bg-amber-400 "
             title="Contains keyframes"
           />
         )}

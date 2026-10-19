@@ -279,7 +279,7 @@ export default function ImageEditorPanel({
 
             <div className="rounded-2xl border border-white/5 bg-[#10111a]/80 p-3 space-y-2.5">
               <div className="flex items-center gap-2 text-[9px] uppercase font-mono font-bold text-neutral-400">
-                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400 " />
                 Padding Background Fill
               </div>
               <div className="flex flex-wrap gap-2">
@@ -292,7 +292,7 @@ export default function ImageEditorPanel({
                       onClick={() => setBackgroundFill(option)}
                       className={`rounded-xl border px-3 py-1.5 text-[9.5px] font-bold font-mono transition-all cursor-pointer ${
                         active
-                          ? "bg-emerald-500/15 border-emerald-500/50 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                          ? "bg-emerald-500/15 border-emerald-500/50 text-emerald-300 "
                           : "bg-black/30 border-white/5 text-neutral-400 hover:text-white hover:border-white/10"
                       }`}
                     >
@@ -347,7 +347,7 @@ export default function ImageEditorPanel({
               onClick={() => setShowSafeZones(!showSafeZones)}
               className={`flex w-full items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs font-bold font-mono transition-all cursor-pointer ${
                 showSafeZones
-                  ? "border-blue-500/50 bg-cyan-950/30 text-cyan-200 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                  ? "border-blue-500/50 bg-cyan-950/30 text-cyan-200 "
                   : "border-white/5 bg-[#10111a]/80 text-neutral-400 hover:border-white/15 hover:text-white"
               }`}
             >
@@ -432,7 +432,7 @@ function ToggleRow({
       onClick={onToggle}
       className={`flex w-full items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs font-bold font-mono transition-all cursor-pointer ${
         enabled
-          ? "border-amber-500/50 bg-amber-950/30 text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+          ? "border-amber-500/50 bg-amber-950/30 text-amber-200 "
           : "border-white/5 bg-[#10111a]/80 text-neutral-400 hover:border-white/15 hover:text-white"
       }`}
     >

@@ -116,8 +116,8 @@ export default function ConfirmModal({
             onClick={handleConfirmClick}
             className={`px-6 py-2.5 border text-white font-bold rounded-xl text-xs tracking-wide transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer ${
               isRed
-                ? "bg-gradient-to-r from-red-650 to-rose-650 hover:from-red-550 hover:to-rose-550 border-red-550/30 shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)]"
-                : "btn-primary shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]"
+                ? "bg-gradient-to-r from-red-650 to-rose-650 hover:from-red-550 hover:to-rose-550 border-red-550/30 "
+                : "btn-primary "
             }`}
           >
             <span>{isAlert ? "OK" : "Confirm"}</span>

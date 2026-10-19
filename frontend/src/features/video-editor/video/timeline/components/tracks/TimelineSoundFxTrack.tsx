@@ -316,11 +316,11 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
                 className={`group absolute rounded-md overflow-hidden select-none border z-10 ${
                   isMoving
-                    ? "cursor-grabbing shadow-[0_4px_20px_rgba(103,232,249,0.4)] z-40"
+                    ? "cursor-grabbing  z-40"
                     : isResizing
-                    ? "cursor-col-resize border-[#60A5FA] shadow-[0_0_14px_rgba(103,232,249,0.5)] z-30"
+                    ? "cursor-col-resize border-[#60A5FA]  z-30"
                     : selectedClip === key
-                    ? "cursor-grab border-[#60A5FA] shadow-[0_0_8px_rgba(103,232,249,0.3)] z-20"
+                    ? "cursor-grab border-[#60A5FA]  z-20"
                     : "cursor-grab border-blue-500/40 hover:border-neutral-700 z-10"
                 } bg-[#0e7490]`}
                 style={{
@@ -365,7 +365,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                   >
                     {/* Live Drag Delta Display */}
                     {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
-                      <span className="text-[7px] font-mono font-bold text-white bg-neutral-900/90 px-1 py-0.2 rounded border border-[#60A5FA] shadow-[0_0_8px_rgba(6,182,212,0.7)] animate-pulse">
+                      <span className="text-[7px] font-mono font-bold text-white bg-neutral-900/90 px-1 py-0.2 rounded border border-[#60A5FA] animate-pulse">
                         {movingInfo.deltaPx > 0
                           ? `+${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`
                           : `${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`}
@@ -393,7 +393,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                           e.stopPropagation();
                           onContextMenu(e, key, idx);
                         }}
-                        className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-neutral-700 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(6,182,212,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                        className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-neutral-700 shadow-[0_2px_6px_rgba(0,0,0,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                         title="Sound FX Options"
                       >
                         <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />

@@ -305,7 +305,7 @@ export default function AutoCropSettingsModal({
       {/* ── Top Header Bar ─────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/8">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600/30 to-indigo-600/20 border border-[#3B82F6]/40 flex items-center justify-center  flex-shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600/30 to-indigo-600/20 border border-[#3B82F6]/40 flex items-center justify-center flex-shrink-0">
             <Scissors className="h-6 w-6 text-[#60A5FA]" />
           </div>
           <div>
@@ -618,7 +618,7 @@ export default function AutoCropSettingsModal({
                     return (
                       <div
                         key={bIdx}
-                        className="absolute border-2 border-emerald-400 bg-emerald-400/15 pointer-events-none rounded transition-all animate-fadeIn shadow-[0_0_10px_rgba(52,211,153,0.3)]"
+                        className="absolute border-2 border-emerald-400 bg-emerald-400/15 pointer-events-none rounded transition-all animate-fadeIn "
                         style={{
                           left: coords.left,
                           top: coords.top,

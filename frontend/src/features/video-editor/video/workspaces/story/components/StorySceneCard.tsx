@@ -16,7 +16,7 @@ export const StorySceneCard: React.FC<StorySceneCardProps> = ({
   return (
     <div
       onClick={onSelectScene}
-      className="p-3 rounded-[1.75rem] bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 cursor-pointer transition-all space-y-2 group shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:shadow-[0_18px_48px_rgba(59,130,246,0.22)]"
+      className="p-3 rounded-[1.75rem] bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 cursor-pointer transition-all space-y-2 group shadow-[0_18px_42px_rgba(0,0,0,0.18)] "
     >
       <div className="flex items-center justify-between border-b border-neutral-800/80 pb-1.5">
         <div className="flex items-center gap-1.5 min-w-0">

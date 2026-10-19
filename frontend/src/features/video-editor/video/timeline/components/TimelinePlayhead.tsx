@@ -73,8 +73,8 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
           xmlns="http://www.w3.org/2000/svg"
           className={`transition-transform duration-100 ${
             isDragging
-              ? "scale-125 drop-shadow-[0_0_16px_rgba(59,130,246,0.8)]"
-              : "group-hover/playhead:scale-110 drop-shadow-[0_0_10px_rgba(59,130,246,0.6)]"
+              ? "scale-125 "
+              : "group-hover/playhead:scale-110 "
           }`}
         >
           <path
@@ -88,7 +88,7 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
 
       {/* Vertical Blue Scrubber Line */}
       <div className="relative w-full h-full pointer-events-none">
-        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1.5px] bg-[#3B82F6] shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1.5px] bg-[#3B82F6] " />
       </div>
     </div>
   );

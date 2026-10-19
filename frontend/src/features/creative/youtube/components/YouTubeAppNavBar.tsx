@@ -11,6 +11,8 @@ import {
   Video,
   Radio,
   Sparkles,
+  Share2,
+  Calendar,
 } from "lucide-react";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 import YouTubeOfficialLogo from "./YouTubeOfficialLogo";
@@ -29,6 +31,9 @@ interface YouTubeAppNavBarProps {
 
 const TABS = [
   { id: "home", label: "Home", icon: Home },
+  { id: "multi_platform", label: "Multi-Platform", icon: Share2 },
+  { id: "scheduler", label: "Scheduler", icon: Calendar },
+  { id: "ab_testing", label: "A/B Testing", icon: Sparkles },
   { id: "videos", label: "Videos", icon: Film },
   { id: "shorts", label: "Shorts", icon: Flame },
   { id: "playlists", label: "Playlists", icon: ListVideo },
@@ -55,7 +60,7 @@ export default function YouTubeAppNavBar({
           {/* Brand */}
           <div className="flex items-center gap-2.5 group cursor-default select-none">
             <div className="p-1.5 px-2 bg-[#121212] group-hover:bg-[#1E1E1E] rounded-xl flex items-center justify-center border border-[#2F2F2F] group-hover:border-red-500/30 transition-all shadow-sm shrink-0">
-              <YouTubeOfficialLogo className="w-6 h-4.5 drop-shadow-[0_0_8px_rgba(255,0,0,0.35)]" />
+              <YouTubeOfficialLogo className="w-6 h-4.5 " />
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
@@ -107,7 +112,7 @@ export default function YouTubeAppNavBar({
                 <span
                   className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-2 ring-[#0A0A0A] ${
                     isConnected
-                      ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.85)]"
+                      ? "bg-emerald-400 "
                       : "bg-amber-400"
                   }`}
                 />

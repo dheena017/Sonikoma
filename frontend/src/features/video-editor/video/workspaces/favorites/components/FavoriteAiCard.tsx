@@ -9,7 +9,7 @@ export const FavoriteAiCard: React.FC<{
 }> = ({ item, onUse, onRemove }) => (
   <div
     onClick={onUse}
-    className="p-3 rounded-[1.75rem] bg-[#1E1E1E] border border-[#2F2F2F] shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:border-amber-400/25 hover:shadow-[0_18px_48px_rgba(245,158,11,0.22)] transition-all duration-200 flex items-center justify-between gap-3 group cursor-pointer"
+    className="p-3 rounded-[1.75rem] bg-[#1E1E1E] border border-[#2F2F2F] shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:border-amber-400/25 transition-all duration-200 flex items-center justify-between gap-3 group cursor-pointer"
   >
     <div className="flex items-center gap-3 min-w-0 flex-1">
       <div className="h-11 w-11 rounded-3xl bg-amber-500/12 border border-amber-500/20 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
@@ -34,7 +34,7 @@ export const FavoriteAiCard: React.FC<{
           e.stopPropagation();
           onUse();
         }}
-        className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-neutral-950 text-[10px] font-mono font-bold uppercase tracking-[0.04em] transition-all shadow-[0_0_14px_rgba(245,158,11,0.25)] active:scale-95"
+        className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-neutral-950 text-[10px] font-mono font-bold uppercase tracking-[0.04em] transition-all active:scale-95"
       >
         Use
       </button>

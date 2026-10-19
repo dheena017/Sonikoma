@@ -42,7 +42,7 @@ export default function CanvasSplitLines({
             <div
               className={`w-full border-t-2 border-dashed ${
                 isHovered
-                  ? "border-[#60A5FA] shadow-[0_0_8px_rgba(167,139,250,0.5)]"
+                  ? "border-[#60A5FA] "
                   : "border-[#3B82F6]/70"
               }`}
             />

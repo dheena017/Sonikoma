@@ -292,7 +292,7 @@ export const AutoCropEngineSelector = React.memo(
             onClick={() => setUseLocalCV(true)}
             className={`group flex flex-col gap-2.5 p-4 sm:p-5 rounded-2xl border text-left transition-all duration-300 cursor-pointer select-none relative overflow-hidden ${
               useLocalCV
-                ? "bg-cyan-950/20 border-blue-500/80 shadow-[0_0_24px_rgba(6,182,212,0.15)] ring-1 ring-cyan-500/30"
+                ? "bg-cyan-950/20 border-blue-500/80  ring-1 ring-cyan-500/30"
                 : "bg-neutral-900/60 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900"
             }`}
           >
@@ -326,7 +326,7 @@ export const AutoCropEngineSelector = React.memo(
                 }`}
               >
                 {useLocalCV && (
-                  <div className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+                  <div className="h-2 w-2 rounded-full bg-blue-400 " />
                 )}
               </span>
             </div>
@@ -342,7 +342,7 @@ export const AutoCropEngineSelector = React.memo(
             onClick={() => setUseLocalCV(false)}
             className={`group flex flex-col gap-2.5 p-4 sm:p-5 rounded-2xl border text-left transition-all duration-300 cursor-pointer select-none relative overflow-hidden ${
               !useLocalCV
-                ? "bg-[#2A2A2A] border-[#2F2F2F] shadow-[0_0_24px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/30"
+                ? "bg-[#2A2A2A] border-[#2F2F2F]  ring-1 ring-indigo-500/30"
                 : "bg-neutral-900/60 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900"
             }`}
           >
@@ -376,7 +376,7 @@ export const AutoCropEngineSelector = React.memo(
                 }`}
               >
                 {!useLocalCV && (
-                  <div className="h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_6px_rgba(99,102,241,0.8)]" />
+                  <div className="h-2 w-2 rounded-full bg-indigo-400 " />
                 )}
               </span>
             </div>
@@ -864,7 +864,7 @@ export const AutoCropEngineSelector = React.memo(
                       }}
                       className={`flex flex-col gap-1.5 p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer select-none active:scale-[0.98] ${
                         isSelected
-                          ? "bg-[#2A2A2A] border-[#2F2F2F] shadow-[0_0_12px_rgba(99,102,241,0.1)]"
+                          ? "bg-[#2A2A2A] border-[#2F2F2F] "
                           : "bg-neutral-900/30 border-neutral-900 hover:border-neutral-800"
                       }`}
                     >

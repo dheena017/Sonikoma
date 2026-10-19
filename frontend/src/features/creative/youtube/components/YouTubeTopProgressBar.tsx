@@ -44,7 +44,7 @@ export default function YouTubeTopProgressBar({
   return (
     <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none h-[2.5px] bg-transparent">
       <div
-        className={`h-full bg-gradient-to-r from-red-600 via-red-500 to-red-400 shadow-[0_0_10px_rgba(255,0,0,0.9)] transition-all ease-out ${
+        className={`h-full bg-gradient-to-r from-red-600 via-red-500 to-red-400  transition-all ease-out ${
           visible ? "opacity-100" : "opacity-0"
         }`}
         style={{

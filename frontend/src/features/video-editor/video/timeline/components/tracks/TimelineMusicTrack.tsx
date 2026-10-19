@@ -233,11 +233,11 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
             onContextMenu={(e) => onContextMenu(e, "a1-0", 0)}
             className={`group absolute inset-y-0 rounded-md overflow-hidden select-none border z-10 ${
               movingInfo?.key === "a1-0"
-                ? "cursor-grabbing shadow-[0_4px_20px_rgba(52,211,153,0.4)] z-40 border-emerald-300"
+                ? "cursor-grabbing  z-40 border-emerald-300"
                 : resizingSide !== null
-                ? "cursor-col-resize border-emerald-300 shadow-[0_0_14px_rgba(110,231,183,0.5)] z-30"
+                ? "cursor-col-resize border-emerald-300  z-30"
                 : selectedClip === "a1-0"
-                ? "cursor-grab border-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.3)] z-20"
+                ? "cursor-grab border-emerald-300  z-20"
                 : "cursor-grab border-emerald-500/40 hover:border-emerald-300/80 z-10"
             } bg-[#047857]`}
             style={{
@@ -290,7 +290,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
               >
                 {/* Live Drag Delta Display */}
                 {movingInfo && movingInfo.deltaPx !== 0 && (
-                  <span className="text-[7.5px] font-mono font-bold text-emerald-100 bg-emerald-900/90 px-1.5 py-0.5 rounded-md border border-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.7)] animate-pulse">
+                  <span className="text-[7.5px] font-mono font-bold text-emerald-100 bg-emerald-900/90 px-1.5 py-0.5 rounded-md border border-emerald-300 animate-pulse">
                     {movingInfo.deltaPx > 0
                       ? `+${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`
                       : `${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`}
@@ -315,7 +315,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                     e.stopPropagation();
                     onContextMenu(e, "a1-0", 0);
                   }}
-                  className="group/btn h-5 px-1.5 flex items-center justify-center rounded-md bg-[#121212]/85 hover:bg-emerald-600 text-neutral-300 hover:text-white border border-white/20 hover:border-emerald-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(110,231,183,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                  className="group/btn h-5 px-1.5 flex items-center justify-center rounded-md bg-[#121212]/85 hover:bg-emerald-600 text-neutral-300 hover:text-white border border-white/20 hover:border-emerald-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                   title="Music Options"
                 >
                   <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />

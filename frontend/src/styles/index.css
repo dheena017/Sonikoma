@@ -16,3 +16,14 @@
 /* --- Scrollbars & Micro-Animations --- */
 @import "./scrollbars.css";
 @import "./animations.css";
+
+/* --- Global Glow Suppression Override --- */
+[class*="shadow-[0_0_"],
+[class*="drop-shadow-[0_0_"],
+.loading-logo-glow,
+.anime-card-glow::before,
+.glow-btn-pulse {
+  box-shadow: none !important;
+  filter: none !important;
+  drop-shadow: none !important;
+}

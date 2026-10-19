@@ -132,7 +132,7 @@ export const StoryboardCameraView: React.FC<StoryboardCameraViewProps> = ({
                     }}
                     className={`py-1.5 px-2 rounded-xl border text-[9px] font-mono font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                       isActive
-                        ? "bg-[#3B82F6] border-[#3B82F6]/40 text-white shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                        ? "bg-[#3B82F6] border-[#3B82F6]/40 text-white "
                         : "bg-black/40 border-white/5 text-neutral-400 hover:text-white hover:bg-black/70 hover:border-white/20"
                     }`}
                   >

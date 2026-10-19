@@ -337,7 +337,7 @@ export const TimelineStoryPanelsTrack: React.FC<
                   onContextMenu={(e) => onContextMenu(e, key, idx)}
                   className={`group absolute rounded-md border select-none overflow-hidden z-10 ${
                     isMoving
-                      ? "cursor-grabbing shadow-[0_4px_20px_rgba(59,130,246,0.5)] z-40 border-[#2F2F2F]"
+                      ? "cursor-grabbing  z-40 border-[#2F2F2F]"
                       : isResizing
                       ? "cursor-col-resize  z-30"
                       : isSelected
@@ -431,7 +431,7 @@ export const TimelineStoryPanelsTrack: React.FC<
                           e.stopPropagation();
                           onContextMenu(e, key, idx);
                         }}
-                        className="group/btn h-4.5 px-1 flex items-center justify-center rounded-[5px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#2F2F2F] shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                        className="group/btn h-4.5 px-1 flex items-center justify-center rounded-[5px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#2F2F2F] shadow-[0_2px_6px_rgba(0,0,0,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                         title="Frame Options"
                       >
                         <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />

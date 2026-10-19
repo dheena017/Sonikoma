@@ -149,7 +149,7 @@ export function WelcomeBackUserModal({
           <button
             type="button"
             onClick={handleConfirmClick}
-            className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-550 hover:to-purple-550 text-white font-bold rounded-xl text-xs tracking-wide transition-all active:scale-95 shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)] flex items-center justify-center gap-2 cursor-pointer"
+            className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-550 hover:to-purple-550 text-white font-bold rounded-xl text-xs tracking-wide transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>{confirmText}</span>
             <ArrowRight className="h-3.5 w-3.5" />

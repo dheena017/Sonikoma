@@ -1351,7 +1351,7 @@ const ImportedAssetsDeck = React.memo(
                       setShowDeleteConfirm(false);
                       executeDeleteSelected();
                     }}
-                    className="px-6 py-2.5 bg-gradient-to-r from-red-650 to-rose-650 hover:from-red-550 hover:to-rose-550 border border-red-550/30 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                    className="px-6 py-2.5 bg-gradient-to-r from-red-650 to-rose-650 hover:from-red-550 hover:to-rose-550 border border-red-550/30 text-white font-bold rounded-xl text-xs tracking-wide transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
                   >
                     <span>Confirm & Delete</span>
                   </button>

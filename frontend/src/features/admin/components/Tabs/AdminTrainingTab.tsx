@@ -214,7 +214,7 @@ export function AdminTrainingTab({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 flex items-center justify-center ">
             <Brain className="w-5 h-5 text-blue-400" />
           </div>
           <div>
@@ -436,7 +436,7 @@ export function AdminTrainingTab({
               type="button"
               disabled={startingTraining}
               onClick={handleStartTraining}
-              className="w-full py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-black tracking-widest uppercase transition-all shadow-[0_4px_20px_rgba(59,130,246,0.35)] hover:shadow-[0_6px_28px_rgba(59,130,246,0.5)] border border-blue-400/30 cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-black tracking-widest uppercase transition-all  border border-blue-400/30 cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2"
             >
               {startingTraining ? (
                 <><RefreshCw className="w-4 h-4 animate-spin" />Starting…</>

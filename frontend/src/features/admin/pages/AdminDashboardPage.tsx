@@ -434,7 +434,7 @@ const AdminDashboardPage = React.memo(
                 fill="none"
                 stroke="#a78bfa"
                 strokeWidth="2.5"
-                className="drop-shadow-[0_2px_8px_rgba(167,139,250,0.4)]"
+                className=""
               />
             )}
             {projectPath && (
@@ -443,7 +443,7 @@ const AdminDashboardPage = React.memo(
                 fill="none"
                 stroke="#3b82f6"
                 strokeWidth="2.5"
-                className="drop-shadow-[0_2px_8px_rgba(59,130,246,0.4)]"
+                className=""
               />
             )}
 

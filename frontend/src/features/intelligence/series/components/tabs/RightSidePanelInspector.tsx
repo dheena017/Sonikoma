@@ -165,7 +165,7 @@ export const RightSidePanelInspector: React.FC<RightSidePanelInspectorProps> = (
         <div className="h-12 px-3 border-b border-[#262626] flex items-center justify-between bg-gradient-to-b from-[#181818] to-[#141414] shrink-0">
           {/* Left: Shot Identification & Counter */}
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-full bg-[#141414] border border-blue-500/40 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.2)] shrink-0 overflow-hidden aspect-square">
+            <div className="w-8 h-8 rounded-full bg-[#141414] border border-blue-500/40 flex items-center justify-center shrink-0 overflow-hidden aspect-square">
               <img
                 src="/logo-dark.png"
                 alt="Sonikoma"
@@ -227,8 +227,8 @@ export const RightSidePanelInspector: React.FC<RightSidePanelInspectorProps> = (
         {/* ── Sub Navigation Tabs ── */}
         <div className="grid grid-cols-2 p-1.5 gap-1.5 border-b border-[#262626] bg-[#141414] shrink-0">
           {[
-            { id: "visual", label: "Visuals", icon: Sparkles, activeCls: "bg-blue-600/25 border-blue-500/50 text-blue-200 shadow-[0_0_12px_rgba(59,130,246,0.25)]" },
-            { id: "dialogue", label: "Speech", icon: MessageSquare, activeCls: "bg-indigo-600/25 border-indigo-500/50 text-indigo-200 shadow-[0_0_12px_rgba(99,102,241,0.25)]" },
+            { id: "visual", label: "Visuals", icon: Sparkles, activeCls: "bg-blue-600/25 border-blue-500/50 text-blue-200 " },
+            { id: "dialogue", label: "Speech", icon: MessageSquare, activeCls: "bg-indigo-600/25 border-indigo-500/50 text-indigo-200 " },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;

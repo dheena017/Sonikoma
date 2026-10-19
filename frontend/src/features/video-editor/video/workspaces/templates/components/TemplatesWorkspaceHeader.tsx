@@ -19,7 +19,7 @@ export const TemplatesWorkspaceHeader: React.FC<
   <div className="shrink-0">
     <div className="px-3.5 py-2.5 border-b border-amber-900/30 bg-neutral-950/80 backdrop-blur-md flex items-center justify-between">
       <div className="flex items-center gap-2.5">
-        <div className="h-6 w-6 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shadow-[0_0_10px_rgba(245,158,11,0.3)]">
+        <div className="h-6 w-6 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center ">
           <LayoutTemplate className="h-3.5 w-3.5 text-amber-400" />
         </div>
         <h2 className="text-xs font-black text-white uppercase tracking-wider font-mono">

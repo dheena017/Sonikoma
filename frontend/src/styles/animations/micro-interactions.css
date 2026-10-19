@@ -64,9 +64,9 @@ button:disabled,
   animation: anime-energy-sheen 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Glowing Pulsing Button */
+/* Pulsing Button - Glow Removed */
 .glow-btn-pulse {
-  animation: pulse-glow 3s infinite;
+  animation: none;
 }
 
 /* Scanner Line */
@@ -81,7 +81,7 @@ button:disabled,
     rgb(168, 85, 247),
     transparent
   );
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.8);
+  box-shadow: none;
   animation: scan-laser 2.5s ease-in-out infinite;
   z-index: 20;
 }

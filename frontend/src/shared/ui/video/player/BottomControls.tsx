@@ -262,7 +262,7 @@ export const VideoPreviewBottomControls: React.FC<
 
           {/* CURRENT PLAYHEAD CIRCLE */}
           <div
-            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full aspect-square bg-white border-2 border-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.7)] group-hover/scrub:scale-125 pointer-events-none transition-transform duration-150 z-30"
+            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full aspect-square bg-white border-2 border-[#3B82F6] group-hover/scrub:scale-125 pointer-events-none transition-transform duration-150 z-30"
             style={{
               left: `${
                 totalDuration > 0

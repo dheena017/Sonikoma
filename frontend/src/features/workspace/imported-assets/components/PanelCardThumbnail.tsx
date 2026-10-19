@@ -28,20 +28,20 @@ const getScrapedImageStatus = (url: string) => {
   if (url.includes("_cropped")) {
     return {
       text: "CROPPED",
-      bg: "bg-gradient-to-r from-sky-600 to-blue-600 border-sky-400/50 text-sky-100 shadow-[0_4px_12px_rgba(56,189,248,0.25)]",
+      bg: "bg-gradient-to-r from-sky-600 to-blue-600 border-sky-400/50 text-sky-100 ",
     };
   }
   if (url.includes("_cleaned")) {
     return {
       text: "CLEANED",
-      bg: "bg-gradient-to-r from-fuchsia-600 to-blue-600 border-blue-400/50 text-white shadow-[0_4px_12px_rgba(59,130,246,0.25)]",
+      bg: "bg-gradient-to-r from-fuchsia-600 to-blue-600 border-blue-400/50 text-white ",
     };
   }
 
   if (url.includes("transform_")) {
     return {
       text: "EDITED",
-      bg: "bg-gradient-to-r from-amber-500 to-orange-600 border-amber-400/50 text-amber-100 shadow-[0_4px_12px_rgba(245,158,11,0.25)]",
+      bg: "bg-gradient-to-r from-amber-500 to-orange-600 border-amber-400/50 text-amber-100 ",
     };
   }
   return null;
@@ -232,7 +232,7 @@ export function PanelCardThumbnail({
       {/* In Timeline Badge */}
       {isInTimeline && (
         <div
-          className={`absolute top-2 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border z-20 transition-all duration-300 border-emerald-400/60 bg-gradient-to-r from-emerald-600 to-teal-600 text-emerald-100 shadow-[0_4px_12px_rgba(16,185,129,0.35)] flex items-center gap-1 ${
+          className={`absolute top-2 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border z-20 transition-all duration-300 border-emerald-400/60 bg-gradient-to-r from-emerald-600 to-teal-600 text-emerald-100  flex items-center gap-1 ${
             status ? "left-28" : "left-12"
           }`}
         >

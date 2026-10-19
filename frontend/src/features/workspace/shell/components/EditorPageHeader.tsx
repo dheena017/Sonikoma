@@ -494,7 +494,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 user?.username ||
                 (user?.email ? user.email.split("@")[0] : "Studio Creator")}
             </span>
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
               <img
                 key={user?.avatar_url || user?.full_name || "avatar"}
                 src={getUserAvatarUrl(user)}

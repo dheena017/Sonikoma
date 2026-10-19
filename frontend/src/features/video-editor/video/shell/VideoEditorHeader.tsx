@@ -668,7 +668,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                   ? activeUser.email.split("@")[0]
                   : "Studio Creator")}
             </span>
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border border-neutral-700 bg-[#121212] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border border-neutral-700 bg-[#121212] shrink-0 flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
               <img
                 key={
                   activeUser?.avatar_url || activeUser?.full_name || "avatar"

@@ -88,7 +88,7 @@ export default function CanvasCropSelection({
           bottom: `${editCropBottom}%`,
           left: `${editCropLeft}%`,
           right: `${editCropRight}%`,
-          boxShadow: `0 0 0 1.5px rgba(0,0,0,0.7), inset 0 0 0 1.5px rgba(0,0,0,0.7), 0 0 30px ${glowColor}`,
+          boxShadow: `0 0 0 1.5px rgba(0,0,0,0.7), inset 0 0 0 1.5px rgba(0,0,0,0.7)`,
           zIndex: 50,
         }}
       >
@@ -104,7 +104,7 @@ export default function CanvasCropSelection({
               onResizeStart("nw", e.touches[0].clientX, e.touches[0].clientY);
             }
           }}
-          className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-[#3B82F6] rounded-full cursor-nwse-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+          className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-[#3B82F6] rounded-full cursor-nwse-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform "
         />
         <div
           onMouseDown={(e) => {
@@ -117,7 +117,7 @@ export default function CanvasCropSelection({
               onResizeStart("ne", e.touches[0].clientX, e.touches[0].clientY);
             }
           }}
-          className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-[#3B82F6] rounded-full cursor-nesw-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+          className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-[#3B82F6] rounded-full cursor-nesw-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform "
         />
         <div
           onMouseDown={(e) => {
@@ -130,7 +130,7 @@ export default function CanvasCropSelection({
               onResizeStart("sw", e.touches[0].clientX, e.touches[0].clientY);
             }
           }}
-          className="absolute -bottom-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-[#3B82F6] rounded-full cursor-nesw-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+          className="absolute -bottom-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-[#3B82F6] rounded-full cursor-nesw-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform "
         />
         <div
           onMouseDown={(e) => {
@@ -143,7 +143,7 @@ export default function CanvasCropSelection({
               onResizeStart("se", e.touches[0].clientX, e.touches[0].clientY);
             }
           }}
-          className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-[#3B82F6] rounded-full cursor-nwse-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+          className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-[#3B82F6] rounded-full cursor-nwse-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform "
         />
 
         {/* Edge handles */}
@@ -160,7 +160,7 @@ export default function CanvasCropSelection({
           }}
           className="absolute -top-1.5 left-2 right-2 h-3 cursor-ns-resize pointer-events-auto group/edge z-40"
         >
-          <div className="mx-auto w-12 h-1 bg-[#2A2A2A] rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+          <div className="mx-auto w-12 h-1 bg-[#2A2A2A] rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 " />
         </div>
         <div
           onMouseDown={(e) => {
@@ -175,7 +175,7 @@ export default function CanvasCropSelection({
           }}
           className="absolute -bottom-1.5 left-2 right-2 h-3 cursor-ns-resize pointer-events-auto group/edge z-40"
         >
-          <div className="mx-auto w-12 h-1 bg-[#2A2A2A] rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+          <div className="mx-auto w-12 h-1 bg-[#2A2A2A] rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 " />
         </div>
         <div
           onMouseDown={(e) => {
@@ -190,7 +190,7 @@ export default function CanvasCropSelection({
           }}
           className="absolute top-2 bottom-2 -left-1.5 w-3 cursor-ew-resize pointer-events-auto group/edge flex items-center z-40"
         >
-          <div className="my-auto h-12 w-1 bg-[#2A2A2A] rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+          <div className="my-auto h-12 w-1 bg-[#2A2A2A] rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 " />
         </div>
         <div
           onMouseDown={(e) => {
@@ -205,12 +205,12 @@ export default function CanvasCropSelection({
           }}
           className="absolute top-2 bottom-2 -right-1.5 w-3 cursor-ew-resize pointer-events-auto group/edge flex items-center z-40"
         >
-          <div className="my-auto h-12 w-1 bg-[#2A2A2A] rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+          <div className="my-auto h-12 w-1 bg-[#2A2A2A] rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 " />
         </div>
 
         {/* Move helper */}
         <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-          <Move className="h-6 w-6 text-white drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+          <Move className="h-6 w-6 text-white " />
         </div>
 
         {/* Specs badge */}

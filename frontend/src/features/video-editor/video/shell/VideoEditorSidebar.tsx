@@ -225,7 +225,7 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
                         <div
                           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${
                             isActive
-                              ? "h-6 bg-[#3B82F6] opacity-100 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
+                              ? "h-6 bg-[#3B82F6] opacity-100 "
                               : "h-0 bg-transparent opacity-0"
                           }`}
                         />

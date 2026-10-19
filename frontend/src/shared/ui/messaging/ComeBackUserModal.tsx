@@ -148,7 +148,7 @@ export function ComeBackUserModal({
             <button
               type="button"
               onClick={onCancel}
-              className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-550 hover:to-teal-550 text-white font-bold rounded-xl text-xs tracking-wide transition-all active:scale-95 shadow-[0_0_20px_-5px_rgba(16,185,129,0.5)] flex items-center justify-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-550 hover:to-teal-550 text-white font-bold rounded-xl text-xs tracking-wide transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>{cancelText}</span>
             </button>

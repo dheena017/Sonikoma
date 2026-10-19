@@ -92,7 +92,7 @@ export interface TooltipPortalProps {
 // Variant & Style Helpers
 // --------------------------------------------------------------------------
 const VARIANT_STYLES: Record<TooltipVariant, string> = {
-  dark: "bg-[#111116]/95 border-[#282832] text-neutral-100 shadow-[0_12px_36px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.08)]",
+  dark: "bg-[#111116]/95 border-[#282832] text-neutral-100 ",
   glass:
     "bg-neutral-900/85 backdrop-blur-xl border-white/15 text-neutral-100 shadow-[0_8px_32px_rgba(0,0,0,0.6)]",
   neon: "bg-[#0c1017]/95 border-neutral-700 text-neutral-100 shadow-xl",
@@ -110,15 +110,15 @@ const VARIANT_STYLES: Record<TooltipVariant, string> = {
 };
 
 const GLOW_COLORS: Record<TooltipVariant, string> = {
-  dark: "shadow-[0_0_25px_rgba(0,0,0,0.8)]",
-  glass: "shadow-[0_0_25px_rgba(255,255,255,0.12)]",
-  neon: "shadow-[0_0_25px_rgba(6,182,212,0.4)]",
+  dark: "",
+  glass: "",
+  neon: "",
   cyber: "",
   gradient: "",
   primary: "",
-  success: "shadow-[0_0_25px_rgba(16,185,129,0.4)]",
-  warning: "shadow-[0_0_25px_rgba(245,158,11,0.4)]",
-  danger: "shadow-[0_0_25px_rgba(244,63,94,0.4)]",
+  success: "",
+  warning: "",
+  danger: "",
 };
 
 const ARROW_STYLES: Record<TooltipVariant, string> = {
@@ -443,8 +443,7 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
         maxWidth: isLongText ? 220 : maxWidth,
         ...userStyle,
       }}
-      className={`
-        pointer-events-none border backdrop-blur-md flex flex-col items-center justify-center
+      className={` pointer-events-none border backdrop-blur-md flex flex-col items-center justify-center
         duration-150 ease-out select-none z-[9900]
         ${isLongText ? "whitespace-normal text-center" : "whitespace-nowrap"}
         ${sizeConfig.root}
@@ -480,8 +479,7 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
         {/* Optional Badge */}
         {badge && (
           <span
-            className={`
-              inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-semibold uppercase tracking-wider border
+            className={` inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-semibold uppercase tracking-wider border
               ${BADGE_STYLES[badgeVariant] || BADGE_STYLES.default}
             `}
           >
@@ -495,8 +493,7 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
             {shortcutKeys.map((key, idx) => (
               <kbd
                 key={idx}
-                className={`
-                  inline-flex items-center justify-center font-mono font-semibold rounded bg-white/10 text-white/90 border border-white/15 shadow-[0_1px_0_rgba(0,0,0,0.5)]
+                className={` inline-flex items-center justify-center font-mono font-semibold rounded bg-white/10 text-white/90 border border-white/15 shadow-[0_1px_0_rgba(0,0,0,0.5)]
                   ${sizeConfig.shortcut}
                 `}
               >

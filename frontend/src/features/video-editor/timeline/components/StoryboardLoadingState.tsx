@@ -9,7 +9,7 @@ export default function StoryboardLoadingState() {
     >
       {/* Centered Status Indicator */}
       <div className="flex flex-col items-center justify-center space-y-2 text-center">
-        <div className="h-10 w-10 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6] shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+        <div className="h-10 w-10 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6] ">
           <Loader2 className="w-5 h-5 animate-spin" />
         </div>
 

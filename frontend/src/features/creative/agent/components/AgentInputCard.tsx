@@ -17,6 +17,13 @@ import {
   BookOpen,
   ExternalLink,
   X,
+  CheckCircle2,
+  SlidersHorizontal,
+  ArrowRight,
+  Film,
+  Zap,
+  Share2,
+  Check,
 } from "lucide-react";
 import { VideoFormat, PrivacyStatus } from "../types";
 import { CyberSelect, CyberSelectOption } from "@/shared/ui/common/CyberSelect";
@@ -109,6 +116,13 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
   isLoading,
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [targetPlatforms, setTargetPlatforms] = useState<string[]>([
+    "youtube",
+    "tiktok",
+    "instagram",
+  ]);
+  const [scheduleMode, setScheduleMode] = useState<"instant" | "peak_hour">("peak_hour");
+  const [enableABTesting, setEnableABTesting] = useState<boolean>(true);
 
   // Auto-detect chapter/episode number from target URL (e.g. episode_no=146)
   const detectedEp = React.useMemo(() => {
@@ -158,484 +172,630 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
     }
   };
 
+  // Helper labels for Blueprint summary
+  const currentNarratorLabel = NARRATOR_VOICES.find((o) => o.value === narratorVoice)?.label.split("(")[0].trim() || "Christopher";
+  const currentProtagonistLabel = PROTAGONIST_VOICES.find((o) => o.value === protagonistVoice)?.label.split("(")[0].trim() || "Guy";
+  const currentLangLabel = LANGUAGE_OPTIONS.find((o) => o.value === language)?.label || "English";
+  const currentPrivacyLabel = PRIVACY_OPTIONS.find((o) => o.value === privacyStatus)?.label.split("(")[0].trim() || "Unlisted";
+
+  const totalBatchCount =
+    chapterRangeEnd && chapterRangeEnd >= (chapterRangeStart || detectedEp || 1)
+      ? chapterRangeEnd - (chapterRangeStart || detectedEp || 1) + 1
+      : 1;
+
   return (
-    <div className="bg-[#1E1E1E]/90 border border-[#2F2F2F] rounded-2xl p-6 sm:p-7 shadow-xl space-y-6 text-left">
-      {/* ── URL Input Form ─────────────────────────────────────────────────── */}
-      <div className="space-y-2.5">
-        <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#9CA3AF] flex items-center justify-between">
-          <span className="flex items-center gap-2 text-[#E5E5E5]">
-            <Link className="w-4 h-4 text-[#3B82F6]" />
-            Series / Chapter URL
-          </span>
-          <span className="text-[11px] text-[#60A5FA] font-mono flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 shadow-sm">
-            <ShieldCheck className="w-3.5 h-3.5" /> Serious Manhwa Dubbing Active
-          </span>
-        </label>
-
-        <div className="flex items-center gap-2.5 w-full h-12 px-3.5 sm:px-4 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Paste comic chapter URL (e.g. https://www.webtoons.com/.../viewer?episode_no=...)"
-            className="flex-1 min-w-0 bg-transparent text-xs sm:text-sm text-[#E5E5E5] placeholder-[#6B7280] outline-none font-mono"
-            disabled={isLoading}
-          />
-          {url && (
-            <button
-              type="button"
-              onClick={() => {
-                setUrl("");
-                setChapterRangeStart?.(undefined);
-                setChapterRangeEnd?.(undefined);
-              }}
-              className="p-1 rounded-md text-[#6B7280] hover:text-[#E5E5E5] hover:bg-[#1E1E1E] transition-all cursor-pointer"
-              title="Clear URL"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={handlePaste}
-            className="px-3 py-1.5 rounded-lg bg-[#1E1E1E] hover:bg-[#252525] border border-[#2F2F2F] hover:border-neutral-600 text-[#9CA3AF] hover:text-[#E5E5E5] text-xs font-mono flex items-center gap-1.5 shrink-0 transition-all cursor-pointer shadow-sm active:scale-95"
-            title="Paste from clipboard"
-          >
-            <Clipboard className="w-3.5 h-3.5" />
-            <span>Paste</span>
-          </button>
-        </div>
-      </div>
-
-      {/* ── Key Pipeline Controls ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
-        {/* Format Selector */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
-            <Smartphone className="w-3.5 h-3.5 text-[#3B82F6]" />
-            Video Format
-          </label>
-          <div className="flex items-center h-[44px] p-1 bg-[#121212] rounded-xl border border-[#2F2F2F] shadow-inner">
-            <button
-              type="button"
-              onClick={() => setVideoFormat("shorts")}
-              className={`flex-1 h-full flex items-center justify-center gap-1.5 px-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                videoFormat === "shorts"
-                  ? "bg-[#3B82F6] text-white shadow-md shadow-[#3B82F6]/30 font-mono"
-                  : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#1E1E1E] font-mono"
-              }`}
-            >
-              <Smartphone className="w-3.5 h-3.5 shrink-0" />
-              <span>Shorts (9:16)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setVideoFormat("landscape")}
-              className={`flex-1 h-full flex items-center justify-center gap-1.5 px-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                videoFormat === "landscape"
-                  ? "bg-[#3B82F6] text-white shadow-md shadow-[#3B82F6]/30 font-mono"
-                  : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#1E1E1E] font-mono"
-              }`}
-            >
-              <Monitor className="w-3.5 h-3.5 shrink-0" />
-              <span>16:9 Video</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Script Language with CyberSelect */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
-            <Globe className="w-3.5 h-3.5 text-[#3B82F6]" />
-            Script Language
-          </label>
-          <CyberSelect
-            value={language}
-            onChange={setLanguage}
-            options={LANGUAGE_OPTIONS}
-            variant="blue"
-            size="lg"
-            searchable={false}
-            className="[&>button]:!bg-[#121212] [&>button]:!border-[#2F2F2F] [&>button]:!h-[44px] [&>button]:!text-xs [&>button]:!font-sans"
-            placeholder="Select script language..."
-            ariaLabel="Select script language"
-          />
-        </div>
-
-        {/* YouTube Privacy with CyberSelect */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
-            <Eye className="w-3.5 h-3.5 text-[#3B82F6]" />
-            YouTube Privacy
-          </label>
-          <CyberSelect
-            value={privacyStatus}
-            onChange={(val) => setPrivacyStatus(val as PrivacyStatus)}
-            options={PRIVACY_OPTIONS}
-            variant="blue"
-            size="lg"
-            searchable={false}
-            className="[&>button]:!bg-[#121212] [&>button]:!border-[#2F2F2F] [&>button]:!h-[44px] [&>button]:!text-xs [&>button]:!font-sans"
-            placeholder="Select privacy..."
-            ariaLabel="Select YouTube privacy"
-          />
-        </div>
-      </div>
-
-      {/* ── Character Voice Continuity Engine Controls ─────────────────────── */}
-      <div className="p-4 sm:p-5 rounded-xl bg-[#141414] border border-[#2A2A2A] space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1 border-b border-[#242424]">
-          <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#3B82F6]" />
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#E5E5E5]">
-              Character Voice Continuity Casting
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 w-fit shadow-sm">
-            <Volume2 className="w-3 h-3" />
-            <span>Zero Random Voices • Locked Continuity</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Master Narrator Voice */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <Mic className="w-3.5 h-3.5 text-[#3B82F6]" />
-                Cinematic Narrator
-              </span>
-              <span className="text-[10px] text-[#60A5FA]">Exposition &amp; Storyteller</span>
-            </label>
-            <CyberSelect
-              value={narratorVoice}
-              onChange={(v) => {
-                setNarratorVoice?.(v);
-                setVoice(v);
-              }}
-              options={NARRATOR_VOICES}
-              variant="blue"
-              size="lg"
-              searchable={false}
-              className="[&>button]:!bg-[#121212] [&>button]:!border-[#2F2F2F] [&>button]:!h-[44px] [&>button]:!text-xs [&>button]:!font-sans"
-              placeholder="Select narrator voice..."
-              ariaLabel="Select narrator voice"
-            />
-          </div>
-
-          {/* Lead Protagonist (MC) Voice */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-[#3B82F6]" />
-                Lead Protagonist (MC)
-              </span>
-              <span className="text-[10px] text-[#60A5FA]">Main Character Dialogue</span>
-            </label>
-            <CyberSelect
-              value={protagonistVoice}
-              onChange={(v) => setProtagonistVoice?.(v)}
-              options={PROTAGONIST_VOICES}
-              variant="blue"
-              size="lg"
-              searchable={false}
-              className="[&>button]:!bg-[#121212] [&>button]:!border-[#2F2F2F] [&>button]:!h-[44px] [&>button]:!text-xs [&>button]:!font-sans"
-              placeholder="Select protagonist voice..."
-              ariaLabel="Select protagonist voice"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Collapsible Multi-Chapter & Advanced Settings ───────────────────── */}
-      <div className="pt-1">
-        <button
-          type="button"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-xs font-mono text-[#9CA3AF] hover:text-[#E5E5E5] flex items-center gap-1.5 cursor-pointer transition-colors"
-        >
-          <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
-          <span>Multi-Chapter Auto-Pilot &amp; Advanced Options</span>
-          {showAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-        </button>
-
-        {showAdvanced && (
-          <div className="mt-3 p-4 rounded-xl bg-[#141414] border border-[#242424] space-y-4 animate-fade-in">
-            {/* Multi-Chapter Batch Range */}
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
-                <label className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
-                  <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
-                  Multi-Chapter Batch Auto-Pilot (Optional)
-                </label>
-                <span className="text-[10px] text-[#9CA3AF] font-mono">
-                  {detectedEp ? `Detected in URL: Ep ${detectedEp}` : "Leave blank for single chapter"}
-                </span>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start text-left">
+      {/* ──────────────────────────────────────────────────────────────────────────
+          LEFT COLUMN: The Configuration Studio (Cards 1 to 4)
+          ────────────────────────────────────────────────────────────────────────── */}
+      <div className="lg:col-span-7 xl:col-span-8 space-y-5">
+        {/* ── CARD 1: SOURCE COMIC & CHAPTER RANGE ──────────────────────────── */}
+        <section className="bg-[#181818]/90 border border-[#2A2A2A] rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-[#242424]">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-[#3B82F6]">
+                <Link className="w-4 h-4" />
               </div>
+              <div>
+                <h2 className="text-sm font-bold text-[#E5E5E5] tracking-tight">
+                  1. Source Comic &amp; Episode Range
+                </h2>
+                <p className="text-[11px] text-[#9CA3AF]">
+                  Paste chapter URL from Webtoons, MangaDex, or supported platform
+                </p>
+              </div>
+            </div>
 
-              {/* Quick Presets Pills */}
-              <div className="flex flex-wrap items-center gap-2 pt-0.5">
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[11px] font-mono text-[#60A5FA]">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Smart Dub Active</span>
+            </div>
+          </div>
+
+          {/* URL Input Bar */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 w-full h-12 px-3.5 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://www.webtoons.com/.../viewer?episode_no=1..."
+                className="flex-1 min-w-0 bg-transparent text-xs sm:text-sm text-[#E5E5E5] placeholder-[#555] outline-none font-mono"
+                disabled={isLoading}
+              />
+              {url && (
                 <button
                   type="button"
                   onClick={() => {
-                    if (detectedEp) {
-                      setChapterRangeStart?.(detectedEp);
-                      setChapterRangeEnd?.(detectedEp);
-                    } else {
-                      setChapterRangeStart?.(undefined);
-                      setChapterRangeEnd?.(undefined);
-                    }
+                    setUrl("");
+                    setChapterRangeStart?.(undefined);
+                    setChapterRangeEnd?.(undefined);
                   }}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-mono cursor-pointer transition-all border ${
-                    (chapterRangeStart === detectedEp && (!chapterRangeEnd || chapterRangeEnd === detectedEp)) ||
-                    (chapterRangeStart === undefined && chapterRangeEnd === undefined)
-                      ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] font-bold"
-                      : "bg-[#181818] border-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] hover:border-[#383838]"
-                  }`}
+                  className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#E5E5E5] hover:bg-[#1E1E1E] transition-all cursor-pointer"
+                  title="Clear URL"
                 >
-                  Single Chapter {detectedEp ? `(Ep ${detectedEp})` : "(Current)"}
+                  <X className="w-3.5 h-3.5" />
                 </button>
+              )}
+              <button
+                type="button"
+                onClick={handlePaste}
+                className="px-3 py-1.5 rounded-lg bg-[#1E1E1E] hover:bg-[#252525] border border-[#2F2F2F] hover:border-neutral-600 text-[#9CA3AF] hover:text-[#E5E5E5] text-xs font-mono flex items-center gap-1.5 shrink-0 transition-all cursor-pointer shadow-sm active:scale-95"
+                title="Paste from clipboard"
+              >
+                <Clipboard className="w-3.5 h-3.5" />
+                <span>Paste</span>
+              </button>
+            </div>
 
-                {detectedEp && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setChapterRangeStart?.(detectedEp);
-                        setChapterRangeEnd?.(detectedEp + 1);
-                      }}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-mono cursor-pointer transition-all border ${
-                        chapterRangeStart === detectedEp && chapterRangeEnd === detectedEp + 1
-                          ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] font-bold"
-                          : "bg-[#181818] border-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] hover:border-[#383838]"
-                      }`}
-                    >
-                      Batch 2 ({detectedEp} → {detectedEp + 1})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setChapterRangeStart?.(detectedEp);
-                        setChapterRangeEnd?.(detectedEp + 2);
-                      }}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-mono cursor-pointer transition-all border ${
-                        chapterRangeStart === detectedEp && chapterRangeEnd === detectedEp + 2
-                          ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] font-bold"
-                          : "bg-[#181818] border-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] hover:border-[#383838]"
-                      }`}
-                    >
-                      Batch 3 ({detectedEp} → {detectedEp + 2})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setChapterRangeStart?.(detectedEp);
-                        setChapterRangeEnd?.(detectedEp + 4);
-                      }}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-mono cursor-pointer transition-all border ${
-                        chapterRangeStart === detectedEp && chapterRangeEnd === detectedEp + 4
-                          ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] font-bold"
-                          : "bg-[#181818] border-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] hover:border-[#383838]"
-                      }`}
-                    >
-                      Batch 5 ({detectedEp} → {detectedEp + 4})
-                    </button>
-                  </>
-                )}
+            {detectedEp && (
+              <div className="flex items-center gap-2 text-[11px] font-mono text-[#9CA3AF]">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Detected in URL:</span>
+                <span className="px-2 py-0.5 rounded-md bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[#93C5FD] font-bold">
+                  Episode {detectedEp}
+                </span>
               </div>
+            )}
+          </div>
 
-              {/* Mismatch Alert Notice */}
-              {isRangeMismatched && !isInvalidInvertedRange && (
-                <div className="p-2.5 rounded-lg bg-amber-950/40 border border-amber-800/40 text-[11px] text-amber-300 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <span>
-                    ⚠️ Target URL is Episode <strong>{detectedEp}</strong>, but batch range is set to Ep {chapterRangeStart}–{chapterRangeEnd}.
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        // Cap auto-aligned count to max 3 chapters so oversized numbers never occur
-                        const rawCount = Math.max(1, (chapterRangeEnd ?? 1) - (chapterRangeStart ?? 1) + 1);
-                        const safeCount = Math.min(3, rawCount);
-                        setChapterRangeStart?.(detectedEp);
-                        setChapterRangeEnd?.(detectedEp + safeCount - 1);
-                      }}
-                      className="px-2.5 py-1 rounded bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-[10px] cursor-pointer transition-colors"
-                    >
-                      Auto-Align ({detectedEp} → {detectedEp + Math.min(3, Math.max(1, (chapterRangeEnd ?? 1) - (chapterRangeStart ?? 1) + 1)) - 1})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setChapterRangeStart?.(detectedEp);
-                        setChapterRangeEnd?.(detectedEp);
-                      }}
-                      className="px-2 py-0.5 rounded bg-amber-900/60 hover:bg-amber-800 text-white font-bold text-[10px] cursor-pointer transition-colors"
-                    >
-                      Reset to Ep {detectedEp}
-                    </button>
-                  </div>
-                </div>
-              )}
+          {/* Episode Batch Presets & Numeric Range */}
+          <div className="p-4 rounded-xl bg-[#141414] border border-[#242424] space-y-3.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-[#E5E5E5] flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
+                Chapter Batch Mode
+              </span>
+              <span className="text-[11px] text-[#6B7280] font-mono">
+                {totalBatchCount > 1 ? `${totalBatchCount} Episodes Selected` : "Single Episode Mode"}
+              </span>
+            </div>
 
-              {/* Large Batch Range Notice (Dynamic calculation based on selected range) */}
-              {isRangeTooLarge && !isInvalidInvertedRange && !isRangeMismatched && (
-                <div className="p-2.5 rounded-lg bg-amber-950/40 border border-amber-800/40 text-[11px] text-amber-300 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <span>
-                    ⚠️ Large Batch Notice: <strong>{chapterRangeEnd! - (chapterRangeStart || detectedEp || 1) + 1} episodes</strong> selected ({chapterRangeStart || detectedEp || 1} → {chapterRangeEnd}). Processing large batches may significantly extend rendering time.
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const start = chapterRangeStart || detectedEp || 1;
-                        setChapterRangeStart?.(start);
-                        setChapterRangeEnd?.(start + 2);
-                      }}
-                      className="px-2.5 py-1 rounded bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-[10px] cursor-pointer transition-colors"
-                    >
-                      Cap to 3 Chapters ({chapterRangeStart || detectedEp} → {(chapterRangeStart || detectedEp || 1) + 2})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setChapterRangeStart?.(detectedEp || chapterRangeStart);
-                        setChapterRangeEnd?.(detectedEp || chapterRangeStart);
-                      }}
-                      className="px-2 py-0.5 rounded bg-amber-900/60 hover:bg-amber-800 text-white font-bold text-[10px] cursor-pointer transition-colors"
-                    >
-                      Single Ep {detectedEp || chapterRangeStart}
-                    </button>
-                  </div>
-                </div>
-              )}
+            {/* Quick Presets Pills */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (detectedEp) {
+                    setChapterRangeStart?.(detectedEp);
+                    setChapterRangeEnd?.(detectedEp);
+                  } else {
+                    setChapterRangeStart?.(undefined);
+                    setChapterRangeEnd?.(undefined);
+                  }
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono cursor-pointer transition-all border ${
+                  (!chapterRangeEnd || chapterRangeEnd === (chapterRangeStart || detectedEp))
+                    ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] font-bold shadow-sm"
+                    : "bg-[#1A1A1A] border-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] hover:border-[#383838]"
+                }`}
+              >
+                Single Ep {detectedEp ? `(${detectedEp})` : ""}
+              </button>
 
-              {/* Inverted Range Error Notice */}
-              {isInvalidInvertedRange && (
-                <div className="p-2.5 rounded-lg bg-red-950/50 border border-red-800/60 text-[11px] text-red-300 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <span>
-                    ❌ Backwards Range: "From Ep" ({chapterRangeStart}) cannot be greater than "To Ep" ({chapterRangeEnd}).
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const temp = chapterRangeStart;
-                        setChapterRangeStart?.(chapterRangeEnd);
-                        setChapterRangeEnd?.(temp);
-                      }}
-                      className="px-2.5 py-1 rounded bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-[10px] cursor-pointer transition-colors"
-                    >
-                      Swap ({chapterRangeEnd} to {chapterRangeStart})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setChapterRangeStart?.(detectedEp ?? undefined);
-                        setChapterRangeEnd?.(undefined);
-                      }}
-                      className="px-2.5 py-1 rounded bg-red-900/80 hover:bg-red-800 text-white font-bold text-[10px] cursor-pointer transition-colors"
-                    >
-                      Clear Range
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-col sm:flex-row items-center gap-3">
-                <div className="flex-1 w-full flex items-center gap-2.5 h-11 px-3.5 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
-                  <span className="text-xs font-mono font-bold text-[#9CA3AF] shrink-0">From Ep:</span>
-                  <input
-                    type="number"
-                    min={1}
-                    value={chapterRangeStart ?? ""}
-                    onChange={(e) => setChapterRangeStart?.(e.target.value ? parseInt(e.target.value) : undefined)}
-                    placeholder={detectedEp ? `e.g. ${detectedEp}` : "1"}
-                    className="flex-1 bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#525252] outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                </div>
-                <div className="hidden sm:flex text-[#525252] font-mono text-xs select-none">→</div>
-                <div className="flex-1 w-full flex items-center gap-2.5 h-11 px-3.5 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
-                  <span className="text-xs font-mono font-bold text-[#9CA3AF] shrink-0">To Ep:</span>
-                  <input
-                    type="number"
-                    min={chapterRangeStart || 1}
-                    value={chapterRangeEnd ?? ""}
-                    onChange={(e) => {
-                      const val = e.target.value ? parseInt(e.target.value) : undefined;
-                      setChapterRangeEnd?.(val);
-                      if (val && !chapterRangeStart && detectedEp) {
-                        setChapterRangeStart?.(detectedEp);
-                      }
+              {detectedEp && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setChapterRangeStart?.(detectedEp);
+                      setChapterRangeEnd?.(detectedEp + 1);
                     }}
-                    placeholder={detectedEp ? `e.g. ${detectedEp + 2}` : "3"}
-                    className="flex-1 bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#525252] outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                </div>
-              </div>
-
-              {url && (
-                <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-[#222]">
-                  <span className="text-[10px] text-[#6B7280] font-mono">
-                    {chapterRangeEnd && chapterRangeEnd > (chapterRangeStart || detectedEp || 1) ? (
-                      <>
-                        Batch range: Episodes <strong>{chapterRangeStart || detectedEp || 1}</strong> to <strong>{chapterRangeEnd}</strong> ({chapterRangeEnd - (chapterRangeStart || detectedEp || 1) + 1} chapters total).
-                      </>
-                    ) : (
-                      <>
-                        Scraping starts directly from target Episode <strong>{detectedEp || chapterRangeStart || 1}</strong>.
-                      </>
-                    )}
-                  </span>
-                  <a
-                    href={`/chapter-scraper?url=${encodeURIComponent(url)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] font-mono text-[#3B82F6] hover:text-blue-400 flex items-center gap-1.5 transition-colors shrink-0"
-                    title="Open full series chapter list in Scraper Studio"
+                    className={`px-3 py-1.5 rounded-lg text-xs font-mono cursor-pointer transition-all border ${
+                      chapterRangeStart === detectedEp && chapterRangeEnd === detectedEp + 1
+                        ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] font-bold shadow-sm"
+                        : "bg-[#1A1A1A] border-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] hover:border-[#383838]"
+                    }`}
                   >
-                    <BookOpen className="w-3.5 h-3.5" />
-                    <span>Browse All Chapters in Scraper Studio</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
+                    Batch 2 ({detectedEp} → {detectedEp + 1})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setChapterRangeStart?.(detectedEp);
+                      setChapterRangeEnd?.(detectedEp + 2);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-mono cursor-pointer transition-all border ${
+                      chapterRangeStart === detectedEp && chapterRangeEnd === detectedEp + 2
+                        ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] font-bold shadow-sm"
+                        : "bg-[#1A1A1A] border-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] hover:border-[#383838]"
+                    }`}
+                  >
+                    Batch 3 ({detectedEp} → {detectedEp + 2})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setChapterRangeStart?.(detectedEp);
+                      setChapterRangeEnd?.(detectedEp + 4);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-mono cursor-pointer transition-all border ${
+                      chapterRangeStart === detectedEp && chapterRangeEnd === detectedEp + 4
+                        ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] font-bold shadow-sm"
+                        : "bg-[#1A1A1A] border-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] hover:border-[#383838]"
+                    }`}
+                  >
+                    Batch 5 ({detectedEp} → {detectedEp + 4})
+                  </button>
+                </>
               )}
             </div>
 
-            {/* Title Override & Review Mode — Perfectly Symmetrical 2-Column Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            {/* Dynamic Large Batch Alert */}
+            {isRangeTooLarge && !isInvalidInvertedRange && !isRangeMismatched && (
+              <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-800/40 text-xs text-amber-300 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <span>
+                  ⚠️ Large Batch: <strong>{totalBatchCount} episodes</strong> selected ({chapterRangeStart || detectedEp || 1} → {chapterRangeEnd}). Rendering large batches takes extended time.
+                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const start = chapterRangeStart || detectedEp || 1;
+                      setChapterRangeStart?.(start);
+                      setChapterRangeEnd?.(start + 2);
+                    }}
+                    className="px-2.5 py-1 rounded bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-[10px] cursor-pointer"
+                  >
+                    Cap to 3 ({chapterRangeStart || detectedEp} → {(chapterRangeStart || detectedEp || 1) + 2})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setChapterRangeStart?.(detectedEp || chapterRangeStart);
+                      setChapterRangeEnd?.(detectedEp || chapterRangeStart);
+                    }}
+                    className="px-2 py-1 rounded bg-amber-900/60 hover:bg-amber-800 text-white font-bold text-[10px] cursor-pointer"
+                  >
+                    Single Ep
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Inverted Range Error */}
+            {isInvalidInvertedRange && (
+              <div className="p-3 rounded-xl bg-red-950/50 border border-red-800/60 text-xs text-red-300 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <span>
+                  ❌ Invalid Range: "From Ep" ({chapterRangeStart}) cannot exceed "To Ep" ({chapterRangeEnd}).
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const temp = chapterRangeStart;
+                    setChapterRangeStart?.(chapterRangeEnd);
+                    setChapterRangeEnd?.(temp);
+                  }}
+                  className="px-2.5 py-1 rounded bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-[10px] cursor-pointer"
+                >
+                  Swap Numbers
+                </button>
+              </div>
+            )}
+
+            {/* Stepper inputs */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 flex items-center gap-2 h-11 px-3.5 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
+                <span className="text-xs font-mono font-bold text-[#9CA3AF] shrink-0">From Ep:</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={chapterRangeStart ?? ""}
+                  onChange={(e) => setChapterRangeStart?.(e.target.value ? parseInt(e.target.value) : undefined)}
+                  placeholder={detectedEp ? `${detectedEp}` : "1"}
+                  className="w-full bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#555] outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </div>
+
+              <span className="text-[#555] font-mono select-none">→</span>
+
+              <div className="flex-1 flex items-center gap-2 h-11 px-3.5 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
+                <span className="text-xs font-mono font-bold text-[#9CA3AF] shrink-0">To Ep:</span>
+                <input
+                  type="number"
+                  min={chapterRangeStart || 1}
+                  value={chapterRangeEnd ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value ? parseInt(e.target.value) : undefined;
+                    setChapterRangeEnd?.(val);
+                    if (val && !chapterRangeStart && detectedEp) {
+                      setChapterRangeStart?.(detectedEp);
+                    }
+                  }}
+                  placeholder={detectedEp ? `${detectedEp + 2}` : "3"}
+                  className="w-full bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#555] outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </div>
+            </div>
+
+            {/* Link & info */}
+            <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-[#202020]">
+              <span className="text-[11px] text-[#6B7280] font-mono">
+                {totalBatchCount > 1
+                  ? `Batch range: Episodes ${chapterRangeStart || detectedEp || 1} to ${chapterRangeEnd} (${totalBatchCount} chapters)`
+                  : `Targeting Episode ${chapterRangeStart || detectedEp || 1}`}
+              </span>
+              {url && (
+                <a
+                  href={`/chapter-scraper?url=${encodeURIComponent(url)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] font-mono text-[#3B82F6] hover:text-blue-400 flex items-center gap-1.5 transition-colors shrink-0"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>Browse in Scraper Studio</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* ── CARD 2: VIDEO FORMAT & DISTRIBUTION ────────────────────────────── */}
+        <section className="bg-[#181818]/90 border border-[#2A2A2A] rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
+          <div className="flex items-center gap-2.5 pb-3 border-b border-[#242424]">
+            <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
+              <Monitor className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-[#E5E5E5] tracking-tight">
+                2. Video Format &amp; Distribution
+              </h2>
+              <p className="text-[11px] text-[#9CA3AF]">
+                Configure target dimensions, voiceover language, and YouTube privacy
+              </p>
+            </div>
+          </div>
+
+          {/* Interactive Format Selection Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {/* Shorts 9:16 Card */}
+            <div
+              onClick={() => setVideoFormat("shorts")}
+              className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3.5 ${
+                videoFormat === "shorts"
+                  ? "bg-[#3B82F6]/10 border-[#3B82F6] shadow-md shadow-[#3B82F6]/10"
+                  : "bg-[#141414] border-[#2A2A2A] hover:border-[#383838] opacity-75 hover:opacity-100"
+              }`}
+            >
+              <div
+                className={`p-2.5 rounded-lg shrink-0 ${
+                  videoFormat === "shorts" ? "bg-[#3B82F6] text-white" : "bg-[#222] text-[#9CA3AF]"
+                }`}
+              >
+                <Smartphone className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#E5E5E5]">Shorts (9:16)</span>
+                  {videoFormat === "shorts" && (
+                    <span className="w-2 h-2 rounded-full bg-[#3B82F6] " />
+                  )}
+                </div>
+                <p className="text-[11px] text-[#9CA3AF] mt-0.5 leading-snug">
+                  Vertical format optimized for YouTube Shorts, Reels &amp; TikTok
+                </p>
+                <span className="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-mono bg-[#1E1E1E] text-[#60A5FA] border border-[#2F2F2F]">
+                  1080 × 1920
+                </span>
+              </div>
+            </div>
+
+            {/* 16:9 Landscape Card */}
+            <div
+              onClick={() => setVideoFormat("landscape")}
+              className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3.5 ${
+                videoFormat === "landscape"
+                  ? "bg-[#3B82F6]/10 border-[#3B82F6] shadow-md shadow-[#3B82F6]/10"
+                  : "bg-[#141414] border-[#2A2A2A] hover:border-[#383838] opacity-75 hover:opacity-100"
+              }`}
+            >
+              <div
+                className={`p-2.5 rounded-lg shrink-0 ${
+                  videoFormat === "landscape" ? "bg-[#3B82F6] text-white" : "bg-[#222] text-[#9CA3AF]"
+                }`}
+              >
+                <Monitor className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#E5E5E5]">16:9 Landscape</span>
+                  {videoFormat === "landscape" && (
+                    <span className="w-2 h-2 rounded-full bg-[#3B82F6] " />
+                  )}
+                </div>
+                <p className="text-[11px] text-[#9CA3AF] mt-0.5 leading-snug">
+                  Full widescreen standard video for desktop &amp; TV viewers
+                </p>
+                <span className="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-mono bg-[#1E1E1E] text-[#60A5FA] border border-[#2F2F2F]">
+                  1920 × 1080
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Language & Privacy Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-[#3B82F6]" />
+                Script Language
+              </label>
+              <CyberSelect
+                value={language}
+                onChange={setLanguage}
+                options={LANGUAGE_OPTIONS}
+                variant="blue"
+                size="lg"
+                searchable={false}
+                className="[&>button]:!bg-[#121212] [&>button]:!border-[#2F2F2F] [&>button]:!h-[44px] [&>button]:!text-xs"
+                placeholder="Select script language..."
+                ariaLabel="Select script language"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-[#3B82F6]" />
+                YouTube Privacy
+              </label>
+              <CyberSelect
+                value={privacyStatus}
+                onChange={(val) => setPrivacyStatus(val as PrivacyStatus)}
+                options={PRIVACY_OPTIONS}
+                variant="blue"
+                size="lg"
+                searchable={false}
+                className="[&>button]:!bg-[#121212] [&>button]:!border-[#2F2F2F] [&>button]:!h-[44px] [&>button]:!text-xs"
+                placeholder="Select privacy..."
+                ariaLabel="Select YouTube privacy"
+              />
+            </div>
+          </div>
+
+          {/* ── Multi-Platform Publishing Targets & Smart Scheduler ── */}
+          <div className="pt-3 border-t border-[#242424] space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <span className="text-xs font-mono font-bold text-[#E5E5E5] flex items-center gap-1.5">
+                <Share2 className="w-3.5 h-3.5 text-[#3B82F6]" />
+                Simultaneous Distribution Channels
+              </span>
+              <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+                <Check className="w-3 h-3" /> Auto 9:16 Cross-Broadcast
+              </span>
+            </div>
+
+            {/* Platform Badges */}
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { id: "youtube", label: "YouTube Shorts", tag: "YT" },
+                { id: "tiktok", label: "TikTok Direct", tag: "TT" },
+                { id: "instagram", label: "Instagram Reels", tag: "IG" },
+              ].map((plat) => {
+                const isActive = targetPlatforms.includes(plat.id);
+                return (
+                  <button
+                    key={plat.id}
+                    type="button"
+                    onClick={() => {
+                      if (isActive && targetPlatforms.length > 1) {
+                        setTargetPlatforms(targetPlatforms.filter((p) => p !== plat.id));
+                      } else if (!isActive) {
+                        setTargetPlatforms([...targetPlatforms, plat.id]);
+                      }
+                    }}
+                    className={`py-2 px-2.5 rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all border ${
+                      isActive
+                        ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] shadow-sm shadow-blue-500/10"
+                        : "bg-[#141414] border-[#2A2A2A] text-neutral-400 hover:text-white hover:border-[#383838]"
+                    }`}
+                  >
+                    <span>{isActive ? "✓" : "+"}</span>
+                    <span className="truncate">{plat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Scheduler & A/B Testing Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              {/* Smart Peak Hour Scheduler */}
+              <div className="p-3 rounded-xl bg-[#141414] border border-[#242424] flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-mono font-bold text-[#E5E5E5] flex items-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 text-amber-400" />
+                    Smart Peak Scheduler
+                  </div>
+                  <div className="text-[10px] text-neutral-400 font-mono">
+                    {scheduleMode === "peak_hour" ? "Auto-queue at 7:30 PM (Peak)" : "Instant publish on finish"}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setScheduleMode(scheduleMode === "peak_hour" ? "instant" : "peak_hour")
+                  }
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold cursor-pointer transition-all border ${
+                    scheduleMode === "peak_hour"
+                      ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                      : "bg-[#202020] text-neutral-400 border-[#303030]"
+                  }`}
+                >
+                  {scheduleMode === "peak_hour" ? "Peak 7:30 PM" : "Instant"}
+                </button>
+              </div>
+
+              {/* AI Thumbnail A/B Testing Toggle */}
+              <div className="p-3 rounded-xl bg-[#141414] border border-[#242424] flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-mono font-bold text-[#E5E5E5] flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                    AI Thumbnail A/B Test
+                  </div>
+                  <div className="text-[10px] text-neutral-400 font-mono">
+                    3 Visual Variants with CTR Scores
+                  </div>
+                </div>
+
+                <div
+                  onClick={() => setEnableABTesting(!enableABTesting)}
+                  className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
+                    enableABTesting ? "bg-[#3B82F6]" : "bg-[#262626] border border-[#3A3A3A]"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-md transition duration-200 ${
+                      enableABTesting ? "translate-x-4.5" : "translate-x-0.5"
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── CARD 3: CHARACTER VOICE CASTING ───────────────────────────────── */}
+        <section className="bg-[#181818]/90 border border-[#2A2A2A] rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#242424]">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                <Users className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-[#E5E5E5] tracking-tight">
+                  3. Character Voice Continuity Casting
+                </h2>
+                <p className="text-[11px] text-[#9CA3AF]">
+                  Lock neural voices to character roles across panels and scenes
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-mono text-emerald-400 w-fit">
+              <Volume2 className="w-3 h-3" />
+              <span>Zero Random Voices</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Mic className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  Cinematic Narrator
+                </span>
+                <span className="text-[10px] text-[#60A5FA]">Exposition &amp; Story</span>
+              </label>
+              <CyberSelect
+                value={narratorVoice}
+                onChange={(v) => {
+                  setNarratorVoice?.(v);
+                  setVoice(v);
+                }}
+                options={NARRATOR_VOICES}
+                variant="blue"
+                size="lg"
+                searchable={false}
+                className="[&>button]:!bg-[#121212] [&>button]:!border-[#2F2F2F] [&>button]:!h-[44px] [&>button]:!text-xs"
+                placeholder="Select narrator voice..."
+                ariaLabel="Select narrator voice"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  Lead Protagonist (MC)
+                </span>
+                <span className="text-[10px] text-[#60A5FA]">Character Dialogue</span>
+              </label>
+              <CyberSelect
+                value={protagonistVoice}
+                onChange={(v) => setProtagonistVoice?.(v)}
+                options={PROTAGONIST_VOICES}
+                variant="blue"
+                size="lg"
+                searchable={false}
+                className="[&>button]:!bg-[#121212] [&>button]:!border-[#2F2F2F] [&>button]:!h-[44px] [&>button]:!text-xs"
+                placeholder="Select protagonist voice..."
+                ariaLabel="Select protagonist voice"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* ── CARD 4: ADVANCED PRODUCTION CONTROLS (COLLAPSIBLE) ─────────────── */}
+        <section className="bg-[#181818]/60 border border-[#242424] rounded-2xl p-4 sm:p-5 transition-all">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full flex items-center justify-between text-xs font-mono text-[#9CA3AF] hover:text-[#E5E5E5] transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-[#3B82F6]" />
+              <span className="font-bold uppercase tracking-wider">Advanced Production Controls</span>
+            </div>
+            {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+
+          {showAdvanced && (
+            <div className="mt-4 pt-4 border-t border-[#242424] grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
+              {/* Custom Title */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
+                <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
-                  <span>Custom Title Override</span>
+                  Custom Title Override
                 </label>
                 <div className="flex items-center h-11 px-3.5 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
                   <input
                     type="text"
                     value={titleOverride ?? ""}
                     onChange={(e) => setTitleOverride?.(e.target.value)}
-                    placeholder="Optional custom title..."
-                    className="w-full bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#525252] outline-none"
+                    placeholder="Auto-generated from chapter title..."
+                    className="w-full bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#555] outline-none"
                   />
                 </div>
               </div>
 
+              {/* Review Checkpoint Switch */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center justify-between">
+                <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-[#3B82F6]" />
-                    <span>Pipeline Control</span>
+                    Review Checkpoint
                   </span>
                   <span className="text-[10px] text-[#60A5FA] font-mono">Human-in-the-Loop</span>
                 </label>
                 <div
                   onClick={() => setReviewMode?.(!reviewMode)}
                   className="flex items-center justify-between h-11 px-3.5 bg-[#121212] hover:bg-[#161616] border border-[#2F2F2F] hover:border-[#3B82F6]/40 rounded-xl cursor-pointer transition-all select-none shadow-sm"
-                  title="Toggle review checkpoint before final video render & upload"
+                  title="Pause execution to preview panels and audio before final render & upload"
                 >
                   <div className="text-left">
-                    <div className="text-xs font-mono font-bold text-[#E5E5E5]">Review Checkpoint</div>
-                    <div className="text-[10px] text-[#9CA3AF]">Pause before render &amp; upload</div>
+                    <div className="text-xs font-mono font-bold text-[#E5E5E5]">Pause Before Publish</div>
+                    <div className="text-[10px] text-[#888]">Review video timeline before release</div>
                   </div>
                   <div
                     className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200 ease-in-out ${
@@ -651,36 +811,185 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </section>
       </div>
 
-      {/* ── BIG GLOWING ACTION BUTTON ───────────────────────────────────────── */}
-      <div className="pt-2">
-        <button
-          type="button"
-          onClick={onLaunch}
-          disabled={isLoading || !url.trim() || isInvalidInvertedRange}
-          className={`w-full h-12 sm:h-13 py-3.5 px-6 rounded-xl text-white font-black text-xs sm:text-sm tracking-wider uppercase font-mono flex items-center justify-center gap-3 shadow-lg active:scale-[0.99] transition-all border ${
-            isInvalidInvertedRange
-              ? "bg-red-900/60 border-red-700/60 text-red-200 cursor-not-allowed"
-              : "bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#2563EB] hover:to-[#1E40AF] shadow-[0_0_24px_rgba(59,130,246,0.25)] hover:shadow-[0_0_36px_rgba(59,130,246,0.4)] border-[#60A5FA]/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          }`}
-        >
-          {isLoading ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Launching Autonomous Agent Pipeline...</span>
-            </>
-          ) : isInvalidInvertedRange ? (
-            <span>Fix Chapter Range: "From Ep" ({chapterRangeStart}) cannot exceed "To Ep" ({chapterRangeEnd})</span>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4 text-white" />
-              <span>Launch Autonomous Agent &amp; Publish to YouTube</span>
-            </>
-          )}
-        </button>
+      {/* ──────────────────────────────────────────────────────────────────────────
+          RIGHT COLUMN: The Sticky Blueprint & Action Panel (35-40% width)
+          ────────────────────────────────────────────────────────────────────────── */}
+      <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-6 space-y-4">
+        <div className="bg-[#181818]/95 border border-[#2F2F2F] rounded-2xl p-5 sm:p-6 shadow-2xl backdrop-blur space-y-5">
+          {/* Blueprint Header */}
+          <div className="flex items-center justify-between pb-3.5 border-b border-[#242424]">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-blue-500/10 text-[#3B82F6] border border-blue-500/20">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#E5E5E5]">
+                Pipeline Blueprint
+              </span>
+            </div>
+
+            {url.trim() ? (
+              <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Ready to Launch
+              </span>
+            ) : (
+              <span className="text-[10px] font-mono text-[#888] bg-[#141414] border border-[#262626] px-2 py-0.5 rounded-full">
+                Awaiting URL
+              </span>
+            )}
+          </div>
+
+          {/* Visual Aspect Ratio Mini Mockup */}
+          <div className="p-4 rounded-xl bg-[#121212] border border-[#242424] flex items-center justify-center min-h-[130px] relative overflow-hidden">
+            {videoFormat === "shorts" ? (
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-28 rounded-lg border-2 border-[#3B82F6]/60 bg-[#1A1A1A] p-1 flex flex-col justify-between ">
+                  <div className="w-full h-8 rounded bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-[8px] text-blue-300 font-mono font-bold">
+                    Panel
+                  </div>
+                  <div className="w-full h-8 rounded bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-[8px] text-purple-300 font-mono font-bold">
+                    Dub
+                  </div>
+                  <div className="w-full h-2 rounded bg-neutral-800" />
+                </div>
+                <div className="text-left space-y-1">
+                  <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Smartphone className="w-3.5 h-3.5 text-[#3B82F6]" />
+                    Vertical 9:16
+                  </div>
+                  <div className="text-[11px] text-[#9CA3AF]">Smart Panel Cropping</div>
+                  <div className="text-[10px] text-[#60A5FA] font-mono">1080 × 1920 HD</div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2.5">
+                <div className="w-44 h-22 rounded-lg border-2 border-[#3B82F6]/60 bg-[#1A1A1A] p-1.5 flex items-center justify-between gap-1.5 ">
+                  <div className="flex-1 h-full rounded bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-[9px] text-blue-300 font-mono font-bold">
+                    Left Panel
+                  </div>
+                  <div className="flex-1 h-full rounded bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-[9px] text-purple-300 font-mono font-bold">
+                    Right Panel
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-[#9CA3AF]">
+                  <span className="font-bold text-white flex items-center gap-1">
+                    <Monitor className="w-3.5 h-3.5 text-[#3B82F6]" />
+                    Widescreen 16:9
+                  </span>
+                  <span className="text-[10px] text-[#60A5FA] font-mono">1920 × 1080 Full HD</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Configuration Parameters Checklist */}
+          <div className="space-y-2 text-xs font-mono">
+            <div className="flex items-center justify-between py-1 border-b border-[#222]">
+              <span className="text-[#888]">Target Chapters</span>
+              <span className="text-[#E5E5E5] font-bold">
+                {totalBatchCount > 1
+                  ? `Ep ${chapterRangeStart || detectedEp || 1} → ${chapterRangeEnd} (${totalBatchCount} eps)`
+                  : `Episode ${chapterRangeStart || detectedEp || 1}`}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between py-1 border-b border-[#222]">
+              <span className="text-[#888]">Language</span>
+              <span className="text-[#E5E5E5] font-semibold">{currentLangLabel}</span>
+            </div>
+
+            <div className="flex items-center justify-between py-1 border-b border-[#222]">
+              <span className="text-[#888]">Narrator Voice</span>
+              <span className="text-[#60A5FA] font-semibold">{currentNarratorLabel}</span>
+            </div>
+
+            <div className="flex items-center justify-between py-1 border-b border-[#222]">
+              <span className="text-[#888]">Lead MC Voice</span>
+              <span className="text-[#93C5FD] font-semibold">{currentProtagonistLabel}</span>
+            </div>
+
+            <div className="flex items-center justify-between py-1 border-b border-[#222]">
+              <span className="text-[#888]">Platforms</span>
+              <span className="text-white font-bold uppercase text-[11px]">
+                {targetPlatforms.map((p) => (p === "youtube" ? "YT" : p === "tiktok" ? "TT" : "IG")).join(" • ")}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between py-1 border-b border-[#222]">
+              <span className="text-[#888]">Timing</span>
+              <span className={scheduleMode === "peak_hour" ? "text-amber-400 font-bold" : "text-[#E5E5E5]"}>
+                {scheduleMode === "peak_hour" ? "Peak 7:30 PM 🔥" : "Instant Release"}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between py-1 border-b border-[#222]">
+              <span className="text-[#888]">A/B Thumbnails</span>
+              <span className={enableABTesting ? "text-purple-400 font-bold" : "text-[#888]"}>
+                {enableABTesting ? "3 Variants (CTR Scored)" : "Single"}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between py-1">
+              <span className="text-[#888]">Checkpoint</span>
+              <span className={reviewMode ? "text-[#60A5FA] font-semibold" : "text-[#888]"}>
+                {reviewMode ? "Enabled (Pause & Review)" : "Instant Auto-Pilot"}
+              </span>
+            </div>
+          </div>
+
+          {/* 5-Stage Mini Pipeline Breadcrumb */}
+          <div className="p-3 rounded-xl bg-[#121212] border border-[#242424] space-y-2">
+            <div className="text-[10px] font-mono uppercase text-[#888] font-bold">
+              Automated 5-Stage Pipeline
+            </div>
+            <div className="flex items-center justify-between text-[10px] font-mono text-[#9CA3AF]">
+              <span className="text-white font-bold">1. Scrape</span>
+              <span>→</span>
+              <span>2. Crop</span>
+              <span>→</span>
+              <span>3. Dub</span>
+              <span>→</span>
+              <span>4. Render</span>
+              <span>→</span>
+              <span className="text-[#60A5FA]">5. Publish</span>
+            </div>
+          </div>
+
+          {/* ── BIG PRIMARY LAUNCH BUTTON ── */}
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={onLaunch}
+              disabled={isLoading || !url.trim() || isInvalidInvertedRange}
+              className={`w-full py-4 px-5 rounded-xl text-white font-black text-xs sm:text-sm tracking-wider uppercase font-mono flex items-center justify-center gap-2.5 shadow-xl transition-all border active:scale-[0.99] cursor-pointer ${
+                isInvalidInvertedRange
+                  ? "bg-red-900/60 border-red-700/60 text-red-200 cursor-not-allowed"
+                  : "bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#2563EB] hover:to-[#1E40AF]   border-[#60A5FA]/30 disabled:opacity-40 disabled:cursor-not-allowed"
+              }`}
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Launching Agent Pipeline...</span>
+                </>
+              ) : isInvalidInvertedRange ? (
+                <span>Fix Chapter Order ({chapterRangeStart} &gt; {chapterRangeEnd})</span>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4 text-white fill-white" />
+                  <span>Launch Autonomous Agent</span>
+                </>
+              )}
+            </button>
+            <p className="text-[10px] text-center text-[#6B7280] font-mono mt-2">
+              Zero-touch workflow: Scrapes, dubs &amp; publishes to YouTube
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

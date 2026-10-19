@@ -168,10 +168,10 @@
 @keyframes pulse-glow {
   0%,
   100% {
-    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+    opacity: 0.8;
   }
   50% {
-    box-shadow: 0 0 25px rgba(139, 92, 246, 0.45);
+    opacity: 1;
   }
 }
 
@@ -245,17 +245,14 @@
   0% {
     width: 0%;
     opacity: 1;
-    box-shadow: 0 0 12px rgba(59, 130, 246, 1), 0 0 24px rgba(34, 211, 238, 0.8);
   }
   60% {
     width: 75%;
     opacity: 1;
-    box-shadow: 0 0 16px rgba(59, 130, 246, 1), 0 0 32px rgba(34, 211, 238, 0.9);
   }
   100% {
     width: 100%;
     opacity: 0;
-    box-shadow: none;
   }
 }
 
@@ -473,7 +470,6 @@
   50% {
     transform: translateY(-24px) rotate(180deg) scale(1.15);
     opacity: 0.95;
-    filter: drop-shadow(0 0 16px rgba(236, 72, 153, 0.9));
   }
   100% {
     transform: translateY(0px) rotate(360deg) scale(1);

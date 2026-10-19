@@ -25,6 +25,9 @@ import YouTubePlaylistsManager from "@/features/creative/youtube/components/YouT
 import YouTubeTopProgressBar from "@/features/creative/youtube/components/YouTubeTopProgressBar";
 import YouTubeCreatePlaylistPanel from "@/features/creative/youtube/components/YouTubeCreatePlaylistPanel";
 import YouTubeStudioPage from "./YouTubeStudioPage";
+import MultiPlatformBroadcastPanel from "@/features/creative/youtube/components/MultiPlatformBroadcastPanel";
+import SmartContentScheduler from "@/features/creative/youtube/components/SmartContentScheduler";
+import ThumbnailABTestingStudio from "@/features/creative/youtube/components/ThumbnailABTestingStudio";
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 import { useYouTubePublisher } from "@/features/creative/youtube/hooks/useYouTubePublisher";
@@ -42,6 +45,9 @@ interface YouTubePageProps {
 
 type AppTab =
   | "home"
+  | "multi_platform"
+  | "scheduler"
+  | "ab_testing"
   | "videos"
   | "shorts"
   | "playlists"
@@ -357,6 +363,44 @@ const YouTubePage = React.memo(
                 onViewComments={handleViewComments}
                 onNavigateTab={(t) => handleTabChange(t as AppTab)}
               />
+            </div>
+          )}
+
+          {/* TAB: MULTI-PLATFORM DIRECT PUBLISHING */}
+          {visitedTabs.has("multi_platform") && (
+            <div
+              className={
+                activeTab === "multi_platform"
+                  ? "block animate-fade-in"
+                  : "hidden"
+              }
+            >
+              <MultiPlatformBroadcastPanel
+                videoUrl={effectiveVideoUrl}
+                videoTitle={effectiveTitle}
+              />
+            </div>
+          )}
+
+          {/* TAB: SMART CONTENT SCHEDULER & CALENDAR */}
+          {visitedTabs.has("scheduler") && (
+            <div
+              className={
+                activeTab === "scheduler" ? "block animate-fade-in" : "hidden"
+              }
+            >
+              <SmartContentScheduler />
+            </div>
+          )}
+
+          {/* TAB: AI THUMBNAIL A/B TESTING */}
+          {visitedTabs.has("ab_testing") && (
+            <div
+              className={
+                activeTab === "ab_testing" ? "block animate-fade-in" : "hidden"
+              }
+            >
+              <ThumbnailABTestingStudio seriesTitle={effectiveTitle} />
             </div>
           )}
 

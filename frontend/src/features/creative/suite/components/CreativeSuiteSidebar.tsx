@@ -194,11 +194,11 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
       ],
     },
     {
-      name: "Distribution",
+      name: "Distribution & Marketing",
       items: [
         {
           id: "youtube",
-          label: "YouTube Publisher",
+          label: "Multi-Platform Publisher",
           icon: Youtube,
           path: "/creative-suite/youtube",
           requiresPanels: false,

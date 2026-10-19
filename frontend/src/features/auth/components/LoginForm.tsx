@@ -429,7 +429,7 @@ export default function LoginPage({
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] text-white font-bold py-3.5 rounded-xl shadow-[0_12px_28px_rgba(59,130,246,0.35)] hover:shadow-[0_16px_36px_rgba(59,130,246,0.45)] active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
+                    className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] text-white font-bold py-3.5 rounded-xl  active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
                   >
                     {isLoading ? (
                       <>

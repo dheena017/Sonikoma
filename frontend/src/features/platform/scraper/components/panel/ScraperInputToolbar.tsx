@@ -325,7 +325,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         />
 
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-2 bg-[#0c0e14]/98 backdrop-blur-xl border border-[#1e2332] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_20px_rgba(37,99,235,0.15)] z-[1000] overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150">
+          <div className="absolute left-0 right-0 top-full mt-2 bg-[#0c0e14]/98 backdrop-blur-xl border border-[#1e2332] rounded-2xl z-[1000] overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150">
             <div className="px-4 py-3 border-b border-[#181a24] bg-[#090b10] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#38bdf8]" />
@@ -523,7 +523,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                     : menuAnchor.rect.bottom + 6,
                 left: Math.max(12, menuAnchor.rect.right - 144),
               }}
-              className="w-36 bg-[#16161D] border border-[#2F2F3D] rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.9),0_0_20px_rgba(59,130,246,0.25)] py-1.5 z-[100000] animate-in fade-in-0 zoom-in-95 duration-100 select-none"
+              className="w-36 bg-[#16161D] border border-[#2F2F3D] rounded-xl py-1.5 z-[100000] animate-in fade-in-0 zoom-in-95 duration-100 select-none"
             >
               <button
                 type="button"

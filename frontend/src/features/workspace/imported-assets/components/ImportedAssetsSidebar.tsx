@@ -180,7 +180,7 @@ export const ImportedAssetsSidebar: React.FC<ImportedAssetsSidebarProps> = ({
               key={`ep-sidebar-${originalIdx}`}
               className={`group/ep flex flex-col p-2.5 rounded-xl border transition-all ${
                 isSelected
-                  ? "bg-[#181926]/90 border-[#3B82F6]/60 shadow-[0_0_15px_rgba(59,130,246,0.15)]"
+                  ? "bg-[#181926]/90 border-[#3B82F6]/60 "
                   : "bg-neutral-900/40 border-neutral-850 hover:border-neutral-700 hover:bg-neutral-900/80"
               }`}
             >

@@ -83,7 +83,7 @@ export default function DeleteConfirmModal({
           <button
             type="button"
             onClick={handleConfirmClick}
-            className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-550 hover:to-rose-550 text-white font-bold rounded-xl text-xs tracking-wide transition-all active:scale-95 shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] flex items-center justify-center gap-1.5 cursor-pointer"
+            className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-550 hover:to-rose-550 text-white font-bold rounded-xl text-xs tracking-wide transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Trash2 className="h-3.5 w-3.5" />
             <span>{confirmText}</span>

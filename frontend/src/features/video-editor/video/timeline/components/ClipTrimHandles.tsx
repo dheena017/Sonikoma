@@ -19,25 +19,25 @@ const colorMap = {
   purple: {
     baseBorder: "border-[#60A5FA]/30",
     hoverBg: "bg-[#2A2A2A]",
-    activeGlow: "shadow-[0_0_14px_rgba(192,132,252,1)] bg-[#2A2A2A]",
+    activeGlow: " bg-[#2A2A2A]",
     iconColor: "text-[#3B82F6]",
   },
   indigo: {
     baseBorder: "border-[#3B82F6]/40",
     hoverBg: "bg-[#3B82F6]",
-    activeGlow: "shadow-[0_0_14px_rgba(129,140,248,1)] bg-[#3B82F6]/20",
+    activeGlow: " bg-[#3B82F6]/20",
     iconColor: "text-neutral-200",
   },
   cyan: {
     baseBorder: "border-blue-400/30",
     hoverBg: "bg-[#3B82F6]",
-    activeGlow: "shadow-[0_0_14px_rgba(103,232,249,1)] bg-blue-500",
+    activeGlow: " bg-blue-500",
     iconColor: "text-neutral-200",
   },
   emerald: {
     baseBorder: "border-emerald-400/30",
     hoverBg: "bg-emerald-600",
-    activeGlow: "shadow-[0_0_14px_rgba(52,211,153,1)] bg-emerald-500",
+    activeGlow: " bg-emerald-500",
     iconColor: "text-emerald-200",
   },
 };

@@ -235,7 +235,7 @@ export default function SeriesEditModal({
             <button
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#2563EB] to-[#4F46E5] hover:from-[#3B82F6] hover:to-[#6366F1] border border-[#60A5FA]/30 text-white text-xs font-extrabold uppercase tracking-wider shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)] transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#2563EB] to-[#4F46E5] hover:from-[#3B82F6] hover:to-[#6366F1] border border-[#60A5FA]/30 text-white text-xs font-extrabold uppercase tracking-wider transition-all cursor-pointer active:scale-95 disabled:opacity-50"
             >
               {isSaving ? (
                 <>

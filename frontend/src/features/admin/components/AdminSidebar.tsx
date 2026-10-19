@@ -210,7 +210,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                     <div
                       className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
                         active
-                          ? "h-5 bg-[#2A2A2A] shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
+                          ? "h-5 bg-[#2A2A2A]  opacity-100"
                           : "h-0 bg-transparent opacity-0"
                       }`}
                     />
@@ -254,7 +254,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             navigateTo("/dashboard");
             onClose();
           }}
-          className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-500 text-white text-xs font-black tracking-widest uppercase transition-all  hover: active:scale-95 border border-[#60A5FA]/40 cursor-pointer font-sans"
+          className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-500 text-white text-xs font-black tracking-widest uppercase transition-all hover: active:scale-95 border border-[#60A5FA]/40 cursor-pointer font-sans"
         >
           <ArrowLeft className="w-4 h-4 shrink-0 stroke-[2.5]" />
           <span>RETURN TO APP</span>

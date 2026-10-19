@@ -99,7 +99,7 @@ function PanelCard({
   const aspectRatioBadgeClass = React.useMemo(() => {
     switch (aspectRatioLabel) {
       case "Too Tall Strip":
-        return "bg-rose-950/40 border-rose-800/40 text-rose-350 shadow-[0_0_8px_rgba(239,68,68,0.15)] animate-pulse";
+        return "bg-rose-950/40 border-rose-800/40 text-rose-350  animate-pulse";
       case "Tall Strip":
         return "bg-blue-950/40 border-blue-500/30 text-blue-400";
       case "Landscape":

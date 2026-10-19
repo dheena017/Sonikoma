@@ -918,7 +918,7 @@ export default function YouTubeChannelModal({
                       onClick={() => setSelectedId(ch.id)}
                       className={`group relative w-full p-4 rounded-2xl border transition-all cursor-pointer text-left overflow-hidden ${
                         isSelected
-                          ? "bg-gradient-to-r from-red-950/40 via-neutral-900/80 to-[#2A2A2A] border-red-600/80 shadow-[0_4px_25px_rgba(239,68,68,0.18)] ring-1 ring-red-500/40"
+                          ? "bg-gradient-to-r from-red-950/40 via-neutral-900/80 to-[#2A2A2A] border-red-600/80  ring-1 ring-red-500/40"
                           : "bg-neutral-900/60 border-neutral-800/80 hover:bg-neutral-900 hover:border-neutral-700 hover:shadow-md"
                       }`}
                     >
@@ -1160,7 +1160,7 @@ export default function YouTubeChannelModal({
             <button
               onClick={handleConnect}
               disabled={!selectedId || isSaving || channels.length === 0}
-              className="relative group flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-red-600 via-[#2A2A2A] to-pink-600 hover:from-red-500 hover:via-blue-500 hover:to-pink-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs rounded-xl transition-all shadow-[0_4px_20px_rgba(239,68,68,0.3)] border border-red-500/40 cursor-pointer font-mono overflow-hidden"
+              className="relative group flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-red-600 via-[#2A2A2A] to-pink-600 hover:from-red-500 hover:via-blue-500 hover:to-pink-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs rounded-xl transition-all border border-red-500/40 cursor-pointer font-mono overflow-hidden"
             >
               {/* Shimmer Effect */}
               <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />

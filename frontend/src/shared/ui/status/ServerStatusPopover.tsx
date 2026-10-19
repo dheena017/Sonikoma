@@ -290,7 +290,7 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
                       item.ok
-                        ? "bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)] animate-pulse"
+                        ? "bg-cyan-400  animate-pulse"
                         : "bg-neutral-600"
                     }`}
                   />

@@ -209,7 +209,7 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
       className={`absolute pointer-events-auto transition-[border-color,box-shadow,background-color] select-none ${
         showPanelBoxes
           ? isSelected
-            ? `border-2 ${borderClass} ${activeTheme.borderActive} shadow-[0_0_0_1.5px_rgba(0,0,0,0.95),0_0_15px_rgba(16,185,129,0.4)] ring-1 ring-emerald-400/60 z-20`
+            ? `border-2 ${borderClass} ${activeTheme.borderActive} shadow-[0_0_0_1.5px_rgba(0,0,0,0.95)] ring-1 ring-emerald-400/60 z-20`
             : isHovered
             ? `border-2 ${borderClass} ${activeTheme.borderActive} shadow-[0_0_0_1px_rgba(0,0,0,0.9)] z-15`
             : `border ${borderClass} border-emerald-400/70 shadow-[0_0_0_1px_rgba(0,0,0,0.85)] z-10`

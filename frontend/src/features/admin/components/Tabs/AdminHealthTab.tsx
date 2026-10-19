@@ -90,7 +90,7 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
           <div
             className={`w-3 h-3 rounded-full ${
               isOperational
-                ? "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)] animate-pulse"
+                ? "bg-emerald-500  animate-pulse"
                 : "bg-amber-500"
             }`}
           />
@@ -551,7 +551,7 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
                   <span
                     className={`w-2 h-2 rounded-full ${
                       provider.active
-                        ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"
+                        ? "bg-emerald-400 "
                         : "bg-neutral-700"
                     }`}
                   />

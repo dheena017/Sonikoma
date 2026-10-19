@@ -61,7 +61,7 @@ const SAMPLE_URLS = [
     thumbnail: "/demo-action-hero.jpg",
     platform: "MangaDex",
     glowColor:
-      "hover:border-neutral-700 hover:shadow-blue-500/20 active:border-blue-400",
+      "hover:border-neutral-700 active:border-blue-400",
   },
   {
     name: "Lore Olympus",
@@ -71,7 +71,7 @@ const SAMPLE_URLS = [
     thumbnail: "/demo-romance.jpg",
     platform: "Webtoon",
     glowColor:
-      "hover:border-pink-500 hover:shadow-pink-500/20 active:border-pink-400",
+      "hover:border-pink-500 active:border-pink-400",
   },
   {
     name: "Omniscient Reader",
@@ -81,7 +81,7 @@ const SAMPLE_URLS = [
     thumbnail: "/demo-monarch.jpg",
     platform: "Webtoon",
     glowColor:
-      "hover:border-emerald-500 hover:shadow-emerald-500/20 active:border-emerald-400",
+      "hover:border-emerald-500 active:border-emerald-400",
   },
   {
     name: "Cyberpunk Blade",
@@ -91,7 +91,7 @@ const SAMPLE_URLS = [
     thumbnail: "/demo-cyberpunk.jpg",
     platform: "Webtoon",
     glowColor:
-      "hover:border-cyan-500 hover:shadow-cyan-500/20 active:border-cyan-400",
+      "hover:border-cyan-500 active:border-cyan-400",
   },
 ];
 
@@ -641,7 +641,7 @@ export default function LandingPage({
                     <button
                       disabled={isNavigating}
                       onClick={() => handleAction(onGetStarted)}
-                      className="group relative flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 disabled:opacity-60 text-white font-black text-sm rounded-2xl transition-all duration-300 active:scale-[0.98] cursor-pointer shrink-0 shadow-[0_18px_40px_rgba(59,130,246,0.35)] hover:shadow-[0_22px_50px_rgba(59,130,246,0.45)] select-none"
+                      className="group relative flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 disabled:opacity-60 text-white font-black text-sm rounded-2xl transition-all duration-300 active:scale-[0.98] cursor-pointer shrink-0  select-none"
                     >
                       {isNavigating ? (
                         <>

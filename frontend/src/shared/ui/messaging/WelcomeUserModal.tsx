@@ -331,7 +331,7 @@ export function WelcomeUserModal({
             <button
               type="button"
               onClick={handleConfirmClick}
-              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 hover:from-purple-500 hover:via-blue-500 hover:to-cyan-400 text-white font-bold rounded-xl text-xs tracking-wide transition-all active:scale-95 shadow-[0_0_20px_-5px_rgba(168,85,247,0.5)] flex items-center justify-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 hover:from-purple-500 hover:via-blue-500 hover:to-cyan-400 text-white font-bold rounded-xl text-xs tracking-wide transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>{confirmText}</span>
               <ArrowRight className="h-3.5 w-3.5" />

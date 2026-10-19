@@ -358,7 +358,7 @@ export default function ProfileAccountTab({
               <button
                 type="button"
                 disabled
-                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 text-xs font-bold tracking-wider select-none shadow-[0_0_10px_-2px_rgba(52,211,153,0.2)] cursor-not-allowed"
+                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 text-xs font-bold tracking-wider select-none cursor-not-allowed"
               >
                 <span className="text-emerald-400">✓</span>
                 <span>Saved</span>

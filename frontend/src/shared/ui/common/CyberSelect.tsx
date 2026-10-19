@@ -60,7 +60,7 @@ const VARIANT_STYLES: Record<
   }
 > = {
   red: {
-    openBorder: "border-red-500/80 shadow-[0_0_20px_rgba(239,68,68,0.25)] ring-1 ring-red-500/30",
+    openBorder: "border-red-500/80  ring-1 ring-red-500/30",
     focusBorder: "focus:border-red-500/60",
     text: "text-red-200",
     activeText: "text-white font-bold",
@@ -69,7 +69,7 @@ const VARIANT_STYLES: Record<
     check: "text-red-400",
   },
   purple: {
-    openBorder: "border-purple-500/80 shadow-[0_0_20px_rgba(168,85,247,0.25)] ring-1 ring-purple-500/30",
+    openBorder: "border-purple-500/80  ring-1 ring-purple-500/30",
     focusBorder: "focus:border-purple-500/60",
     text: "text-purple-200",
     activeText: "text-purple-200 font-bold",
@@ -78,7 +78,7 @@ const VARIANT_STYLES: Record<
     check: "text-purple-400",
   },
   cyan: {
-    openBorder: "border-cyan-500/80 shadow-[0_0_20px_rgba(6,182,212,0.25)] ring-1 ring-cyan-500/30",
+    openBorder: "border-cyan-500/80  ring-1 ring-cyan-500/30",
     focusBorder: "focus:border-cyan-500/60",
     text: "text-cyan-200",
     activeText: "text-cyan-200 font-bold",
@@ -87,7 +87,7 @@ const VARIANT_STYLES: Record<
     check: "text-cyan-400",
   },
   amber: {
-    openBorder: "border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.25)] ring-1 ring-amber-500/30",
+    openBorder: "border-amber-500/80  ring-1 ring-amber-500/30",
     focusBorder: "focus:border-amber-500/60",
     text: "text-amber-200",
     activeText: "text-amber-200 font-bold",
@@ -96,7 +96,7 @@ const VARIANT_STYLES: Record<
     check: "text-amber-400",
   },
   emerald: {
-    openBorder: "border-emerald-500/80 shadow-[0_0_20px_rgba(16,185,129,0.25)] ring-1 ring-emerald-500/30",
+    openBorder: "border-emerald-500/80  ring-1 ring-emerald-500/30",
     focusBorder: "focus:border-emerald-500/60",
     text: "text-emerald-200",
     activeText: "text-emerald-200 font-bold",

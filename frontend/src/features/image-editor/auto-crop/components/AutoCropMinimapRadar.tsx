@@ -513,9 +513,9 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
                   }}
                   className={`absolute transition-all pointer-events-auto cursor-pointer rounded-[2px] ${
                     isSel
-                      ? "border-2 border-emerald-400 bg-emerald-400/35 z-25 shadow-[0_0_0_1px_rgba(0,0,0,0.9),0_0_10px_rgba(52,211,153,0.9)] ring-1 ring-white/70"
+                      ? "border-2 border-emerald-400 bg-emerald-400/35 z-25 shadow-[0_0_0_1px_rgba(0,0,0,0.9)] ring-1 ring-white/70"
                       : isHov
-                      ? "border-2 border-cyan-400 bg-cyan-400/20 z-15 shadow-[0_0_0_1px_rgba(0,0,0,0.8),0_0_6px_rgba(6,182,212,0.6)]"
+                      ? "border-2 border-cyan-400 bg-cyan-400/20 z-15 shadow-[0_0_0_1px_rgba(0,0,0,0.8)]"
                       : "border border-emerald-400/60 bg-emerald-500/[0.04] shadow-[0_0_0_1px_rgba(0,0,0,0.7)] hover:border-emerald-300 z-10"
                   }`}
                 >
@@ -613,7 +613,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
                 Math.min(40, scrollProgress.heightPct || 10)
               )}%`,
             }}
-            className="absolute inset-x-0.5 rounded-sm bg-emerald-400/80 border border-emerald-300 shadow-[0_0_6px_rgba(52,211,153,0.8)] pointer-events-none group-hover/rail:bg-emerald-300 transition-all"
+            className="absolute inset-x-0.5 rounded-sm bg-emerald-400/80 border border-emerald-300 pointer-events-none group-hover/rail:bg-emerald-300 transition-all"
           />
         </div>
       </div>

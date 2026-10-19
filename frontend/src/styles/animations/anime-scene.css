@@ -80,10 +80,9 @@
   pointer-events: none;
 }
 
-/* Soft Ambient Aurora Glows with Live Floating Animation */
+/* Soft Ambient Aurora Glows - Disabled */
 .anime-hero-aurora {
-  opacity: 0.6;
-  mix-blend-mode: screen;
+  display: none;
 }
 
 .anime-aurora-beam {

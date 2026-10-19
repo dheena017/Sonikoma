@@ -164,8 +164,8 @@ export default function ProfilePreferencesTab({
           via: "via-indigo-500/20",
           peerChecked: "peer-checked:bg-indigo-500",
           focusBorder: "focus:border-[#2F2F2F]",
-          shadowBtn: "shadow-[0_0_20px_rgba(99,102,241,0.3)]",
-          shadowBtnHover: "hover:shadow-[0_0_30px_rgba(99,102,241,0.5)]",
+          shadowBtn: "",
+          shadowBtnHover: "",
           shadowInset: "shadow-[inset_0_0_20px_rgba(99,102,241,0.1)]",
         };
       case "emerald":
@@ -178,8 +178,8 @@ export default function ProfilePreferencesTab({
           via: "via-emerald-500/20",
           peerChecked: "peer-checked:bg-emerald-500",
           focusBorder: "focus:border-emerald-500/50",
-          shadowBtn: "shadow-[0_0_20px_rgba(16,185,129,0.3)]",
-          shadowBtnHover: "hover:shadow-[0_0_30px_rgba(16,185,129,0.5)]",
+          shadowBtn: "",
+          shadowBtnHover: "",
           shadowInset: "shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]",
         };
       case "rose":
@@ -192,8 +192,8 @@ export default function ProfilePreferencesTab({
           via: "via-rose-500/20",
           peerChecked: "peer-checked:bg-rose-500",
           focusBorder: "focus:border-rose-500/50",
-          shadowBtn: "shadow-[0_0_20px_rgba(244,63,94,0.3)]",
-          shadowBtnHover: "hover:shadow-[0_0_30px_rgba(244,63,94,0.5)]",
+          shadowBtn: "",
+          shadowBtnHover: "",
           shadowInset: "shadow-[inset_0_0_20px_rgba(244,63,94,0.1)]",
         };
       case "amber":
@@ -206,8 +206,8 @@ export default function ProfilePreferencesTab({
           via: "via-amber-500/20",
           peerChecked: "peer-checked:bg-amber-500",
           focusBorder: "focus:border-amber-500/50",
-          shadowBtn: "shadow-[0_0_20px_rgba(245,158,11,0.3)]",
-          shadowBtnHover: "hover:shadow-[0_0_30px_rgba(245,158,11,0.5)]",
+          shadowBtn: "",
+          shadowBtnHover: "",
           shadowInset: "shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]",
         };
       case "cyan":
@@ -220,8 +220,8 @@ export default function ProfilePreferencesTab({
           via: "via-blue-500/20",
           peerChecked: "peer-checked:bg-blue-500",
           focusBorder: "focus:border-neutral-600",
-          shadowBtn: "shadow-[0_0_20px_rgba(6,182,212,0.3)]",
-          shadowBtnHover: "hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]",
+          shadowBtn: "",
+          shadowBtnHover: "",
           shadowInset: "shadow-[inset_0_0_20px_rgba(6,182,212,0.1)]",
         };
       case "purple":
@@ -236,7 +236,7 @@ export default function ProfilePreferencesTab({
           peerChecked: "peer-checked:bg-[#2A2A2A]",
           focusBorder: "focus:border-neutral-600",
           shadowBtn: "",
-          shadowBtnHover: "hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]",
+          shadowBtnHover: "",
           shadowInset: "shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]",
         };
     }

@@ -524,7 +524,7 @@ export default function CropCanvas({
                   }}
                   className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${
                     isSelected
-                      ? "border-[#60A5FA] bg-[#3B82F6]/10 z-30 shadow-[0_0_15px_rgba(139,92,246,0.2)]"
+                      ? "border-[#60A5FA] bg-[#3B82F6]/10 z-30 "
                       : "border-[#3B82F6]/40 bg-[#2A2A2A] hover:bg-[#3B82F6]/10 z-20"
                   }`}
                   style={{

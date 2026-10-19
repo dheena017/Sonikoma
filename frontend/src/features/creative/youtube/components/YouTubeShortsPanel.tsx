@@ -230,7 +230,7 @@ export default function YouTubeShortsPanel({
             <div
               key={short.id}
               onClick={() => setActiveReelIndex(idx)}
-              className="group relative aspect-[9/16] bg-neutral-950 rounded-3xl overflow-hidden border border-neutral-800/80 hover:border-red-500/70 shadow-xl hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-300 cursor-pointer flex flex-col justify-between"
+              className="group relative aspect-[9/16] bg-neutral-950 rounded-3xl overflow-hidden border border-neutral-800/80 hover:border-red-500/70 shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between"
             >
               {/* Thumbnail Image */}
               <img

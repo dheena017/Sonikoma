@@ -1164,7 +1164,7 @@ export default function VideoPreviewCinemaPlayer({
               />
             ) : panels.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 space-y-3 select-none z-20 my-auto animate-in fade-in-0 zoom-in-95 duration-200">
-                <div className="h-10 w-10 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6] shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+                <div className="h-10 w-10 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6] ">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div className="space-y-1 max-w-sm">
@@ -1179,7 +1179,7 @@ export default function VideoPreviewCinemaPlayer({
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 space-y-3 select-none z-20 my-auto animate-in fade-in-0 zoom-in-95 duration-200">
-                <div className="h-12 w-12 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6] shadow-[0_0_24px_rgba(59,130,246,0.25)]">
+                <div className="h-12 w-12 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6] ">
                   <Video className="h-5 w-5" />
                 </div>
                 <div className="space-y-1 max-w-sm">
@@ -1271,7 +1271,7 @@ export default function VideoPreviewCinemaPlayer({
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 space-y-3 select-none z-20 my-auto animate-in fade-in-0 zoom-in-95 duration-200">
-              <div className="h-10 w-10 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6] shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+              <div className="h-10 w-10 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6] ">
                 <Sparkles className="w-5 h-5" />
               </div>
               <div className="space-y-1 max-w-sm">

@@ -33,7 +33,7 @@ export default function PageNotFound({
         </div>
 
         {/* 404 Header Text with Gradient */}
-        <h1 className="relative z-10 font-sans font-extrabold text-8xl md:text-9xl tracking-tighter bg-gradient-to-r from-blue-400 via-fuchsia-400 to-indigo-400 bg-clip-text text-transparent select-none drop-shadow-[0_0_35px_rgba(168,85,247,0.35)] leading-none mb-4">
+        <h1 className="relative z-10 font-sans font-extrabold text-8xl md:text-9xl tracking-tighter bg-gradient-to-r from-blue-400 via-fuchsia-400 to-indigo-400 bg-clip-text text-transparent select-none leading-none mb-4">
           404
         </h1>
 

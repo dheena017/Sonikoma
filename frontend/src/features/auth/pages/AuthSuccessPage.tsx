@@ -216,7 +216,7 @@ export default function AuthSuccessPage({
             <div className="w-full space-y-2 pt-1">
               <div className="w-full h-2 bg-neutral-800/80 rounded-full overflow-hidden p-0.5 border border-neutral-700/40">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 transition-all duration-700 ease-out shadow-[0_0_12px_rgba(168,85,247,0.5)]"
+                  className="h-full rounded-full bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 transition-all duration-700 ease-out "
                   style={{ width: `${progress}%` }}
                 />
               </div>

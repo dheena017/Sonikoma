@@ -922,7 +922,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`px-3 py-1.5 rounded-xl transition-all text-xs font-medium whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                     isActive
-                      ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold shadow-[0_0_12px_rgba(59,130,246,0.35)]"
+                      ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold "
                       : "text-[#9CA3AF] bg-[#121212] border border-[#2F2F2F] hover:text-white hover:border-neutral-700 hover:bg-[#2A2A2A]"
                   }`}
                 >
