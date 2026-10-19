@@ -86,6 +86,28 @@ const PRIVACY_OPTIONS: CyberSelectOption[] = [
   { value: "private", label: "Private (Channel Only)" },
 ];
 
+const VIDEO_FORMAT_OPTIONS: CyberSelectOption[] = [
+  { value: "shorts", label: "Shorts (9:16) — Vertical Mobile (1080 × 1920)" },
+  { value: "landscape", label: "Landscape (16:9) — Widescreen Desktop/TV (1920 × 1080)" },
+];
+
+const DISTRIBUTION_OPTIONS: CyberSelectOption[] = [
+  { value: "all", label: "All Channels (YouTube + TikTok + Reels)" },
+  { value: "youtube", label: "YouTube Shorts Only" },
+  { value: "tiktok", label: "TikTok Direct Only" },
+  { value: "instagram", label: "Instagram Reels Only" },
+  { value: "yt_tiktok", label: "YouTube + TikTok Direct" },
+  { value: "yt_ig", label: "YouTube + Instagram Reels" },
+];
+
+const BATCH_MODE_OPTIONS: CyberSelectOption[] = [
+  { value: "single", label: "Single Episode" },
+  { value: "batch_2", label: "Batch: 2 Episodes" },
+  { value: "batch_3", label: "Batch: 3 Episodes" },
+  { value: "batch_5", label: "Batch: 5 Episodes" },
+  { value: "custom", label: "Custom Range (Manual)" },
+];
+
 export const AgentInputCard: React.FC<AgentInputCardProps> = ({
   url,
   setUrl,
@@ -117,6 +139,44 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
     "tiktok",
     "instagram",
   ]);
+
+  const currentDistributionValue = React.useMemo(() => {
+    const hasYT = targetPlatforms.includes("youtube");
+    const hasTT = targetPlatforms.includes("tiktok");
+    const hasIG = targetPlatforms.includes("instagram");
+    if (hasYT && hasTT && hasIG) return "all";
+    if (hasYT && hasTT && !hasIG) return "yt_tiktok";
+    if (hasYT && hasIG && !hasTT) return "yt_ig";
+    if (hasYT && !hasTT && !hasIG) return "youtube";
+    if (hasTT && !hasYT && !hasIG) return "tiktok";
+    if (hasIG && !hasYT && !hasTT) return "instagram";
+    return "all";
+  }, [targetPlatforms]);
+
+  const handleDistributionChange = (val: string) => {
+    switch (val) {
+      case "all":
+        setTargetPlatforms(["youtube", "tiktok", "instagram"]);
+        break;
+      case "youtube":
+        setTargetPlatforms(["youtube"]);
+        break;
+      case "tiktok":
+        setTargetPlatforms(["tiktok"]);
+        break;
+      case "instagram":
+        setTargetPlatforms(["instagram"]);
+        break;
+      case "yt_tiktok":
+        setTargetPlatforms(["youtube", "tiktok"]);
+        break;
+      case "yt_ig":
+        setTargetPlatforms(["youtube", "instagram"]);
+        break;
+      default:
+        setTargetPlatforms(["youtube"]);
+    }
+  };
 
   // Auto-detect chapter/episode number from target URL (e.g. episode_no=146)
   const detectedEp = React.useMemo(() => {
@@ -176,6 +236,44 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
     chapterRangeEnd && chapterRangeEnd >= (chapterRangeStart || detectedEp || 1)
       ? chapterRangeEnd - (chapterRangeStart || detectedEp || 1) + 1
       : 1;
+
+  const currentBatchMode = React.useMemo(() => {
+    const start = chapterRangeStart || detectedEp || 1;
+    const end = chapterRangeEnd || start;
+    const count = Math.max(1, end - start + 1);
+    if (!chapterRangeEnd || count === 1) return "single";
+    if (count === 2) return "batch_2";
+    if (count === 3) return "batch_3";
+    if (count === 5) return "batch_5";
+    return "custom";
+  }, [chapterRangeStart, chapterRangeEnd, detectedEp]);
+
+  const handleBatchModeChange = (val: string) => {
+    const start = chapterRangeStart || detectedEp || 1;
+    if (!chapterRangeStart && detectedEp) {
+      setChapterRangeStart?.(detectedEp);
+    }
+    switch (val) {
+      case "single":
+        setChapterRangeStart?.(start);
+        setChapterRangeEnd?.(start);
+        break;
+      case "batch_2":
+        setChapterRangeStart?.(start);
+        setChapterRangeEnd?.(start + 1);
+        break;
+      case "batch_3":
+        setChapterRangeStart?.(start);
+        setChapterRangeEnd?.(start + 2);
+        break;
+      case "batch_5":
+        setChapterRangeStart?.(start);
+        setChapterRangeEnd?.(start + 4);
+        break;
+      case "custom":
+        break;
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start text-left">
@@ -253,283 +351,206 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
             )}
           </div>
 
-          {/* Episode Batch Presets & Numeric Range */}
-          <div className="p-4 rounded-xl bg-[#141414] border border-[#242424] space-y-3.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-[#E5E5E5] flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
-                Chapter Batch Mode
-              </span>
-              <span className="text-[11px] text-[#6B7280] font-mono">
-                {totalBatchCount > 1 ? `${totalBatchCount} Episodes Selected` : "Single Episode Mode"}
-              </span>
+          {/* Episode Batch Mode & Range Selection */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  Episode Batch Mode
+                </span>
+                <span className="text-[10px] text-[#60A5FA] font-mono">
+                  {totalBatchCount > 1 ? `${totalBatchCount} Episodes` : "Single Ep"}
+                </span>
+              </label>
+              <CyberSelect
+                value={currentBatchMode}
+                onChange={handleBatchModeChange}
+                options={BATCH_MODE_OPTIONS}
+                variant="blue"
+                size="lg"
+                searchable={false}
+                className="[&>button]:!bg-[#121212] [&>button]:!border-[#2F2F2F] [&>button]:!h-[44px] [&>button]:!text-xs"
+                placeholder="Select batch mode..."
+                ariaLabel="Select batch mode"
+              />
             </div>
 
-            {/* Quick Presets Pills */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  Target Episode Range
+                </span>
+                {url && (
+                  <a
+                    href={`/chapter-scraper?url=${encodeURIComponent(url)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] font-mono text-[#3B82F6] hover:text-blue-400 flex items-center gap-1"
+                  >
+                    <span>Scraper Studio</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                )}
+              </label>
+
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-1.5 h-[44px] px-3 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
+                  <span className="text-[11px] font-mono font-semibold text-[#888] shrink-0">From</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={chapterRangeStart ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value ? parseInt(e.target.value) : undefined;
+                      setChapterRangeStart?.(val);
+                    }}
+                    placeholder={detectedEp ? `${detectedEp}` : "1"}
+                    className="w-full bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#555] outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+
+                <span className="text-[#555] font-mono select-none">→</span>
+
+                <div className="flex-1 flex items-center gap-1.5 h-[44px] px-3 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
+                  <span className="text-[11px] font-mono font-semibold text-[#888] shrink-0">To</span>
+                  <input
+                    type="number"
+                    min={chapterRangeStart || 1}
+                    value={chapterRangeEnd ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value ? parseInt(e.target.value) : undefined;
+                      setChapterRangeEnd?.(val);
+                      if (val && !chapterRangeStart && detectedEp) {
+                        setChapterRangeStart?.(detectedEp);
+                      }
+                    }}
+                    placeholder={detectedEp ? `${detectedEp + 2}` : "3"}
+                    className="w-full bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#555] outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Dynamic Large Batch Alert */}
+          {isRangeTooLarge && !isInvalidInvertedRange && !isRangeMismatched && (
+            <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-800/40 text-xs text-amber-300 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <span>
+                ⚠️ Large Batch: <strong>{totalBatchCount} episodes</strong> selected ({chapterRangeStart || detectedEp || 1} → {chapterRangeEnd}).
+              </span>
               <button
                 type="button"
                 onClick={() => {
-                  if (detectedEp) {
-                    setChapterRangeStart?.(detectedEp);
-                    setChapterRangeEnd?.(detectedEp);
-                  } else {
-                    setChapterRangeStart?.(undefined);
-                    setChapterRangeEnd?.(undefined);
-                  }
+                  const start = chapterRangeStart || detectedEp || 1;
+                  setChapterRangeStart?.(start);
+                  setChapterRangeEnd?.(start + 2);
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono cursor-pointer transition-all border ${
-                  (!chapterRangeEnd || chapterRangeEnd === (chapterRangeStart || detectedEp))
-                    ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] font-bold shadow-sm"
-                    : "bg-[#1A1A1A] border-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] hover:border-[#383838]"
-                }`}
+                className="px-2.5 py-1 rounded bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-[10px] cursor-pointer shrink-0"
               >
-                Single Ep {detectedEp ? `(${detectedEp})` : ""}
+                Cap to 3
               </button>
-
-              {detectedEp && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setChapterRangeStart?.(detectedEp);
-                      setChapterRangeEnd?.(detectedEp + 1);
-                    }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-mono cursor-pointer transition-all border ${
-                      chapterRangeStart === detectedEp && chapterRangeEnd === detectedEp + 1
-                        ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] font-bold shadow-sm"
-                        : "bg-[#1A1A1A] border-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] hover:border-[#383838]"
-                    }`}
-                  >
-                    Batch 2 ({detectedEp} → {detectedEp + 1})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setChapterRangeStart?.(detectedEp);
-                      setChapterRangeEnd?.(detectedEp + 2);
-                    }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-mono cursor-pointer transition-all border ${
-                      chapterRangeStart === detectedEp && chapterRangeEnd === detectedEp + 2
-                        ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] font-bold shadow-sm"
-                        : "bg-[#1A1A1A] border-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] hover:border-[#383838]"
-                    }`}
-                  >
-                    Batch 3 ({detectedEp} → {detectedEp + 2})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setChapterRangeStart?.(detectedEp);
-                      setChapterRangeEnd?.(detectedEp + 4);
-                    }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-mono cursor-pointer transition-all border ${
-                      chapterRangeStart === detectedEp && chapterRangeEnd === detectedEp + 4
-                        ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] font-bold shadow-sm"
-                        : "bg-[#1A1A1A] border-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] hover:border-[#383838]"
-                    }`}
-                  >
-                    Batch 5 ({detectedEp} → {detectedEp + 4})
-                  </button>
-                </>
-              )}
             </div>
+          )}
 
-            {/* Dynamic Large Batch Alert */}
-            {isRangeTooLarge && !isInvalidInvertedRange && !isRangeMismatched && (
-              <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-800/40 text-xs text-amber-300 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                <span>
-                  ⚠️ Large Batch: <strong>{totalBatchCount} episodes</strong> selected ({chapterRangeStart || detectedEp || 1} → {chapterRangeEnd}). Rendering large batches takes extended time.
-                </span>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const start = chapterRangeStart || detectedEp || 1;
-                      setChapterRangeStart?.(start);
-                      setChapterRangeEnd?.(start + 2);
-                    }}
-                    className="px-2.5 py-1 rounded bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-[10px] cursor-pointer"
-                  >
-                    Cap to 3 ({chapterRangeStart || detectedEp} → {(chapterRangeStart || detectedEp || 1) + 2})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setChapterRangeStart?.(detectedEp || chapterRangeStart);
-                      setChapterRangeEnd?.(detectedEp || chapterRangeStart);
-                    }}
-                    className="px-2 py-1 rounded bg-amber-900/60 hover:bg-amber-800 text-white font-bold text-[10px] cursor-pointer"
-                  >
-                    Single Ep
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Inverted Range Error */}
-            {isInvalidInvertedRange && (
-              <div className="p-3 rounded-xl bg-red-950/50 border border-red-800/60 text-xs text-red-300 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <span>
-                  ❌ Invalid Range: "From Ep" ({chapterRangeStart}) cannot exceed "To Ep" ({chapterRangeEnd}).
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const temp = chapterRangeStart;
-                    setChapterRangeStart?.(chapterRangeEnd);
-                    setChapterRangeEnd?.(temp);
-                  }}
-                  className="px-2.5 py-1 rounded bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-[10px] cursor-pointer"
-                >
-                  Swap Numbers
-                </button>
-              </div>
-            )}
-
-            {/* Stepper inputs */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1 flex items-center gap-2 h-11 px-3.5 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
-                <span className="text-xs font-mono font-bold text-[#9CA3AF] shrink-0">From Ep:</span>
-                <input
-                  type="number"
-                  min={1}
-                  value={chapterRangeStart ?? ""}
-                  onChange={(e) => setChapterRangeStart?.(e.target.value ? parseInt(e.target.value) : undefined)}
-                  placeholder={detectedEp ? `${detectedEp}` : "1"}
-                  className="w-full bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#555] outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-              </div>
-
-              <span className="text-[#555] font-mono select-none">→</span>
-
-              <div className="flex-1 flex items-center gap-2 h-11 px-3.5 bg-[#121212] border border-[#2F2F2F] rounded-xl focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6]/30 transition-all">
-                <span className="text-xs font-mono font-bold text-[#9CA3AF] shrink-0">To Ep:</span>
-                <input
-                  type="number"
-                  min={chapterRangeStart || 1}
-                  value={chapterRangeEnd ?? ""}
-                  onChange={(e) => {
-                    const val = e.target.value ? parseInt(e.target.value) : undefined;
-                    setChapterRangeEnd?.(val);
-                    if (val && !chapterRangeStart && detectedEp) {
-                      setChapterRangeStart?.(detectedEp);
-                    }
-                  }}
-                  placeholder={detectedEp ? `${detectedEp + 2}` : "3"}
-                  className="w-full bg-transparent text-xs font-mono text-[#E5E5E5] placeholder-[#555] outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-              </div>
-            </div>
-
-            {/* Link & info */}
-            <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-[#202020]">
-              <span className="text-[11px] text-[#6B7280] font-mono">
-                {totalBatchCount > 1
-                  ? `Batch range: Episodes ${chapterRangeStart || detectedEp || 1} to ${chapterRangeEnd} (${totalBatchCount} chapters)`
-                  : `Targeting Episode ${chapterRangeStart || detectedEp || 1}`}
+          {/* Inverted Range Error */}
+          {isInvalidInvertedRange && (
+            <div className="p-3 rounded-xl bg-red-950/50 border border-red-800/60 text-xs text-red-300 font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <span>
+                ❌ Invalid Range: "From Ep" ({chapterRangeStart}) cannot exceed "To Ep" ({chapterRangeEnd}).
               </span>
-              {url && (
-                <a
-                  href={`/chapter-scraper?url=${encodeURIComponent(url)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[11px] font-mono text-[#3B82F6] hover:text-blue-400 flex items-center gap-1.5 transition-colors shrink-0"
-                >
-                  <BookOpen className="w-3.5 h-3.5" />
-                  <span>Browse in Scraper Studio</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  const temp = chapterRangeStart;
+                  setChapterRangeStart?.(chapterRangeEnd);
+                  setChapterRangeEnd?.(temp);
+                }}
+                className="px-2.5 py-1 rounded bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-[10px] cursor-pointer shrink-0"
+              >
+                Swap Numbers
+              </button>
             </div>
-          </div>
+          )}
         </section>
 
         {/* ── CARD 2: VIDEO FORMAT & DISTRIBUTION ────────────────────────────── */}
         <section className="bg-[#181818]/90 border border-[#2A2A2A] rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
-          <div className="flex items-center gap-2.5 pb-3 border-b border-[#242424]">
-            <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
-              <Monitor className="w-4 h-4" />
+          <div className="flex items-center justify-between pb-3 border-b border-[#242424]">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                <Monitor className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-[#E5E5E5] tracking-tight">
+                  2. Video Format &amp; Distribution
+                </h2>
+                <p className="text-[11px] text-[#9CA3AF]">
+                  Configure video dimensions, distribution channels, language, and privacy
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-sm font-bold text-[#E5E5E5] tracking-tight">
-                2. Video Format &amp; Distribution
-              </h2>
-              <p className="text-[11px] text-[#9CA3AF]">
-                Configure target dimensions, voiceover language, and YouTube privacy
-              </p>
-            </div>
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-[11px] font-mono text-purple-300">
+              {videoFormat === "shorts" ? "9:16 Vertical" : "16:9 Full HD"}
+            </span>
           </div>
 
-          {/* Interactive Format Selection Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            {/* Shorts 9:16 Card */}
-            <div
-              onClick={() => setVideoFormat("shorts")}
-              className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3.5 ${
-                videoFormat === "shorts"
-                  ? "bg-[#3B82F6]/10 border-[#3B82F6] shadow-md shadow-[#3B82F6]/10"
-                  : "bg-[#141414] border-[#2A2A2A] hover:border-[#383838] opacity-75 hover:opacity-100"
-              }`}
-            >
-              <div
-                className={`p-2.5 rounded-lg shrink-0 ${
-                  videoFormat === "shorts" ? "bg-[#3B82F6] text-white" : "bg-[#222] text-[#9CA3AF]"
-                }`}
-              >
-                <Smartphone className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#E5E5E5]">Shorts (9:16)</span>
-                  {videoFormat === "shorts" && (
-                    <span className="w-2 h-2 rounded-full bg-[#3B82F6] " />
+          {/* 2x2 Grid of Dropdowns */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Video Format Dropdown */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  {videoFormat === "shorts" ? (
+                    <Smartphone className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  ) : (
+                    <Monitor className="w-3.5 h-3.5 text-[#3B82F6]" />
                   )}
-                </div>
-                <p className="text-[11px] text-[#9CA3AF] mt-0.5 leading-snug">
-                  Vertical format optimized for YouTube Shorts, Reels &amp; TikTok
-                </p>
-                <span className="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-mono bg-[#1E1E1E] text-[#60A5FA] border border-[#2F2F2F]">
-                  1080 × 1920
+                  Video Aspect Ratio
                 </span>
-              </div>
+                <span className="text-[10px] text-[#60A5FA] font-mono">
+                  {videoFormat === "shorts" ? "1080 × 1920" : "1920 × 1080"}
+                </span>
+              </label>
+              <CyberSelect
+                value={videoFormat}
+                onChange={(val) => setVideoFormat(val as VideoFormat)}
+                options={VIDEO_FORMAT_OPTIONS}
+                variant="blue"
+                size="lg"
+                searchable={false}
+                className="[&>button]:!bg-[#121212] [&>button]:!border-[#2F2F2F] [&>button]:!h-[44px] [&>button]:!text-xs"
+                placeholder="Select video format..."
+                ariaLabel="Select video format"
+              />
             </div>
 
-            {/* 16:9 Landscape Card */}
-            <div
-              onClick={() => setVideoFormat("landscape")}
-              className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3.5 ${
-                videoFormat === "landscape"
-                  ? "bg-[#3B82F6]/10 border-[#3B82F6] shadow-md shadow-[#3B82F6]/10"
-                  : "bg-[#141414] border-[#2A2A2A] hover:border-[#383838] opacity-75 hover:opacity-100"
-              }`}
-            >
-              <div
-                className={`p-2.5 rounded-lg shrink-0 ${
-                  videoFormat === "landscape" ? "bg-[#3B82F6] text-white" : "bg-[#222] text-[#9CA3AF]"
-                }`}
-              >
-                <Monitor className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#E5E5E5]">16:9 Landscape</span>
-                  {videoFormat === "landscape" && (
-                    <span className="w-2 h-2 rounded-full bg-[#3B82F6] " />
-                  )}
-                </div>
-                <p className="text-[11px] text-[#9CA3AF] mt-0.5 leading-snug">
-                  Full widescreen standard video for desktop &amp; TV viewers
-                </p>
-                <span className="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-mono bg-[#1E1E1E] text-[#60A5FA] border border-[#2F2F2F]">
-                  1920 × 1080
+            {/* Distribution Channels Dropdown */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Share2 className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  Distribution Target
                 </span>
-              </div>
+                <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+                  <Check className="w-3 h-3" /> Auto Broadcast
+                </span>
+              </label>
+              <CyberSelect
+                value={currentDistributionValue}
+                onChange={handleDistributionChange}
+                options={DISTRIBUTION_OPTIONS}
+                variant="blue"
+                size="lg"
+                searchable={false}
+                className="[&>button]:!bg-[#121212] [&>button]:!border-[#2F2F2F] [&>button]:!h-[44px] [&>button]:!text-xs"
+                placeholder="Select distribution..."
+                ariaLabel="Select distribution target"
+              />
             </div>
-          </div>
 
-          {/* Language & Privacy Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            {/* Script Language Dropdown */}
             <div className="space-y-1.5">
               <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center gap-1.5">
                 <Globe className="w-3.5 h-3.5 text-[#3B82F6]" />
@@ -548,6 +569,7 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
               />
             </div>
 
+            {/* YouTube Privacy Dropdown */}
             <div className="space-y-1.5">
               <label className="text-xs font-mono font-bold text-[#9CA3AF] flex items-center gap-1.5">
                 <Eye className="w-3.5 h-3.5 text-[#3B82F6]" />
@@ -564,51 +586,6 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
                 placeholder="Select privacy..."
                 ariaLabel="Select YouTube privacy"
               />
-            </div>
-          </div>
-
-          {/* ── Multi-Platform Publishing Targets & Smart Scheduler ── */}
-          <div className="pt-3 border-t border-[#242424] space-y-3.5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <span className="text-xs font-mono font-bold text-[#E5E5E5] flex items-center gap-1.5">
-                <Share2 className="w-3.5 h-3.5 text-[#3B82F6]" />
-                Simultaneous Distribution Channels
-              </span>
-              <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
-                <Check className="w-3 h-3" /> Auto 9:16 Cross-Broadcast
-              </span>
-            </div>
-
-            {/* Platform Badges */}
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { id: "youtube", label: "YouTube Shorts", tag: "YT" },
-                { id: "tiktok", label: "TikTok Direct", tag: "TT" },
-                { id: "instagram", label: "Instagram Reels", tag: "IG" },
-              ].map((plat) => {
-                const isActive = targetPlatforms.includes(plat.id);
-                return (
-                  <button
-                    key={plat.id}
-                    type="button"
-                    onClick={() => {
-                      if (isActive && targetPlatforms.length > 1) {
-                        setTargetPlatforms(targetPlatforms.filter((p) => p !== plat.id));
-                      } else if (!isActive) {
-                        setTargetPlatforms([...targetPlatforms, plat.id]);
-                      }
-                    }}
-                    className={`py-2 px-2.5 rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all border ${
-                      isActive
-                        ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#93C5FD] shadow-sm shadow-blue-500/10"
-                        : "bg-[#141414] border-[#2A2A2A] text-neutral-400 hover:text-white hover:border-[#383838]"
-                    }`}
-                  >
-                    <span>{isActive ? "✓" : "+"}</span>
-                    <span className="truncate">{plat.label}</span>
-                  </button>
-                );
-              })}
             </div>
           </div>
         </section>
@@ -721,6 +698,13 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
                 {totalBatchCount > 1
                   ? `Ep ${chapterRangeStart || detectedEp || 1} → ${chapterRangeEnd} (${totalBatchCount} eps)`
                   : `Episode ${chapterRangeStart || detectedEp || 1}`}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between py-1 border-b border-[#222]">
+              <span className="text-[#888]">Video Format</span>
+              <span className="text-[#E5E5E5] font-semibold">
+                {videoFormat === "shorts" ? "Vertical 9:16 (Shorts)" : "Widescreen 16:9"}
               </span>
             </div>
 
