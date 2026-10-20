@@ -9,10 +9,6 @@ import {
   ListVideo,
   BarChart3,
   Video,
-  Radio,
-  Sparkles,
-  Share2,
-  Calendar,
 } from "lucide-react";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 import YouTubeOfficialLogo from "./YouTubeOfficialLogo";
@@ -31,9 +27,6 @@ interface YouTubeAppNavBarProps {
 
 const TABS = [
   { id: "home", label: "Home", icon: Home },
-  { id: "multi_platform", label: "Multi-Platform", icon: Share2 },
-  { id: "scheduler", label: "Scheduler", icon: Calendar },
-  { id: "ab_testing", label: "A/B Testing", icon: Sparkles },
   { id: "videos", label: "Videos", icon: Film },
   { id: "shorts", label: "Shorts", icon: Flame },
   { id: "playlists", label: "Playlists", icon: ListVideo },
@@ -60,7 +53,7 @@ export default function YouTubeAppNavBar({
           {/* Brand */}
           <div className="flex items-center gap-2.5 group cursor-default select-none">
             <div className="p-1.5 px-2 bg-[#121212] group-hover:bg-[#1E1E1E] rounded-xl flex items-center justify-center border border-[#2F2F2F] group-hover:border-red-500/30 transition-all shadow-sm shrink-0">
-              <YouTubeOfficialLogo className="w-6 h-4.5 " />
+              <YouTubeOfficialLogo className="w-6 h-4.5" />
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
@@ -81,8 +74,8 @@ export default function YouTubeAppNavBar({
           <Tooltip
             text={
               isConnected
-                ? `Active: ${channelTitle || "Channel"} — Click to switch`
-                : "Connect YouTube channel"
+                ?`Active: ${channelTitle ||"Channel"} — Click to switch`
+                :"Connect YouTube channel"
             }
             placement="bottom"
           >
@@ -98,34 +91,33 @@ export default function YouTubeAppNavBar({
                     alt={channelTitle}
                     referrerPolicy="no-referrer"
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display =
-                        "none";
+                      (e.currentTarget as HTMLImageElement).style.display ="none";
                     }}
                     className="w-6 h-6 rounded-full object-cover border border-[#2F2F2F] group-hover:border-red-500/50 transition-colors shadow-sm"
                   />
                 ) : (
                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-600 via-rose-600 to-red-700 flex items-center justify-center font-bold text-white text-[9.5px] font-sans uppercase shadow-sm">
-                    {channelTitle ? channelTitle.charAt(0) : "Y"}
+                    {channelTitle ? channelTitle.charAt(0) :"Y"}
                   </div>
                 )}
                 {/* Live connection dot */}
                 <span
                   className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-2 ring-[#0A0A0A] ${
                     isConnected
-                      ? "bg-emerald-400 "
-                      : "bg-amber-400"
+                      ?"bg-emerald-400"
+                      :"bg-amber-400"
                   }`}
                 />
               </div>
 
               <div className="text-left min-w-0 max-w-[120px] sm:max-w-[160px] md:max-w-[210px]">
                 <div className="text-xs font-semibold text-[#E5E5E5] leading-tight truncate group-hover:text-red-300 transition-colors">
-                  {isConnected ? channelTitle : "Connect Channel"}
+                  {isConnected ? channelTitle :"Connect Channel"}
                 </div>
                 <div className="text-[10px] text-[#9CA3AF] font-sans leading-tight truncate flex items-center gap-1">
                   <span>
                     {channelHandle ||
-                      (isConnected ? "Connected" : "Click to connect")}
+                      (isConnected ?"Connected" :"Click to connect")}
                   </span>
                 </div>
               </div>
@@ -147,13 +139,13 @@ export default function YouTubeAppNavBar({
                   onClick={() => onTabChange(tab.id)}
                   className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium font-sans transition-all duration-200 cursor-pointer select-none whitespace-nowrap ${
                     isActive
-                      ? "bg-red-600 text-white font-semibold shadow-sm border border-red-500/50"
-                      : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#1E1E1E] border border-transparent"
+                      ?"bg-red-600 text-white font-semibold shadow-sm border border-red-500/50"
+                      :"text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#1E1E1E] border border-transparent"
                   }`}
                 >
                   <Icon
                     className={`w-3.5 h-3.5 transition-transform ${
-                      isActive ? "scale-105 text-white" : "text-[#9CA3AF]"
+                      isActive ?"scale-105 text-white" :"text-[#9CA3AF]"
                     }`}
                   />
                   <span>{tab.label}</span>
@@ -174,7 +166,7 @@ export default function YouTubeAppNavBar({
           >
             <button
               onClick={onPublish}
-              className="group relative flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold font-sans rounded-xl shadow-md shadow-red-950/40 hover:shadow-red-900/60 border border-red-500/50 transition-all duration-300 cursor-pointer active:scale-95 overflow-hidden shrink-0 whitespace-nowrap"
+              className="group relative flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold font-sans rounded-xl shadow-md border border-red-500/50 transition-all duration-300 cursor-pointer active:scale-95 overflow-hidden shrink-0 whitespace-nowrap"
               aria-label="Publish Video"
             >
               {/* Shimmer reflection */}

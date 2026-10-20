@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { createPortal } from "react-dom";
+import React, { useState, useRef } from"react";
+import { createPortal } from"react-dom";
 import {
   X,
   Sparkles,
@@ -13,8 +13,8 @@ import {
   Flame,
   Layers,
   Volume2,
-} from "lucide-react";
-import { SonikomaLogo } from "@/shared/ui/branding";
+} from"lucide-react";
+import { SonikomaLogo } from"@/shared/ui/branding";
 
 export interface WelcomeUserModalProps {
   username?: string;
@@ -30,43 +30,43 @@ export interface WelcomeUserModalProps {
 
 const STARTER_TEMPLATES = [
   {
-    id: "action",
-    title: "Solo Hunter Action",
-    genre: "Shonen / Dungeon",
-    badge: "Most Popular",
-    badgeColor: "bg-blue-500/20 text-blue-300 border-blue-400/30",
-    image: "/demo-action-hero.jpg",
-    description: "High-intensity lightning auras & impact punch zoom",
+    id:"action",
+    title:"Solo Hunter Action",
+    genre:"Shonen / Dungeon",
+    badge:"Most Popular",
+    badgeColor:"bg-blue-500/20 text-blue-300 border-blue-400/30",
+    image:"/demo-action-hero.jpg",
+    description:"High-intensity lightning auras & impact punch zoom",
   },
   {
-    id: "fantasy",
-    title: "Celestial Sorcery",
-    genre: "Fantasy / Magic",
-    badge: "Trending",
-    badgeColor: "bg-purple-500/20 text-purple-300 border-purple-400/30",
-    image: "/voice-lyra.jpg",
-    description: "Ornate spell incantations & cinematic palace reveals",
+    id:"fantasy",
+    title:"Celestial Sorcery",
+    genre:"Fantasy / Magic",
+    badge:"Trending",
+    badgeColor:"bg-purple-500/20 text-purple-300 border-purple-400/30",
+    image:"/voice-lyra.jpg",
+    description:"Ornate spell incantations & cinematic palace reveals",
   },
   {
-    id: "cyberpunk",
-    title: "Neon Rain Katana",
-    genre: "Sci-Fi / Action",
-    badge: "Dialogue Heavy",
-    badgeColor: "bg-cyan-500/20 text-cyan-300 border-cyan-400/30",
-    image: "/demo-cyberpunk.jpg",
-    description: "Rapid dialogue cuts & synthwave rainy atmosphere",
+    id:"cyberpunk",
+    title:"Neon Rain Katana",
+    genre:"Sci-Fi / Action",
+    badge:"Dialogue Heavy",
+    badgeColor:"bg-cyan-500/20 text-cyan-300 border-cyan-400/30",
+    image:"/demo-cyberpunk.jpg",
+    description:"Rapid dialogue cuts & synthwave rainy atmosphere",
   },
 ];
 
 export function WelcomeUserModal({
   username,
-  title = username ? `Welcome, ${username}!` : "Welcome to Sonikoma Studio!",
-  message = "Transform static comics and webtoon panels into broadcast-ready animated videos with synchronized AI voice acting and camera motion.",
+  title = username ?`Welcome, ${username}!` :"Welcome to Sonikoma Studio!",
+  message ="Transform static comics and webtoon panels into broadcast-ready animated videos with synchronized AI voice acting and camera motion.",
   isOpen = true,
   onConfirm,
   onCancel,
-  confirmText = "Enter Studio",
-  cancelText = "Skip",
+  confirmText ="Enter Studio",
+  cancelText ="Skip",
   onSelectTemplate,
 }: WelcomeUserModalProps) {
   const isExecutingRef = useRef(false);
@@ -102,8 +102,6 @@ export function WelcomeUserModal({
 
       {/* Main Modal Card */}
       <div className="relative w-full max-w-2xl max-h-[92vh] bg-neutral-950/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
-        {/* Top accent glow line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-400 blur-[1px] z-30" />
 
         {/* HERO IMAGE BANNER HEADER */}
         <div className="relative h-44 sm:h-52 w-full overflow-hidden shrink-0 border-b border-white/10 select-none">
@@ -256,8 +254,8 @@ export function WelcomeUserModal({
                     onClick={() => setSelectedTemplate(tmpl.id)}
                     className={`relative p-2 rounded-2xl text-left transition-all border cursor-pointer overflow-hidden flex flex-col justify-between ${
                       isSelected
-                        ? "bg-purple-950/40 border-purple-500 ring-2 ring-purple-500/30 shadow-lg shadow-purple-500/10"
-                        : "bg-neutral-900/40 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/70"
+                        ?"bg-purple-950/40 border-purple-500 ring-2 ring-purple-500/30 shadow-lg"
+                        :"bg-neutral-900/40 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/70"
                     }`}
                   >
                     {/* Template Image Header */}

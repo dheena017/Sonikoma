@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Sparkles, Copy, Check, Loader2, RefreshCw } from "lucide-react";
+import React, { useState } from"react";
+import { Sparkles, Copy, Check, Loader2, RefreshCw } from"lucide-react";
 
 export interface VisualsTabProps {
   prompt: string;
@@ -12,7 +12,7 @@ export interface VisualsTabProps {
   isSynthesizingVisuals?: boolean;
   addNotification?: (
     message: string,
-    type: "success" | "error" | "info" | "warning"
+    type:"success" |"error" |"info" |"warning"
   ) => void;
 }
 
@@ -33,7 +33,7 @@ export const VisualsTab: React.FC<VisualsTabProps> = ({
     navigator.clipboard.writeText(prompt);
     setCopiedPrompt(true);
     setTimeout(() => setCopiedPrompt(false), 2000);
-    addNotification?.("Prompt copied to clipboard!", "info");
+    addNotification?.("Prompt copied to clipboard!","info");
   };
 
   return (
@@ -83,7 +83,7 @@ export const VisualsTab: React.FC<VisualsTabProps> = ({
               type="button"
               onClick={() => onRegenerateVisual(prompt)}
               disabled={isRegenerating || !prompt.trim()}
-              className="w-full py-3 px-4 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-mono font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-blue-500/20 active:scale-[0.99] border border-[#3B82F6]/50"
+              className="w-full py-3 px-4 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-mono font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-[0.99] border border-[#3B82F6]/50"
             >
               {isRegenerating ? (
                 <>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from"react";
 import {
   Sparkles,
   Check,
@@ -11,12 +11,12 @@ import {
   Globe2,
   SlidersHorizontal,
   TrendingUp,
-} from "lucide-react";
-import { GeneratedPanel } from "@/shared/types";
-import * as api from "@/shared/api";
-import { fetchWithAuth } from "@/shared/utils";
-import { Tooltip } from "@/shared/ui/common/TooltipPortal";
-import CyberSelect from "@/shared/ui/common/CyberSelect";
+} from"lucide-react";
+import { GeneratedPanel } from"@/shared/types";
+import * as api from"@/shared/api";
+import { fetchWithAuth } from"@/shared/utils";
+import { Tooltip } from"@/shared/ui/common/TooltipPortal";
+import CyberSelect from"@/shared/ui/common/CyberSelect";
 
 interface TranslationToolProps {
   panel: GeneratedPanel;
@@ -31,10 +31,10 @@ export type PanelTranslationToolProps = TranslationToolProps;
 
 
 const TONE_PRESETS = [
-  { id: "natural", label: "Natural Conversational", hint: "Everyday authentic dialogue" },
-  { id: "shonen", label: "Dynamic / Shonen", hint: "High-energy comic impact" },
-  { id: "sakuga", label: "Dramatic Sakuga", hint: "Poetic & cinematic tone" },
-  { id: "slang", label: "Colloquial / Slang", hint: "Modern street expressions" },
+  { id:"natural", label:"Natural Conversational", hint:"Everyday authentic dialogue" },
+  { id:"shonen", label:"Dynamic / Shonen", hint:"High-energy comic impact" },
+  { id:"sakuga", label:"Dramatic Sakuga", hint:"Poetic & cinematic tone" },
+  { id:"slang", label:"Colloquial / Slang", hint:"Modern street expressions" },
 ];
 
 export function TranslationTool({
@@ -46,7 +46,7 @@ export function TranslationTool({
   addNotification,
 }: TranslationToolProps) {
   const [lang, setLang] = useState("Spanish");
-  const [targetScope, setTargetScope] = useState<"dialogue" | "narrative">("dialogue");
+  const [targetScope, setTargetScope] = useState<"dialogue" |"narrative">("dialogue");
   const [selectedTone, setSelectedTone] = useState("natural");
 
   const [translating, setTranslating] = useState(false);
@@ -59,9 +59,9 @@ export function TranslationTool({
   const [appliedRecently, setAppliedRecently] = useState(false);
 
   // Derive source text based on active scope
-  const sourceText = targetScope === "dialogue"
-    ? (panel?.speech_text || "")
-    : (panel?.visual_description || "");
+  const sourceText = targetScope ==="dialogue"
+    ? (panel?.speech_text ||"")
+    : (panel?.visual_description ||"");
 
   // Update targetDraft when panel changes or targetScope toggles
   useEffect(() => {
@@ -71,9 +71,7 @@ export function TranslationTool({
 
   const handleTranslate = async () => {
     if (!sourceText.trim()) {
-      addNotification?.(
-        `No ${targetScope === "dialogue" ? "dialogue speech" : "narrative description"} found on this panel to translate.`,
-        "error"
+      addNotification?.(`No ${targetScope ==="dialogue" ?"dialogue speech" :"narrative description"} found on this panel to translate.`,"error"
       );
       return;
     }
@@ -87,16 +85,16 @@ export function TranslationTool({
         model: localStorage.getItem("ai_comic_model") || undefined,
       });
 
-      const translated = json.result?.translated_text || json.translated_text || "";
+      const translated = json.result?.translated_text || json.translated_text ||"";
       if (json.success && translated) {
         setTargetDraft(translated);
-        addNotification?.(`Translated to ${lang} successfully!`, "success");
+        addNotification?.(`Translated to ${lang} successfully!`,"success");
       } else {
-        addNotification?.(json.error || "Translation service did not return text.", "error");
+        addNotification?.(json.error ||"Translation service did not return text.","error");
       }
     } catch (e: any) {
       console.error("Translation error:", e);
-      addNotification?.(`Translation failed: ${e?.message || "Server error"}`, "error");
+      addNotification?.(`Translation failed: ${e?.message ||"Server error"}`,"error");
     } finally {
       setTranslating(false);
     }
@@ -105,7 +103,7 @@ export function TranslationTool({
   const handleApplyToStoryboard = () => {
     if (!targetDraft.trim()) return;
 
-    if (targetScope === "dialogue") {
+    if (targetScope ==="dialogue") {
       onUpdateDialogue(targetDraft);
     } else if (onUpdateNarrative) {
       onUpdateNarrative(targetDraft);
@@ -114,9 +112,7 @@ export function TranslationTool({
     setAppliedRecently(true);
     setTimeout(() => setAppliedRecently(false), 2500);
 
-    addNotification?.(
-      `Applied localized ${targetScope === "dialogue" ? "speech dialogue" : "narrative text"} to Panel storyboard!`,
-      "success"
+    addNotification?.(`Applied localized ${targetScope ==="dialogue" ?"speech dialogue" :"narrative text"} to Panel storyboard!`,"success"
     );
   };
 
@@ -133,7 +129,7 @@ export function TranslationTool({
         const item = panels[i];
         setBatchProgress({ current: i + 1, total: panels.length });
 
-        const itemSource = targetScope === "dialogue" ? item.speech_text : item.visual_description;
+        const itemSource = targetScope ==="dialogue" ? item.speech_text : item.visual_description;
         if (!itemSource || !itemSource.trim()) {
           updatedPanels.push(item);
           continue;
@@ -147,10 +143,10 @@ export function TranslationTool({
             model: localStorage.getItem("ai_comic_model") || undefined,
           });
 
-          const translated = json.result?.translated_text || json.translated_text || "";
+          const translated = json.result?.translated_text || json.translated_text ||"";
           if (json.success && translated) {
             successCount++;
-            if (targetScope === "dialogue") {
+            if (targetScope ==="dialogue") {
               updatedPanels.push({ ...item, speech_text: translated });
             } else {
               updatedPanels.push({ ...item, visual_description: translated });
@@ -171,19 +167,17 @@ export function TranslationTool({
       // If active panel was in this batch, sync local targetDraft
       const activeIdx = panels.findIndex((p) => p.id === panel.id);
       if (activeIdx !== -1 && updatedPanels[activeIdx]) {
-        const activeUpdated = targetScope === "dialogue"
+        const activeUpdated = targetScope ==="dialogue"
           ? updatedPanels[activeIdx].speech_text
           : updatedPanels[activeIdx].visual_description;
-        setTargetDraft(activeUpdated || "");
+        setTargetDraft(activeUpdated ||"");
       }
 
-      addNotification?.(
-        `Batch translated ${successCount} of ${panels.length} panels into ${lang}!`,
-        "success"
+      addNotification?.(`Batch translated ${successCount} of ${panels.length} panels into ${lang}!`,"success"
       );
     } catch (error) {
       console.error(error);
-      addNotification?.("Batch translation encountered an unexpected error.", "error");
+      addNotification?.("Batch translation encountered an unexpected error.","error");
     } finally {
       setBatchTranslating(false);
       setBatchProgress(null);
@@ -197,7 +191,7 @@ export function TranslationTool({
     navigator.clipboard.writeText(targetDraft);
     setCopiedTarget(true);
     setTimeout(() => setCopiedTarget(false), 2000);
-    addNotification?.("Copied localized text to clipboard!", "success");
+    addNotification?.("Copied localized text to clipboard!","success");
   };
 
   // Metrics
@@ -219,9 +213,9 @@ export function TranslationTool({
             <button
               onClick={() => setTargetScope("dialogue")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-bold transition-all cursor-pointer ${
-                targetScope === "dialogue"
-                  ? "bg-[#3B82F6] text-white shadow-md shadow-blue-500/20"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+                targetScope ==="dialogue"
+                  ?"bg-[#3B82F6] text-white shadow-md"
+                  :"text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               }`}
             >
               <MessageSquare className="w-3.5 h-3.5" />
@@ -230,9 +224,9 @@ export function TranslationTool({
             <button
               onClick={() => setTargetScope("narrative")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-bold transition-all cursor-pointer ${
-                targetScope === "narrative"
-                  ? "bg-[#3B82F6] text-white shadow-md shadow-blue-500/20"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+                targetScope ==="narrative"
+                  ?"bg-[#3B82F6] text-white shadow-md"
+                  :"text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               }`}
             >
               <Film className="w-3.5 h-3.5" />
@@ -241,7 +235,7 @@ export function TranslationTool({
           </div>
 
           <span className="text-[10px] font-mono text-neutral-400 hidden sm:inline">
-            Active: {targetScope === "dialogue" ? "Character Speech Bubbles" : "Scene Description"}
+            Active: {targetScope ==="dialogue" ?"Character Speech Bubbles" :"Scene Description"}
           </span>
         </div>
 
@@ -264,22 +258,22 @@ export function TranslationTool({
               size="md"
               searchable
               options={[
-                { value: "Spanish", label: "Spanish (Español)", description: "Neutral Spanish" },
-                { value: "Japanese", label: "Japanese (日本語)", description: "Authentic manga style" },
-                { value: "Korean", label: "Korean (한국어)", description: "Authentic webtoon style" },
-                { value: "Chinese", label: "Chinese (简体中文)", description: "Manhua localization" },
-                { value: "French", label: "French (Français)", description: "Standard French" },
-                { value: "German", label: "German (Deutsch)", description: "Standard German" },
-                { value: "Tamil", label: "Tamil (தமிழ்)", description: "Direct native localization" },
-                { value: "Hindi", label: "Hindi (हिन्दी)", description: "Devanagari localization" },
-                { value: "Portuguese", label: "Portuguese (Português)", description: "BR/PT localization" },
-                { value: "Italian", label: "Italian (Italiano)", description: "Standard Italian" },
-                { value: "Russian", label: "Russian (Русский)", description: "Standard Russian" },
-                { value: "Arabic", label: "Arabic (العربية)", description: "Modern standard Arabic" },
-                { value: "Indonesian", label: "Indonesian (Bahasa)", description: "Standard Indonesian" },
-                { value: "Vietnamese", label: "Vietnamese (Tiếng Việt)", description: "Standard Vietnamese" },
-                { value: "Thai", label: "Thai (ไทย)", description: "Standard Thai" },
-                { value: "English", label: "English", description: "Standard English" },
+                { value:"Spanish", label:"Spanish (Español)", description:"Neutral Spanish" },
+                { value:"Japanese", label:"Japanese (日本語)", description:"Authentic manga style" },
+                { value:"Korean", label:"Korean (한국어)", description:"Authentic webtoon style" },
+                { value:"Chinese", label:"Chinese (简体中文)", description:"Manhua localization" },
+                { value:"French", label:"French (Français)", description:"Standard French" },
+                { value:"German", label:"German (Deutsch)", description:"Standard German" },
+                { value:"Tamil", label:"Tamil (தமிழ்)", description:"Direct native localization" },
+                { value:"Hindi", label:"Hindi (हिन्दी)", description:"Devanagari localization" },
+                { value:"Portuguese", label:"Portuguese (Português)", description:"BR/PT localization" },
+                { value:"Italian", label:"Italian (Italiano)", description:"Standard Italian" },
+                { value:"Russian", label:"Russian (Русский)", description:"Standard Russian" },
+                { value:"Arabic", label:"Arabic (العربية)", description:"Modern standard Arabic" },
+                { value:"Indonesian", label:"Indonesian (Bahasa)", description:"Standard Indonesian" },
+                { value:"Vietnamese", label:"Vietnamese (Tiếng Việt)", description:"Standard Vietnamese" },
+                { value:"Thai", label:"Thai (ไทย)", description:"Standard Thai" },
+                { value:"English", label:"English", description:"Standard English" },
               ]}
             />
           </div>
@@ -316,7 +310,7 @@ export function TranslationTool({
           <div className="flex items-center justify-between pb-2 border-b border-neutral-850">
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 font-bold flex items-center gap-1.5">
-                Source {targetScope === "dialogue" ? "Speech" : "Narrative"}
+                Source {targetScope ==="dialogue" ?"Speech" :"Narrative"}
               </span>
               <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-400">
                 Editable
@@ -333,16 +327,16 @@ export function TranslationTool({
             <textarea
               value={sourceText}
               onChange={(e) => {
-                if (targetScope === "dialogue") {
+                if (targetScope ==="dialogue") {
                   onUpdateDialogue(e.target.value);
                 } else if (onUpdateNarrative) {
                   onUpdateNarrative(e.target.value);
                 }
               }}
               placeholder={
-                targetScope === "dialogue"
-                  ? "Enter original comic dialogue to translate..."
-                  : "Enter original scene visual narrative to translate..."
+                targetScope ==="dialogue"
+                  ?"Enter original comic dialogue to translate..."
+                  :"Enter original scene visual narrative to translate..."
               }
               className="w-full flex-1 bg-transparent text-xs text-neutral-100 placeholder:text-neutral-500 resize-none focus:outline-none font-sans leading-relaxed min-h-[100px]"
             />
@@ -355,7 +349,7 @@ export function TranslationTool({
                 onClick={() => {
                   if (sourceText) {
                     navigator.clipboard.writeText(sourceText);
-                    addNotification?.("Copied source text!", "success");
+                    addNotification?.("Copied source text!","success");
                   }
                 }}
                 disabled={!sourceText}
@@ -367,7 +361,7 @@ export function TranslationTool({
               {sourceText && (
                 <button
                   onClick={() => {
-                    if (targetScope === "dialogue") {
+                    if (targetScope ==="dialogue") {
                       onUpdateDialogue("");
                     } else if (onUpdateNarrative) {
                       onUpdateNarrative("");
@@ -399,13 +393,13 @@ export function TranslationTool({
                 <span
                   className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${
                     charDeltaPct > 20
-                      ? "bg-amber-950/40 border-amber-800/60 text-amber-300"
-                      : "bg-neutral-900 border-neutral-800 text-neutral-400"
+                      ?"bg-amber-950/40 border-amber-800/60 text-amber-300"
+                      :"bg-neutral-900 border-neutral-800 text-neutral-400"
                   }`}
                   title="Text expansion indicator relative to source (important for speech bubbles)"
                 >
                   <TrendingUp className="w-2.5 h-2.5 inline mr-1" />
-                  {charDeltaPct > 0 ? `+${charDeltaPct}%` : `${charDeltaPct}%`}
+                  {charDeltaPct > 0 ?`+${charDeltaPct}%` :`${charDeltaPct}%`}
                 </span>
               )}
               <span className="text-[9px] font-mono text-neutral-400 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
@@ -476,7 +470,7 @@ export function TranslationTool({
           <button
             onClick={handleTranslate}
             disabled={translating || !sourceText}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 via-[#3B82F6] to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-40 text-white text-xs font-mono font-bold shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 via-[#3B82F6] to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-40 text-white text-xs font-mono font-bold shadow-md transition-all cursor-pointer"
           >
             {translating ? (
               <>
@@ -500,7 +494,7 @@ export function TranslationTool({
               disabled={batchTranslating || !panels?.length}
               className="flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#60A5FA] hover:bg-[#3B82F6]/20 disabled:opacity-40 text-xs font-mono font-bold transition-all cursor-pointer"
             >
-              <Layers3 className={`w-3.5 h-3.5 ${batchTranslating ? "animate-spin" : ""}`} />
+              <Layers3 className={`w-3.5 h-3.5 ${batchTranslating ?"animate-spin" :""}`} />
               {batchTranslating ? (
                 <span>
                   Translating ({batchProgress?.current}/{batchProgress?.total})...
@@ -519,10 +513,10 @@ export function TranslationTool({
             disabled={!targetDraft.trim()}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border ${
               appliedRecently
-                ? "bg-emerald-500 text-black border-emerald-400"
+                ?"bg-emerald-500 text-black border-emerald-400"
                 : targetDraft.trim()
-                ? "bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500/50 shadow-md shadow-emerald-500/20"
-                : "bg-neutral-900 border-neutral-800 text-neutral-400 opacity-50 cursor-not-allowed"
+                ?"bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500/50 shadow-md"
+                :"bg-neutral-900 border-neutral-800 text-neutral-400 opacity-50 cursor-not-allowed"
             }`}
           >
             {appliedRecently ? (

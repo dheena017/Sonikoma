@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from"react";
 import {
   Globe,
   Database,
@@ -32,8 +32,8 @@ import {
   RotateCcw,
   FileText,
   CheckCircle2,
-} from "lucide-react";
-import DeleteConfirmModal from "@/shared/ui/modal/DeleteConfirmModal";
+} from"lucide-react";
+import DeleteConfirmModal from"@/shared/ui/modal/DeleteConfirmModal";
 import {
   listAdminDomains,
   updateDomainStatus,
@@ -46,24 +46,24 @@ import {
   type DomainRecord,
   type AdapterMeta,
   type SeparateUrlResult,
-} from "@/features/platform/scraper/api/scraper";
+} from"@/features/platform/scraper/api/scraper";
 
 // ─── Status Badge Component ──────────────────────────────────────────────────
 const StatusBadge = ({ status }: { status: string }) => {
   switch (status.toLowerCase()) {
-    case "approved":
+    case"approved":
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
           <ShieldCheck className="w-3 h-3 text-emerald-400" /> Approved
         </span>
       );
-    case "pending":
+    case"pending":
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
           <Clock className="w-3 h-3 text-amber-400" /> Pending Review
         </span>
       );
-    case "blocked":
+    case"blocked":
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
           <ShieldAlert className="w-3 h-3 text-red-400" /> Blocked
@@ -99,23 +99,21 @@ const DomainRuleModal = ({
   const isEditing = Boolean(initialData);
 
   // Form tabs
-  const [modalTab, setModalTab] = useState<"general" | "engine" | "headers">(
-    "general"
+  const [modalTab, setModalTab] = useState<"general" |"engine" |"headers">("general"
   );
 
   // General Fields
-  const [domainInput, setDomainInput] = useState(initialData?.domain || "");
-  const [status, setStatus] = useState<"approved" | "blocked" | "pending">(
-    (initialData?.status as any) || "approved"
+  const [domainInput, setDomainInput] = useState(initialData?.domain ||"");
+  const [status, setStatus] = useState<"approved" |"blocked" |"pending">(
+    (initialData?.status as any) ||"approved"
   );
   const [rateLimit, setRateLimit] = useState(
     initialData?.rate_limit_per_min || 30
   );
 
   // Engine & Performance Fields
-  const [engineStrategy, setEngineStrategy] = useState<
-    "auto" | "http_fast" | "browser_playwright"
-  >((initialData?.engine_strategy as any) || "auto");
+  const [engineStrategy, setEngineStrategy] = useState<"auto" |"http_fast" |"browser_playwright"
+  >((initialData?.engine_strategy as any) ||"auto");
   const [proxyRequired, setProxyRequired] = useState(
     Boolean(initialData?.proxy_required)
   );
@@ -128,9 +126,9 @@ const DomainRuleModal = ({
   );
 
   // Headers & Notes
-  const [notes, setNotes] = useState(initialData?.notes || "");
+  const [notes, setNotes] = useState(initialData?.notes ||"");
   const [customHeaders, setCustomHeaders] = useState(
-    initialData?.custom_headers || "{}"
+    initialData?.custom_headers ||"{}"
   );
 
   const [submitting, setSubmitting] = useState(false);
@@ -156,16 +154,14 @@ const DomainRuleModal = ({
         notes: notes.trim(),
       });
 
-      addNotification(
-        `Domain '${cleaned}' ${
-          isEditing ? "updated" : "created"
-        } successfully.`,
-        "success"
+      addNotification(`Domain '${cleaned}' ${
+          isEditing ?"updated" :"created"
+        } successfully.`,"success"
       );
       onSuccess();
       onClose();
     } catch {
-      addNotification("Failed to save domain configuration rule.", "error");
+      addNotification("Failed to save domain configuration rule.","error");
     } finally {
       setSubmitting(false);
     }
@@ -193,8 +189,8 @@ const DomainRuleModal = ({
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-white tracking-tight">
                   {isEditing
-                    ? `Edit Rule: ${initialData?.domain}`
-                    : "Add New Scraper Domain Rule"}
+                    ?`Edit Rule: ${initialData?.domain}`
+                    :"Add New Scraper Domain Rule"}
                 </h3>
                 {isEditing && <StatusBadge status={status} />}
               </div>
@@ -218,9 +214,9 @@ const DomainRuleModal = ({
             type="button"
             onClick={() => setModalTab("general")}
             className={`py-3 px-3 font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
-              modalTab === "general"
-                ? "border-blue-500 text-white"
-                : "border-transparent text-neutral-400 hover:text-neutral-200"
+              modalTab ==="general"
+                ?"border-blue-500 text-white"
+                :"border-transparent text-neutral-400 hover:text-neutral-200"
             }`}
           >
             <Shield className="w-3.5 h-3.5" />
@@ -231,9 +227,9 @@ const DomainRuleModal = ({
             type="button"
             onClick={() => setModalTab("engine")}
             className={`py-3 px-3 font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
-              modalTab === "engine"
-                ? "border-blue-500 text-white"
-                : "border-transparent text-neutral-400 hover:text-neutral-200"
+              modalTab ==="engine"
+                ?"border-blue-500 text-white"
+                :"border-transparent text-neutral-400 hover:text-neutral-200"
             }`}
           >
             <Cpu className="w-3.5 h-3.5" />
@@ -244,9 +240,9 @@ const DomainRuleModal = ({
             type="button"
             onClick={() => setModalTab("headers")}
             className={`py-3 px-3 font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
-              modalTab === "headers"
-                ? "border-blue-500 text-white"
-                : "border-transparent text-neutral-400 hover:text-neutral-200"
+              modalTab ==="headers"
+                ?"border-blue-500 text-white"
+                :"border-transparent text-neutral-400 hover:text-neutral-200"
             }`}
           >
             <Code className="w-3.5 h-3.5" />
@@ -260,7 +256,7 @@ const DomainRuleModal = ({
           className="p-6 space-y-5 overflow-y-auto flex-1 text-xs font-sans"
         >
           {/* ── TAB 1: GENERAL & RATE LIMITS ── */}
-          {modalTab === "general" && (
+          {modalTab ==="general" && (
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-neutral-300 mb-1.5 uppercase tracking-wider font-mono">
@@ -320,8 +316,8 @@ const DomainRuleModal = ({
                     onClick={() => setRateLimit(preset)}
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all ${
                       rateLimit === preset
-                        ? "bg-blue-600 text-white"
-                        : "bg-neutral-800 text-neutral-400 hover:text-white"
+                        ?"bg-blue-600 text-white"
+                        :"bg-neutral-800 text-neutral-400 hover:text-white"
                     }`}
                   >
                     {preset} req/m
@@ -362,7 +358,7 @@ const DomainRuleModal = ({
           )}
 
           {/* ── TAB 2: ENGINE & NETWORK ── */}
-          {modalTab === "engine" && (
+          {modalTab ==="engine" && (
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-neutral-300 mb-1.5 uppercase tracking-wider font-mono">
@@ -456,7 +452,7 @@ const DomainRuleModal = ({
           )}
 
           {/* ── TAB 3: HEADERS & NOTES ── */}
-          {modalTab === "headers" && (
+          {modalTab ==="headers" && (
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-neutral-300 mb-1.5 uppercase tracking-wider font-mono">
@@ -465,7 +461,7 @@ const DomainRuleModal = ({
                 <textarea
                   value={customHeaders}
                   onChange={(e) => setCustomHeaders(e.target.value)}
-                  placeholder='{"User-Agent": "Custom/1.0", "Referer": "https://..."}'
+                  placeholder='{"User-Agent":"Custom/1.0","Referer":"https://..."}'
                   rows={3}
                   className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-emerald-300 placeholder-neutral-600 focus:outline-none focus:border-neutral-600 font-mono resize-none"
                 />
@@ -517,14 +513,14 @@ const DomainRuleModal = ({
               <button
                 type="submit"
                 disabled={submitting || !domainInput.trim()}
-                className="px-5 py-2 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/20 cursor-pointer"
+                className="px-5 py-2 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2 shadow-lg cursor-pointer"
               >
                 {submitting ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
                 ) : (
                   <Check className="w-4 h-4" />
                 )}
-                {isEditing ? "Save Changes" : "Create Rule"}
+                {isEditing ?"Save Changes" :"Create Rule"}
               </button>
             </div>
           </div>
@@ -543,15 +539,13 @@ export function AdminScrapersTab({
   addNotification: any;
 }) {
   // Navigation
-  const [activeSubTab, setActiveSubTab] = useState<"domains" | "adapters">(
-    "domains"
+  const [activeSubTab, setActiveSubTab] = useState<"domains" |"adapters">("domains"
   );
 
   // Domain records & filters
   const [domains, setDomains] = useState<DomainRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState<
-    "all" | "approved" | "blocked" | "pending"
+  const [filterStatus, setFilterStatus] = useState<"all" |"approved" |"blocked" |"pending"
   >("all");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -590,7 +584,7 @@ export function AdminScrapersTab({
       const res = await listAdminDomains(fetchWithInterceptor);
       setDomains(res.domains || []);
     } catch {
-      addNotification("Failed to load domain rules from database.", "error");
+      addNotification("Failed to load domain rules from database.","error");
     } finally {
       setLoading(false);
     }
@@ -620,16 +614,16 @@ export function AdminScrapersTab({
 
   // Fast Toggle Status (Approved <-> Blocked)
   const handleToggleStatus = async (d: DomainRecord) => {
-    const nextStatus = d.status === "approved" ? "blocked" : "approved";
+    const nextStatus = d.status ==="approved" ?"blocked" :"approved";
     setActionLoading(d.domain);
     try {
       await updateDomainStatus(fetchWithInterceptor, d.domain, {
         status: nextStatus,
       });
-      addNotification(`Domain '${d.domain}' set to ${nextStatus}.`, "success");
+      addNotification(`Domain '${d.domain}' set to ${nextStatus}.`,"success");
       loadDomains();
     } catch {
-      addNotification(`Failed to toggle status for '${d.domain}'.`, "error");
+      addNotification(`Failed to toggle status for '${d.domain}'.`,"error");
     } finally {
       setActionLoading(null);
     }
@@ -640,10 +634,10 @@ export function AdminScrapersTab({
     setActionLoading(domain);
     try {
       await deleteAdminDomain(fetchWithInterceptor, domain);
-      addNotification(`Domain rule '${domain}' removed.`, "success");
+      addNotification(`Domain rule '${domain}' removed.`,"success");
       loadDomains();
     } catch {
-      addNotification(`Failed to delete '${domain}'.`, "error");
+      addNotification(`Failed to delete '${domain}'.`,"error");
     } finally {
       setActionLoading(null);
     }
@@ -655,12 +649,11 @@ export function AdminScrapersTab({
     try {
       const res = await clearScraperCache(fetchWithInterceptor);
       addNotification(
-        res.message || "RAM cache cleared successfully.",
-        "success"
+        res.message ||"RAM cache cleared successfully.","success"
       );
       loadSystemMetrics();
     } catch {
-      addNotification("Failed to purge scraper cache.", "error");
+      addNotification("Failed to purge scraper cache.","error");
     } finally {
       setClearingCache(false);
     }
@@ -686,7 +679,7 @@ export function AdminScrapersTab({
         blockedCheck: blockedCheck || undefined,
       });
     } catch {
-      addNotification("Inspection failed for the provided URL.", "error");
+      addNotification("Inspection failed for the provided URL.","error");
     } finally {
       setProbing(false);
     }
@@ -696,9 +689,9 @@ export function AdminScrapersTab({
   const filteredDomains = domains.filter((d) => {
     const matchesSearch =
       d.domain.toLowerCase().includes(search.toLowerCase()) ||
-      (d.requested_by || "").toLowerCase().includes(search.toLowerCase()) ||
-      (d.notes || "").toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = filterStatus === "all" || d.status === filterStatus;
+      (d.requested_by ||"").toLowerCase().includes(search.toLowerCase()) ||
+      (d.notes ||"").toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = filterStatus ==="all" || d.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
@@ -708,9 +701,9 @@ export function AdminScrapersTab({
     currentPage * pageSize
   );
 
-  const approvedCount = domains.filter((d) => d.status === "approved").length;
-  const blockedCount = domains.filter((d) => d.status === "blocked").length;
-  const pendingCount = domains.filter((d) => d.status === "pending").length;
+  const approvedCount = domains.filter((d) => d.status ==="approved").length;
+  const blockedCount = domains.filter((d) => d.status ==="blocked").length;
+  const pendingCount = domains.filter((d) => d.status ==="pending").length;
 
   return (
     <div className="space-y-6 animate-in fade-in">
@@ -745,12 +738,12 @@ export function AdminScrapersTab({
             onClick={() => setShowProbe((v) => !v)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
               showProbe
-                ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-500/20"
-                : "bg-[#181818] border-[#2F2F2F] text-neutral-300 hover:text-white hover:border-neutral-500"
+                ?"bg-blue-600 border-blue-500 text-white shadow-md"
+                :"bg-[#181818] border-[#2F2F2F] text-neutral-300 hover:text-white hover:border-neutral-500"
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            {showProbe ? "Hide URL Inspector" : "URL Inspector / Probe"}
+            {showProbe ?"Hide URL Inspector" :"URL Inspector / Probe"}
           </button>
 
           <button
@@ -761,7 +754,7 @@ export function AdminScrapersTab({
           >
             <RefreshCw
               className={`w-3.5 h-3.5 text-blue-400 ${
-                clearingCache ? "animate-spin" : ""
+                clearingCache ?"animate-spin" :""
               }`}
             />
             Purge RAM Cache
@@ -769,7 +762,7 @@ export function AdminScrapersTab({
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-500/20 cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Add Domain Rule
@@ -787,10 +780,10 @@ export function AdminScrapersTab({
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between">
               <span className="text-base font-bold text-white uppercase font-mono">
-                {health?.status || "HEALTHY"}
+                {health?.status ||"HEALTHY"}
               </span>
               <span className="text-[10px] text-neutral-500 font-mono">
-                v{health?.version || "2.0"}
+                v{health?.version ||"2.0"}
               </span>
             </div>
             <div className="text-[11px] text-neutral-400 truncate">
@@ -835,7 +828,7 @@ export function AdminScrapersTab({
             <div className="flex items-center justify-between">
               <span className="text-base font-bold text-white font-mono">
                 {(health?.in_memory_l1_cache_size || 0) +
-                  (health?.in_memory_l5_cache_size || 0)}{" "}
+                  (health?.in_memory_l5_cache_size || 0)}{""}
                 Keys
               </span>
               <span className="text-[10px] text-purple-400 uppercase font-mono font-bold">
@@ -843,7 +836,7 @@ export function AdminScrapersTab({
               </span>
             </div>
             <div className="text-[11px] text-neutral-400 truncate">
-              {health?.in_memory_l1_cache_size || 0} L1 HTML •{" "}
+              {health?.in_memory_l1_cache_size || 0} L1 HTML •{""}
               {health?.in_memory_l5_cache_size || 0} L5 Panels
             </div>
           </div>
@@ -922,7 +915,7 @@ export function AdminScrapersTab({
                     Domain / Host
                   </span>
                   <span className="text-white font-bold">
-                    {probeResult.separated?.domain || "Unknown"}
+                    {probeResult.separated?.domain ||"Unknown"}
                   </span>
                 </div>
 
@@ -948,8 +941,7 @@ export function AdminScrapersTab({
                     Recommended Action
                   </span>
                   <span className="text-amber-400 font-bold uppercase">
-                    {probeResult.separated?.recommended_action ||
-                      "Standard Scrape"}
+                    {probeResult.separated?.recommended_action ||"Standard Scrape"}
                   </span>
                 </div>
               </div>
@@ -965,7 +957,7 @@ export function AdminScrapersTab({
                     </span>
                     {probeResult.separated.is_chapter_url && (
                       <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                        Chapter #{probeResult.separated.chapter_number || "1"}
+                        Chapter #{probeResult.separated.chapter_number ||"1"}
                       </span>
                     )}
                     {probeResult.separated.series_slug && (
@@ -986,9 +978,9 @@ export function AdminScrapersTab({
         <button
           onClick={() => setActiveSubTab("domains")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeSubTab === "domains"
-              ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-              : "bg-[#181818] text-neutral-400 hover:text-white border border-[#2F2F2F]"
+            activeSubTab ==="domains"
+              ?"bg-blue-600 text-white shadow-md"
+              :"bg-[#181818] text-neutral-400 hover:text-white border border-[#2F2F2F]"
           }`}
         >
           <Database className="w-3.5 h-3.5" />
@@ -998,9 +990,9 @@ export function AdminScrapersTab({
         <button
           onClick={() => setActiveSubTab("adapters")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeSubTab === "adapters"
-              ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-              : "bg-[#181818] text-neutral-400 hover:text-white border border-[#2F2F2F]"
+            activeSubTab ==="adapters"
+              ?"bg-blue-600 text-white shadow-md"
+              :"bg-[#181818] text-neutral-400 hover:text-white border border-[#2F2F2F]"
           }`}
         >
           <Cpu className="w-3.5 h-3.5" />
@@ -1009,7 +1001,7 @@ export function AdminScrapersTab({
       </div>
 
       {/* ── SUB-TAB 1: DOMAIN RULES REGISTRY TABLE ── */}
-      {activeSubTab === "domains" && (
+      {activeSubTab ==="domains" && (
         <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl overflow-hidden shadow-sm space-y-0">
           {/* Table Toolbar */}
           <div className="p-4 border-b border-[#2F2F2F] bg-[#181818] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -1031,7 +1023,7 @@ export function AdminScrapersTab({
 
               {/* Status Filter Tabs */}
               <div className="flex items-center p-1 bg-black/40 border border-[#2F2F2F] rounded-xl">
-                {(["all", "approved", "blocked", "pending"] as const).map(
+                {(["all","approved","blocked","pending"] as const).map(
                   (st) => (
                     <button
                       key={st}
@@ -1041,8 +1033,8 @@ export function AdminScrapersTab({
                       }}
                       className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider font-mono transition-all cursor-pointer ${
                         filterStatus === st
-                          ? "bg-[#3B82F6] text-white shadow-sm"
-                          : "text-neutral-400 hover:text-white"
+                          ?"bg-[#3B82F6] text-white shadow-sm"
+                          :"text-neutral-400 hover:text-white"
                       }`}
                     >
                       {st}
@@ -1080,7 +1072,7 @@ export function AdminScrapersTab({
                 title="Refresh Table"
               >
                 <RefreshCw
-                  className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+                  className={`w-3.5 h-3.5 ${loading ?"animate-spin" :""}`}
                 />
               </button>
             </div>
@@ -1166,11 +1158,11 @@ export function AdminScrapersTab({
                       {/* Strategy */}
                       <td className="px-5 py-3.5">
                         <span className="text-[11px] font-mono text-neutral-400">
-                          {d.engine_strategy === "http_fast"
-                            ? "⚡ Fast HTTP"
-                            : d.engine_strategy === "browser_playwright"
-                            ? "🎭 Playwright"
-                            : "🤖 Auto AI"}
+                          {d.engine_strategy ==="http_fast"
+                            ?"⚡ Fast HTTP"
+                            : d.engine_strategy ==="browser_playwright"
+                            ?"🎭 Playwright"
+                            :"🤖 Auto AI"}
                         </span>
                       </td>
 
@@ -1193,12 +1185,12 @@ export function AdminScrapersTab({
                           ? new Date(d.created_at).toLocaleDateString(
                               undefined,
                               {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
+                                year:"numeric",
+                                month:"short",
+                                day:"numeric",
                               }
                             )
-                          : "Default Rule"}
+                          :"Default Rule"}
                       </td>
 
                       {/* Actions */}
@@ -1209,19 +1201,19 @@ export function AdminScrapersTab({
                             onClick={() => handleToggleStatus(d)}
                             disabled={actionLoading === d.domain}
                             title={
-                              d.status === "approved"
-                                ? "Block domain"
-                                : "Approve domain"
+                              d.status ==="approved"
+                                ?"Block domain"
+                                :"Approve domain"
                             }
                             className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                              d.status === "approved"
-                                ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20"
-                                : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20"
+                              d.status ==="approved"
+                                ?"bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20"
+                                :"bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20"
                             }`}
                           >
                             {actionLoading === d.domain ? (
                               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                            ) : d.status === "approved" ? (
+                            ) : d.status ==="approved" ? (
                               <XCircle className="w-3.5 h-3.5" />
                             ) : (
                               <CheckCircle className="w-3.5 h-3.5" />
@@ -1285,7 +1277,7 @@ export function AdminScrapersTab({
       )}
 
       {/* ── SUB-TAB 2: SITE ADAPTERS REGISTRY ── */}
-      {activeSubTab === "adapters" && (
+      {activeSubTab ==="adapters" && (
         <div className="space-y-4">
           <div className="p-4 bg-[#141414] border border-[#2F2F2F] rounded-2xl flex items-center justify-between">
             <div className="space-y-0.5">
@@ -1324,8 +1316,7 @@ export function AdminScrapersTab({
                   </div>
 
                   <p className="text-xs text-neutral-400 line-clamp-2">
-                    {ad.description ||
-                      "Custom extractor module with automated chapter navigation."}
+                    {ad.description ||"Custom extractor module with automated chapter navigation."}
                   </p>
 
                   <div className="pt-2 border-t border-[#242424] space-y-2">

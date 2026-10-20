@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   X,
   Film,
@@ -9,7 +9,7 @@ import {
   Check,
   Loader2,
   Play,
-} from "lucide-react";
+} from"lucide-react";
 
 interface SeriesPublishModalProps {
   isOpen: boolean;
@@ -26,11 +26,10 @@ export default function SeriesPublishModal({
   chapterCount,
   totalPanels,
 }: SeriesPublishModalProps) {
-  const [activeTab, setActiveTab] = useState<
-    "video" | "archive" | "pdf" | "audio"
+  const [activeTab, setActiveTab] = useState<"video" |"archive" |"pdf" |"audio"
   >("video");
-  const [resolution, setResolution] = useState<"1080p" | "4k">("1080p");
-  const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16">("9:16");
+  const [resolution, setResolution] = useState<"1080p" |"4k">("1080p");
+  const [aspectRatio, setAspectRatio] = useState<"16:9" |"9:16">("9:16");
   const [isExporting, setIsExporting] = useState(false);
   const [exportComplete, setExportComplete] = useState(false);
 
@@ -79,9 +78,9 @@ export default function SeriesPublishModal({
               setExportComplete(false);
             }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold font-mono transition-all border-b-2 cursor-pointer ${
-              activeTab === "video"
-                ? "border-[#3B82F6] text-[#3B82F6] bg-neutral-900"
-                : "border-transparent text-neutral-400 hover:text-white"
+              activeTab ==="video"
+                ?"border-[#3B82F6] text-[#3B82F6] bg-neutral-900"
+                :"border-transparent text-neutral-400 hover:text-white"
             }`}
           >
             <Film className="w-4 h-4" /> Full Video Reel (MP4)
@@ -92,9 +91,9 @@ export default function SeriesPublishModal({
               setExportComplete(false);
             }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold font-mono transition-all border-b-2 cursor-pointer ${
-              activeTab === "archive"
-                ? "border-[#3B82F6] text-[#3B82F6] bg-neutral-900"
-                : "border-transparent text-neutral-400 hover:text-white"
+              activeTab ==="archive"
+                ?"border-[#3B82F6] text-[#3B82F6] bg-neutral-900"
+                :"border-transparent text-neutral-400 hover:text-white"
             }`}
           >
             <Download className="w-4 h-4" /> Comic Archive (CBZ/ZIP)
@@ -105,9 +104,9 @@ export default function SeriesPublishModal({
               setExportComplete(false);
             }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold font-mono transition-all border-b-2 cursor-pointer ${
-              activeTab === "pdf"
-                ? "border-[#3B82F6] text-[#3B82F6] bg-neutral-900"
-                : "border-transparent text-neutral-400 hover:text-white"
+              activeTab ==="pdf"
+                ?"border-[#3B82F6] text-[#3B82F6] bg-neutral-900"
+                :"border-transparent text-neutral-400 hover:text-white"
             }`}
           >
             <FileText className="w-4 h-4" /> PDF Storyboard
@@ -118,9 +117,9 @@ export default function SeriesPublishModal({
               setExportComplete(false);
             }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold font-mono transition-all border-b-2 cursor-pointer ${
-              activeTab === "audio"
-                ? "border-[#3B82F6] text-[#3B82F6] bg-neutral-900"
-                : "border-transparent text-neutral-400 hover:text-white"
+              activeTab ==="audio"
+                ?"border-[#3B82F6] text-[#3B82F6] bg-neutral-900"
+                :"border-transparent text-neutral-400 hover:text-white"
             }`}
           >
             <Music className="w-4 h-4" /> Audio Track (MP3)
@@ -129,7 +128,7 @@ export default function SeriesPublishModal({
 
         {/* Content Body */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-neutral-900">
-          {activeTab === "video" && (
+          {activeTab ==="video" && (
             <div className="space-y-5">
               <div className="p-4 bg-neutral-955 rounded-2xl border border-neutral-800 space-y-4">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono">
@@ -143,15 +142,15 @@ export default function SeriesPublishModal({
                       Resolution
                     </label>
                     <div className="flex gap-2">
-                      {(["1080p", "4k"] as const).map((res) => (
+                      {(["1080p","4k"] as const).map((res) => (
                         <button
                           key={res}
                           type="button"
                           onClick={() => setResolution(res)}
                           className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                             resolution === res
-                              ? "bg-[#2A2A2A] border-[#3B82F6] text-[#60A5FA]"
-                              : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
+                              ?"bg-[#2A2A2A] border-[#3B82F6] text-[#60A5FA]"
+                              :"bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
                           }`}
                         >
                           {res.toUpperCase()}
@@ -165,20 +164,20 @@ export default function SeriesPublishModal({
                       Aspect Ratio
                     </label>
                     <div className="flex gap-2">
-                      {(["9:16", "16:9"] as const).map((ratio) => (
+                      {(["9:16","16:9"] as const).map((ratio) => (
                         <button
                           key={ratio}
                           type="button"
                           onClick={() => setAspectRatio(ratio)}
                           className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                             aspectRatio === ratio
-                              ? "bg-[#2A2A2A] border-[#3B82F6] text-[#60A5FA]"
-                              : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
+                              ?"bg-[#2A2A2A] border-[#3B82F6] text-[#60A5FA]"
+                              :"bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
                           }`}
                         >
-                          {ratio === "9:16"
-                            ? "9:16 (Shorts/TikTok)"
-                            : "16:9 (YouTube)"}
+                          {ratio ==="9:16"
+                            ?"9:16 (Shorts/TikTok)"
+                            :"16:9 (YouTube)"}
                         </button>
                       ))}
                     </div>
@@ -203,7 +202,7 @@ export default function SeriesPublishModal({
                   </div>
                   <button
                     onClick={() => alert(`Downloading ${seriesTitle}_Reel.mp4`)}
-                    className="flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-emerald-900/40"
+                    className="flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all cursor-pointer shadow-lg"
                   >
                     <Download className="w-4 h-4" /> Download MP4
                   </button>
@@ -230,7 +229,7 @@ export default function SeriesPublishModal({
             </div>
           )}
 
-          {activeTab === "archive" && (
+          {activeTab ==="archive" && (
             <div className="p-6 bg-neutral-955 rounded-2xl border border-neutral-800 text-center space-y-4">
               <Download className="w-10 h-10 text-[#3B82F6] mx-auto" />
               <div>
@@ -238,7 +237,7 @@ export default function SeriesPublishModal({
                   Export CBZ / ZIP Package
                 </h3>
                 <p className="text-xs text-neutral-400 font-mono max-w-md mx-auto mt-1">
-                  Downloads all sliced comic panels across {chapterCount}{" "}
+                  Downloads all sliced comic panels across {chapterCount}{""}
                   chapters in structured folders for offline reading.
                 </p>
               </div>
@@ -253,7 +252,7 @@ export default function SeriesPublishModal({
             </div>
           )}
 
-          {activeTab === "pdf" && (
+          {activeTab ==="pdf" && (
             <div className="p-6 bg-neutral-955 rounded-2xl border border-neutral-800 text-center space-y-4">
               <FileText className="w-10 h-10 text-[#3B82F6] mx-auto" />
               <div>
@@ -276,7 +275,7 @@ export default function SeriesPublishModal({
             </div>
           )}
 
-          {activeTab === "audio" && (
+          {activeTab ==="audio" && (
             <div className="p-6 bg-neutral-955 rounded-2xl border border-neutral-800 text-center space-y-4">
               <Music className="w-10 h-10 text-[#3B82F6] mx-auto" />
               <div>

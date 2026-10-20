@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   Settings,
   Bell,
@@ -26,8 +26,8 @@ import {
   Type,
   Square,
   ZapOff,
-} from "lucide-react";
-import { AIModelSelector } from "@/features/intelligence/core";
+} from"lucide-react";
+import { AIModelSelector } from"@/features/intelligence/core";
 
 interface ProfilePreferencesTabProps {
   notifications: {
@@ -61,7 +61,7 @@ interface ProfilePreferencesTabProps {
     audioFormat: string;
   };
   setExportSettings?: React.Dispatch<React.SetStateAction<any>>;
-  themeMode?: "dark" | "light" | string;
+  themeMode?:"dark" |"light" | string;
   toggleThemeMode?: () => void;
   theme?: string;
   setTheme?: (theme: string) => void;
@@ -115,129 +115,129 @@ export default function ProfilePreferencesTab({
 
   const accentColors = [
     {
-      id: "purple",
-      name: "Nebula Purple",
-      class: "bg-[#2A2A2A]",
-      shadow: "shadow-black/50",
+      id:"purple",
+      name:"Nebula Purple",
+      class:"bg-[#2A2A2A]",
+      shadow:"shadow-black/50",
     },
     {
-      id: "indigo",
-      name: "Deep Space",
-      class: "bg-indigo-500",
-      shadow: "shadow-indigo-500/50",
+      id:"indigo",
+      name:"Deep Space",
+      class:"bg-indigo-500",
+      shadow:"",
     },
     {
-      id: "emerald",
-      name: "Cyber Green",
-      class: "bg-emerald-500",
-      shadow: "shadow-emerald-500/50",
+      id:"emerald",
+      name:"Cyber Green",
+      class:"bg-emerald-500",
+      shadow:"",
     },
     {
-      id: "rose",
-      name: "Neon Pink",
-      class: "bg-rose-500",
-      shadow: "shadow-rose-500/50",
+      id:"rose",
+      name:"Neon Pink",
+      class:"bg-rose-500",
+      shadow:"",
     },
     {
-      id: "amber",
-      name: "Sunset Gold",
-      class: "bg-amber-500",
-      shadow: "shadow-amber-500/50",
+      id:"amber",
+      name:"Sunset Gold",
+      class:"bg-amber-500",
+      shadow:"",
     },
     {
-      id: "cyan",
-      name: "Electric Blue",
-      class: "bg-blue-500",
-      shadow: "shadow-cyan-500/50",
+      id:"cyan",
+      name:"Electric Blue",
+      class:"bg-blue-500",
+      shadow:"",
     },
   ];
 
   const getThemeClasses = (color: string) => {
     switch (color) {
-      case "indigo":
+      case"indigo":
         return {
-          text: "text-indigo-400",
-          bg10: "bg-indigo-500/10",
-          border30: "border-[#2F2F2F]",
-          bg600: "bg-indigo-600",
-          bgHover: "hover:bg-indigo-500",
-          via: "via-indigo-500/20",
-          peerChecked: "peer-checked:bg-indigo-500",
-          focusBorder: "focus:border-[#2F2F2F]",
-          shadowBtn: "",
-          shadowBtnHover: "",
-          shadowInset: "shadow-[inset_0_0_20px_rgba(99,102,241,0.1)]",
+          text:"text-indigo-400",
+          bg10:"bg-indigo-500/10",
+          border30:"border-[#2F2F2F]",
+          bg600:"bg-indigo-600",
+          bgHover:"hover:bg-indigo-500",
+          via:"via-indigo-500/20",
+          peerChecked:"peer-checked:bg-indigo-500",
+          focusBorder:"focus:border-[#2F2F2F]",
+          shadowBtn:"",
+          shadowBtnHover:"",
+          shadowInset:"shadow-[inset_0_0_20px_rgba(99,102,241,0.1)]",
         };
-      case "emerald":
+      case"emerald":
         return {
-          text: "text-emerald-400",
-          bg10: "bg-emerald-500/10",
-          border30: "border-emerald-500/30",
-          bg600: "bg-emerald-600",
-          bgHover: "hover:bg-emerald-500",
-          via: "via-emerald-500/20",
-          peerChecked: "peer-checked:bg-emerald-500",
-          focusBorder: "focus:border-emerald-500/50",
-          shadowBtn: "",
-          shadowBtnHover: "",
-          shadowInset: "shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]",
+          text:"text-emerald-400",
+          bg10:"bg-emerald-500/10",
+          border30:"border-emerald-500/30",
+          bg600:"bg-emerald-600",
+          bgHover:"hover:bg-emerald-500",
+          via:"via-emerald-500/20",
+          peerChecked:"peer-checked:bg-emerald-500",
+          focusBorder:"focus:border-emerald-500/50",
+          shadowBtn:"",
+          shadowBtnHover:"",
+          shadowInset:"shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]",
         };
-      case "rose":
+      case"rose":
         return {
-          text: "text-rose-400",
-          bg10: "bg-rose-500/10",
-          border30: "border-rose-500/30",
-          bg600: "bg-rose-600",
-          bgHover: "hover:bg-rose-500",
-          via: "via-rose-500/20",
-          peerChecked: "peer-checked:bg-rose-500",
-          focusBorder: "focus:border-rose-500/50",
-          shadowBtn: "",
-          shadowBtnHover: "",
-          shadowInset: "shadow-[inset_0_0_20px_rgba(244,63,94,0.1)]",
+          text:"text-rose-400",
+          bg10:"bg-rose-500/10",
+          border30:"border-rose-500/30",
+          bg600:"bg-rose-600",
+          bgHover:"hover:bg-rose-500",
+          via:"via-rose-500/20",
+          peerChecked:"peer-checked:bg-rose-500",
+          focusBorder:"focus:border-rose-500/50",
+          shadowBtn:"",
+          shadowBtnHover:"",
+          shadowInset:"shadow-[inset_0_0_20px_rgba(244,63,94,0.1)]",
         };
-      case "amber":
+      case"amber":
         return {
-          text: "text-amber-400",
-          bg10: "bg-amber-500/10",
-          border30: "border-amber-500/30",
-          bg600: "bg-amber-600",
-          bgHover: "hover:bg-amber-500",
-          via: "via-amber-500/20",
-          peerChecked: "peer-checked:bg-amber-500",
-          focusBorder: "focus:border-amber-500/50",
-          shadowBtn: "",
-          shadowBtnHover: "",
-          shadowInset: "shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]",
+          text:"text-amber-400",
+          bg10:"bg-amber-500/10",
+          border30:"border-amber-500/30",
+          bg600:"bg-amber-600",
+          bgHover:"hover:bg-amber-500",
+          via:"via-amber-500/20",
+          peerChecked:"peer-checked:bg-amber-500",
+          focusBorder:"focus:border-amber-500/50",
+          shadowBtn:"",
+          shadowBtnHover:"",
+          shadowInset:"shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]",
         };
-      case "cyan":
+      case"cyan":
         return {
-          text: "text-blue-400",
-          bg10: "bg-blue-500/10",
-          border30: "border-blue-500/30",
-          bg600: "bg-cyan-600",
-          bgHover: "hover:bg-[#3B82F6]",
-          via: "via-blue-500/20",
-          peerChecked: "peer-checked:bg-blue-500",
-          focusBorder: "focus:border-neutral-600",
-          shadowBtn: "",
-          shadowBtnHover: "",
-          shadowInset: "shadow-[inset_0_0_20px_rgba(6,182,212,0.1)]",
+          text:"text-blue-400",
+          bg10:"bg-blue-500/10",
+          border30:"border-blue-500/30",
+          bg600:"bg-cyan-600",
+          bgHover:"hover:bg-[#3B82F6]",
+          via:"via-blue-500/20",
+          peerChecked:"peer-checked:bg-blue-500",
+          focusBorder:"focus:border-neutral-600",
+          shadowBtn:"",
+          shadowBtnHover:"",
+          shadowInset:"shadow-[inset_0_0_20px_rgba(6,182,212,0.1)]",
         };
-      case "purple":
+      case"purple":
       default:
         return {
-          text: "text-[#3B82F6]",
-          bg10: "bg-[#3B82F6]/10",
-          border30: "border-[#3B82F6]/30",
-          bg600: "bg-[#2A2A2A]",
-          bgHover: "hover:bg-[#3B82F6]",
-          via: "via-blue-500/20",
-          peerChecked: "peer-checked:bg-[#2A2A2A]",
-          focusBorder: "focus:border-neutral-600",
-          shadowBtn: "",
-          shadowBtnHover: "",
-          shadowInset: "shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]",
+          text:"text-[#3B82F6]",
+          bg10:"bg-[#3B82F6]/10",
+          border30:"border-[#3B82F6]/30",
+          bg600:"bg-[#2A2A2A]",
+          bgHover:"hover:bg-[#3B82F6]",
+          via:"via-blue-500/20",
+          peerChecked:"peer-checked:bg-[#2A2A2A]",
+          focusBorder:"focus:border-neutral-600",
+          shadowBtn:"",
+          shadowBtnHover:"",
+          shadowInset:"shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]",
         };
     }
   };
@@ -324,13 +324,13 @@ export default function ProfilePreferencesTab({
                     onClick={() => setAccentColor(color.id)}
                     className={`relative group aspect-square rounded-2xl flex items-center justify-center border transition-all ${
                       accentColor === color.id
-                        ? "border-white/20 bg-white/5 shadow-xl"
-                        : "border-transparent hover:bg-white/5"
+                        ?"border-white/20 bg-white/5 shadow-xl"
+                        :"border-transparent hover:bg-white/5"
                     }`}
                   >
                     <div
                       className={`w-8 h-8 rounded-full ${color.class} ${
-                        accentColor === color.id ? color.shadow : ""
+                        accentColor === color.id ? color.shadow :""
                       } transition-shadow`}
                     />
                     {accentColor === color.id && (
@@ -356,9 +356,9 @@ export default function ProfilePreferencesTab({
                     type="button"
                     onClick={() => setFontScale("small")}
                     className={`flex-1 py-2.5 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all ${
-                      fontScale === "small"
-                        ? `bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text} shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]`
-                        : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                      fontScale ==="small"
+                        ?`bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text} shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]`
+                        :"bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
                     Small
@@ -367,9 +367,9 @@ export default function ProfilePreferencesTab({
                     type="button"
                     onClick={() => setFontScale("medium")}
                     className={`flex-1 py-2.5 rounded-xl border flex items-center justify-center gap-2 text-sm font-bold transition-all ${
-                      fontScale === "medium"
-                        ? `bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text} shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]`
-                        : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                      fontScale ==="medium"
+                        ?`bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text} shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]`
+                        :"bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
                     Medium
@@ -378,9 +378,9 @@ export default function ProfilePreferencesTab({
                     type="button"
                     onClick={() => setFontScale("large")}
                     className={`flex-1 py-2.5 rounded-xl border flex items-center justify-center gap-2 text-base font-bold transition-all ${
-                      fontScale === "large"
-                        ? `bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text} shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]`
-                        : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                      fontScale ==="large"
+                        ?`bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text} shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]`
+                        :"bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
                     Large
@@ -399,9 +399,9 @@ export default function ProfilePreferencesTab({
                     type="button"
                     onClick={() => setCornerRadius("sharp")}
                     className={`flex-1 py-3 border flex items-center justify-center gap-2 text-xs font-bold transition-all rounded-sm ${
-                      cornerRadius === "sharp"
-                        ? `bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text}`
-                        : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                      cornerRadius ==="sharp"
+                        ?`bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text}`
+                        :"bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
                     Sharp
@@ -410,9 +410,9 @@ export default function ProfilePreferencesTab({
                     type="button"
                     onClick={() => setCornerRadius("rounded")}
                     className={`flex-1 py-3 border flex items-center justify-center gap-2 text-xs font-bold transition-all rounded-xl ${
-                      cornerRadius === "rounded"
-                        ? `bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text}`
-                        : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                      cornerRadius ==="rounded"
+                        ?`bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text}`
+                        :"bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
                     Rounded
@@ -421,9 +421,9 @@ export default function ProfilePreferencesTab({
                     type="button"
                     onClick={() => setCornerRadius("pill")}
                     className={`flex-1 py-3 border flex items-center justify-center gap-2 text-xs font-bold transition-all rounded-full ${
-                      cornerRadius === "pill"
-                        ? `bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text}`
-                        : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                      cornerRadius ==="pill"
+                        ?`bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text}`
+                        :"bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
                     Soft
@@ -506,7 +506,7 @@ export default function ProfilePreferencesTab({
                     className="sr-only peer"
                     checked={notifications.newsletter}
                     onChange={() =>
-                      handleToggle(setNotifications, "newsletter")
+                      handleToggle(setNotifications,"newsletter")
                     }
                   />
                   <div
@@ -536,7 +536,7 @@ export default function ProfilePreferencesTab({
                     className="sr-only peer"
                     checked={notifications.productUpdates}
                     onChange={() =>
-                      handleToggle(setNotifications, "productUpdates")
+                      handleToggle(setNotifications,"productUpdates")
                     }
                   />
                   <div
@@ -627,7 +627,7 @@ export default function ProfilePreferencesTab({
                     className="sr-only peer"
                     checked={notifications.pushNotifications}
                     onChange={() =>
-                      handleToggle(setNotifications, "pushNotifications")
+                      handleToggle(setNotifications,"pushNotifications")
                     }
                   />
                   <div
@@ -677,7 +677,7 @@ export default function ProfilePreferencesTab({
                     <AIModelSelector
                       selectedModel={ai.defaultModel}
                       onChange={(val) =>
-                        handleSelect(setAi, "defaultModel", val)
+                        handleSelect(setAi,"defaultModel", val)
                       }
                     />
                   </div>
@@ -702,7 +702,7 @@ export default function ProfilePreferencesTab({
                     <select
                       value={ai.defaultVoice}
                       onChange={(e) =>
-                        handleSelect(setAi, "defaultVoice", e.target.value)
+                        handleSelect(setAi,"defaultVoice", e.target.value)
                       }
                       className={`w-full bg-black/50 border border-white/10 text-white text-xs font-medium rounded-lg px-3 py-2.5 focus:outline-none ${tc.focusBorder}`}
                     >
@@ -739,8 +739,7 @@ export default function ProfilePreferencesTab({
                       value={ai.autoCropSensitivity}
                       onChange={(e) =>
                         handleSelect(
-                          setAi,
-                          "autoCropSensitivity",
+                          setAi,"autoCropSensitivity",
                           e.target.value
                         )
                       }
@@ -799,7 +798,7 @@ export default function ProfilePreferencesTab({
                     className="sr-only peer"
                     checked={workspace.hardwareAcceleration}
                     onChange={() =>
-                      handleToggle(setWorkspace, "hardwareAcceleration")
+                      handleToggle(setWorkspace,"hardwareAcceleration")
                     }
                   />
                   <div
@@ -830,7 +829,7 @@ export default function ProfilePreferencesTab({
                     type="checkbox"
                     className="sr-only peer"
                     checked={workspace.compactMode}
-                    onChange={() => handleToggle(setWorkspace, "compactMode")}
+                    onChange={() => handleToggle(setWorkspace,"compactMode")}
                   />
                   <div
                     className={`w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${tc.peerChecked}`}
@@ -858,8 +857,7 @@ export default function ProfilePreferencesTab({
                     value={workspace.autoSaveInterval}
                     onChange={(e) =>
                       handleSelect(
-                        setWorkspace,
-                        "autoSaveInterval",
+                        setWorkspace,"autoSaveInterval",
                         e.target.value
                       )
                     }
@@ -913,7 +911,7 @@ export default function ProfilePreferencesTab({
                       type="checkbox"
                       className="sr-only peer"
                       checked={privacy.publicProfile}
-                      onChange={() => handleToggle(setPrivacy, "publicProfile")}
+                      onChange={() => handleToggle(setPrivacy,"publicProfile")}
                     />
                     <div
                       className={`w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${tc.peerChecked}`}
@@ -942,7 +940,7 @@ export default function ProfilePreferencesTab({
                       className="sr-only peer"
                       checked={privacy.analyticsTelemetry}
                       onChange={() =>
-                        handleToggle(setPrivacy, "analyticsTelemetry")
+                        handleToggle(setPrivacy,"analyticsTelemetry")
                       }
                     />
                     <div
@@ -991,8 +989,7 @@ export default function ProfilePreferencesTab({
                       value={exportSettings.resolution}
                       onChange={(e) =>
                         handleSelect(
-                          setExportSettings,
-                          "resolution",
+                          setExportSettings,"resolution",
                           e.target.value
                         )
                       }
@@ -1024,8 +1021,7 @@ export default function ProfilePreferencesTab({
                       value={exportSettings.framerate}
                       onChange={(e) =>
                         handleSelect(
-                          setExportSettings,
-                          "framerate",
+                          setExportSettings,"framerate",
                           e.target.value
                         )
                       }
@@ -1057,8 +1053,7 @@ export default function ProfilePreferencesTab({
                       value={exportSettings.audioFormat}
                       onChange={(e) =>
                         handleSelect(
-                          setExportSettings,
-                          "audioFormat",
+                          setExportSettings,"audioFormat",
                           e.target.value
                         )
                       }

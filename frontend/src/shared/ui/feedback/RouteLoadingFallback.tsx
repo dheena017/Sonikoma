@@ -33,8 +33,6 @@ export default function RouteLoadingFallback({
     <div className="w-full flex-1 min-h-[480px] flex flex-col items-center justify-center p-6 animate-in fade-in duration-500 select-none">
       {/* Prominent, Centered Studio Loading Card */}
       <div className="flex flex-col items-center gap-5 px-8 sm:px-12 py-9 rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] shadow-2xl max-w-md w-full text-center relative overflow-hidden group">
-        {/* Ambient Top Glow */}
-        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Sonikoma Logo Brand Header */}
         <div className="relative z-10 pt-1 flex justify-center">

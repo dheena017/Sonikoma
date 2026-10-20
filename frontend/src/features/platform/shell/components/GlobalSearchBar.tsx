@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo } from"react";
 import {
   Search,
   BookOpen,
@@ -20,10 +20,10 @@ import {
   Sliders,
   Play,
   Key,
-} from "lucide-react";
-import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
-import { useAIModelStore } from "@/features/intelligence/core/hooks/useAIModelStore";
-import { FavoritesManager } from "@/features/platform/scraper/chapter-scraper/utils/FavoritesManager";
+} from"lucide-react";
+import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
+import { useAIModelStore } from"@/features/intelligence/core/hooks/useAIModelStore";
+import { FavoritesManager } from"@/features/platform/scraper/chapter-scraper/utils/FavoritesManager";
 
 export interface GlobalSearchBarProps {
   className?: string;
@@ -33,7 +33,7 @@ export interface GlobalSearchBarProps {
 
 interface SearchResultItem {
   id: string;
-  type: "project" | "panel" | "model" | "chapter" | "tool";
+  type:"project" |"panel" |"model" |"chapter" |"tool";
   title: string;
   subtitle: string;
   icon: React.ElementType;
@@ -44,14 +44,13 @@ interface SearchResultItem {
 }
 
 export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
-  className = "",
+  className ="",
   compact = false,
   onSelectRoute,
 }) => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState<
-    "all" | "projects" | "panels" | "models" | "tools"
+  const [selectedFilter, setSelectedFilter] = useState<"all" |"projects" |"panels" |"models" |"tools"
   >("all");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [dbProjects, setDbProjects] = useState<any[]>([]);
@@ -97,19 +96,19 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       const isInput =
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
+        target.tagName ==="INPUT" ||
+        target.tagName ==="TEXTAREA" ||
         target.isContentEditable;
 
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() ==="k") {
         e.preventDefault();
         setIsOpen(true);
         inputRef.current?.focus();
-      } else if (e.key === "/" && !isInput) {
+      } else if (e.key ==="/" && !isInput) {
         e.preventDefault();
         setIsOpen(true);
         inputRef.current?.focus();
-      } else if (e.key === "Escape" && isOpen) {
+      } else if (e.key ==="Escape" && isOpen) {
         setIsOpen(false);
         inputRef.current?.blur();
       }
@@ -144,10 +143,10 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
       return;
     }
     const nav = (window as any).navigateTo;
-    if (typeof nav === "function") {
+    if (typeof nav ==="function") {
       nav(path);
     } else {
-      window.history.pushState({}, "", path);
+      window.history.pushState({},"", path);
       window.dispatchEvent(new Event("popstate"));
     }
   };
@@ -158,7 +157,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     const results: SearchResultItem[] = [];
 
     // 1. REAL PROJECTS & SERIES SEARCH
-    if (selectedFilter === "all" || selectedFilter === "projects") {
+    if (selectedFilter ==="all" || selectedFilter ==="projects") {
       // Include active project
       if (activeProjectData?.project) {
         const p = activeProjectData.project;
@@ -168,15 +167,15 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
           p.series_name?.toLowerCase().includes(q)
         ) {
           results.push({
-            id: `proj-active-${p.project_id}`,
-            type: "project",
-            title: p.title || "Active Project",
-            subtitle: `${activeProjectData.panels?.length || 0} Panels • ${
-              p.series_name || "Custom Series"
+            id:`proj-active-${p.project_id}`,
+            type:"project",
+            title: p.title ||"Active Project",
+            subtitle:`${activeProjectData.panels?.length || 0} Panels • ${
+              p.series_name ||"Custom Series"
             }`,
             icon: BookOpen,
-            badge: "Active",
-            badgeColor: "#3B82F6",
+            badge:"Active",
+            badgeColor:"#3B82F6",
             imageUrl: p.cover_image || activeProjectData.panels?.[0]?.image_url,
             onSelect: () => navigateTo("/editor"),
           });
@@ -187,22 +186,22 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
       dbProjects.forEach((p) => {
         if (p.project_id === activeProjectId || p.id === activeProjectId)
           return;
-        const title = p.title || p.name || "Untitled Comic";
-        const series = p.series_name || p.seriesTitle || "";
+        const title = p.title || p.name ||"Untitled Comic";
+        const series = p.series_name || p.seriesTitle ||"";
         if (
           !q ||
           title.toLowerCase().includes(q) ||
           series.toLowerCase().includes(q)
         ) {
           results.push({
-            id: `proj-${p.project_id || p.id}`,
-            type: "project",
+            id:`proj-${p.project_id || p.id}`,
+            type:"project",
             title,
-            subtitle: `${p.panels_count || p.panels?.length || 0} Panels ${
-              series ? `• ${series}` : ""
+            subtitle:`${p.panels_count || p.panels?.length || 0} Panels ${
+              series ?`• ${series}` :""
             }`,
             icon: BookOpen,
-            badge: "Project",
+            badge:"Project",
             imageUrl: p.cover_image || p.thumbnail_url,
             onSelect: () => {
               useProjectStore
@@ -216,28 +215,27 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     }
 
     // 2. REAL STORYBOARD PANELS & DIALOGUE SEARCH (FROM ACTIVE COMIC)
-    if (selectedFilter === "all" || selectedFilter === "panels") {
+    if (selectedFilter ==="all" || selectedFilter ==="panels") {
       const activePanels = activeProjectData?.panels || [];
       activePanels.forEach((panel, idx) => {
         const text =
-          panel.speech_text || panel.narrative || panel.ocr_text || "";
-        const charName = panel.speaker || panel.character || "";
+          panel.speech_text || panel.narrative || panel.ocr_text ||"";
+        const charName = panel.speaker || panel.character ||"";
         if (
           q &&
           (text.toLowerCase().includes(q) ||
-            charName.toLowerCase().includes(q) ||
-            `panel ${idx + 1}`.includes(q))
+            charName.toLowerCase().includes(q) ||`panel ${idx + 1}`.includes(q))
         ) {
           results.push({
-            id: `panel-${panel.id || idx}`,
-            type: "panel",
-            title: `Panel #${idx + 1}${charName ? `: ${charName}` : ""}`,
+            id:`panel-${panel.id || idx}`,
+            type:"panel",
+            title:`Panel #${idx + 1}${charName ?`: ${charName}` :""}`,
             subtitle: text
-              ? `"${text.slice(0, 70)}..."`
-              : "Storyboard visual action beat",
+              ?`"${text.slice(0, 70)}..."`
+              :"Storyboard visual action beat",
             icon: MessageSquare,
-            badge: `P#${idx + 1}`,
-            badgeColor: "#3B82F6",
+            badge:`P#${idx + 1}`,
+            badgeColor:"#3B82F6",
             imageUrl: panel.image_url,
             onSelect: () => {
               useProjectStore.getState().setSelectedPanelIndex(idx);
@@ -249,7 +247,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     }
 
     // 3. REAL LIVE AI MODELS & ENGINES SEARCH
-    if (selectedFilter === "all" || selectedFilter === "models") {
+    if (selectedFilter ==="all" || selectedFilter ==="models") {
       const allModels = getAvailableModels();
       allModels.forEach((m) => {
         if (
@@ -259,15 +257,15 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
           m.provider.toLowerCase().includes(q)
         ) {
           results.push({
-            id: `model-${m.id}`,
-            type: "model",
+            id:`model-${m.id}`,
+            type:"model",
             title: m.name,
-            subtitle: `${m.provider.toUpperCase()} • ${
-              m.description || "High-performance AI model"
+            subtitle:`${m.provider.toUpperCase()} • ${
+              m.description ||"High-performance AI model"
             }`,
             icon: Cpu,
             badge: m.badge || m.provider.toUpperCase(),
-            badgeColor: "#06B6D4",
+            badgeColor:"#06B6D4",
             onSelect: () => navigateTo(`/ai-core?tab=routing`),
           });
         }
@@ -275,7 +273,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     }
 
     // 4. REAL SAVED WEBTOON / MANGA FAVORITES SEARCH
-    if (selectedFilter === "all" || selectedFilter === "projects") {
+    if (selectedFilter ==="all" || selectedFilter ==="projects") {
       try {
         const favs = FavoritesManager.getFavorites();
         favs.forEach((f) => {
@@ -285,13 +283,13 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
             f.source.toLowerCase().includes(q)
           ) {
             results.push({
-              id: `fav-${f.url}`,
-              type: "chapter",
+              id:`fav-${f.url}`,
+              type:"chapter",
               title: f.title,
-              subtitle: `Saved Manga Series • ${f.source.toUpperCase()}`,
+              subtitle:`Saved Manga Series • ${f.source.toUpperCase()}`,
               icon: Globe,
-              badge: "Manga Series",
-              badgeColor: "#EC4899",
+              badge:"Manga Series",
+              badgeColor:"#EC4899",
               imageUrl: f.coverImage,
               onSelect: () => {
                 localStorage.setItem("auto_import_url", f.url);
@@ -304,49 +302,49 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     }
 
     // 5. REAL STUDIO WORKSPACES & TOOLS
-    if (selectedFilter === "all" || selectedFilter === "tools") {
+    if (selectedFilter ==="all" || selectedFilter ==="tools") {
       const coreTools = [
         {
-          title: "Storyboard Director Studio",
-          subtitle: "Multi-panel comic timeline & animatic editor",
-          route: "/editor",
+          title:"Storyboard Director Studio",
+          subtitle:"Multi-panel comic timeline & animatic editor",
+          route:"/editor",
           icon: Film,
-          badge: "Workspace",
+          badge:"Workspace",
         },
         {
-          title: "Webtoon & Manga Scraper",
-          subtitle: "Extract chapters, panels & text bubbles",
-          route: "/scraper",
+          title:"Webtoon & Manga Scraper",
+          subtitle:"Extract chapters, panels & text bubbles",
+          route:"/scraper",
           icon: Layers,
-          badge: "Workspace",
+          badge:"Workspace",
         },
         {
-          title: "Voice & Dialogue Studio",
-          subtitle: "AI Voice casting, emotion TTS & soundboard",
-          route: "/voice-studio",
+          title:"Voice & Dialogue Studio",
+          subtitle:"AI Voice casting, emotion TTS & soundboard",
+          route:"/voice-studio",
           icon: Volume2,
-          badge: "Audio Lab",
+          badge:"Audio Lab",
         },
         {
-          title: "Smart Model Cascades & Routing",
-          subtitle: "11 Specialized comic task engine matrix",
-          route: "/ai-core?tab=routing",
+          title:"Smart Model Cascades & Routing",
+          subtitle:"11 Specialized comic task engine matrix",
+          route:"/ai-core?tab=routing",
           icon: Workflow,
-          badge: "AI Core",
+          badge:"AI Core",
         },
         {
-          title: "API Vault & Cloud Keys",
-          subtitle: "Manage Gemini, Claude, OpenAI & ElevenLabs keys",
-          route: "/ai-core?tab=api-keys",
+          title:"API Vault & Cloud Keys",
+          subtitle:"Manage Gemini, Claude, OpenAI & ElevenLabs keys",
+          route:"/ai-core?tab=api-keys",
           icon: Key,
-          badge: "Security",
+          badge:"Security",
         },
         {
-          title: "System Settings",
-          subtitle: "Preferences, export quality & theme configuration",
-          route: "/settings",
+          title:"System Settings",
+          subtitle:"Preferences, export quality & theme configuration",
+          route:"/settings",
           icon: Settings,
-          badge: "Settings",
+          badge:"Settings",
         },
       ];
 
@@ -357,13 +355,13 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
           tool.subtitle.toLowerCase().includes(q)
         ) {
           results.push({
-            id: `tool-${tool.route}`,
-            type: "tool",
+            id:`tool-${tool.route}`,
+            type:"tool",
             title: tool.title,
             subtitle: tool.subtitle,
             icon: tool.icon,
             badge: tool.badge,
-            badgeColor: "#F59E0B",
+            badgeColor:"#F59E0B",
             onSelect: () => navigateTo(tool.route),
           });
         }
@@ -383,15 +381,15 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
   // Keyboard navigation up/down
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (searchResults.length === 0) return;
-    if (e.key === "ArrowDown") {
+    if (e.key ==="ArrowDown") {
       e.preventDefault();
       setSelectedIndex((prev) => (prev + 1) % searchResults.length);
-    } else if (e.key === "ArrowUp") {
+    } else if (e.key ==="ArrowUp") {
       e.preventDefault();
       setSelectedIndex(
         (prev) => (prev - 1 + searchResults.length) % searchResults.length
       );
-    } else if (e.key === "Enter") {
+    } else if (e.key ==="Enter") {
       e.preventDefault();
       if (searchResults[selectedIndex]) {
         searchResults[selectedIndex].onSelect();
@@ -403,7 +401,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     <div
       ref={containerRef}
       className={`relative ${className} ${
-        compact ? "max-w-[220px]" : "w-full max-w-sm lg:max-w-md"
+        compact ?"max-w-[220px]" :"w-full max-w-sm lg:max-w-md"
       }`}
     >
       {/* ── Search Input Capsule (Exact Image Styling) ── */}
@@ -442,11 +440,11 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
           <div className="p-2 border-b border-white/[0.06] bg-[#0A0A0E] flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0">
             {(
               [
-                { id: "all", label: "All Results" },
-                { id: "projects", label: "Projects" },
-                { id: "panels", label: "Panels & Dialogue" },
-                { id: "models", label: "AI Engines" },
-                { id: "tools", label: "Tools" },
+                { id:"all", label:"All Results" },
+                { id:"projects", label:"Projects" },
+                { id:"panels", label:"Panels & Dialogue" },
+                { id:"models", label:"AI Engines" },
+                { id:"tools", label:"Tools" },
               ] as const
             ).map((tab) => (
               <button
@@ -455,8 +453,8 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                 onClick={() => setSelectedFilter(tab.id)}
                 className={`px-2.5 py-1 rounded-lg text-[10px] font-bold font-sans transition-all cursor-pointer whitespace-nowrap ${
                   selectedFilter === tab.id
-                    ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
-                    : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
+                    ?"bg-blue-600 text-white shadow-sm"
+                    :"text-neutral-400 hover:text-white hover:bg-white/[0.04]"
                 }`}
               >
                 {tab.label}
@@ -490,8 +488,8 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`w-full text-left px-3 py-2 rounded-xl flex items-center justify-between gap-3 group transition-all cursor-pointer ${
                       isHighlighted
-                        ? "bg-blue-500/15 border border-blue-500/30 text-white"
-                        : "hover:bg-white/[0.04] text-neutral-300 border border-transparent"
+                        ?"bg-blue-500/15 border border-blue-500/30 text-white"
+                        :"hover:bg-white/[0.04] text-neutral-300 border border-transparent"
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -523,11 +521,11 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                         <span
                           className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border uppercase"
                           style={{
-                            backgroundColor: `${
-                              item.badgeColor || "#3B82F6"
+                            backgroundColor:`${
+                              item.badgeColor ||"#3B82F6"
                             }20`,
-                            color: item.badgeColor || "#3B82F6",
-                            borderColor: `${item.badgeColor || "#3B82F6"}40`,
+                            color: item.badgeColor ||"#3B82F6",
+                            borderColor:`${item.badgeColor ||"#3B82F6"}40`,
                           }}
                         >
                           {item.badge}
@@ -546,19 +544,19 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
             <span className="flex items-center gap-1.5">
               <kbd className="px-1 py-0.2 rounded bg-black/40 border border-white/10">
                 ↑↓
-              </kbd>{" "}
+              </kbd>{""}
               to navigate
             </span>
             <span className="flex items-center gap-1.5">
               <kbd className="px-1 py-0.2 rounded bg-black/40 border border-white/10">
                 ↵
-              </kbd>{" "}
+              </kbd>{""}
               to open
             </span>
             <span className="flex items-center gap-1.5">
               <kbd className="px-1 py-0.2 rounded bg-black/40 border border-white/10">
                 ESC
-              </kbd>{" "}
+              </kbd>{""}
               to close
             </span>
           </div>

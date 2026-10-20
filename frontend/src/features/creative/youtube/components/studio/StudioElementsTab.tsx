@@ -1,6 +1,6 @@
-import React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import CyberSelect from "@/shared/ui/common/CyberSelect";
+import React from"react";
+import { ChevronLeft, ChevronRight } from"lucide-react";
+import CyberSelect from"@/shared/ui/common/CyberSelect";
 
 export interface StudioElementsTabProps {
   description: string;
@@ -70,11 +70,10 @@ export default function StudioElementsTab({
           </button>
         </div>
         <textarea
-          value={description.match(/^(0:00.+(\n\d+:\d+.+)*)/m)?.[0] ?? ""}
+          value={description.match(/^(0:00.+(\n\d+:\d+.+)*)/m)?.[0] ??""}
           readOnly
           rows={4}
-          placeholder={
-            "0:00 Intro\n1:30 Chapter 1 - Title\n5:00 Chapter 2 - Title\n\nClick 'Auto-compile' to generate from story panels"
+          placeholder={"0:00 Intro\n1:30 Chapter 1 - Title\n5:00 Chapter 2 - Title\n\nClick 'Auto-compile' to generate from story panels"
           }
           className="w-full bg-neutral-950/60 border border-neutral-700 rounded-xl px-4 py-3 text-xs text-neutral-400 placeholder-neutral-600 font-mono resize-none focus:outline-none"
         />
@@ -128,12 +127,12 @@ export default function StudioElementsTab({
               onChange={setWebtoonPlatform}
               placeholder="Select platform..."
               options={[
-                { value: "", label: "Select platform" },
-                { value: "Webtoon", label: "Webtoon" },
-                { value: "Tapas", label: "Tapas" },
-                { value: "Manga Plus", label: "Manga Plus" },
-                { value: "Crunchyroll", label: "Crunchyroll" },
-                { value: "Other", label: "Other" },
+                { value:"", label:"Select platform" },
+                { value:"Webtoon", label:"Webtoon" },
+                { value:"Tapas", label:"Tapas" },
+                { value:"Manga Plus", label:"Manga Plus" },
+                { value:"Crunchyroll", label:"Crunchyroll" },
+                { value:"Other", label:"Other" },
               ]}
             />
           </div>
@@ -179,9 +178,9 @@ export default function StudioElementsTab({
             value={subtitlesType}
             onChange={setSubtitlesType}
             options={[
-              { value: "none", label: "No subtitles" },
-              { value: "auto", label: "Auto-generated (YouTube ASR)" },
-              { value: "manual", label: "Upload SRT / VTT file" },
+              { value:"none", label:"No subtitles" },
+              { value:"auto", label:"Auto-generated (YouTube ASR)" },
+              { value:"manual", label:"Upload SRT / VTT file" },
             ]}
           />
           <CyberSelect
@@ -190,21 +189,21 @@ export default function StudioElementsTab({
             placeholder="Select language..."
             searchable
             options={[
-              { value: "", label: "Select language" },
-              { value: "en", label: "English" },
-              { value: "ja", label: "Japanese" },
-              { value: "ko", label: "Korean" },
-              { value: "zh-Hans", label: "Chinese (Simplified)" },
-              { value: "zh-Hant", label: "Chinese (Traditional)" },
-              { value: "es", label: "Spanish" },
-              { value: "fr", label: "French" },
-              { value: "de", label: "German" },
-              { value: "id", label: "Indonesian" },
-              { value: "vi", label: "Vietnamese" },
-              { value: "th", label: "Thai" },
-              { value: "ar", label: "Arabic" },
-              { value: "pt", label: "Portuguese" },
-              { value: "ru", label: "Russian" },
+              { value:"", label:"Select language" },
+              { value:"en", label:"English" },
+              { value:"ja", label:"Japanese" },
+              { value:"ko", label:"Korean" },
+              { value:"zh-Hans", label:"Chinese (Simplified)" },
+              { value:"zh-Hant", label:"Chinese (Traditional)" },
+              { value:"es", label:"Spanish" },
+              { value:"fr", label:"French" },
+              { value:"de", label:"German" },
+              { value:"id", label:"Indonesian" },
+              { value:"vi", label:"Vietnamese" },
+              { value:"th", label:"Thai" },
+              { value:"ar", label:"Arabic" },
+              { value:"pt", label:"Portuguese" },
+              { value:"ru", label:"Russian" },
             ]}
           />
         </div>
@@ -221,7 +220,7 @@ export default function StudioElementsTab({
         </button>
         <button
           onClick={onNext}
-          className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold font-mono rounded-xl shadow-lg shadow-red-600/30 transition-all cursor-pointer"
+          className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold font-mono rounded-xl shadow-lg transition-all cursor-pointer"
         >
           <span>Next: Checks</span>
           <ChevronRight className="w-4 h-4" />

@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   Sparkles,
   Film,
@@ -14,11 +14,11 @@ import {
   Trash2,
   Zap,
   Save,
-} from "lucide-react";
-import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
-import { getProxiedImageUrl } from "@/shared/utils";
-import { Tooltip } from "@/shared/ui/common/TooltipPortal";
-import { getHumanEditorPath } from "@/shared/utils/workspaceNavigation";
+} from"lucide-react";
+import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
+import { getProxiedImageUrl } from"@/shared/utils";
+import { Tooltip } from"@/shared/ui/common/TooltipPortal";
+import { getHumanEditorPath } from"@/shared/utils/workspaceNavigation";
 
 interface ActiveProjectWorkspaceBarProps {
   navigateTo?: (path: string) => void;
@@ -52,11 +52,10 @@ export const ActiveProjectWorkspaceBar: React.FC<
     setIsSaving(true);
     try {
       const fetcher = fetchWithInterceptor || window.fetch;
-      const res = await fetcher(
-        `/api/v1/projects/${encodeURIComponent(activeProjectId)}/promote`,
+      const res = await fetcher(`/api/v1/projects/${encodeURIComponent(activeProjectId)}/promote`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method:"POST",
+          headers: {"Content-Type":"application/json" },
         }
       );
       const data = await res.json();
@@ -66,7 +65,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
             ...activeProjectData,
             project: {
               ...activeProjectData.project,
-              project_type: "permanent",
+              project_type:"permanent",
             },
           });
         }
@@ -93,8 +92,8 @@ export const ActiveProjectWorkspaceBar: React.FC<
   };
 
   // ── MISSING STATE ─────────────────────────────────────────────────────────
-  if (projectState === "missing") {
-    const missingId = missingProjectInfo?.missingId || "Unknown ID";
+  if (projectState ==="missing") {
+    const missingId = missingProjectInfo?.missingId ||"Unknown ID";
     const isJobId = missingProjectInfo?.isJobId ?? missingId.startsWith("job_");
     return (
       <div className="w-full bg-rose-950/30 border-b border-rose-500/25 backdrop-blur-md px-4 py-2 text-xs transition-all">
@@ -105,12 +104,12 @@ export const ActiveProjectWorkspaceBar: React.FC<
             </div>
             <div className="min-w-0">
               <span className="font-semibold text-rose-300 block">
-                {isJobId ? "Job ID Expired" : "Project Not Found"}
+                {isJobId ?"Job ID Expired" :"Project Not Found"}
               </span>
               <span className="text-rose-400/70 font-mono text-[10px] truncate block max-w-[260px] sm:max-w-sm">
                 {isJobId
-                  ? `"${missingId}" is a processing job reference, not a project ID.`
-                  : `"${missingId}" could not be found or was deleted.`}
+                  ?`"${missingId}" is a processing job reference, not a project ID.`
+                  :`"${missingId}" could not be found or was deleted.`}
               </span>
             </div>
           </div>
@@ -146,7 +145,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
   }
 
   // ── LOADING STATE ─────────────────────────────────────────────────────────
-  if (projectState === "loading" || isHydrating) {
+  if (projectState ==="loading" || isHydrating) {
     return (
       <div className="w-full bg-[#0d0d12]/90 border-b border-[#3B82F6]/20 backdrop-blur-md px-4 py-2 transition-all">
         <div className="max-w-7xl mx-auto flex items-center gap-3">
@@ -201,17 +200,17 @@ export const ActiveProjectWorkspaceBar: React.FC<
   // ── ACTIVE STATE ──────────────────────────────────────────────────────────
   const project = activeProjectData.project;
   const panels = activeProjectData.panels || [];
-  const title = project?.title || "Untitled Project";
+  const title = project?.title ||"Untitled Project";
   const chapter = project?.chapter_slug
-    ? `Chapter ${project.chapter_slug}`
+    ?`Chapter ${project.chapter_slug}`
     : project?.episode
-    ? `Ep. ${project.episode}`
-    : "";
+    ?`Ep. ${project.episode}`
+    :"";
   const coverImage =
     project?.cover_image || project?.first_panel_image || panels[0]?.image_url;
-  const projectStatus = project?.status || "Ready";
+  const projectStatus = project?.status ||"Ready";
   const isTemp =
-    project?.project_type === "temp" || activeProjectId.startsWith("temp_");
+    project?.project_type ==="temp" || activeProjectId.startsWith("temp_");
 
   const totalDurationSeconds = panels.reduce(
     (acc: number, p: any) => acc + (p.duration || p.audio_duration || 3),
@@ -219,32 +218,32 @@ export const ActiveProjectWorkspaceBar: React.FC<
   );
   const minutes = Math.floor(totalDurationSeconds / 60);
   const seconds = Math.round(totalDurationSeconds % 60);
-  const durationText = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  const durationText = minutes > 0 ?`${minutes}m ${seconds}s` :`${seconds}s`;
 
   const renderStatusBadge = () => {
     switch (projectStatus.toLowerCase()) {
-      case "processing":
+      case"processing":
         return (
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/30">
             <Loader2 className="w-3 h-3 animate-spin" />
             <span>Processing</span>
           </span>
         );
-      case "draft":
+      case"draft":
         return (
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#3B82F6]/10 text-[#60A5FA] border border-[#3B82F6]/30">
             <span className="w-1.5 h-1.5 rounded-full bg-[#2A2A2A] animate-pulse" />
             <span>Draft</span>
           </span>
         );
-      case "completed":
+      case"completed":
         return (
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
             <CheckCircle2 className="w-3 h-3" />
             <span>Completed</span>
           </span>
         );
-      case "error":
+      case"error":
         return (
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/30">
             <AlertCircle className="w-3 h-3" />
@@ -261,17 +260,17 @@ export const ActiveProjectWorkspaceBar: React.FC<
     }
   };
 
-  const editorUrl = `/scraper/editor?project_id=${encodeURIComponent(
+  const editorUrl =`/scraper/editor?project_id=${encodeURIComponent(
     activeProjectId
   )}`;
-  const creativeSuiteUrl = `/creative-suite?project_id=${encodeURIComponent(
+  const creativeSuiteUrl =`/creative-suite?project_id=${encodeURIComponent(
     activeProjectId
   )}`;
 
   return (
     <div
       className={`w-full bg-[#0b0c10]/95 border-b backdrop-blur-md px-4 py-2 text-xs transition-all shadow-lg ${
-        isTemp ? "border-amber-500/30" : "border-white/10"
+        isTemp ?"border-amber-500/30" :"border-white/10"
       }`}
     >
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
@@ -325,7 +324,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
 
               <span className="hidden sm:inline-flex items-center gap-1 text-neutral-300">
                 <Layers className="w-3 h-3 text-neutral-400" />
-                {panels.length} {panels.length === 1 ? "Panel" : "Panels"}
+                {panels.length} {panels.length === 1 ?"Panel" :"Panels"}
               </span>
 
               {panels.length > 0 && (
@@ -349,7 +348,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
                 <button
                   onClick={handleSaveProject}
                   disabled={isSaving}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-semibold shadow-md shadow-amber-500/20 transition-all text-xs disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-semibold shadow-md transition-all text-xs disabled:opacity-50 cursor-pointer"
                   aria-label="Save Project"
                 >
                   {isSaving ? (

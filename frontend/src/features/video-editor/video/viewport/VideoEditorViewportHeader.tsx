@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Sparkles, Save, Video, ZoomIn, ZoomOut, Tv, Download } from "lucide-react";
-import MetadataPanel from "@/shared/ui/video/MetadataPanel";
+import React, { useEffect, useRef, useState } from"react";
+import { Sparkles, Save, Video, ZoomIn, ZoomOut, Tv, Download } from"lucide-react";
+import MetadataPanel from"@/shared/ui/video/MetadataPanel";
 
 export interface VideoEditorViewportHeaderProps {
-  monitorTab: "timeline" | "video";
-  setMonitorTab: (tab: "timeline" | "video") => void;
+  monitorTab:"timeline" |"video";
+  setMonitorTab: (tab:"timeline" |"video") => void;
   panelsCount: number;
   zoomLevel: number;
   setZoomLevel: (updater: (prev: number) => number) => void;
@@ -44,15 +44,15 @@ export const VideoEditorViewportHeader: React.FC<
   handleRenderFinalVideo,
   onExport,
   isRendering = false,
-  musicTheme = "",
-  voiceActor = "",
+  musicTheme ="",
+  voiceActor ="",
   videoUrl = null,
   seriesTitle,
   chapterNumber,
   chapterTitle,
   targetUrl,
   navigateTo,
-  aspectRatio = "original",
+  aspectRatio ="original",
   setAspectRatio,
 }) => {
   const finalExport = onExportVideo || handleRenderFinalVideo || onExport;
@@ -83,20 +83,20 @@ export const VideoEditorViewportHeader: React.FC<
     >
       {/* Left: Viewport Name & Live Pill */}
       <div className="min-w-0 flex items-center gap-2">
-        <div className="h-6 w-6 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 shadow-sm shadow-blue-500/25 flex items-center justify-center shrink-0 transition-all cursor-pointer">
+        <div className="h-6 w-6 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 shadow-sm flex items-center justify-center shrink-0 transition-all cursor-pointer">
           <Sparkles className="h-3.5 w-3.5 text-white" />
         </div>
         <div className="min-w-0 flex items-center gap-2">
           <span
             className={`${
-              isNarrow ? "hidden" : "block"
+              isNarrow ?"hidden" :"block"
             } truncate whitespace-nowrap text-xs font-bold font-mono tracking-wider text-white uppercase`}
           >
-            {isCompact ? "Video Preview" : "Video Editor Preview"}
+            {isCompact ?"Video Preview" :"Video Editor Preview"}
           </span>
           <span
             className={`${
-              isNarrow ? "hidden" : "inline-flex"
+              isNarrow ?"hidden" :"inline-flex"
             } items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400`}
           >
             <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" />
@@ -111,14 +111,14 @@ export const VideoEditorViewportHeader: React.FC<
           type="button"
           onClick={() => setMonitorTab("timeline")}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md whitespace-nowrap text-[11px] font-bold transition-all cursor-pointer ${
-            monitorTab === "timeline"
-              ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25 border border-blue-400/40"
-              : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
+            monitorTab ==="timeline"
+              ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm  border border-blue-400/40"
+              :"text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
           }`}
         >
           <Tv className="h-3 w-3" />
-          <span className={isNarrow ? "hidden" : "inline"}>
-            {isCompact ? "Live" : "Live Video Preview"}
+          <span className={isNarrow ?"hidden" :"inline"}>
+            {isCompact ?"Live" :"Live Video Preview"}
           </span>
         </button>
 
@@ -126,22 +126,22 @@ export const VideoEditorViewportHeader: React.FC<
           type="button"
           onClick={() => setMonitorTab("video")}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md whitespace-nowrap text-[11px] font-bold transition-all cursor-pointer ${
-            monitorTab === "video"
-              ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25 border border-blue-400/40"
-              : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
+            monitorTab ==="video"
+              ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm  border border-blue-400/40"
+              :"text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
           }`}
         >
           <Video className="h-3 w-3" />
-          <span className={isNarrow ? "hidden" : "inline"}>
-            {isCompact ? "Final" : "Final Video"}
+          <span className={isNarrow ?"hidden" :"inline"}>
+            {isCompact ?"Final" :"Final Video"}
           </span>
           <span
             className={`${
-              isCompact ? "hidden" : "inline"
+              isCompact ?"hidden" :"inline"
             } text-[8px] font-mono px-1 py-0.2 rounded border uppercase ${
-              monitorTab === "video"
-                ? "bg-black/30 border-blue-400/40 text-white"
-                : "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
+              monitorTab ==="video"
+                ?"bg-black/30 border-blue-400/40 text-white"
+                :"bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
             }`}
           >
             MP4
@@ -195,8 +195,8 @@ export const VideoEditorViewportHeader: React.FC<
             title="Save Project"
           >
             <Save className="h-3 w-3 text-[#3B82F6]" />
-            <span className={isCompact ? "hidden" : "hidden sm:inline"}>
-              {isSaving ? "Saving..." : "Save"}
+            <span className={isCompact ?"hidden" :"hidden sm:inline"}>
+              {isSaving ?"Saving..." :"Save"}
             </span>
           </button>
         )}
@@ -206,16 +206,16 @@ export const VideoEditorViewportHeader: React.FC<
             type="button"
             onClick={finalExport}
             disabled={isRendering}
-            className="h-7 px-3 rounded-lg border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[11px] font-bold flex items-center gap-1 whitespace-nowrap transition cursor-pointer active:scale-95 shadow-sm shadow-blue-500/25 disabled:opacity-50"
+            className="h-7 px-3 rounded-lg border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[11px] font-bold flex items-center gap-1 whitespace-nowrap transition cursor-pointer active:scale-95 shadow-sm disabled:opacity-50"
             title="Export and render final video"
           >
             <Video className="h-3 w-3" />
-            <span className={isNarrow ? "hidden" : "inline"}>
+            <span className={isNarrow ?"hidden" :"inline"}>
               {isCompact
-                ? "Export"
+                ?"Export"
                 : isRendering
-                ? "Rendering..."
-                : "Export Video"}
+                ?"Rendering..."
+                :"Export Video"}
             </span>
           </button>
         )}
@@ -223,15 +223,15 @@ export const VideoEditorViewportHeader: React.FC<
         {videoUrl && (
           <a
             href={videoUrl}
-            download={seriesTitle ? `${seriesTitle.replace(/[^a-zA-Z0-9_-]/g, "_")}_video.mp4` : "video.mp4"}
+            download={seriesTitle ?`${seriesTitle.replace(/[^a-zA-Z0-9_-]/g,"_")}_video.mp4` :"video.mp4"}
             target="_blank"
             rel="noopener noreferrer"
-            className="h-7 px-3 rounded-lg border border-emerald-500/40 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center gap-1 whitespace-nowrap transition cursor-pointer active:scale-95 shadow-sm shadow-emerald-500/25"
+            className="h-7 px-3 rounded-lg border border-emerald-500/40 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center gap-1 whitespace-nowrap transition cursor-pointer active:scale-95 shadow-sm"
             title="Download compiled MP4 video to your computer"
           >
             <Download className="h-3 w-3" />
-            <span className={isNarrow ? "hidden" : "inline"}>
-              {isCompact ? "MP4" : "Download MP4"}
+            <span className={isNarrow ?"hidden" :"inline"}>
+              {isCompact ?"MP4" :"Download MP4"}
             </span>
           </a>
         )}

@@ -44,9 +44,6 @@ export default function CanvasCropSelection({
   const badgeColorClass = isOutOfTolerance
     ? "text-orange-400 border-orange-800/40"
     : "text-[#3B82F6] border-[#2F2F2F]";
-  const glowColor = isOutOfTolerance
-    ? "rgba(249,115,22,0.3)"
-    : "rgba(139,92,246,0.25)";
 
   return (
     <>

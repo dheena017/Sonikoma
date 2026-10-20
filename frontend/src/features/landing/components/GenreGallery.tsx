@@ -1,55 +1,55 @@
-import React from "react";
-import { Sparkles, ArrowRight, Play, Film, Flame } from "lucide-react";
+import React from"react";
+import { Sparkles, ArrowRight, Play, Film, Flame } from"lucide-react";
 
 interface GenreGalleryProps {
-  themeMode?: "dark" | "light";
+  themeMode?:"dark" |"light";
   onGetStarted: () => void;
 }
 
 const GENRES = [
   {
-    title: "Shonen & Dungeon Action",
-    tag: "Action / Hunter",
-    tagColor: "bg-blue-500/20 text-blue-300 border-blue-400/30",
-    image: "/demo-action-hero.jpg",
-    description: "Electric lightning auras, dynamic weapon clashes, and intense hunter awakenings.",
-    stats: "Top Popularity • 120+ FPS Motion",
-    sampleChapter: "Solo Leveling / Overgeared style",
+    title:"Shonen & Dungeon Action",
+    tag:"Action / Hunter",
+    tagColor:"bg-blue-500/20 text-blue-300 border-blue-400/30",
+    image:"/demo-action-hero.jpg",
+    description:"Electric lightning auras, dynamic weapon clashes, and intense hunter awakenings.",
+    stats:"Top Popularity • 120+ FPS Motion",
+    sampleChapter:"Solo Leveling / Overgeared style",
   },
   {
-    title: "Imperial & Otome Romance",
-    tag: "Romance / Fantasy",
-    tagColor: "bg-pink-500/20 text-pink-300 border-pink-400/30",
-    image: "/demo-romance.jpg",
-    description: "Starlight palace balconies, royal ballroom drama, and emotional character vows.",
-    stats: "High Retention • Melodic Narration",
-    sampleChapter: "Villainess / Imperial Palace style",
+    title:"Imperial & Otome Romance",
+    tag:"Romance / Fantasy",
+    tagColor:"bg-pink-500/20 text-pink-300 border-pink-400/30",
+    image:"/demo-romance.jpg",
+    description:"Starlight palace balconies, royal ballroom drama, and emotional character vows.",
+    stats:"High Retention • Melodic Narration",
+    sampleChapter:"Villainess / Imperial Palace style",
   },
   {
-    title: "Dark Fantasy & Monarchs",
-    tag: "Dark Fantasy / Lore",
-    tagColor: "bg-purple-500/20 text-purple-300 border-purple-400/30",
-    image: "/demo-monarch.jpg",
-    description: "Obsidian thrones, legions of shadow knights, and world-shattering climaxes.",
-    stats: "Cinematic Audio • Punch-Zoom Shake",
-    sampleChapter: "Omniscient Reader / Monarch style",
+    title:"Dark Fantasy & Monarchs",
+    tag:"Dark Fantasy / Lore",
+    tagColor:"bg-purple-500/20 text-purple-300 border-purple-400/30",
+    image:"/demo-monarch.jpg",
+    description:"Obsidian thrones, legions of shadow knights, and world-shattering climaxes.",
+    stats:"Cinematic Audio • Punch-Zoom Shake",
+    sampleChapter:"Omniscient Reader / Monarch style",
   },
   {
-    title: "Sci-Fi & Cyberpunk Rain",
-    tag: "Cyberpunk / Mecha",
-    tagColor: "bg-cyan-500/20 text-cyan-300 border-cyan-400/30",
-    image: "/demo-cyberpunk.jpg",
-    description: "Neon-drenched megacities, laser blades, holographic HUDs, and stealth operatives.",
-    stats: "Synthwave Audio • Multi-Language OCR",
-    sampleChapter: "Cyberpunk / Edgerunners style",
+    title:"Sci-Fi & Cyberpunk Rain",
+    tag:"Cyberpunk / Mecha",
+    tagColor:"bg-cyan-500/20 text-cyan-300 border-cyan-400/30",
+    image:"/demo-cyberpunk.jpg",
+    description:"Neon-drenched megacities, laser blades, holographic HUDs, and stealth operatives.",
+    stats:"Synthwave Audio • Multi-Language OCR",
+    sampleChapter:"Cyberpunk / Edgerunners style",
   },
 ];
 
 export function GenreGallery({
-  themeMode = "dark",
+  themeMode ="dark",
   onGetStarted,
 }: GenreGalleryProps) {
-  const isLight = themeMode === "light";
+  const isLight = themeMode ==="light";
 
   return (
     <section id="genre-gallery" className="py-24 px-4 sm:px-6 relative z-10 scroll-mt-24">
@@ -59,8 +59,8 @@ export function GenreGallery({
           <div
             className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider border ${
               isLight
-                ? "bg-rose-50 border-rose-200 text-rose-700"
-                : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                ?"bg-rose-50 border-rose-200 text-rose-700"
+                :"bg-rose-500/10 border-rose-500/20 text-rose-400"
             }`}
           >
             <Flame className="w-3.5 h-3.5 text-rose-400" />
@@ -69,10 +69,10 @@ export function GenreGallery({
 
           <h2
             className={`text-3xl sm:text-4xl md:text-5xl font-black tracking-tight ${
-              isLight ? "text-slate-950" : "text-white"
+              isLight ?"text-slate-950" :"text-white"
             }`}
           >
-            Breathtaking Visuals Across{" "}
+            Breathtaking Visuals Across{""}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
               Every Webtoon Genre
             </span>
@@ -80,7 +80,7 @@ export function GenreGallery({
 
           <p
             className={`text-sm sm:text-base leading-relaxed ${
-              isLight ? "text-slate-600" : "text-neutral-400"
+              isLight ?"text-slate-600" :"text-neutral-400"
             }`}
           >
             Whether your story is an adrenaline-fueled dungeon raid, an emotional
@@ -97,8 +97,8 @@ export function GenreGallery({
               onClick={onGetStarted}
               className={`group relative rounded-[28px] overflow-hidden border cursor-pointer transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between ${
                 isLight
-                  ? "bg-white border-slate-200 shadow-lg shadow-slate-200/50 hover:shadow-2xl hover:border-blue-400"
-                  : "bg-[#11131a] border-white/10 hover:border-white/30 shadow-xl hover:shadow-2xl hover:shadow-blue-950/40"
+                  ?"bg-white border-slate-200 shadow-lg shadow-slate-200/50 hover:shadow-2xl hover:border-blue-400"
+                  :"bg-[#11131a] border-white/10 hover:border-white/30 shadow-xl hover:shadow-2xl"
               }`}
             >
               {/* Image Container with Zoom effect */}
@@ -140,14 +140,14 @@ export function GenreGallery({
                 <div>
                   <h3
                     className={`text-base font-bold tracking-tight mb-1 transition-colors ${
-                      isLight ? "text-slate-900" : "text-white"
+                      isLight ?"text-slate-900" :"text-white"
                     }`}
                   >
                     {genre.title}
                   </h3>
                   <p
                     className={`text-xs leading-relaxed ${
-                      isLight ? "text-slate-600" : "text-neutral-400"
+                      isLight ?"text-slate-600" :"text-neutral-400"
                     }`}
                   >
                     {genre.description}

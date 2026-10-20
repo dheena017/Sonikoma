@@ -57,14 +57,6 @@ export default function ConfirmModal({
 
       {/* Modal Container */}
       <div className="relative w-full max-w-md bg-neutral-950/90 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
-        {/* Glow Accent */}
-        <div
-          className={`absolute top-0 left-0 right-0 h-[2px] blur-[1px] ${
-            isRed
-              ? "bg-gradient-to-r from-red-500 via-rose-500 to-amber-500"
-              : "bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#3B82F6]"
-          }`}
-        />
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">

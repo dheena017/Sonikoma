@@ -1,6 +1,6 @@
-import React from "react";
-import { Layers, RefreshCw, Crop as CropIcon, Trash2 } from "lucide-react";
-import { Slice } from "@/features/image-editor/canvas/components";
+import React from"react";
+import { Layers, RefreshCw, Crop as CropIcon, Trash2 } from"lucide-react";
+import { Slice } from"@/features/image-editor/canvas/components";
 
 interface CutsRegistryListProps {
   slices: Slice[];
@@ -44,21 +44,20 @@ export function CutsRegistryList({
           <div
             key={slice.id}
             onClick={() => {
-              console.log(
-                `[CutsRegistry] Selecting slice #${index + 1}: ${slice.id}`
+              console.log(`[CutsRegistry] Selecting slice #${index + 1}: ${slice.id}`
               );
               handleSelectSlice(slice);
             }}
             className={`p-2.5 rounded-xl text-[11px] font-mono border cursor-pointer transition-all flex items-center justify-between group ${
               isSelected
-                ? "bg-emerald-950/30 border-emerald-500/50 text-emerald-300 shadow shadow-emerald-900/20"
-                : "bg-black/20 border-white/5 hover:bg-white/3 hover:border-white/10 text-neutral-500 hover:text-neutral-300"
+                ?"bg-emerald-950/30 border-emerald-500/50 text-emerald-300 shadow"
+                :"bg-black/20 border-white/5 hover:bg-white/3 hover:border-white/10 text-neutral-500 hover:text-neutral-300"
             }`}
           >
             <div className="flex items-center gap-2">
               <span
                 className={`font-bold ${
-                  isSelected ? "text-emerald-300" : "text-neutral-400"
+                  isSelected ?"text-emerald-300" :"text-neutral-400"
                 }`}
               >
                 #{index + 1}
@@ -83,8 +82,7 @@ export function CutsRegistryList({
               <button
                 type="button"
                 onClick={(e) => {
-                  console.log(
-                    `[CutsRegistry] Executing crop for slice: ${slice.id}`
+                  console.log(`[CutsRegistry] Executing crop for slice: ${slice.id}`
                   );
                   handleCropSingleSlice(slice, e);
                 }}

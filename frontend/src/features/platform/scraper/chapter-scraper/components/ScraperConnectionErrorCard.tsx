@@ -64,9 +64,6 @@ export default function ScraperConnectionErrorCard({
 
   return (
     <div className="w-full max-w-4xl mx-auto rounded-3xl border border-rose-500/20 bg-gradient-to-b from-[#1E1215] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-10 shadow-2xl space-y-8 relative overflow-hidden text-left animate-fade-in">
-      {/* Background ambient lighting */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#3B82F6]/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* TOP HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08] relative z-10">

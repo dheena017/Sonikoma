@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo } from"react";
 import {
   ArrowLeft,
   Compass,
@@ -20,9 +20,9 @@ import {
   Info,
   ChevronUp,
   ChevronDown,
-} from "lucide-react";
-import { AutoCropMinimapRadar } from "../components/AutoCropMinimapRadar";
-import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
+} from"lucide-react";
+import { AutoCropMinimapRadar } from"../components/AutoCropMinimapRadar";
+import { getProxiedImageUrl } from"@/shared/utils/imageProxy";
 
 interface AutoCropRadarPageProps {
   onBack?: () => void;
@@ -31,8 +31,7 @@ interface AutoCropRadarPageProps {
 }
 
 // Sample fallback comic strip data for live demonstration
-const SAMPLE_IMAGE_URL =
-  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop";
+const SAMPLE_IMAGE_URL ="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop";
 
 export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
   onBack,
@@ -70,7 +69,7 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
     const avgHeight = 18000 / panelCount;
     for (let i = 0; i < panelCount; i++) {
       dummy.push({
-        id: `panel-${i + 1}`,
+        id:`panel-${i + 1}`,
         x: 0,
         y: Math.round(i * avgHeight),
         width: 1200,
@@ -85,7 +84,7 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
   useEffect(() => {
     if (!imageUrl) return;
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    img.crossOrigin ="anonymous";
     img.onload = () => {
       if (img.naturalWidth > 0 && img.naturalHeight > 0) {
         setTotalWidth(img.naturalWidth);
@@ -107,31 +106,31 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
 
   const themePalettes: Record<string, any> = {
     emerald: {
-      name: "Emerald Studio",
-      hex: "#10b981",
-      borderActive: "border-emerald-400",
-      borderInactive: "border-emerald-500/40",
-      badgeBg: "bg-emerald-500/30",
-      ring: "ring-emerald-400",
-      text: "text-emerald-400",
+      name:"Emerald Studio",
+      hex:"#10b981",
+      borderActive:"border-emerald-400",
+      borderInactive:"border-emerald-500/40",
+      badgeBg:"bg-emerald-500/30",
+      ring:"ring-emerald-400",
+      text:"text-emerald-400",
     },
     cyan: {
-      name: "Cyber Cyan",
-      hex: "#06b6d4",
-      borderActive: "border-cyan-400",
-      borderInactive: "border-cyan-500/40",
-      badgeBg: "bg-cyan-500/30",
-      ring: "ring-cyan-400",
-      text: "text-cyan-400",
+      name:"Cyber Cyan",
+      hex:"#06b6d4",
+      borderActive:"border-cyan-400",
+      borderInactive:"border-cyan-500/40",
+      badgeBg:"bg-cyan-500/30",
+      ring:"ring-cyan-400",
+      text:"text-cyan-400",
     },
     violet: {
-      name: "Neon Violet",
-      hex: "#8b5cf6",
-      borderActive: "border-violet-400",
-      borderInactive: "border-violet-500/40",
-      badgeBg: "bg-violet-500/30",
-      ring: "ring-violet-400",
-      text: "text-violet-400",
+      name:"Neon Violet",
+      hex:"#8b5cf6",
+      borderActive:"border-violet-400",
+      borderInactive:"border-violet-500/40",
+      badgeBg:"bg-violet-500/30",
+      ring:"ring-violet-400",
+      text:"text-violet-400",
     },
   };
 
@@ -147,7 +146,7 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
       (panel.y / totalHeight) * scrollViewportRef.current.scrollHeight;
     scrollViewportRef.current.scrollTo({
       top: Math.max(0, targetY - 100),
-      behavior: "smooth",
+      behavior:"smooth",
     });
   };
 
@@ -193,8 +192,8 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
                 onClick={() => setActiveThemeName(key)}
                 className={`px-2 py-0.5 rounded-lg capitalize transition-all !cursor-pointer ${
                   activeThemeName === key
-                    ? "bg-neutral-800 text-white font-bold shadow-sm"
-                    : "text-neutral-500 hover:text-neutral-300"
+                    ?"bg-neutral-800 text-white font-bold shadow-sm"
+                    :"text-neutral-500 hover:text-neutral-300"
                 }`}
               >
                 {key}
@@ -206,8 +205,8 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
             onClick={() => setIsRadarExpanded(!isRadarExpanded)}
             className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all !cursor-pointer ${
               isRadarExpanded
-                ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-                : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
+                ?"bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+                :"bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
             }`}
           >
             {isRadarExpanded ? (
@@ -215,7 +214,7 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
             ) : (
               <Maximize2 className="h-3.5 w-3.5" />
             )}
-            <span>{isRadarExpanded ? "Collapse Radar" : "Expand Radar"}</span>
+            <span>{isRadarExpanded ?"Collapse Radar" :"Expand Radar"}</span>
           </button>
         </div>
       </header>
@@ -230,11 +229,11 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
         >
           <div
             style={{
-              width: "100%",
-              maxWidth: "850px",
-              minHeight: `${totalHeight}px`,
-              transform: `scale(${zoomScale})`,
-              transformOrigin: "top center",
+              width:"100%",
+              maxWidth:"850px",
+              minHeight:`${totalHeight}px`,
+              transform:`scale(${zoomScale})`,
+              transformOrigin:"top center",
             }}
             className="relative transition-transform duration-100 my-6 shadow-2xl rounded-2xl overflow-hidden border border-neutral-800/80 bg-neutral-900"
           >
@@ -258,21 +257,21 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
                 <div
                   key={panel.id ?? idx}
                   style={{
-                    top: `${topPct}%`,
-                    height: `${heightPct}%`,
+                    top:`${topPct}%`,
+                    height:`${heightPct}%`,
                   }}
                   onClick={() => scrollToPanel(idx)}
                   className={`absolute inset-x-0 border-y-2 cursor-pointer transition-all ${
                     isSelected
-                      ? `${activeTheme.borderActive} ${activeTheme.badgeBg} ring-2 ${activeTheme.ring}/60 z-30 shadow-2xl`
-                      : "border-white/20 hover:bg-emerald-500/10 hover:border-emerald-400/60 z-10"
+                      ?`${activeTheme.borderActive} ${activeTheme.badgeBg} ring-2 ${activeTheme.ring}/60 z-30 shadow-2xl`
+                      :"border-white/20 hover:bg-emerald-500/10 hover:border-emerald-400/60 z-10"
                   }`}
                 >
                   <span
                     className={`absolute left-2 top-2 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold shadow-md ${
                       isSelected
-                        ? "bg-emerald-400 text-black shadow-emerald-500/50"
-                        : "bg-black/80 text-white border border-neutral-700"
+                        ?"bg-emerald-400 text-black"
+                        :"bg-black/80 text-white border border-neutral-700"
                     }`}
                   >
                     #{idx + 1}

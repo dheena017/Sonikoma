@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from"react";
 import {
   FolderOpen,
   ArrowLeft,
@@ -26,16 +26,16 @@ import {
   ChevronRight,
   ChevronDown,
   Check,
-} from "lucide-react";
-import { groupProjectsIntoSeries, Series } from "../utils/seriesGrouping";
-import type { Project, ViewMode } from "../hooks/ProjectTypes";
-import ProjectCard from "../components/ProjectCard";
-import { useProjectsActions } from "../hooks";
-import SeriesEditModal from "../components/SeriesEditModal";
-import SeriesPublishModal from "../components/SeriesPublishModal";
-import { SeriesDetailsSkeleton } from "@/features/platform/projects/components/SeriesDetailsSkeleton";
-import { notify } from "@/features/platform/notifications";
-import SeriesReaderModal from "../components/SeriesReaderModal";
+} from"lucide-react";
+import { groupProjectsIntoSeries, Series } from"../utils/seriesGrouping";
+import type { Project, ViewMode } from"../hooks/ProjectTypes";
+import ProjectCard from"../components/ProjectCard";
+import { useProjectsActions } from"../hooks";
+import SeriesEditModal from"../components/SeriesEditModal";
+import SeriesPublishModal from"../components/SeriesPublishModal";
+import { SeriesDetailsSkeleton } from"@/features/platform/projects/components/SeriesDetailsSkeleton";
+import { notify } from"@/features/platform/notifications";
+import SeriesReaderModal from"../components/SeriesReaderModal";
 
 interface SeriesDetailsPageProps {
   onNavigateHome: () => void;
@@ -52,8 +52,7 @@ export default function SeriesDetailsPage({
 }: SeriesDetailsPageProps) {
   const seriesSlug =
     window.location.pathname.split("/projects/")[1]?.split("/")[0] ||
-    window.location.pathname.split("/series/")[1]?.split("/")[0] ||
-    "";
+    window.location.pathname.split("/series/")[1]?.split("/")[0] ||"";
 
   const initialSeries = seriesSlug
     ? cachedSeriesMap.get(seriesSlug) || null
@@ -64,11 +63,9 @@ export default function SeriesDetailsPage({
 
   // Filter, Search, Sort & View states
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "ready">(
-    "all"
+  const [statusFilter, setStatusFilter] = useState<"all" |"draft" |"ready">("all"
   );
-  const [sortBy, setSortBy] = useState<
-    "newest" | "oldest" | "panels" | "alphabetical"
+  const [sortBy, setSortBy] = useState<"newest" |"oldest" |"panels" |"alphabetical"
   >("newest");
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortRef = React.useRef<HTMLDivElement>(null);
@@ -107,10 +104,9 @@ export default function SeriesDetailsPage({
         localStorage.getItem("sonikoma_token") ||
         sessionStorage.getItem("sonikoma_token");
       await fetch(`/api/v1/projects/${projectId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        method:"PATCH",
+        headers: {"Content-Type":"application/json",
+          ...(token ? { Authorization:`Bearer ${token}` } : {}),
         },
         body: JSON.stringify({ title: newName.trim() }),
       });
@@ -124,7 +120,7 @@ export default function SeriesDetailsPage({
             }
           : null
       );
-      notify.success(`Renamed chapter to "${newName.trim()}"`);
+      notify.success(`Renamed chapter to"${newName.trim()}"`);
     } catch (err) {
       console.error("Failed to rename chapter:", err);
     }
@@ -153,20 +149,18 @@ export default function SeriesDetailsPage({
         if (!cachedSeriesMap.has(seriesSlug)) {
           setLoading(true);
         }
-        const seriesRes = await fetchWithInterceptor(
-          `/api/v1/projects/series/${encodeURIComponent(seriesSlug)}`
+        const seriesRes = await fetchWithInterceptor(`/api/v1/projects/series/${encodeURIComponent(seriesSlug)}`
         );
         if (!seriesRes.ok) {
           throw new Error(
             seriesRes.status === 404
-              ? "Series not found."
-              : "Failed to load series"
+              ?"Series not found."
+              :"Failed to load series"
           );
         }
         const seriesData = await seriesRes.json();
         const seriesRecord = seriesData.series;
-        const projectsRes = await fetchWithInterceptor(
-          `/api/v1/projects?series_id=${encodeURIComponent(seriesRecord.id)}&limit=200`
+        const projectsRes = await fetchWithInterceptor(`/api/v1/projects?series_id=${encodeURIComponent(seriesRecord.id)}&limit=200`
         );
         if (!projectsRes.ok) {
           throw new Error("Failed to load series chapters");
@@ -179,7 +173,7 @@ export default function SeriesDetailsPage({
         const foundSeries: Series = groupedSeries || {
           id: seriesRecord.id,
           slug: seriesRecord.slug || seriesSlug,
-          title: seriesRecord.title || "Untitled Series",
+          title: seriesRecord.title ||"Untitled Series",
           cover: seriesRecord.cover_image,
           chapters: [],
           chapterCount: 0,
@@ -203,7 +197,7 @@ export default function SeriesDetailsPage({
         console.error("Failed to fetch series details", err);
         if (!cachedSeriesMap.has(seriesSlug)) {
           setError(
-            err.message || "An error occurred while loading series details."
+            err.message ||"An error occurred while loading series details."
           );
         }
       } finally {
@@ -228,7 +222,7 @@ export default function SeriesDetailsPage({
   const readyChaptersCount = useMemo(() => {
     if (!series) return 0;
     return series.chapters.filter(
-      (c) => c.status && c.status.toLowerCase() !== "draft"
+      (c) => c.status && c.status.toLowerCase() !=="draft"
     ).length;
   }, [series]);
 
@@ -254,30 +248,30 @@ export default function SeriesDetailsPage({
     }
 
     // Status filter
-    if (statusFilter === "draft") {
+    if (statusFilter ==="draft") {
       list = list.filter(
-        (c) => !c.status || c.status.toLowerCase() === "draft"
+        (c) => !c.status || c.status.toLowerCase() ==="draft"
       );
-    } else if (statusFilter === "ready") {
-      list = list.filter((c) => c.status && c.status.toLowerCase() !== "draft");
+    } else if (statusFilter ==="ready") {
+      list = list.filter((c) => c.status && c.status.toLowerCase() !=="draft");
     }
 
     // Sorting
     list.sort((a, b) => {
-      if (sortBy === "newest") {
+      if (sortBy ==="newest") {
         return (
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
       }
-      if (sortBy === "oldest") {
+      if (sortBy ==="oldest") {
         return (
           new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         );
       }
-      if (sortBy === "panels") {
+      if (sortBy ==="panels") {
         return (b.panels_count || 0) - (a.panels_count || 0);
       }
-      if (sortBy === "alphabetical") {
+      if (sortBy ==="alphabetical") {
         return a.title.localeCompare(b.title);
       }
       return 0;
@@ -304,11 +298,10 @@ export default function SeriesDetailsPage({
     if (!series || series.chapters.length === 0) return;
     const firstChapterId = series.chapters[0].project_id;
     try {
-      const res = await fetchWithInterceptor(
-        `/api/v1/projects/${firstChapterId}`,
+      const res = await fetchWithInterceptor(`/api/v1/projects/${firstChapterId}`,
         {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          method:"PUT",
+          headers: {"Content-Type":"application/json" },
           body: JSON.stringify({
             title: updated.title,
             author: updated.author,
@@ -337,7 +330,7 @@ export default function SeriesDetailsPage({
       }
     } catch (err: any) {
       console.error("Failed to update series metadata on backend", err);
-      notify.error(err.message || "Failed to update series metadata.");
+      notify.error(err.message ||"Failed to update series metadata.");
     }
   };
 
@@ -429,16 +422,16 @@ export default function SeriesDetailsPage({
                 aria-pressed={isFavorite}
                 className={`flex min-h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-semibold transition-colors cursor-pointer ${
                   isFavorite
-                    ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
-                    : "bg-[#141414] border-[#2F2F2F] text-neutral-400 hover:text-white hover:bg-[#252525]"
+                    ?"bg-amber-500/10 border-amber-500/30 text-amber-400"
+                    :"bg-[#141414] border-[#2F2F2F] text-neutral-400 hover:text-white hover:bg-[#252525]"
                 }`}
               >
                 <Star
                   className={`w-3.5 h-3.5 ${
-                    isFavorite ? "fill-amber-400 text-amber-400" : ""
+                    isFavorite ?"fill-amber-400 text-amber-400" :""
                   }`}
                 />
-                <span>{isFavorite ? "Favorited" : "Favorite"}</span>
+                <span>{isFavorite ?"Favorited" :"Favorite"}</span>
               </button>
 
               <button
@@ -480,10 +473,10 @@ export default function SeriesDetailsPage({
               <div className="space-y-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="rounded-md border border-sky-300/20 bg-sky-300/10 px-2 py-1 text-xs font-medium text-sky-200">
-                    {series.genre || "Fantasy Action"}
+                    {series.genre ||"Fantasy Action"}
                   </span>
                   <span className="rounded-md border border-white/10 px-2 py-1 text-xs text-neutral-300">
-                    By {series.author || "Unknown Author"}
+                    By {series.author ||"Unknown Author"}
                   </span>
                 </div>
 
@@ -501,7 +494,7 @@ export default function SeriesDetailsPage({
               <p className="text-xs text-neutral-500">
                 Updated {series.latestUpdatedAt
                   ? new Date(series.latestUpdatedAt).toLocaleDateString()
-                  : "recently"}
+                  :"recently"}
               </p>
 
               <div className="grid grid-cols-1 gap-2 border-t border-[#2F2F2F] pt-4 sm:grid-cols-2 xl:flex xl:flex-wrap">
@@ -614,7 +607,7 @@ export default function SeriesDetailsPage({
                 <div
                   className="h-full rounded-full bg-[#3B82F6] transition-all duration-500"
                   style={{
-                    width: `${Math.round(
+                    width:`${Math.round(
                       (readyChaptersCount / Math.max(1, series.chapterCount)) *
                         100
                     )}%`,
@@ -654,15 +647,15 @@ export default function SeriesDetailsPage({
 
             {/* Status Filters */}
             <div className="col-span-2 grid h-11 grid-cols-3 items-center rounded-xl border border-[#2F2F2F] bg-[#141414] p-1 text-xs sm:col-span-1 sm:flex">
-              {(["all", "draft", "ready"] as const).map((status) => (
+              {(["all","draft","ready"] as const).map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
                   aria-pressed={statusFilter === status}
                   className={`h-full rounded-lg px-2 text-xs capitalize transition-colors cursor-pointer sm:px-3 ${
                     statusFilter === status
-                      ? "bg-[#252525] font-bold text-white border border-[#2F2F2F]"
-                      : "text-[#9CA3AF] hover:text-white"
+                      ?"bg-[#252525] font-bold text-white border border-[#2F2F2F]"
+                      :"text-[#9CA3AF] hover:text-white"
                   }`}
                 >
                   {status}
@@ -677,23 +670,23 @@ export default function SeriesDetailsPage({
                 onClick={() => setIsSortOpen((prev) => !prev)}
                 className={`flex h-11 min-w-0 items-center justify-between gap-2 rounded-xl border bg-[#141414] px-3 text-xs transition-colors cursor-pointer select-none sm:flex-none ${
                   isSortOpen
-                    ? "border-[#3B82F6]/60 text-white"
-                    : "border-[#2F2F2F] text-neutral-300 hover:border-neutral-500"
+                    ?"border-[#3B82F6]/60 text-white"
+                    :"border-[#2F2F2F] text-neutral-300 hover:border-neutral-500"
                 }`}
               >
                 <span className="hidden text-neutral-500 sm:inline">Sort:</span>
                 <span className="font-semibold text-white">
-                  {sortBy === "newest"
-                    ? "Newest First"
-                    : sortBy === "oldest"
-                    ? "Oldest First"
-                    : sortBy === "panels"
-                    ? "Most Panels"
-                    : "Alphabetical"}
+                  {sortBy ==="newest"
+                    ?"Newest First"
+                    : sortBy ==="oldest"
+                    ?"Oldest First"
+                    : sortBy ==="panels"
+                    ?"Most Panels"
+                    :"Alphabetical"}
                 </span>
                 <ChevronDown
                   className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
-                    isSortOpen ? "rotate-180 text-[#3B82F6]" : ""
+                    isSortOpen ?"rotate-180 text-[#3B82F6]" :""
                   }`}
                 />
               </button>
@@ -702,10 +695,10 @@ export default function SeriesDetailsPage({
                 <div className="absolute right-0 z-50 mt-2 w-44 rounded-xl border border-[#2F2F2F] bg-[#1E1E1E] py-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-1">
                     {[
-                      { id: "newest", label: "Newest First" },
-                      { id: "oldest", label: "Oldest First" },
-                      { id: "panels", label: "Most Panels" },
-                      { id: "alphabetical", label: "Alphabetical" },
+                      { id:"newest", label:"Newest First" },
+                      { id:"oldest", label:"Oldest First" },
+                      { id:"panels", label:"Most Panels" },
+                      { id:"alphabetical", label:"Alphabetical" },
                     ].map((opt) => {
                       const isSelected = sortBy === opt.id;
                       return (
@@ -718,8 +711,8 @@ export default function SeriesDetailsPage({
                           }}
                           className={`my-0.5 flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition-colors cursor-pointer ${
                             isSelected
-                              ? "bg-[#252525] font-bold text-white"
-                              : "text-neutral-300 hover:bg-[#252525] hover:text-white"
+                              ?"bg-[#252525] font-bold text-white"
+                              :"text-neutral-300 hover:bg-[#252525] hover:text-white"
                           }`}
                         >
                           <span>{opt.label}</span>
@@ -741,9 +734,9 @@ export default function SeriesDetailsPage({
                 onClick={() => setViewMode("grid")}
                 aria-label="Grid view"
                 className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors cursor-pointer ${
-                  viewMode === "grid"
-                    ? "bg-[#252525] text-white"
-                    : "text-neutral-500 hover:text-white"
+                  viewMode ==="grid"
+                    ?"bg-[#252525] text-white"
+                    :"text-neutral-500 hover:text-white"
                 }`}
                 title="Grid view"
               >
@@ -754,9 +747,9 @@ export default function SeriesDetailsPage({
                 onClick={() => setViewMode("list")}
                 aria-label="List view"
                 className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors cursor-pointer ${
-                  viewMode === "list"
-                    ? "bg-[#252525] text-white"
-                    : "text-neutral-500 hover:text-white"
+                  viewMode ==="list"
+                    ?"bg-[#252525] text-white"
+                    :"text-neutral-500 hover:text-white"
                 }`}
                 title="List view"
               >
@@ -768,7 +761,7 @@ export default function SeriesDetailsPage({
 
         {/* 5. Chapters Grid or List View */}
         {filteredChapters.length > 0 ? (
-          viewMode === "grid" ? (
+          viewMode ==="grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-7">
               {filteredChapters.map((chapter) => (
                 <div key={chapter.project_id} className="relative group">
@@ -860,7 +853,7 @@ export default function SeriesDetailsPage({
                         {chapter.title}
                       </h4>
                       <p className="text-xs text-neutral-400 font-mono">
-                        {chapter.panels_count || 0} Panels · Created{" "}
+                        {chapter.panels_count || 0} Panels · Created{""}
                         {new Date(chapter.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -870,19 +863,19 @@ export default function SeriesDetailsPage({
                     <span
                       className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase font-mono border ${
                         chapter.status &&
-                        chapter.status.toLowerCase() !== "draft"
-                          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                          : "bg-neutral-800 border-neutral-800 text-neutral-400"
+                        chapter.status.toLowerCase() !=="draft"
+                          ?"bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                          :"bg-neutral-800 border-neutral-800 text-neutral-400"
                       }`}
                     >
-                      {chapter.status || "Draft"}
+                      {chapter.status ||"Draft"}
                     </span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         actions.handleOpenProject(chapter);
                       }}
-                      className="px-4 py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
                     >
                       Open Studio
                     </button>

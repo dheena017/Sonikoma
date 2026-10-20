@@ -4,7 +4,7 @@ import React, {
   useEffect,
   useMemo,
   useCallback,
-} from "react";
+} from"react";
 import {
   ChevronUp,
   ChevronDown,
@@ -18,8 +18,8 @@ import {
   ArrowUp,
   ArrowDown,
   Eye,
-} from "lucide-react";
-import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
+} from"lucide-react";
+import { getProxiedImageUrl } from"@/shared/utils/imageProxy";
 
 export interface MinimapPanelBox {
   id?: string | number;
@@ -68,17 +68,17 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
   scrollViewportRef,
   onNudgePanel,
   activeTheme = {
-    hex: "#10b981",
-    borderActive: "border-emerald-400",
-    borderInactive: "border-emerald-500/40",
-    badgeBg: "bg-emerald-500/30",
-    ring: "ring-emerald-400",
-    text: "text-emerald-400",
+    hex:"#10b981",
+    borderActive:"border-emerald-400",
+    borderInactive:"border-emerald-500/40",
+    badgeBg:"bg-emerald-500/30",
+    ring:"ring-emerald-400",
+    text:"text-emerald-400",
   },
   isExpanded: externalExpanded,
   onToggleExpanded,
   onClose,
-  className = "",
+  className ="",
 }) => {
   const [internalExpanded, setInternalExpanded] = useState<boolean>(false);
   const isExpanded =
@@ -204,7 +204,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
       if (maxScroll > 0) {
         trackRef.current.scrollTo({
           top: Math.max(0, Math.min(maxScroll, targetScroll)),
-          behavior: isPanelChanged ? "smooth" : "auto",
+          behavior: isPanelChanged ?"smooth" :"auto",
         });
       }
     }
@@ -241,7 +241,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
         const maxScroll = Math.max(0, scrollH - clientH);
         scrollViewportRef.current.scrollTo({
           top: targetRatio * maxScroll,
-          behavior: "auto",
+          behavior:"auto",
         });
       });
     },
@@ -270,7 +270,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
         const maxScroll = Math.max(0, scrollH - clientH);
         scrollViewportRef.current.scrollTo({
           top: targetRatio * maxScroll,
-          behavior: "auto",
+          behavior:"auto",
         });
       });
     },
@@ -281,7 +281,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
     if (!isDragging) return;
 
     const handlePointerMove = (e: MouseEvent | TouchEvent) => {
-      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+      const clientY ="touches" in e ? e.touches[0].clientY : e.clientY;
       handlePointerScrub(clientY);
     };
 
@@ -308,23 +308,23 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
     activeBox?.height ?? totalHeight / boxes.length
   );
   const activeRatio =
-    activeBoxWidth > 0 ? (activeBoxHeight / activeBoxWidth).toFixed(2) : "1.0";
+    activeBoxWidth > 0 ? (activeBoxHeight / activeBoxWidth).toFixed(2) :"1.0";
   const activeRatioTag =
     +activeRatio > 1.8
-      ? "Tall Strip"
+      ?"Tall Strip"
       : +activeRatio > 1.3
-      ? "Portrait"
+      ?"Portrait"
       : +activeRatio < 0.8
-      ? "Wide"
-      : "Square";
+      ?"Wide"
+      :"Square";
 
   if (!boxes.length || totalHeight <= 0) return null;
 
   return (
     <div
       style={{
-        width: `${currentCardWidth}px`,
-        maxWidth: "92vw",
+        width:`${currentCardWidth}px`,
+        maxWidth:"92vw",
       }}
       className={`h-full bg-neutral-950/98 border-l border-neutral-800/90 shadow-2xl backdrop-blur-2xl flex flex-col items-center select-none transition-[width] duration-200 z-30 shrink-0 animate-in fade-in slide-in-from-right-3 duration-200 ${className}`}
     >
@@ -448,8 +448,8 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
           {/* ── LIVE NATURAL ASPECT RATIO COMIC STRIP RADAR ── */}
           <div
             style={{
-              width: "100%",
-              height: `${Math.round(naturalMinimapHeight)}px`,
+              width:"100%",
+              height:`${Math.round(naturalMinimapHeight)}px`,
             }}
             className="relative w-full"
           >
@@ -458,9 +458,9 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
               src={getProxiedImageUrl(imageUrl)}
               alt="Dynamic Radar Preview"
               style={{
-                width: "100%",
-                height: `${Math.round(naturalMinimapHeight)}px`,
-                objectFit: "fill",
+                width:"100%",
+                height:`${Math.round(naturalMinimapHeight)}px`,
+                objectFit:"fill",
               }}
               className="w-full block select-none pointer-events-none opacity-95 group-hover/radar:opacity-100 transition-opacity"
             />
@@ -499,34 +499,34 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
                         clientH / 2;
                       scrollViewportRef.current.scrollTo({
                         top: Math.max(0, targetScroll),
-                        behavior: "smooth",
+                        behavior:"smooth",
                       });
                     }
                   }}
                   onMouseEnter={() => setHoverPanelIndex(i)}
                   onMouseLeave={() => setHoverPanelIndex(null)}
                   style={{
-                    top: `${topPct}%`,
-                    left: `${leftPct}%`,
-                    width: `${widthPct}%`,
-                    height: `${heightPct}%`,
+                    top:`${topPct}%`,
+                    left:`${leftPct}%`,
+                    width:`${widthPct}%`,
+                    height:`${heightPct}%`,
                   }}
                   className={`absolute transition-all pointer-events-auto cursor-pointer rounded-[2px] ${
                     isSel
-                      ? "border-2 border-emerald-400 bg-emerald-400/35 z-25 shadow-[0_0_0_1px_rgba(0,0,0,0.9)] ring-1 ring-white/70"
+                      ?"border-2 border-emerald-400 bg-emerald-400/35 z-25 shadow-[0_0_0_1px_rgba(0,0,0,0.9)] ring-1 ring-white/70"
                       : isHov
-                      ? "border-2 border-cyan-400 bg-cyan-400/20 z-15 shadow-[0_0_0_1px_rgba(0,0,0,0.8)]"
-                      : "border border-emerald-400/60 bg-emerald-500/[0.04] shadow-[0_0_0_1px_rgba(0,0,0,0.7)] hover:border-emerald-300 z-10"
+                      ?"border-2 border-cyan-400 bg-cyan-400/20 z-15 shadow-[0_0_0_1px_rgba(0,0,0,0.8)]"
+                      :"border border-emerald-400/60 bg-emerald-500/[0.04] shadow-[0_0_0_1px_rgba(0,0,0,0.7)] hover:border-emerald-300 z-10"
                   }`}
                 >
                   {(isSel || isHov || isExpanded) && (
                     <span
                       className={`absolute left-0.5 top-0.5 px-1 py-0.2 rounded-[2px] text-[7px] font-mono font-bold leading-tight shadow-md z-30 pointer-events-none ${
                         isSel
-                          ? "bg-emerald-400 text-black font-extrabold shadow-emerald-500/50 scale-105 origin-top-left"
+                          ?"bg-emerald-400 text-black font-extrabold  scale-105 origin-top-left"
                           : isHov
-                          ? "bg-cyan-400 text-black shadow-cyan-500/40"
-                          : "bg-neutral-950/90 text-emerald-400 border border-emerald-500/40 font-semibold"
+                          ?"bg-cyan-400 text-black"
+                          :"bg-neutral-950/90 text-emerald-400 border border-emerald-500/40 font-semibold"
                       }`}
                     >
                       #{i + 1}
@@ -541,7 +541,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
           {hoverPanelIndex !== null && boxes[hoverPanelIndex] && (
             <div
               style={{
-                top: `${Math.max(
+                top:`${Math.max(
                   6,
                   Math.min(
                     94,
@@ -596,10 +596,10 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
             <div
               key={`tick-${b.id ?? i}`}
               style={{
-                top: `${((b.y ?? 0) / (totalHeight || 1)) * 100}%`,
+                top:`${((b.y ?? 0) / (totalHeight || 1)) * 100}%`,
               }}
               className={`absolute left-0 right-0 h-[1px] pointer-events-none ${
-                selectedPanelIndex === i ? "bg-emerald-400 z-10" : "bg-white/15"
+                selectedPanelIndex === i ?"bg-emerald-400 z-10" :"bg-white/15"
               }`}
             />
           ))}
@@ -607,8 +607,8 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
           {/* Active viewport indicator thumb on rail */}
           <div
             style={{
-              top: `${Math.max(0, Math.min(94, scrollProgress.topPct || 0))}%`,
-              height: `${Math.max(
+              top:`${Math.max(0, Math.min(94, scrollProgress.topPct || 0))}%`,
+              height:`${Math.max(
                 6,
                 Math.min(40, scrollProgress.heightPct || 10)
               )}%`,
@@ -627,7 +627,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
               if (scrollViewportRef?.current) {
                 scrollViewportRef.current.scrollTo({
                   top: 0,
-                  behavior: "smooth",
+                  behavior:"smooth",
                 });
               }
             }}
@@ -675,7 +675,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
               if (scrollViewportRef?.current) {
                 scrollViewportRef.current.scrollTo({
                   top: scrollViewportRef.current.scrollHeight,
-                  behavior: "smooth",
+                  behavior:"smooth",
                 });
               }
             }}

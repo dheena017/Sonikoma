@@ -1,5 +1,5 @@
-import React from "react";
-import { Sparkles } from "lucide-react";
+import React from"react";
+import { Sparkles } from"lucide-react";
 
 interface StoryboardAnalysisBannerProps {
   isAnalyzingAll: boolean;
@@ -13,7 +13,7 @@ const StoryboardAnalysisBanner = ({
   if (!isAnalyzingAll) return null;
 
   return (
-    <div className="bg-gradient-to-r from-blue-950/60 via-indigo-950/50 to-neutral-950 border border-blue-500/30 rounded-xl px-4 py-3 flex items-center justify-between gap-3 animate-in fade-in duration-200 shadow-lg shadow-blue-950/40 my-2">
+    <div className="bg-gradient-to-r from-blue-950/60 via-indigo-950/50 to-neutral-950 border border-blue-500/30 rounded-xl px-4 py-3 flex items-center justify-between gap-3 animate-in fade-in duration-200 shadow-lg my-2">
       <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center shrink-0">
           <div className="w-6 h-6 rounded-full border-2 border-blue-400/30 border-t-blue-400 animate-spin" />

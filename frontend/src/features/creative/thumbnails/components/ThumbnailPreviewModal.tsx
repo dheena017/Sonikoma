@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
-import { createPortal } from "react-dom";
-import { X, Download, Youtube, Image } from "lucide-react";
-import { GeneratedThumbnailItem } from "../types";
+import React, { useEffect } from"react";
+import { createPortal } from"react-dom";
+import { X, Download, Youtube, Image } from"lucide-react";
+import { GeneratedThumbnailItem } from"../types";
 
 interface ThumbnailPreviewModalProps {
   item: GeneratedThumbnailItem | null;
@@ -19,7 +19,7 @@ export const ThumbnailPreviewModal: React.FC<ThumbnailPreviewModalProps> = ({
   useEffect(() => {
     if (!item) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key ==="Escape") {
         onClose();
       }
     };
@@ -84,8 +84,7 @@ export const ThumbnailPreviewModal: React.FC<ThumbnailPreviewModalProps> = ({
             <span className="text-[10px] font-mono uppercase text-[#9CA3AF] block">
               Hook Text Sticker:
             </span>
-            <p className="text-sm font-bold text-[#E5E5E5] font-mono truncate">
-              "{item.hook_text}"
+            <p className="text-sm font-bold text-[#E5E5E5] font-mono truncate">"{item.hook_text}"
             </p>
           </div>
 
@@ -93,7 +92,7 @@ export const ThumbnailPreviewModal: React.FC<ThumbnailPreviewModalProps> = ({
             <button
               type="button"
               onClick={() => onDownload(item)}
-              className="px-4 sm:px-5 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md shadow-[#3B82F6]/20 active:scale-95"
+              className="px-4 sm:px-5 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
             >
               <Download className="w-4 h-4" />
               <span>Download HD 1280x720</span>
@@ -106,7 +105,7 @@ export const ThumbnailPreviewModal: React.FC<ThumbnailPreviewModalProps> = ({
                   onSelectForYouTube(item);
                   onClose();
                 }}
-                className="px-4 sm:px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md shadow-red-950/40 active:scale-95"
+                className="px-4 sm:px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
               >
                 <Youtube className="w-4 h-4" />
                 <span>Use for YouTube</span>

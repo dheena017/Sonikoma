@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { ShieldAlert, Lock, ArrowLeft } from "lucide-react";
-import * as api from "@/shared/api";
+import React, { useEffect, useState, useMemo } from"react";
+import { ShieldAlert, Lock, ArrowLeft } from"lucide-react";
+import * as api from"@/shared/api";
 import {
   AdminActivityTab,
   AdminAnnouncementsTab,
@@ -15,9 +15,9 @@ import {
   AdminUsersTab,
   AdminCreditsTab,
   AdminTrainingTab,
-} from "@/features/admin/components/Tabs";
-import AdminLayout from "@/features/admin/components/AdminLayout";
-import AdminDashboardPage from "@/features/admin/pages/AdminDashboardPage";
+} from"@/features/admin/components/Tabs";
+import AdminLayout from"@/features/admin/components/AdminLayout";
+import AdminDashboardPage from"@/features/admin/pages/AdminDashboardPage";
 
 const AdminPage = React.memo(
   ({
@@ -44,9 +44,9 @@ const AdminPage = React.memo(
     const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
     const activeTab = useMemo(() => {
-      if (currentPath === "/admin" || currentPath === "/admin/")
-        return "overview";
-      return currentPath.split("/").pop() || "overview";
+      if (currentPath ==="/admin" || currentPath ==="/admin/")
+        return"overview";
+      return currentPath.split("/").pop() ||"overview";
     }, [currentPath]);
 
     const fetchAnalytics = async () => {
@@ -69,22 +69,22 @@ const AdminPage = React.memo(
 
     useEffect(() => {
       if (
-        activeTab === "analytics" ||
-        activeTab === "finance" ||
-        activeTab === "usage"
+        activeTab ==="analytics" ||
+        activeTab ==="finance" ||
+        activeTab ==="usage"
       )
         fetchAnalytics();
     }, [activeTab]);
 
-    // PREMIUM UPGRADE: High-end "Access Denied" security screen
+    // PREMIUM UPGRADE: High-end"Access Denied" security screen
     const isUserAdmin =
-      user?.creator_role === "admin" || user?.role === "admin";
+      user?.creator_role ==="admin" || user?.role ==="admin";
     if (!isAuthenticated || (user && !isUserAdmin)) {
       return (
         <div className="fixed inset-0 z-50 w-full h-full bg-[#050507] flex flex-col items-center justify-center p-6 overflow-hidden selection:bg-rose-500/30">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-rose-900/20 via-[#050507] to-[#050507] pointer-events-none" />
 
-          <div className="relative z-10 max-w-md w-full bg-[#0a0a0e]/80 backdrop-blur-xl border border-rose-900/30 p-8 rounded-3xl shadow-2xl shadow-rose-900/20 text-center animate-[fadeIn_0.4s_ease-out]">
+          <div className="relative z-10 max-w-md w-full bg-[#0a0a0e]/80 backdrop-blur-xl border border-rose-900/30 p-8 rounded-3xl shadow-2xl text-center animate-[fadeIn_0.4s_ease-out]">
             <div className="w-20 h-20 bg-rose-500/10 rounded-2xl mx-auto flex items-center justify-center mb-6 border border-rose-500/20 shadow-[inset_0_0_20px_rgba(244,63,94,0.2)]">
               <ShieldAlert className="w-10 h-10 text-rose-500 animate-pulse" />
             </div>
@@ -112,12 +112,11 @@ const AdminPage = React.memo(
                       localStorage.getItem("sonikoma_token") ||
                       sessionStorage.getItem("sonikoma_token");
                     const res = await fetch("/api/v1/auth/profile", {
-                      method: "PUT",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
+                      method:"PUT",
+                      headers: {"Content-Type":"application/json",
+                        Authorization:`Bearer ${token}`,
                       },
-                      body: JSON.stringify({ creator_role: "admin" }),
+                      body: JSON.stringify({ creator_role:"admin" }),
                     });
                     if (res.ok) {
                       window.location.reload();
@@ -138,103 +137,103 @@ const AdminPage = React.memo(
       );
     }
 
-    const isOverview = activeTab === "overview";
+    const isOverview = activeTab ==="overview";
 
     const tabMetadata: Record<
       string,
       { title: string; desc: string; badge: string }
     > = {
       overview: {
-        title: "Root Telemetry Dashboard",
-        desc: "Real-time infrastructure, pipeline telemetry & active creator metrics",
-        badge: "Live Pulse",
+        title:"Root Telemetry Dashboard",
+        desc:"Real-time infrastructure, pipeline telemetry & active creator metrics",
+        badge:"Live Pulse",
       },
       users: {
-        title: "User Accounts & Role Management",
-        desc: "Inspect user accounts, manage creator roles, permissions, and security status",
-        badge: "Access Control",
+        title:"User Accounts & Role Management",
+        desc:"Inspect user accounts, manage creator roles, permissions, and security status",
+        badge:"Access Control",
       },
       credits: {
-        title: "Credits & Economy Control",
-        desc: "Manage studio generation credits, transaction ledger, and top-ups",
-        badge: "Ledger",
+        title:"Credits & Economy Control",
+        desc:"Manage studio generation credits, transaction ledger, and top-ups",
+        badge:"Ledger",
       },
       announcements: {
-        title: "System Broadcasts & Alerts",
-        desc: "Publish platform-wide broadcast alerts and scheduled maintenance notices",
-        badge: "Broadcast",
+        title:"System Broadcasts & Alerts",
+        desc:"Publish platform-wide broadcast alerts and scheduled maintenance notices",
+        badge:"Broadcast",
       },
       content: {
-        title: "Content Moderation & Projects",
-        desc: "Inspect public and private storyboards, project status, and storage quotas",
-        badge: "Assets",
+        title:"Content Moderation & Projects",
+        desc:"Inspect public and private storyboards, project status, and storage quotas",
+        badge:"Assets",
       },
       jobs: {
-        title: "Background Jobs & Task Execution",
-        desc: "Monitor live processing queues, cancel hung tasks, and audit completed workers",
-        badge: "Workers",
+        title:"Background Jobs & Task Execution",
+        desc:"Monitor live processing queues, cancel hung tasks, and audit completed workers",
+        badge:"Workers",
       },
       scrapers: {
-        title: "Webtoon Engine Configuration",
-        desc: "Tune scraper workers, domain proxies, selectors, and rate limiting",
-        badge: "Engine",
+        title:"Webtoon Engine Configuration",
+        desc:"Tune scraper workers, domain proxies, selectors, and rate limiting",
+        badge:"Engine",
       },
       health: {
-        title: "Infrastructure & Server Health",
-        desc: "Host CPU, GPU worker nodes, memory pools, and database connection latency",
-        badge: "Telemetry",
+        title:"Infrastructure & Server Health",
+        desc:"Host CPU, GPU worker nodes, memory pools, and database connection latency",
+        badge:"Telemetry",
       },
       activity: {
-        title: "System Audit & Security Logs",
-        desc: "Real-time administrative actions, authentication attempts, and event trail",
-        badge: "Security Audit",
+        title:"System Audit & Security Logs",
+        desc:"Real-time administrative actions, authentication attempts, and event trail",
+        badge:"Security Audit",
       },
       analytics: {
-        title: "Platform Growth Analytics",
-        desc: "User acquisition funnels, retention cohorts, and project creation velocity",
-        badge: "BI Insights",
+        title:"Platform Growth Analytics",
+        desc:"User acquisition funnels, retention cohorts, and project creation velocity",
+        badge:"BI Insights",
       },
       finance: {
-        title: "Revenue & Subscription Ledger",
-        desc: "Track Monthly Recurring Revenue (MRR), subscription churn, and payouts",
-        badge: "Financials",
+        title:"Revenue & Subscription Ledger",
+        desc:"Track Monthly Recurring Revenue (MRR), subscription churn, and payouts",
+        badge:"Financials",
       },
       usage: {
-        title: "Resource Consumption & Quotas",
-        desc: "AI generation tokens, image rendering compute, and bandwidth utilization",
-        badge: "Quotas",
+        title:"Resource Consumption & Quotas",
+        desc:"AI generation tokens, image rendering compute, and bandwidth utilization",
+        badge:"Quotas",
       },
       settings: {
-        title: "Platform Global Settings",
-        desc: "Tune AI model endpoints, webhook secrets, rate limits, and server environment",
-        badge: "System Config",
+        title:"Platform Global Settings",
+        desc:"Tune AI model endpoints, webhook secrets, rate limits, and server environment",
+        badge:"System Config",
       },
       explorer: {
-        title: "Database Query Explorer",
-        desc: "Direct read-only schema navigation and table query workbench",
-        badge: "Database",
+        title:"Database Query Explorer",
+        desc:"Direct read-only schema navigation and table query workbench",
+        badge:"Database",
       },
       console: {
-        title: "Superuser Interactive Terminal",
-        desc: "Direct command execution and server process diagnostics console",
-        badge: "CLI Terminal",
+        title:"Superuser Interactive Terminal",
+        desc:"Direct command execution and server process diagnostics console",
+        badge:"CLI Terminal",
       },
       training: {
-        title: "AI Training & Data Flywheel",
-        desc: "Manage the YOLO fine-tuning pipeline, dataset gallery, and auto-trigger configuration for speech bubble detection",
-        badge: "ML Engine",
+        title:"AI Training & Data Flywheel",
+        desc:"Manage the YOLO fine-tuning pipeline, dataset gallery, and auto-trigger configuration for speech bubble detection",
+        badge:"ML Engine",
       },
     };
 
     const currentTabInfo = tabMetadata[activeTab] || {
       title: activeTab.charAt(0).toUpperCase() + activeTab.slice(1),
-      desc: "Administrative management module and system telemetry workbench",
-      badge: "Admin",
+      desc:"Administrative management module and system telemetry workbench",
+      badge:"Admin",
     };
 
     const renderActiveModule = () => {
       switch (activeTab) {
-        case "overview":
+        case"overview":
           return (
             <AdminDashboardPage
               user={user}
@@ -246,79 +245,79 @@ const AdminPage = React.memo(
               isTab={true}
             />
           );
-        case "announcements":
+        case"announcements":
           return (
             <AdminAnnouncementsTab
               fetchWithInterceptor={fetchWithInterceptor}
             />
           );
-        case "users":
+        case"users":
           return (
             <AdminUsersTab
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />
           );
-        case "credits":
+        case"credits":
           return (
             <AdminCreditsTab
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />
           );
-        case "content":
+        case"content":
           return (
             <AdminContentTab
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />
           );
-        case "usage":
+        case"usage":
           return (
             <AdminUsageTab
               fetchWithInterceptor={fetchWithInterceptor}
               analytics={analytics}
             />
           );
-        case "scrapers":
+        case"scrapers":
           return (
             <AdminScrapersTab
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />
           );
-        case "jobs":
+        case"jobs":
           return (
             <AdminJobsTab
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />
           );
-        case "finance":
+        case"finance":
           return (
             <AdminFinanceTab
               fetchWithInterceptor={fetchWithInterceptor}
               analytics={analytics}
             />
           );
-        case "settings":
+        case"settings":
           return (
             <AdminSettingsTab
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />
           );
-        case "health":
+        case"health":
           return <AdminHealthTab fetchWithInterceptor={fetchWithInterceptor} />;
-        case "activity":
+        case"activity":
           return (
             <AdminActivityTab fetchWithInterceptor={fetchWithInterceptor} />
           );
-        case "explorer":
+        case"explorer":
           return (
             <AdminExplorerTab fetchWithInterceptor={fetchWithInterceptor} />
           );
-        case "training":
+        case"training":
           return (
             <AdminTrainingTab
               fetchWithInterceptor={fetchWithInterceptor}

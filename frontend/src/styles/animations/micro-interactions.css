@@ -64,10 +64,6 @@ button:disabled,
   animation: anime-energy-sheen 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Pulsing Button - Glow Removed */
-.glow-btn-pulse {
-  animation: none;
-}
 
 /* Scanner Line */
 .scanner-line {

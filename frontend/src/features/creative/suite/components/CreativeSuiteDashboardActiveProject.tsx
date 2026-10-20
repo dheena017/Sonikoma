@@ -1,6 +1,6 @@
-import React from "react";
-import { LogOut, Play, Tv, Film, Sparkles } from "lucide-react";
-import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import React from"react";
+import { LogOut, Play, Tv, Film, Sparkles } from"lucide-react";
+import { Tooltip } from"@/shared/ui/common/TooltipPortal";
 
 interface CreativeSuiteDashboardActiveProjectProps {
   activeProject: any | null;
@@ -22,23 +22,21 @@ const CreativeSuiteDashboardActiveProject: React.FC<
   const projectIdVal = activeProject?.project_id ?? null;
   const projectStatus = activeProject?.status
     ? activeProject.status.toString()
-    : "Draft";
+    :"Draft";
   const projectStatusClass = projectStatus.toLowerCase().includes("publish")
-    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
-    : "bg-[#3B82F6]/10 border-[#3B82F6]/20 text-[#60A5FA]";
-  const seriesTitleVal = activeProject?.title ?? "Untitled Series";
+    ?"bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
+    :"bg-[#3B82F6]/10 border-[#3B82F6]/20 text-[#60A5FA]";
+  const seriesTitleVal = activeProject?.title ??"Untitled Series";
   const seriesCoverImageVal = activeProject?.cover_image ?? null;
   const chapterTitleVal = activeProject?.episode
-    ? activeProject.episode.split(" - ").slice(1).join(" - ") ||
-      "Untitled Chapter"
-    : "Untitled Chapter";
-  const projectIdLabel = projectIdVal ? `${projectIdVal.slice(0, 7)}…` : "—";
-  const authorLabel = activeProject?.author || "Unknown Creator";
-  const genreLabel = activeProject?.genre || "No genre";
+    ? activeProject.episode.split(" -").slice(1).join(" -") ||"Untitled Chapter"
+    :"Untitled Chapter";
+  const projectIdLabel = projectIdVal ?`${projectIdVal.slice(0, 7)}…` :"—";
+  const authorLabel = activeProject?.author ||"Unknown Creator";
+  const genreLabel = activeProject?.genre ||"No genre";
   const synopsisText =
     activeProject?.synopsis ||
-    activeProject?.description ||
-    "No synopsis is available for this project yet.";
+    activeProject?.description ||"No synopsis is available for this project yet.";
 
   const safePanels = panels || [];
 
@@ -157,21 +155,18 @@ const CreativeSuiteDashboardActiveProject: React.FC<
                         onClick={() => {
                           const seriesSlug =
                             activeProject?.series_slug ||
-                            localStorage.getItem("active_series_slug") ||
-                            "active";
+                            localStorage.getItem("active_series_slug") ||"active";
                           const chapterSlug =
                             activeProject?.chapter_slug ||
-                            localStorage.getItem("active_chapter_slug") ||
-                            "active";
-                          navigateTo(
-                            `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}?panel=${
+                            localStorage.getItem("active_chapter_slug") ||"active";
+                          navigateTo(`/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}?panel=${
                               idx + 1
                             }`
                           );
                         }}
                         className="relative flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border border-neutral-850 bg-neutral-950 hover:border-neutral-700 transition-all cursor-pointer group shadow-md"
                         title={`Panel #${idx + 1}: ${
-                          p?.speech_text || p?.visual_description || "Frame"
+                          p?.speech_text || p?.visual_description ||"Frame"
                         }`}
                       >
                         {imgUrl ? (
@@ -218,20 +213,17 @@ const CreativeSuiteDashboardActiveProject: React.FC<
                   onClick={() => {
                     const seriesSlug =
                       activeProject?.series_slug ||
-                      localStorage.getItem("active_series_slug") ||
-                      "active";
+                      localStorage.getItem("active_series_slug") ||"active";
                     const chapterSlug =
                       activeProject?.chapter_slug ||
-                      localStorage.getItem("active_chapter_slug") ||
-                      "active";
-                    navigateTo(
-                      `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`
+                      localStorage.getItem("active_chapter_slug") ||"active";
+                    navigateTo(`/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`
                     );
                   }}
-                  className="w-full py-3 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-white text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 cursor-pointer"
+                  className="w-full py-3 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-white text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg cursor-pointer"
                   aria-label="Resume Editing"
                 >
-                  <Play className="w-4 h-4 fill-white" />{" "}
+                  <Play className="w-4 h-4 fill-white" />{""}
                   <span>Resume Editing</span>
                 </button>
               </Tooltip>

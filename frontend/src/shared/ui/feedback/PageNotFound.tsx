@@ -1,5 +1,5 @@
-import React from "react";
-import { Compass, ArrowLeft } from "lucide-react";
+import React from"react";
+import { Compass, ArrowLeft } from"lucide-react";
 
 interface PageNotFoundProps {
   onNavigateHome: () => void;
@@ -14,9 +14,6 @@ export default function PageNotFound({
 }: PageNotFoundProps) {
   return (
     <div className="flex-1 flex items-center justify-center px-4 py-16 md:py-24 relative overflow-hidden bg-transparent">
-      {/* Background decorative glowing orbs */}
-      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#2A2A2A] rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Main glassmorphic card */}
       <div className="relative w-full max-w-xl bg-neutral-950/40 backdrop-blur-xl border border-neutral-800/80 rounded-2xl p-8 md:p-12 text-center shadow-2xl shadow-black/50 overflow-hidden">
@@ -26,8 +23,6 @@ export default function PageNotFound({
         {/* Animated Compass Icon */}
         <div className="relative z-10 flex justify-center mb-8">
           <div className="relative p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 shadow-inner group">
-            {/* Pulsing outer glow */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-blue-500/20 to-indigo-500/20 blur-md opacity-70 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
             <Compass className="h-16 w-16 text-[#3B82F6] animate-float" />
           </div>
         </div>
@@ -51,7 +46,7 @@ export default function PageNotFound({
         <div className="relative z-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
           <button
             onClick={onNavigateHome}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium transition-all duration-300 shadow-lg shadow-indigo-900/40 hover:scale-[1.02] cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium transition-all duration-300 shadow-lg hover:scale-[1.02] cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Return to Dashboard

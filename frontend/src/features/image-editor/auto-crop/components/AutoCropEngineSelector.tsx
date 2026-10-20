@@ -296,9 +296,6 @@ export const AutoCropEngineSelector = React.memo(
                 : "bg-neutral-900/60 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900"
             }`}
           >
-            {useLocalCV && (
-              <div className="absolute top-0 right-0 w-28 h-28 bg-blue-500/10 rounded-full blur-2xl -mr-4 -mt-4 pointer-events-none" />
-            )}
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
                 <span
@@ -346,9 +343,6 @@ export const AutoCropEngineSelector = React.memo(
                 : "bg-neutral-900/60 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900"
             }`}
           >
-            {!useLocalCV && (
-              <div className="absolute top-0 right-0 w-28 h-28 bg-indigo-500/10 rounded-full blur-2xl -mr-4 -mt-4 pointer-events-none animate-pulse" />
-            )}
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
                 <span

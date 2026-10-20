@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import { createPortal } from "react-dom";
+import React, { useEffect, useState, useRef } from"react";
+import { createPortal } from"react-dom";
 import {
   X,
   Video,
@@ -28,10 +28,10 @@ import {
   CheckCircle2,
   ChevronRight,
   Sliders,
-} from "lucide-react";
-import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
-import { SonikomaLogo } from "@/shared/ui/branding";
-import { getProxyImageUrl, isApiUrl, isProxyUrl } from "@/features/image-editor/canvas/api/image";
+} from"lucide-react";
+import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
+import { SonikomaLogo } from"@/shared/ui/branding";
+import { getProxyImageUrl, isApiUrl, isProxyUrl } from"@/features/image-editor/canvas/api/image";
 
 interface ProjectConfirmModalProps {
   isOpen: boolean;
@@ -79,145 +79,137 @@ interface ProjectConfirmModalProps {
 }
 
 // ── Shared Style Classes ──
-const inputCls =
-  "w-full bg-[#0a0a12] border border-white/[0.08] focus:border-neutral-600 rounded-2xl px-4 py-3 text-sm text-neutral-200 outline-none transition-all shadow-inner placeholder:text-neutral-600 focus:bg-[#0e0f1a]";
+const inputCls ="w-full bg-[#0a0a12] border border-white/[0.08] focus:border-neutral-600 rounded-2xl px-4 py-3 text-sm text-neutral-200 outline-none transition-all shadow-inner placeholder:text-neutral-600 focus:bg-[#0e0f1a]";
 
-const selectCls =
-  "w-full bg-[#0a0a12] border border-white/[0.08] focus:border-neutral-600 rounded-2xl px-4 py-3 text-sm text-neutral-200 outline-none transition-all shadow-inner cursor-pointer focus:bg-[#0e0f1a]";
+const selectCls ="w-full bg-[#0a0a12] border border-white/[0.08] focus:border-neutral-600 rounded-2xl px-4 py-3 text-sm text-neutral-200 outline-none transition-all shadow-inner cursor-pointer focus:bg-[#0e0f1a]";
 
-const labelCls =
-  "text-[10px] font-bold text-neutral-500 uppercase tracking-wider font-mono flex items-center gap-1.5 mb-1.5";
+const labelCls ="text-[10px] font-bold text-neutral-500 uppercase tracking-wider font-mono flex items-center gap-1.5 mb-1.5";
 
-const cardCls =
-  "bg-[#0e0f19]/80 border border-white/[0.07] rounded-2xl p-5 space-y-4";
+const cardCls ="bg-[#0e0f19]/80 border border-white/[0.07] rounded-2xl p-5 space-y-4";
 
-type TabKey = "metadata" | "ai" | "distribution";
+type TabKey ="metadata" |"ai" |"distribution";
 
 // ── Configuration Constants (Decoupled & Extensible) ──
 const PRESETS = [
   {
-    id: "shorts" as const,
-    label: "Shorts / TikTok",
+    id:"shorts" as const,
+    label:"Shorts / TikTok",
     icon: Flame,
-    color: "blue",
+    color:"blue",
     config: {
-      targetLayout: "9:16",
-      narrationTone: "Dramatic",
-      voiceActor: "Epic Trailer Narrator",
-      bgmStyle: "Dark Action Hybrid",
-      targetPlatforms: ["YouTube Shorts", "TikTok"],
+      targetLayout:"9:16",
+      narrationTone:"Dramatic",
+      voiceActor:"Epic Trailer Narrator",
+      bgmStyle:"Dark Action Hybrid",
+      targetPlatforms: ["YouTube Shorts","TikTok"],
     },
   },
   {
-    id: "movie" as const,
-    label: "Full Video (16:9)",
+    id:"movie" as const,
+    label:"Full Video (16:9)",
     icon: Film,
-    color: "indigo",
+    color:"indigo",
     config: {
-      targetLayout: "16:9",
-      narrationTone: "Cinematic",
-      voiceActor: "Deep Fantasy Narrator",
-      bgmStyle: "Epic Orchestral",
+      targetLayout:"16:9",
+      narrationTone:"Cinematic",
+      voiceActor:"Deep Fantasy Narrator",
+      bgmStyle:"Epic Orchestral",
       targetPlatforms: ["YouTube Video"],
     },
   },
   {
-    id: "reel" as const,
-    label: "Story Reel",
+    id:"reel" as const,
+    label:"Story Reel",
     icon: Tv,
-    color: "cyan",
+    color:"cyan",
     config: {
-      targetLayout: "9:16",
-      narrationTone: "Dialogue-focused",
-      voiceActor: "Soft Female Storyteller",
-      bgmStyle: "Lo-Fi Recaps",
-      targetPlatforms: ["Instagram Reels", "TikTok"],
+      targetLayout:"9:16",
+      narrationTone:"Dialogue-focused",
+      voiceActor:"Soft Female Storyteller",
+      bgmStyle:"Lo-Fi Recaps",
+      targetPlatforms: ["Instagram Reels","TikTok"],
     },
   },
 ];
 
 const LAYOUT_OPTIONS = [
-  { value: "9:16", label: "📱 Vertical Shorts (9:16)" },
-  { value: "16:9", label: "🎬 Landscape Video (16:9)" },
-  { value: "1:1", label: "⏹️ Square Post (1:1)" },
+  { value:"9:16", label:"📱 Vertical Shorts (9:16)" },
+  { value:"16:9", label:"🎬 Landscape Video (16:9)" },
+  { value:"1:1", label:"⏹️ Square Post (1:1)" },
 ];
 
 const TONE_OPTIONS = [
-  { value: "Dramatic", label: "Dramatic / Epic" },
-  { value: "Dialogue-focused", label: "Dialogue Focused" },
-  { value: "Action-paced", label: "Fast Action" },
-  { value: "Cinematic", label: "Cinematic" },
-  { value: "Minimalistic", label: "Subtle & Minimal" },
+  { value:"Dramatic", label:"Dramatic / Epic" },
+  { value:"Dialogue-focused", label:"Dialogue Focused" },
+  { value:"Action-paced", label:"Fast Action" },
+  { value:"Cinematic", label:"Cinematic" },
+  { value:"Minimalistic", label:"Subtle & Minimal" },
 ];
 
 const VOICE_ACTORS = [
-  { value: "Epic Trailer Narrator", label: "🎙️ Epic Trailer (Deep Male)" },
-  { value: "Anime Protagonist (Male)", label: "🔥 Anime Protagonist" },
-  { value: "Deep Fantasy Narrator", label: "🏰 Deep Fantasy (Cinematic)" },
-  { value: "Soft Female Storyteller", label: "🌸 Soft Female Storyteller" },
-  { value: "Cinematic Male", label: "🎬 Cinematic Male" },
+  { value:"Epic Trailer Narrator", label:"🎙️ Epic Trailer (Deep Male)" },
+  { value:"Anime Protagonist (Male)", label:"🔥 Anime Protagonist" },
+  { value:"Deep Fantasy Narrator", label:"🏰 Deep Fantasy (Cinematic)" },
+  { value:"Soft Female Storyteller", label:"🌸 Soft Female Storyteller" },
+  { value:"Cinematic Male", label:"🎬 Cinematic Male" },
 ];
 
 const BGM_STYLES = [
-  { value: "Dark Action Hybrid", label: "⚡ Dark Action Hybrid" },
-  { value: "Epic Orchestral", label: "🎻 Epic Orchestral" },
-  { value: "Lo-Fi Recaps", label: "🎧 Lo-Fi Chill" },
-  { value: "Cyberpunk Synthwave", label: "🌆 Cyberpunk Synthwave" },
-  { value: "None", label: "🔇 None (Voice Only)" },
+  { value:"Dark Action Hybrid", label:"⚡ Dark Action Hybrid" },
+  { value:"Epic Orchestral", label:"🎻 Epic Orchestral" },
+  { value:"Lo-Fi Recaps", label:"🎧 Lo-Fi Chill" },
+  { value:"Cyberpunk Synthwave", label:"🌆 Cyberpunk Synthwave" },
+  { value:"None", label:"🔇 None (Voice Only)" },
 ];
 
 const STATUS_OPTIONS = [
-  { value: "Draft", label: "🔒 Private Draft" },
-  { value: "Review", label: "👀 Ready for Review" },
-  { value: "Published", label: "🌐 Published (Public)" },
+  { value:"Draft", label:"🔒 Private Draft" },
+  { value:"Review", label:"👀 Ready for Review" },
+  { value:"Published", label:"🌐 Published (Public)" },
 ];
 
 const SENSITIVITY_OPTIONS = [
-  { value: "Conservative", label: "Conservative" },
-  { value: "Balanced", label: "Balanced" },
-  { value: "Aggressive", label: "Aggressive" },
+  { value:"Conservative", label:"Conservative" },
+  { value:"Balanced", label:"Balanced" },
+  { value:"Aggressive", label:"Aggressive" },
 ];
 
 const LANGUAGE_OPTIONS = [
-  { value: "English", label: "English" },
-  { value: "Korean", label: "Korean" },
-  { value: "Japanese", label: "Japanese" },
-  { value: "Spanish", label: "Spanish" },
-  { value: "Chinese", label: "Chinese" },
-  { value: "French", label: "French" },
-  { value: "German", label: "German" },
+  { value:"English", label:"English" },
+  { value:"Korean", label:"Korean" },
+  { value:"Japanese", label:"Japanese" },
+  { value:"Spanish", label:"Spanish" },
+  { value:"Chinese", label:"Chinese" },
+  { value:"French", label:"French" },
+  { value:"German", label:"German" },
 ];
 
 const SUBTITLE_OPTIONS = [
-  { value: "None", label: "None" },
+  { value:"None", label:"None" },
   ...LANGUAGE_OPTIONS,
 ];
 
-const PLATFORM_OPTIONS = [
-  "YouTube Shorts",
-  "TikTok",
-  "Instagram Reels",
-  "YouTube Video",
+const PLATFORM_OPTIONS = ["YouTube Shorts","TikTok","Instagram Reels","YouTube Video",
 ];
 
 const AI_TASK_DEFINITIONS = [
   {
-    key: "generateScript" as const,
+    key:"generateScript" as const,
     icon: FileText,
-    label: "Script Extraction",
-    sub: "OCR & Clean Dialogue",
+    label:"Script Extraction",
+    sub:"OCR & Clean Dialogue",
   },
   {
-    key: "generateVoice" as const,
+    key:"generateVoice" as const,
     icon: Mic,
-    label: "AI Voiceover",
-    sub: "Text-to-Speech Narration",
+    label:"AI Voiceover",
+    sub:"Text-to-Speech Narration",
   },
   {
-    key: "generateSFX" as const,
+    key:"generateSFX" as const,
     icon: Music,
-    label: "SFX & Soundtrack",
-    sub: "Ambient & Impact Audio",
+    label:"SFX & Soundtrack",
+    sub:"Ambient & Impact Audio",
   },
 ];
 
@@ -244,11 +236,10 @@ export default function ProjectConfirmModal({
     generateVoice: true,
     generateSFX: true,
   });
-  const [submittingAction, setSubmittingAction] = useState<
-    "draft" | "ai" | null
+  const [submittingAction, setSubmittingAction] = useState<"draft" |"ai" | null
   >(null);
-  const isSavingDraft = submittingAction === "draft";
-  const isLaunchingAI = submittingAction === "ai";
+  const isSavingDraft = submittingAction ==="draft";
+  const isLaunchingAI = submittingAction ==="ai";
   const isSubmitting = submittingAction !== null;
   const [targetLayout, setTargetLayout] = useState("9:16");
   const [narrationTone, setNarrationTone] = useState("Dramatic");
@@ -265,9 +256,7 @@ export default function ProjectConfirmModal({
   const [isExtractingCover, setIsExtractingCover] = useState(false);
   const [voiceActor, setVoiceActor] = useState("Epic Trailer Narrator");
   const [bgmStyle, setBgmStyle] = useState("Dark Action Hybrid");
-  const [targetPlatforms, setTargetPlatforms] = useState<string[]>([
-    "YouTube Shorts",
-    "TikTok",
+  const [targetPlatforms, setTargetPlatforms] = useState<string[]>(["YouTube Shorts","TikTok",
   ]);
 
   const isSubmittingRef = useRef(false);
@@ -292,8 +281,8 @@ export default function ProjectConfirmModal({
         const clean = g
           .trim()
           .toLowerCase()
-          .replace(/[^\w\s-]/g, "")
-          .replace(/\s+/g, "");
+          .replace(/[^\w\s-]/g,"")
+          .replace(/\s+/g,"");
         if (clean && !generated.includes(`#${clean}`)) {
           generated.push(`#${clean}`);
         }
@@ -303,8 +292,8 @@ export default function ProjectConfirmModal({
       const titleTag = seriesTitle
         .trim()
         .toLowerCase()
-        .replace(/[^\w\s-]/g, "")
-        .replace(/\s+/g, "");
+        .replace(/[^\w\s-]/g,"")
+        .replace(/\s+/g,"");
       if (titleTag && !generated.includes(`#${titleTag}`)) {
         generated.push(`#${titleTag}`);
       }
@@ -315,7 +304,7 @@ export default function ProjectConfirmModal({
     setCustomTags(Array.from(new Set([...customTags, ...generated])));
   };
 
-  const applyPreset = (presetId: "shorts" | "movie" | "reel") => {
+  const applyPreset = (presetId:"shorts" |"movie" |"reel") => {
     const selected = PRESETS.find((p) => p.id === presetId);
     if (!selected) return;
     setTargetLayout(selected.config.targetLayout);
@@ -335,14 +324,13 @@ export default function ProjectConfirmModal({
         activeData?.project?.cover_image ||
         activeData?.project?.first_panel_image ||
         activeData?.panels?.[0]?.image_url ||
-        activeData?.scrapedImages?.[0] ||
-        "";
+        activeData?.scrapedImages?.[0] ||"";
 
-      const activeUrl = activeData?.project?.url || "";
-      let urlChNum = "";
-      let urlChTitle = "";
-      let urlGenre = "";
-      let urlSeries = "";
+      const activeUrl = activeData?.project?.url ||"";
+      let urlChNum ="";
+      let urlChTitle ="";
+      let urlGenre ="";
+      let urlSeries ="";
 
       if (activeUrl) {
         // Episode / Chapter number from URL
@@ -352,26 +340,26 @@ export default function ProjectConfirmModal({
         // Chapter title from URL slug, e.g. /1270-backache-1/viewer -> Backache (1)
         const mSlug = activeUrl.match(/\/(?:\d+[-_])?([a-zA-Z0-9-_]+)\/viewer/i);
         if (mSlug) {
-          urlChTitle = mSlug[1].replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+          urlChTitle = mSlug[1].replace(/[-_]+/g,"").replace(/\b\w/g, (c) => c.toUpperCase());
         }
 
         // Webtoons path parsing: /en/{genre}/{series-slug}/{episode}/viewer
         const pathParts = activeUrl.split("?")[0].split("/").filter(Boolean);
-        const enIdx = pathParts.findIndex((p) => p.toLowerCase() === "en" || p.toLowerCase() === "id" || p.toLowerCase() === "th" || p.toLowerCase() === "zh-hant");
+        const enIdx = pathParts.findIndex((p) => p.toLowerCase() ==="en" || p.toLowerCase() ==="id" || p.toLowerCase() ==="th" || p.toLowerCase() ==="zh-hant");
         if (enIdx !== -1 && pathParts.length > enIdx + 2) {
-          urlGenre = pathParts[enIdx + 1].replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-          urlSeries = pathParts[enIdx + 2].replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+          urlGenre = pathParts[enIdx + 1].replace(/[-_]+/g,"").replace(/\b\w/g, (c) => c.toUpperCase());
+          urlSeries = pathParts[enIdx + 2].replace(/[-_]+/g,"").replace(/\b\w/g, (c) => c.toUpperCase());
         }
       }
 
       const resolvedTitle =
-        initialDetails?.seriesTitle || activeData?.project?.title || urlSeries || "";
+        initialDetails?.seriesTitle || activeData?.project?.title || urlSeries ||"";
       let resolvedChTitle =
-        initialDetails?.chapterTitle || activeData?.project?.chapterTitle || urlChTitle || "";
+        initialDetails?.chapterTitle || activeData?.project?.chapterTitle || urlChTitle ||"";
       let resolvedChNum =
-        initialDetails?.chapterNumber || activeData?.project?.chapterNumber || urlChNum || "";
+        initialDetails?.chapterNumber || activeData?.project?.chapterNumber || urlChNum ||"";
 
-      // Clean up title prefix if chapter title came as "1270: Backache (1)"
+      // Clean up title prefix if chapter title came as"1270: Backache (1)"
       if (resolvedChTitle && /^(\d+)\s*[:\-–]\s*(.+)$/i.test(resolvedChTitle)) {
         const m = resolvedChTitle.match(/^(\d+)\s*[:\-–]\s*(.+)$/i);
         if (m) {
@@ -380,35 +368,35 @@ export default function ProjectConfirmModal({
         }
       }
       if (resolvedChTitle && resolvedChTitle.toLowerCase() === resolvedTitle.toLowerCase()) {
-        resolvedChTitle = urlChTitle || "";
+        resolvedChTitle = urlChTitle ||"";
       }
 
       setSeriesTitle(resolvedTitle);
       setChapterNumber(resolvedChNum);
       setChapterTitle(resolvedChTitle);
       setScrapedGenre(
-        initialDetails?.scrapedGenre || activeData?.project?.genre || urlGenre || ""
+        initialDetails?.scrapedGenre || activeData?.project?.genre || urlGenre ||""
       );
       setSeriesAuthor(
-        initialDetails?.seriesAuthor || activeData?.project?.author || ""
+        initialDetails?.seriesAuthor || activeData?.project?.author ||""
       );
       setSeriesCoverImage(fallbackCover);
       setSeriesSynopsis(
-        initialDetails?.seriesSynopsis || activeData?.project?.synopsis || ""
+        initialDetails?.seriesSynopsis || activeData?.project?.synopsis ||""
       );
       setProjectStatus(
-        initialDetails?.status || activeData?.project?.status || "Draft"
+        initialDetails?.status || activeData?.project?.status ||"Draft"
       );
       setActiveTab("metadata");
-      document.body.style.overflow = "hidden";
-      if (container) container.style.overflow = "hidden";
+      document.body.style.overflow ="hidden";
+      if (container) container.style.overflow ="hidden";
     } else {
-      document.body.style.overflow = "";
-      if (container) container.style.overflow = "";
+      document.body.style.overflow ="";
+      if (container) container.style.overflow ="";
     }
     return () => {
-      document.body.style.overflow = "";
-      if (container) container.style.overflow = "";
+      document.body.style.overflow ="";
+      if (container) container.style.overflow ="";
     };
   }, [isOpen, initialDetails]);
 
@@ -430,7 +418,7 @@ export default function ProjectConfirmModal({
 
   const displayCoverUrl = React.useMemo(() => {
     if (localCoverImage) return localCoverImage;
-    if (!seriesCoverImage) return "";
+    if (!seriesCoverImage) return"";
     if (
       seriesCoverImage.startsWith("data:") ||
       seriesCoverImage.startsWith("blob:") ||
@@ -447,7 +435,7 @@ export default function ProjectConfirmModal({
   const handleConfirm = async (shouldGenerate: boolean) => {
     if (isSubmitting || isSubmittingRef.current) return;
     isSubmittingRef.current = true;
-    setSubmittingAction(shouldGenerate ? "ai" : "draft");
+    setSubmittingAction(shouldGenerate ?"ai" :"draft");
 
     // Defer heavy async operations by 1 frame so the button loading spinner paints immediately and smoothly
     setTimeout(async () => {
@@ -488,11 +476,11 @@ export default function ProjectConfirmModal({
   };
 
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
+    if (e.key ==="Enter" || e.key ===",") {
       e.preventDefault();
       const val = tagInput.trim();
       if (val && !customTags.includes(val)) {
-        setCustomTags([...customTags, val.startsWith("#") ? val : `#${val}`]);
+        setCustomTags([...customTags, val.startsWith("#") ? val :`#${val}`]);
       }
       setTagInput("");
     }
@@ -529,16 +517,16 @@ export default function ProjectConfirmModal({
     }
   };
 
-  if (typeof document === "undefined") return null;
+  if (typeof document ==="undefined") return null;
 
   const tabs: {
     key: TabKey;
     label: string;
     icon: React.ComponentType<{ className?: string }>;
   }[] = [
-    { key: "metadata", label: "Metadata & Details", icon: BookOpen },
-    { key: "ai", label: "AI & Audio Studio", icon: Sparkles },
-    { key: "distribution", label: "Distribution & Tags", icon: Globe },
+    { key:"metadata", label:"Metadata & Details", icon: BookOpen },
+    { key:"ai", label:"AI & Audio Studio", icon: Sparkles },
+    { key:"distribution", label:"Distribution & Tags", icon: Globe },
   ];
 
   return createPortal(
@@ -590,13 +578,13 @@ export default function ProjectConfirmModal({
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer select-none ${
                   isActive
-                    ? "bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/35 shadow-sm shadow-[#1e3a5f]/40"
-                    : "text-neutral-500 hover:text-neutral-300 hover:bg-white/[0.03] border border-transparent"
+                    ?"bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/35 shadow-sm"
+                    :"text-neutral-500 hover:text-neutral-300 hover:bg-white/[0.03] border border-transparent"
                 }`}
               >
                 <Icon
                   className={`w-3.5 h-3.5 ${
-                    isActive ? "text-[#3B82F6]" : "text-neutral-500"
+                    isActive ?"text-[#3B82F6]" :"text-neutral-500"
                   }`}
                 />
                 <span>{tab.label}</span>
@@ -608,7 +596,7 @@ export default function ProjectConfirmModal({
         {/* ── Tab Content Area ── */}
         <div className="flex-1 overflow-y-auto p-6 space-y-5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#3B82F6]/40">
           {/* TAB 1: METADATA & DETAILS */}
-          {activeTab === "metadata" && (
+          {activeTab ==="metadata" && (
             <div className="space-y-4 animate-in fade-in duration-200">
               <div className={cardCls}>
                 <div className="flex items-center gap-2 mb-1">
@@ -639,7 +627,7 @@ export default function ProjectConfirmModal({
                   <div className="space-y-1.5">
                     <label className={labelCls}>
                       <Hash className="h-3 w-3 text-[#3B82F6]" />
-                      Chapter Number{" "}
+                      Chapter Number{""}
                       <span className="text-rose-500 ml-0.5">*</span>
                     </label>
                     <input
@@ -729,8 +717,7 @@ export default function ProjectConfirmModal({
                           alt="Cover"
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            (e.currentTarget as HTMLElement).style.display =
-                              "none";
+                            (e.currentTarget as HTMLElement).style.display ="none";
                           }}
                         />
                         {isExtractingCover && (
@@ -828,8 +815,8 @@ export default function ProjectConfirmModal({
                               }}
                               className={`w-10 h-10 rounded-lg overflow-hidden border shrink-0 transition-all cursor-pointer ${
                                 seriesCoverImage === imgUrl && !localCoverImage
-                                  ? "border-[#3B82F6] ring-2 ring-[#3B82F6]/30 scale-105"
-                                  : "border-white/10 hover:border-white/30 opacity-70 hover:opacity-100"
+                                  ?"border-[#3B82F6] ring-2 ring-[#3B82F6]/30 scale-105"
+                                  :"border-white/10 hover:border-white/30 opacity-70 hover:opacity-100"
                               }`}
                             >
                               <img
@@ -874,7 +861,7 @@ export default function ProjectConfirmModal({
           )}
 
           {/* TAB 2: AI & AUDIO STUDIO */}
-          {activeTab === "ai" && (
+          {activeTab ==="ai" && (
             <div className="space-y-4 animate-in fade-in duration-200">
               {/* Presets */}
               <div className="bg-[#0e0f19]/80 border border-white/[0.07] rounded-2xl p-4 flex items-center justify-between gap-2 overflow-x-auto">
@@ -963,8 +950,8 @@ export default function ProjectConfirmModal({
                         onClick={() => toggleTask(key)}
                         className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                           aiTasks[key]
-                            ? "bg-[#3B82F6]/15 border-[#3B82F6]/40 text-[#60A5FA]"
-                            : "bg-white/[0.03] border-white/[0.06] text-neutral-600 hover:text-neutral-400"
+                            ?"bg-[#3B82F6]/15 border-[#3B82F6]/40 text-[#60A5FA]"
+                            :"bg-white/[0.03] border-white/[0.06] text-neutral-600 hover:text-neutral-400"
                         }`}
                       >
                         <div className="flex items-center justify-between mb-2">
@@ -1025,7 +1012,7 @@ export default function ProjectConfirmModal({
           )}
 
           {/* TAB 3: DISTRIBUTION & TAGS */}
-          {activeTab === "distribution" && (
+          {activeTab ==="distribution" && (
             <div className="space-y-4 animate-in fade-in duration-200">
               {/* Platforms */}
               <div className={cardCls}>
@@ -1046,8 +1033,8 @@ export default function ProjectConfirmModal({
                       onClick={() => togglePlatform(platform)}
                       className={`py-3 px-3.5 rounded-2xl border text-xs font-semibold transition-all cursor-pointer text-left flex items-center justify-between ${
                         targetPlatforms.includes(platform)
-                          ? "bg-[#3B82F6]/15 border-[#3B82F6]/35 text-[#60A5FA] shadow-sm"
-                          : "bg-white/[0.03] border-white/[0.06] text-neutral-600 hover:text-neutral-400"
+                          ?"bg-[#3B82F6]/15 border-[#3B82F6]/35 text-[#60A5FA] shadow-sm"
+                          :"bg-white/[0.03] border-white/[0.06] text-neutral-600 hover:text-neutral-400"
                       }`}
                     >
                       <span>{platform}</span>
@@ -1102,7 +1089,7 @@ export default function ProjectConfirmModal({
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={handleTagKeyDown}
                     placeholder={
-                      customTags.length === 0 ? "Type tag & press Enter..." : ""
+                      customTags.length === 0 ?"Type tag & press Enter..." :""
                     }
                     className="bg-transparent border-none outline-none text-sm text-neutral-300 flex-1 min-w-[120px] placeholder:text-neutral-700"
                   />
@@ -1189,12 +1176,12 @@ export default function ProjectConfirmModal({
           </button>
 
           <div className="flex items-center gap-2.5">
-            {activeTab !== "distribution" ? (
+            {activeTab !=="distribution" ? (
               <button
                 type="button"
                 onClick={() => {
-                  if (activeTab === "metadata") setActiveTab("ai");
-                  else if (activeTab === "ai") setActiveTab("distribution");
+                  if (activeTab ==="metadata") setActiveTab("ai");
+                  else if (activeTab ==="ai") setActiveTab("distribution");
                 }}
                 className="px-4 py-2.5 bg-white/[0.05] hover:bg-white/[0.08] text-neutral-300 hover:text-white border border-white/[0.08] hover:border-white/[0.14] rounded-xl text-xs font-bold tracking-wide transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
               >

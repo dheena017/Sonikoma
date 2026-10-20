@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo } from"react";
 import {
   ArrowLeft,
   Workflow,
@@ -18,12 +18,12 @@ import {
   RefreshCw,
   SlidersHorizontal,
   Key,
-} from "lucide-react";
+} from"lucide-react";
 import TierModelCard, {
   DynamicModelOption,
   isProviderKeyConfiguredInVault,
-} from "./TierModelCard";
-import { logAITaskCascade, logAITaskCompletion } from "@/shared/utils/aiTierLogger";
+} from"./TierModelCard";
+import { logAITaskCascade, logAITaskCompletion } from"@/shared/utils/aiTierLogger";
 
 export interface CapabilityDefinition {
   task: string;
@@ -52,7 +52,7 @@ interface TaskRouteConfigureViewProps {
   onSelectTask: (taskId: string) => void;
   onModelChange: (
     task: string,
-    field: "primary_model" | "fallback_model" | "tertiary_model",
+    field:"primary_model" |"fallback_model" |"tertiary_model",
     modelId: string
   ) => void;
   onSave: () => void;
@@ -88,7 +88,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
     if (targetTag) {
       list = availableModels.filter((m) => {
         if (Array.isArray(m.tags) && m.tags.length > 0) {
-          if (targetTag === "Image-to-Video" || targetTag === "Text-to-Video") {
+          if (targetTag ==="Image-to-Video" || targetTag ==="Text-to-Video") {
             return m.tags.includes("Image-to-Video") || m.tags.includes("Text-to-Video");
           }
           return m.tags.includes(targetTag);
@@ -97,42 +97,38 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
       });
     } else {
       switch (taskRoute.required_type) {
-        case "audio_tts":
+        case"audio_tts":
           list = availableModels.filter(
             (m) =>
-              m.provider === "edgetts" ||
-              m.provider === "elevenlabs" ||
+              m.provider ==="edgetts" ||
+              m.provider ==="elevenlabs" ||
               m.capabilities?.some((c) =>
-                ["tts", "audio", "voice_cloning", "multilingual_audio"].includes(
+                ["tts","audio","voice_cloning","multilingual_audio"].includes(
                   c.toLowerCase()
                 )
               ) ||
               m.category?.toLowerCase().includes("speech")
           );
           break;
-        case "image_diffusion":
+        case"image_diffusion":
           list = availableModels.filter(
             (m) =>
-              m.provider === "huggingface" ||
-              m.provider === "stablediffusion" ||
+              m.provider ==="huggingface" ||
+              m.provider ==="stablediffusion" ||
               m.id.toLowerCase().includes("dall-e") ||
               m.capabilities?.some((c) =>
-                [
-                  "image_generation",
-                  "high_res_image",
-                  "diffusion",
-                  "image",
+                ["image_generation","high_res_image","diffusion","image",
                 ].includes(c.toLowerCase())
               ) ||
               m.category?.toLowerCase().includes("diffusion") ||
               m.category?.toLowerCase().includes("image")
           );
           break;
-        case "vision_multimodal":
+        case"vision_multimodal":
           list = availableModels.filter(
             (m) =>
               m.capabilities?.some((c) =>
-                ["vision", "multimodal", "image_understanding", "ocr"].includes(
+                ["vision","multimodal","image_understanding","ocr"].includes(
                   c.toLowerCase()
                 )
               ) ||
@@ -143,7 +139,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
           );
           break;
         default:
-          list = availableModels.filter((m) => m.provider !== "edgetts");
+          list = availableModels.filter((m) => m.provider !=="edgetts");
       }
     }
 
@@ -164,18 +160,18 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
             id: aId,
             name: aId,
             provider: aId.includes("gemini")
-              ? "gemini"
+              ?"gemini"
               : aId.includes("flux") || aId.includes("sd")
-              ? "huggingface"
-              : "openai",
+              ?"huggingface"
+              :"openai",
             provider_name: aId.includes("gemini")
-              ? "Google"
+              ?"Google"
               : aId.includes("flux") || aId.includes("sd")
-              ? "HuggingFace"
-              : "OpenAI",
+              ?"HuggingFace"
+              :"OpenAI",
             category: taskRoute.category,
-            status: "ready",
-            tags: [taskRoute.required_tag || "Engine"],
+            status:"ready",
+            tags: [taskRoute.required_tag ||"Engine"],
           });
         }
       }
@@ -204,13 +200,13 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
     });
     try {
       const res = await fetch("/api/v1/ai/routing/simulate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method:"POST",
+        headers: {"Content-Type":"application/json" },
         body: JSON.stringify({
           task: taskRoute.task,
           primary_model: taskRoute.primary_model,
           fallback_model: taskRoute.fallback_model,
-          simulate_error_on: "",
+          simulate_error_on:"",
         }),
       });
       if (res.ok) {
@@ -218,7 +214,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
         setSimResult(data);
         logAITaskCompletion(taskRoute.name, {
           model: data.resolved_model || taskRoute.primary_model,
-          tier_display: data.tier_used || "Tier 1 (Primary)",
+          tier_display: data.tier_used ||"Tier 1 (Primary)",
           latency_ms: data.latency_ms,
           cascade,
         });
@@ -228,14 +224,14 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
         setSimResult({
           success: true,
           resolved_model: taskRoute.primary_model,
-          tier_used: "Tier 1 Primary",
+          tier_used:"Tier 1 Primary",
           latency_ms: 135,
-          status: "SUCCESS",
-          message: `Pipeline successfully routed to ${taskRoute.primary_model} with active failover backup.`,
+          status:"SUCCESS",
+          message:`Pipeline successfully routed to ${taskRoute.primary_model} with active failover backup.`,
         });
         logAITaskCompletion(taskRoute.name, {
           model: taskRoute.primary_model,
-          tier_display: "Tier 1 (Primary)",
+          tier_display:"Tier 1 (Primary)",
           latency_ms: 135,
           cascade,
         });
@@ -244,14 +240,14 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
       setSimResult({
         success: true,
         resolved_model: taskRoute.primary_model,
-        tier_used: "Tier 1 Primary",
+        tier_used:"Tier 1 Primary",
         latency_ms: 120,
-        status: "SUCCESS",
-        message: "Live simulation verified: Primary engine responded cleanly.",
+        status:"SUCCESS",
+        message:"Live simulation verified: Primary engine responded cleanly.",
       });
       logAITaskCompletion(taskRoute.name, {
         model: taskRoute.primary_model,
-        tier_display: "Tier 1 (Primary)",
+        tier_display:"Tier 1 (Primary)",
         latency_ms: 120,
         cascade,
       });
@@ -302,9 +298,9 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/30 transition-all cursor-pointer disabled:opacity-50"
           >
             <Play
-              className={`w-3.5 h-3.5 ${isSimulating ? "animate-spin" : ""}`}
+              className={`w-3.5 h-3.5 ${isSimulating ?"animate-spin" :""}`}
             />
-            <span>{isSimulating ? "Testing..." : "Test Cascade"}</span>
+            <span>{isSimulating ?"Testing..." :"Test Cascade"}</span>
           </button>
 
           <button
@@ -313,8 +309,8 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
             disabled={isSaving}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all duration-200 cursor-pointer shadow-md active:scale-95 ${
               saved
-                ? "bg-emerald-600 border border-emerald-500/40"
-                : "bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 shadow-blue-500/20"
+                ?"bg-emerald-600 border border-emerald-500/40"
+                :"bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40"
             }`}
           >
             {saved ? (
@@ -398,14 +394,14 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
 
               <div className="pt-1 flex items-center gap-3 text-xs font-mono text-neutral-400 flex-wrap">
                 <span>
-                  Task Identifier:{" "}
+                  Task Identifier:{""}
                   <code className="text-blue-300 font-bold">
                     {taskRoute.task}
                   </code>
                 </span>
                 <span>•</span>
                 <span>
-                  Type:{" "}
+                  Type:{""}
                   <code className="text-[#60A5FA]">
                     {taskRoute.required_type}
                   </code>
@@ -462,7 +458,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               availableModels={suitableModels}
               requiredTag={taskRoute.required_tag}
               onModelChange={(modelId) =>
-                onModelChange(taskRoute.task, "primary_model", modelId)
+                onModelChange(taskRoute.task,"primary_model", modelId)
               }
             />
           </div>
@@ -487,7 +483,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               availableModels={suitableModels}
               requiredTag={taskRoute.required_tag}
               onModelChange={(modelId) =>
-                onModelChange(taskRoute.task, "fallback_model", modelId)
+                onModelChange(taskRoute.task,"fallback_model", modelId)
               }
             />
           </div>
@@ -512,7 +508,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               availableModels={suitableModels}
               requiredTag={taskRoute.required_tag}
               onModelChange={(modelId) =>
-                onModelChange(taskRoute.task, "tertiary_model", modelId)
+                onModelChange(taskRoute.task,"tertiary_model", modelId)
               }
             />
           </div>
@@ -593,7 +589,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
                 Active Tier
               </span>
               <span className="text-emerald-400 font-bold">
-                {simResult.tier_used || "Tier 1 Primary"}
+                {simResult.tier_used ||"Tier 1 Primary"}
               </span>
             </div>
             <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06]">
@@ -606,8 +602,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
             </div>
           </div>
           <p className="text-xs text-neutral-300 font-sans pt-1">
-            {simResult.message ||
-              "Model responded normally. Cascade fallback path verified."}
+            {simResult.message ||"Model responded normally. Cascade fallback path verified."}
           </p>
         </div>
       )}

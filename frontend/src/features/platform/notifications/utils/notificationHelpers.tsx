@@ -1,12 +1,12 @@
-import { CircleAlert, AlertCircle, CheckCircle, Info } from "lucide-react";
+import { CircleAlert, AlertCircle, CheckCircle, Info } from"lucide-react";
 
 export const getNotificationIcon = (type: string) => {
   switch (type) {
-    case "error":
+    case"error":
       return <CircleAlert className="h-5 w-5 text-rose-500 shrink-0" />;
-    case "warning":
+    case"warning":
       return <AlertCircle className="h-5 w-5 text-amber-500 shrink-0" />;
-    case "success":
+    case"success":
       return <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0" />;
     default:
       return <Info className="h-5 w-5 text-blue-500 shrink-0" />;
@@ -15,19 +15,19 @@ export const getNotificationIcon = (type: string) => {
 
 export const getNotificationIconBox = (type: string) => {
   switch (type) {
-    case "error":
+    case"error":
       return (
         <div className="icon-pill icon-pill--rose">
           <CircleAlert className="h-5 w-5" />
         </div>
       );
-    case "warning":
+    case"warning":
       return (
         <div className="icon-pill icon-pill--amber">
           <AlertCircle className="h-5 w-5" />
         </div>
       );
-    case "success":
+    case"success":
       return (
         <div className="icon-pill icon-pill--emerald">
           <CheckCircle className="h-5 w-5" />
@@ -44,30 +44,30 @@ export const getNotificationIconBox = (type: string) => {
 
 export const getTypeStyles = (type: string) => {
   switch (type) {
-    case "error":
-      return "text-rose-500 bg-rose-500/5 border-rose-500/20";
-    case "warning":
-      return "text-amber-500 bg-amber-500/5 border-amber-500/20";
-    case "success":
-      return "text-emerald-500 bg-emerald-500/5 border-emerald-500/20";
+    case"error":
+      return"text-rose-500 bg-rose-500/5 border-rose-500/20";
+    case"warning":
+      return"text-amber-500 bg-amber-500/5 border-amber-500/20";
+    case"success":
+      return"text-emerald-500 bg-emerald-500/5 border-emerald-500/20";
     default:
-      return "text-blue-500 bg-blue-500/5 border-blue-500/20";
+      return"text-blue-500 bg-blue-500/5 border-blue-500/20";
   }
 };
 
 export const getToastStyles = (errorCode?: number, type?: string) => {
   if (errorCode === 429) {
-    return "bg-amber-950/95 border-amber-500/85 text-amber-100 shadow-amber-950/40 shadow-xl border-2";
+    return"bg-amber-950/95 border-amber-500/85 text-amber-100  shadow-xl border-2";
   } else if (errorCode === 500) {
-    return "bg-red-950/95 border-red-500 text-red-100 shadow-red-950/50 shadow-xl border-2";
-  } else if (type === "error") {
-    return "bg-rose-950/90 border-rose-800 text-rose-100";
-  } else if (type === "warning") {
-    return "bg-amber-950/90 border-amber-800 text-amber-100";
-  } else if (type === "success") {
-    return "bg-emerald-950/90 border-emerald-800 text-emerald-100";
+    return"bg-red-950/95 border-red-500 text-red-100  shadow-xl border-2";
+  } else if (type ==="error") {
+    return"bg-rose-950/90 border-rose-800 text-rose-100";
+  } else if (type ==="warning") {
+    return"bg-amber-950/90 border-amber-800 text-amber-100";
+  } else if (type ==="success") {
+    return"bg-emerald-950/90 border-emerald-800 text-emerald-100";
   } else {
-    return "bg-blue-950/90 border-blue-800 text-blue-100";
+    return"bg-blue-950/90 border-blue-800 text-blue-100";
   }
 };
 
@@ -76,7 +76,7 @@ export const getToastIcon = (errorCode?: number, type?: string) => {
     return (
       <svg
         className="h-5 w-5 text-amber-400 shrink-0 animate-spin"
-        style={{ animationDuration: "3s" }}
+        style={{ animationDuration:"3s" }}
         fill="none"
         viewBox="0 0 24 24"
       >
@@ -97,11 +97,11 @@ export const getToastIcon = (errorCode?: number, type?: string) => {
     );
   } else if (errorCode === 500) {
     return <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />;
-  } else if (type === "error") {
+  } else if (type ==="error") {
     return <CircleAlert className="h-5 w-5 text-rose-400 shrink-0" />;
-  } else if (type === "warning") {
+  } else if (type ==="warning") {
     return <AlertCircle className="h-5 w-5 text-amber-400 shrink-0" />;
-  } else if (type === "success") {
+  } else if (type ==="success") {
     return <CheckCircle className="h-5 w-5 text-emerald-400 shrink-0" />;
   } else {
     return <Info className="h-5 w-5 text-blue-400 shrink-0" />;
@@ -110,16 +110,16 @@ export const getToastIcon = (errorCode?: number, type?: string) => {
 
 export const getToastTitle = (errorCode?: number, type?: string) => {
   if (errorCode === 429) {
-    return "Quota Exhausted (429)";
+    return"Quota Exhausted (429)";
   } else if (errorCode === 500) {
-    return "Pipeline Failure (500)";
-  } else if (type === "error") {
-    return "Operation Error";
-  } else if (type === "warning") {
-    return "Warning";
-  } else if (type === "success") {
-    return "Success";
+    return"Pipeline Failure (500)";
+  } else if (type ==="error") {
+    return"Operation Error";
+  } else if (type ==="warning") {
+    return"Warning";
+  } else if (type ==="success") {
+    return"Success";
   } else {
-    return "Information";
+    return"Information";
   }
 };

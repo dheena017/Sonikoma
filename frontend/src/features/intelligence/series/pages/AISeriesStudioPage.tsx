@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { createPortal } from "react-dom";
+import React, { useState, useEffect, useCallback, useRef } from"react";
+import { createPortal } from"react-dom";
 import {
   Sparkles,
   Layers,
@@ -41,7 +41,7 @@ import {
   Eye,
   Sliders,
   Clock,
-} from "lucide-react";
+} from"lucide-react";
 import {
   aiSeriesApi,
   AISeriesProject,
@@ -49,12 +49,12 @@ import {
   AISeriesPanel,
   InteractiveSpeechBubble,
   CharacterDNA,
-} from "@/features/intelligence/series/api/aiSeries";
-import { NotificationType } from "@/features/platform/notifications";
-import RightSidePanelInspector from "../components/tabs/RightSidePanelInspector";
-import RouteLoadingFallback from "@/shared/ui/feedback/RouteLoadingFallback";
-import { SonikomaLogo } from "@/shared/ui/branding";
-import { logAITaskCascade, logAITaskCompletion } from "@/shared/utils/aiTierLogger";
+} from"@/features/intelligence/series/api/aiSeries";
+import { NotificationType } from"@/features/platform/notifications";
+import RightSidePanelInspector from"../components/tabs/RightSidePanelInspector";
+import RouteLoadingFallback from"@/shared/ui/feedback/RouteLoadingFallback";
+import { SonikomaLogo } from"@/shared/ui/branding";
+import { logAITaskCascade, logAITaskCompletion } from"@/shared/utils/aiTierLogger";
 
 // ── Stateful Studio Image Components with Dynamic Processing State ───────
 interface StudioPanelImageProps {
@@ -65,7 +65,7 @@ interface StudioPanelImageProps {
   prompt?: string;
   isRegenerating?: boolean;
   screentoneFilter?: boolean;
-  fitMode?: "contain" | "cover";
+  fitMode?:"contain" |"cover";
   aspectRatioClass?: string;
   imageModel?: string;
   onOpenInspector?: () => void;
@@ -73,21 +73,21 @@ interface StudioPanelImageProps {
 }
 
 export const formatModelBadge = (m?: string): string => {
-  if (!m) return "⚡ Sonikoma Studio 2D";
+  if (!m) return"⚡ Sonikoma Studio 2D";
   const lower = m.toLowerCase();
-  if (lower.includes("turbo") || lower.includes("sonikoma")) return "⚡ Sonikoma Studio 2D";
-  if (lower.includes("flux.1") || lower.includes("schnell")) return "⚡ Sonikoma Studio 2D";
-  if (lower.includes("flux-anime") || lower === "flux_anime") return "🎨 FLUX Anime";
-  if (lower.includes("flux-realism")) return "📸 FLUX Real";
-  if (lower.includes("flux-pro")) return "✨ FLUX Pro";
-  if (lower.includes("flux")) return "⚡ Sonikoma Studio 2D";
-  if (lower.includes("sdxl") || lower.includes("stable-diffusion-xl")) return "🖼️ SDXL";
-  if (lower.includes("stable-diffusion") || lower.includes("diffusers")) return "🖼️ Stable Diffusion";
-  if (lower.includes("dall-e")) return "🎨 DALL-E 3";
-  if (lower.includes("midjourney")) return "🌌 Midjourney";
-  if (lower.includes("gemini")) return "✨ Gemini Vision";
+  if (lower.includes("turbo") || lower.includes("sonikoma")) return"⚡ Sonikoma Studio 2D";
+  if (lower.includes("flux.1") || lower.includes("schnell")) return"⚡ Sonikoma Studio 2D";
+  if (lower.includes("flux-anime") || lower ==="flux_anime") return"🎨 FLUX Anime";
+  if (lower.includes("flux-realism")) return"📸 FLUX Real";
+  if (lower.includes("flux-pro")) return"✨ FLUX Pro";
+  if (lower.includes("flux")) return"⚡ Sonikoma Studio 2D";
+  if (lower.includes("sdxl") || lower.includes("stable-diffusion-xl")) return"🖼️ SDXL";
+  if (lower.includes("stable-diffusion") || lower.includes("diffusers")) return"🖼️ Stable Diffusion";
+  if (lower.includes("dall-e")) return"🎨 DALL-E 3";
+  if (lower.includes("midjourney")) return"🌌 Midjourney";
+  if (lower.includes("gemini")) return"✨ Gemini Vision";
   const clean = m.includes("/") ? m.split("/").pop() || m : m;
-  return `⚡ ${clean}`;
+  return`⚡ ${clean}`;
 };
 
 const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
@@ -98,16 +98,16 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
   prompt,
   isRegenerating = false,
   screentoneFilter = false,
-  fitMode = "contain",
-  aspectRatioClass = "aspect-[2/3]",
+  fitMode ="contain",
+  aspectRatioClass ="aspect-[2/3]",
   imageModel,
   onOpenInspector,
   onReload,
 }) => {
   const modelLabel = formatModelBadge(imageModel);
 
-  const [imageState, setImageState] = useState<"loading" | "loaded" | "error">(
-    src ? "loading" : "error"
+  const [imageState, setImageState] = useState<"loading" |"loaded" |"error">(
+    src ?"loading" :"error"
   );
   const [isLocalReloading, setIsLocalReloading] = useState<boolean>(false);
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
@@ -143,10 +143,10 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
 
   // Multi-stage pipeline during active visual generation
   const GENERATION_STAGES = [
-    { name: "Scene Direction", desc: "Analyzing angle, character DNA & composition" },
-    { name: "Latent Diffusion", desc: "Synthesizing high-res 2D manhwa lineart" },
-    { name: "Cel Shading & Tone", desc: "Applying screentones & dynamic lighting" },
-    { name: "Media Finalization", desc: "Encoding frame & caching to studio disk" },
+    { name:"Scene Direction", desc:"Analyzing angle, character DNA & composition" },
+    { name:"Latent Diffusion", desc:"Synthesizing high-res 2D manhwa lineart" },
+    { name:"Cel Shading & Tone", desc:"Applying screentones & dynamic lighting" },
+    { name:"Media Finalization", desc:"Encoding frame & caching to studio disk" },
   ];
 
   const currentStageIndex =
@@ -168,7 +168,7 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
 
         {/* Ambient Glow Pod & Logo with Dynamic Spinner Rings */}
         <div className="relative mb-4 flex items-center justify-center">
-          <div className="w-20 h-20 rounded-full bg-cyan-500/15 blur-2xl absolute pointer-events-none animate-pulse" />
+          
           <div className="relative z-10 p-2 rounded-2xl bg-[#1C1C1C] border border-cyan-500/30 shadow-lg">
             <SonikomaLogo iconOnly size="md" />
           </div>
@@ -205,10 +205,10 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
               key={st.name}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 i === currentStageIndex
-                  ? "w-8 bg-cyan-400 "
+                  ?"w-8 bg-cyan-400"
                   : i < currentStageIndex
-                  ? "w-4 bg-blue-500/80"
-                  : "w-3 bg-white/15"
+                  ?"w-4 bg-blue-500/80"
+                  :"w-3 bg-white/15"
               }`}
               title={`Step ${i + 1}: ${st.name}`}
             />
@@ -219,8 +219,8 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
         <div className="w-48 space-y-1.5 z-10">
           <div className="h-1.5 w-full bg-[#252525] rounded-full overflow-hidden p-0.5 border border-white/10">
             <div
-              className="h-full bg-gradient-to-r from-blue-600 via-cyan-400 to-indigo-500 rounded-full transition-all duration-500 ease-out "
-              style={{ width: `${progressPercent}%` }}
+              className="h-full bg-gradient-to-r from-blue-600 via-cyan-400 to-indigo-500 rounded-full transition-all duration-500 ease-out"
+              style={{ width:`${progressPercent}%` }}
             />
           </div>
           <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400">
@@ -232,8 +232,7 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
         {/* Prompt Snippet Preview */}
         {prompt && (
           <div className="mt-4 px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 max-w-[280px] z-10">
-            <p className="text-[9px] font-mono text-neutral-400 line-clamp-2 italic text-left">
-              "{prompt}"
+            <p className="text-[9px] font-mono text-neutral-400 line-clamp-2 italic text-left">"{prompt}"
             </p>
           </div>
         )}
@@ -242,7 +241,7 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
   }
 
   // 2. STORYBOARD CARD AWAITING SYNTHESIS / PROCESS LAUNCHER
-  if (!src || imageState === "error") {
+  if (!src || imageState ==="error") {
     const handleGenerateClick = async (e: React.MouseEvent) => {
       e.stopPropagation();
       setIsLocalReloading(true);
@@ -286,7 +285,7 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
             </span>
             {cameraAngle && (
               <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-neutral-300 capitalize truncate max-w-[140px]">
-                {cameraAngle.replace(/_/g, " ")}
+                {cameraAngle.replace(/_/g,"")}
               </span>
             )}
           </div>
@@ -308,11 +307,10 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
           <div className="space-y-1 text-[10px] font-mono text-neutral-400">
             <div className="flex items-center gap-1.5 text-neutral-300">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
-              <span className="truncate">Ready: {cameraAngle?.replace(/_/g, " ") || "Standard Shot"}</span>
+              <span className="truncate">Ready: {cameraAngle?.replace(/_/g,"") ||"Standard Shot"}</span>
             </div>
             {prompt && (
-              <p className="text-[9px] text-neutral-400 line-clamp-2 pl-3 italic border-l border-white/10 my-0.5">
-                "{prompt}"
+              <p className="text-[9px] text-neutral-400 line-clamp-2 pl-3 italic border-l border-white/10 my-0.5">"{prompt}"
               </p>
             )}
           </div>
@@ -325,7 +323,7 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
               type="button"
               onClick={handleGenerateClick}
               disabled={isActuallyProcessing}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white text-xs font-mono font-bold transition-all cursor-pointer shadow-lg shadow-blue-500/25 active:scale-95 disabled:pointer-events-none hover:shadow-blue-500/40"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white text-xs font-mono font-bold transition-all cursor-pointer shadow-lg active:scale-95 disabled:pointer-events-none"
               title="Synthesize Visual with AI Diffusion"
             >
               <Zap className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300" />
@@ -366,13 +364,13 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
 
   // 3. LOADED / BUFFERING ARTWORK FRAME
   const finalSrc = cacheBuster > 0
-    ? (src.includes("?") ? `${src}&t=${cacheBuster}` : `${src}?t=${cacheBuster}`)
+    ? (src.includes("?") ?`${src}&t=${cacheBuster}` :`${src}?t=${cacheBuster}`)
     : src;
 
   return (
     <div className={`w-full h-full relative overflow-hidden flex items-center justify-center ${aspectRatioClass}`}>
       {/* Sleek skeleton while image is buffering over network */}
-      {imageState === "loading" && (
+      {imageState ==="loading" && (
         <div className="absolute inset-0 bg-gradient-to-b from-[#181818] via-[#141414] to-[#101010] flex flex-col items-center justify-center z-0 animate-pulse select-none">
           <div className="relative mb-2 flex items-center justify-center">
             <div className="p-2 rounded-2xl bg-[#1C1C1C] border border-white/10">
@@ -389,13 +387,13 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
         src={finalSrc}
         alt={alt}
         className={`w-auto h-full max-h-full max-w-full ${
-          fitMode === "cover" ? "object-cover w-full h-full" : "object-contain"
+          fitMode ==="cover" ?"object-cover w-full h-full" :"object-contain"
         } block transition-opacity duration-300 relative z-10 ${
-          imageState === "loaded" ? "opacity-100" : "opacity-0"
-        } ${screentoneFilter ? "contrast-125 grayscale" : ""}`}
+          imageState ==="loaded" ?"opacity-100" :"opacity-0"
+        } ${screentoneFilter ?"contrast-125 grayscale" :""}`}
         loading="eager"
         ref={(el) => {
-          if (el && el.complete && el.naturalWidth > 0 && imageState !== "loaded") {
+          if (el && el.complete && el.naturalWidth > 0 && imageState !=="loaded") {
             setImageState("loaded");
             setIsLocalReloading(false);
           }
@@ -411,7 +409,7 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
       />
 
       {/* ── AI Smart Routing Model Badge Displayed Directly on Image ── */}
-      {imageState === "loaded" && (
+      {imageState ==="loaded" && (
         <div className="absolute top-3 right-3 z-20 pointer-events-none transition-all duration-300">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold text-white shadow-xl transition-all">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
@@ -441,8 +439,8 @@ const FilmstripThumbnail: React.FC<FilmstripThumbnailProps> = ({
   isRegenerating = false,
   onClick,
 }) => {
-  const [thumbState, setThumbState] = useState<"loading" | "loaded" | "error">(
-    src ? "loading" : "error"
+  const [thumbState, setThumbState] = useState<"loading" |"loaded" |"error">(
+    src ?"loading" :"error"
   );
 
   useEffect(() => {
@@ -459,11 +457,11 @@ const FilmstripThumbnail: React.FC<FilmstripThumbnailProps> = ({
       type="button"
       onClick={onClick}
       className={`relative shrink-0 w-16 h-11 rounded-lg overflow-hidden border transition-all cursor-pointer group bg-[#141414] flex items-center justify-center ${isSelected
-        ? "ring-2 ring-blue-500 border-blue-400 scale-105 shadow-md shadow-blue-500/30"
-        : "border-white/10 hover:border-white/30 opacity-75 hover:opacity-100"
+        ?"ring-2 ring-blue-500 border-blue-400 scale-105 shadow-md"
+        :"border-white/10 hover:border-white/30 opacity-75 hover:opacity-100"
         }`}
     >
-      {(isRegenerating || thumbState === "loading") && (
+      {(isRegenerating || thumbState ==="loading") && (
         <div className="absolute inset-0 bg-[#181818] flex items-center justify-center animate-pulse z-10">
           <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin" />
         </div>
@@ -475,11 +473,11 @@ const FilmstripThumbnail: React.FC<FilmstripThumbnailProps> = ({
           src={src}
           alt={`#${shotIndex + 1}`}
           className={`w-full h-full object-cover relative z-10 transition-opacity duration-200 ${
-            thumbState === "loaded" ? "opacity-100" : "opacity-0"
+            thumbState ==="loaded" ?"opacity-100" :"opacity-0"
           }`}
           loading="eager"
           ref={(el) => {
-            if (el && el.complete && el.naturalWidth > 0 && thumbState !== "loaded") {
+            if (el && el.complete && el.naturalWidth > 0 && thumbState !=="loaded") {
               setThumbState("loaded");
             }
           }}
@@ -488,7 +486,7 @@ const FilmstripThumbnail: React.FC<FilmstripThumbnailProps> = ({
         />
       )}
 
-      {thumbState === "error" && !isRegenerating && (
+      {thumbState ==="error" && !isRegenerating && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#181818]">
           <Sparkles className="w-3 h-3 text-neutral-500" />
         </div>
@@ -522,7 +520,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
   // ── URL & ID Resolution ──────────────────────────────────────────────
   const resolvedSeriesId = React.useMemo(() => {
     if (seriesIdFromRoute) return seriesIdFromRoute;
-    if (typeof window !== "undefined") {
+    if (typeof window !=="undefined") {
       const search = new URLSearchParams(window.location.search);
       const qSeriesId = search.get("series_id") || search.get("seriesId");
       if (qSeriesId) return qSeriesId;
@@ -536,7 +534,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
         return parts[aiIdx + 1];
       }
     }
-    return "";
+    return"";
   }, [seriesIdFromRoute]);
 
   // ── Core Project State ───────────────────────────────────────────────
@@ -557,7 +555,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
   const [selectedPanelIdx, setSelectedPanelIdx] = useState<number>(0);
 
   // ── Viewport Controls ────────────────────────────────────────────────
-  const [viewportMode, setViewportMode] = useState<"strip" | "grid" | "video">("strip");
+  const [viewportMode, setViewportMode] = useState<"strip" |"grid" |"video">("strip");
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [screentoneFilter, setScreentoneFilter] = useState<boolean>(false);
   const [showSpeechBubbles, setShowSpeechBubbles] = useState<boolean>(true);
@@ -616,11 +614,11 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
       setProject(proj);
 
       // Default format viewport mapping
-      const fmt = (proj.format_type || "manhwa").toLowerCase();
-      if (fmt === "comic_manga") {
+      const fmt = (proj.format_type ||"manhwa").toLowerCase();
+      if (fmt ==="comic_manga") {
         setViewportMode("grid");
         setScreentoneFilter(true);
-      } else if (fmt === "anime") {
+      } else if (fmt ==="anime") {
         setViewportMode("video");
       } else {
         setViewportMode("strip");
@@ -632,16 +630,16 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
       setCurrentChapter(chap);
       if (chap.panels && chap.panels.length > 0) {
         setSelectedPanelIdx(0);
-        setEditingPrompt(chap.panels[0].prompt || "");
-        setEditingSpeechText(chap.panels[0].speech_text || "");
-        setEditingSpeaker(chap.panels[0].speech_bubbles?.[0]?.speaker_name || "Hero");
+        setEditingPrompt(chap.panels[0].prompt ||"");
+        setEditingSpeechText(chap.panels[0].speech_text ||"");
+        setEditingSpeaker(chap.panels[0].speech_bubbles?.[0]?.speaker_name ||"Hero");
       }
-      console.log(`[Series Studio] Loaded AI Series "${proj.title}" (Format: ${fmt}, Sessions: ${proj.sessions?.length || 1})`);
+      console.log(`[Series Studio] Loaded AI Series"${proj.title}" (Format: ${fmt}, Sessions: ${proj.sessions?.length || 1})`);
       console.log(`[Series Studio] Initialized Chapter 1 (${chap.panels?.length || 0} panels ready)`);
     } catch (err: any) {
       console.error("[AISeriesStudio] Load failure:", err);
-      setLoadError(err.message || "Failed to load AI Series project.");
-      addNotification("Could not retrieve AI Series project data.", "error");
+      setLoadError(err.message ||"Failed to load AI Series project.");
+      addNotification("Could not retrieve AI Series project data.","error");
     } finally {
       setIsLoading(false);
     }
@@ -658,15 +656,13 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
             fetchProjectData(list[0].series_id);
           } else {
             setIsLoading(false);
-            setLoadError(
-              "No AI Series created yet. Use the Workspace to construct your first AI series."
+            setLoadError("No AI Series created yet. Use the Workspace to construct your first AI series."
             );
           }
         })
         .catch(() => {
           setIsLoading(false);
-          setLoadError(
-            "No Series ID specified. Please select an AI Series from the Dashboard."
+          setLoadError("No Series ID specified. Please select an AI Series from the Dashboard."
           );
         });
     }
@@ -682,15 +678,15 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
       setCurrentChapter(chap);
       if (chap.panels && chap.panels.length > 0) {
         setSelectedPanelIdx(0);
-        setEditingPrompt(chap.panels[0].prompt || "");
-        setEditingSpeechText(chap.panels[0].speech_text || "");
-        setEditingSpeaker(chap.panels[0].speech_bubbles?.[0]?.speaker_name || "Hero");
+        setEditingPrompt(chap.panels[0].prompt ||"");
+        setEditingSpeechText(chap.panels[0].speech_text ||"");
+        setEditingSpeaker(chap.panels[0].speech_bubbles?.[0]?.speaker_name ||"Hero");
       }
-      console.log(`[Series Studio] Switched to Chapter ${chapNum}: "${chap.title}" (${chap.panels?.length || 0} panels)`);
-      addNotification(`Loaded Chapter ${chapNum}: "${chap.title}"`, "info");
+      console.log(`[Series Studio] Switched to Chapter ${chapNum}:"${chap.title}" (${chap.panels?.length || 0} panels)`);
+      addNotification(`Loaded Chapter ${chapNum}:"${chap.title}"`,"info");
     } catch (err: any) {
       console.error("[AISeriesStudio] Chapter load error:", err);
-      addNotification(`Failed to load Chapter ${chapNum}.`, "error");
+      addNotification(`Failed to load Chapter ${chapNum}.`,"error");
     }
   };
 
@@ -699,26 +695,26 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
 
   useEffect(() => {
     if (activePanel) {
-      setEditingPrompt(activePanel.prompt || "");
-      setEditingSpeechText(activePanel.speech_text || "");
-      setEditingSpeaker(activePanel.speech_bubbles?.[0]?.speaker_name || "Hero");
+      setEditingPrompt(activePanel.prompt ||"");
+      setEditingSpeechText(activePanel.speech_text ||"");
+      setEditingSpeaker(activePanel.speech_bubbles?.[0]?.speaker_name ||"Hero");
     }
   }, [activePanel]);
 
   // ── Visual Synthesis Actions ──────────────────────────────────────────
   const handleSynthesizeChapterVisuals = async (model?: string) => {
     if (!resolvedSeriesId || !project) return;
-    const chosenModel = model || project.image_model || "flux-anime";
-    const taskKey = project.art_style === "manhwa" ? "manhwa_diffusion" : "image_diffusion";
+    const chosenModel = model || project.image_model ||"flux-anime";
+    const taskKey = project.art_style ==="manhwa" ?"manhwa_diffusion" :"image_diffusion";
     const cascade = logAITaskCascade("Visual Diffusion", {
       taskKey,
       requestedModel: chosenModel,
-      details: `Chapter ${selectedChapterNum}`,
+      details:`Chapter ${selectedChapterNum}`,
     });
     try {
       setIsSynthesizingVisuals(true);
       console.log(`[Series Studio] Synthesizing visuals for Chapter ${selectedChapterNum} (Model: ${chosenModel})...`);
-      addNotification(`Synthesizing visuals with ${chosenModel}...`, "info");
+      addNotification(`Synthesizing visuals with ${chosenModel}...`,"info");
       const updated = await aiSeriesApi.renderChapterImages(
         resolvedSeriesId,
         selectedSessionNum,
@@ -736,8 +732,8 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
           ...p,
           image_url: p.image_url
             ? (p.image_url.includes("?")
-                ? `${p.image_url}&t=${Date.now()}`
-                : `${p.image_url}?t=${Date.now()}`)
+                ?`${p.image_url}&t=${Date.now()}`
+                :`${p.image_url}?t=${Date.now()}`)
             : p.image_url,
         }));
         setCurrentChapter({
@@ -746,21 +742,21 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
         });
         const activeTier =
           chosenModel === cascade.emergency
-            ? "Tier 3 (Emergency)"
+            ?"Tier 3 (Emergency)"
             : chosenModel === cascade.fallback
-            ? "Tier 2 (Fallback)"
-            : "Tier 1 (Primary)";
+            ?"Tier 2 (Fallback)"
+            :"Tier 1 (Primary)";
         logAITaskCompletion("Visual Diffusion", {
           model: chosenModel,
           tier_display: activeTier,
           cascade,
         });
         console.log(`[Series Studio] Synthesized visuals for Chapter ${selectedChapterNum} (${freshChap.panels?.length || 0} panels ready).`);
-        addNotification("Chapter panels synthesized successfully!", "success");
+        addNotification("Chapter panels synthesized successfully!","success");
       }
     } catch (err: any) {
       console.error("Visual synthesis failed:", err);
-      addNotification(err.message || "Visual synthesis failed.", "error");
+      addNotification(err.message ||"Visual synthesis failed.","error");
     } finally {
       setIsSynthesizingVisuals(false);
     }
@@ -770,14 +766,14 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
   const handleSynthesizeAudio = async () => {
     if (!resolvedSeriesId) return;
     const cascade = logAITaskCascade("Voiceover Synthesis", {
-      taskKey: "speech_synthesis",
-      requestedModel: "edge-tts-neural",
-      details: `Chapter ${selectedChapterNum}`,
+      taskKey:"speech_synthesis",
+      requestedModel:"edge-tts-neural",
+      details:`Chapter ${selectedChapterNum}`,
     });
     try {
       setIsSynthesizingAudio(true);
       console.log(`[Series Studio] Synthesizing vocal dubbing for Chapter ${selectedChapterNum}...`);
-      addNotification("Synthesizing Edge-TTS vocal audio for all character dialogue...", "info");
+      addNotification("Synthesizing Edge-TTS vocal audio for all character dialogue...","info");
       const updated = await aiSeriesApi.synthesizeChapterAudio(
         resolvedSeriesId,
         selectedSessionNum,
@@ -791,16 +787,16 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
         );
         setCurrentChapter(freshChap);
         logAITaskCompletion("Voiceover Synthesis", {
-          model: "edge-tts-neural",
-          tier_display: "Tier 1 (Primary)",
+          model:"edge-tts-neural",
+          tier_display:"Tier 1 (Primary)",
           cascade,
         });
         console.log(`[Series Studio] Vocal dubbing completed for Chapter ${selectedChapterNum}.`);
-        addNotification("Vocal dubbing synthesized successfully!", "success");
+        addNotification("Vocal dubbing synthesized successfully!","success");
       }
     } catch (err: any) {
       console.error("Vocal dubbing failed:", err);
-      addNotification(err.message || "Failed to synthesize vocal dubbing.", "error");
+      addNotification(err.message ||"Failed to synthesize vocal dubbing.","error");
     } finally {
       setIsSynthesizingAudio(false);
     }
@@ -813,8 +809,8 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
     overrideModel?: string
   ) => {
     if (!resolvedSeriesId || !panels[idx]) return;
-    const chosenModel = overrideModel || project?.image_model || "flux-anime";
-    const taskKey = project?.art_style === "manhwa" ? "manhwa_diffusion" : "image_diffusion";
+    const chosenModel = overrideModel || project?.image_model ||"flux-anime";
+    const taskKey = project?.art_style ==="manhwa" ?"manhwa_diffusion" :"image_diffusion";
     const cascade = logAITaskCascade(`Shot #${idx + 1} Visual Synthesis`, {
       taskKey,
       requestedModel: chosenModel,
@@ -826,8 +822,8 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
       const targetPanel = panels[idx];
       const panelId = targetPanel.panel_id || targetPanel.id || String(idx + 1);
       const promptToUse = (overridePrompt ?? editingPrompt ?? targetPanel.prompt)?.trim() || targetPanel.prompt;
-      console.log(`[Series Studio] Regenerating Shot #${idx + 1} (Model: ${overrideModel || project?.image_model || "auto"})...`);
-      addNotification(`Generating Shot #${idx + 1}...`, "info");
+      console.log(`[Series Studio] Regenerating Shot #${idx + 1} (Model: ${overrideModel || project?.image_model ||"auto"})...`);
+      addNotification(`Generating Shot #${idx + 1}...`,"info");
       const updatedPanel = await aiSeriesApi.renderPanelImage(
         resolvedSeriesId,
         panelId,
@@ -841,8 +837,8 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
       if (updatedPanel && currentChapter) {
         const bustUrl = updatedPanel.image_url
           ? (updatedPanel.image_url.includes("?")
-              ? `${updatedPanel.image_url}&t=${Date.now()}`
-              : `${updatedPanel.image_url}?t=${Date.now()}`)
+              ?`${updatedPanel.image_url}&t=${Date.now()}`
+              :`${updatedPanel.image_url}?t=${Date.now()}`)
           : updatedPanel.image_url;
         const updatedPanels = [...currentChapter.panels];
         updatedPanels[idx] = {
@@ -857,21 +853,21 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
         setEditingPrompt(promptToUse);
         const activeTier =
           chosenModel === cascade.emergency
-            ? "Tier 3 (Emergency)"
+            ?"Tier 3 (Emergency)"
             : chosenModel === cascade.fallback
-            ? "Tier 2 (Fallback)"
-            : "Tier 1 (Primary)";
+            ?"Tier 2 (Fallback)"
+            :"Tier 1 (Primary)";
         logAITaskCompletion(`Shot #${idx + 1} Visual Synthesis`, {
           model: chosenModel,
           tier_display: activeTier,
           cascade,
         });
         console.log(`[Series Studio] Shot #${idx + 1} regenerated successfully.`);
-        addNotification(`Shot #${idx + 1} generated!`, "success");
+        addNotification(`Shot #${idx + 1} generated!`,"success");
       }
     } catch (err: any) {
       console.error("Panel render failed:", err);
-      addNotification(err.message || "Failed to generate shot visual.", "error");
+      addNotification(err.message ||"Failed to generate shot visual.","error");
     } finally {
       setIsRegeneratingPanel(false);
       setRegeneratingPanelIdx(null);
@@ -893,7 +889,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
       return;
     }
     if (!audioUrl) {
-      addNotification("No synthesized audio URL for this scene line yet.", "info");
+      addNotification("No synthesized audio URL for this scene line yet.","info");
       return;
     }
     const audio = new Audio(audioUrl);
@@ -919,19 +915,19 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
   if (loadError || !project) {
     return (
       <div className="w-full flex-1 flex flex-col items-center justify-center min-h-[70vh] p-6 max-w-lg mx-auto text-center space-y-5">
-        <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 shadow-xl shadow-red-500/10">
+        <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 shadow-xl">
           <AlertCircle className="w-7 h-7" />
         </div>
         <div className="space-y-1.5">
           <h2 className="text-base font-bold text-white">Series Not Available</h2>
           <p className="text-xs text-neutral-400 leading-relaxed">
-            {loadError || "The requested AI Series could not be found."}
+            {loadError ||"The requested AI Series could not be found."}
           </p>
         </div>
         <button
           type="button"
           onClick={() => navigateTo("/scraper")}
-          className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-mono font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-blue-500/25"
+          className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-mono font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-lg"
         >
           <ArrowLeft className="w-4 h-4" /> Return to Scraper & Projects
         </button>
@@ -939,10 +935,10 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
     );
   }
 
-  const format = (project.format_type || "manhwa").toLowerCase();
-  const isManhwa = format === "manhwa";
-  const isComic = format === "comic_manga";
-  const isAnime = format === "anime";
+  const format = (project.format_type ||"manhwa").toLowerCase();
+  const isManhwa = format ==="manhwa";
+  const isComic = format ==="comic_manga";
+  const isAnime = format ==="anime";
   const panels = currentChapter?.panels || [];
   const sessions = project.sessions || [];
   const currentSession = sessions.find((s) => s.session_number === selectedSessionNum) || sessions[0];
@@ -958,11 +954,11 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
           <div className="flex items-center gap-3 min-w-0">
             {project.format_type && (
               <span className="text-[10px] font-mono font-black uppercase px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-400/30 shrink-0">
-                {project.format_type.replace(/_/g, " ")}
+                {project.format_type.replace(/_/g,"")}
               </span>
             )}
             <h1 className="text-sm font-bold text-white truncate max-w-xs sm:max-w-sm" title={project.title}>
-              {project.title || "AI Series Studio"}
+              {project.title ||"AI Series Studio"}
             </h1>
 
             <div className="h-4 w-px bg-white/10 shrink-0 hidden md:block" />
@@ -994,17 +990,17 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                 onClick={() => setShowSpeechBubbles(!showSpeechBubbles)}
                 className={`px-2.5 py-1 rounded-lg border text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
                   showSpeechBubbles
-                    ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300 "
-                    : "bg-white/5 border-white/10 text-neutral-400 hover:text-white"
+                    ?"bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
+                    :"bg-white/5 border-white/10 text-neutral-400 hover:text-white"
                 }`}
                 title="Toggle Speech Bubbles Overlay"
               >
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    showSpeechBubbles ? "bg-emerald-400 animate-pulse" : "bg-neutral-600"
+                    showSpeechBubbles ?"bg-emerald-400 animate-pulse" :"bg-neutral-600"
                   }`}
                 />
-                <span>Bubbles {showSpeechBubbles ? "ON" : "OFF"}</span>
+                <span>Bubbles {showSpeechBubbles ?"ON" :"OFF"}</span>
               </button>
             </div>
 
@@ -1023,11 +1019,11 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                     </span>
                   </>
                 )}
-                {project.voice_model && project.voice_model !== "muted" && (
+                {project.voice_model && project.voice_model !=="muted" && (
                   <>
                     <span className="text-neutral-600">•</span>
                     <span className="text-emerald-400 truncate max-w-[100px]" title={project.voice_model}>
-                      🎙️ {project.voice_model.includes("eleven") ? "ElevenLabs" : "Edge-TTS"}
+                      🎙️ {project.voice_model.includes("eleven") ?"ElevenLabs" :"Edge-TTS"}
                     </span>
                   </>
                 )}
@@ -1049,7 +1045,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                 >
                   <span>Session {selectedSessionNum}</span>
                   <ChevronDown
-                    className={`w-3.5 h-3.5 text-neutral-400 shrink-0 transition-transform duration-200 ${isSessionMenuOpen ? "rotate-180" : ""
+                    className={`w-3.5 h-3.5 text-neutral-400 shrink-0 transition-transform duration-200 ${isSessionMenuOpen ?"rotate-180" :""
                       }`}
                   />
                 </button>
@@ -1073,8 +1069,8 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                             setIsSessionMenuOpen(false);
                           }}
                           className={`w-full px-2.5 py-1.5 rounded-xl text-left text-xs font-mono transition-all flex items-center justify-between cursor-pointer ${isSelected
-                            ? "bg-cyan-500/20 text-cyan-200 font-bold border border-cyan-400/30"
-                            : "text-neutral-300 hover:text-white hover:bg-white/[0.06] border border-transparent"
+                            ?"bg-cyan-500/20 text-cyan-200 font-bold border border-cyan-400/30"
+                            :"text-neutral-300 hover:text-white hover:bg-white/[0.06] border border-transparent"
                             }`}
                         >
                           <span>Session {s.session_number}</span>
@@ -1107,14 +1103,13 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                     {(() => {
                       const cur = chapters.find((c: any) => c.chapter_number === selectedChapterNum);
                       const title =
-                        cur?.title?.replace(/^(Chapter|Episode|Ch|Ep)\s*\d+[:\-.]*\s*/i, "").trim() ||
-                        cur?.title ||
-                        `Episode ${selectedChapterNum}`;
-                      return `Ep ${selectedChapterNum}: ${title}`;
+                        cur?.title?.replace(/^(Chapter|Episode|Ch|Ep)\s*\d+[:\-.]*\s*/i,"").trim() ||
+                        cur?.title ||`Episode ${selectedChapterNum}`;
+                      return`Ep ${selectedChapterNum}: ${title}`;
                     })()}
                   </span>
                   <ChevronDown
-                    className={`w-3.5 h-3.5 text-cyan-400 shrink-0 transition-transform duration-200 ${isEpisodeMenuOpen ? "rotate-180" : ""
+                    className={`w-3.5 h-3.5 text-cyan-400 shrink-0 transition-transform duration-200 ${isEpisodeMenuOpen ?"rotate-180" :""
                       }`}
                   />
                 </button>
@@ -1129,9 +1124,8 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                     {chapters.map((c: any) => {
                       const isSelected = c.chapter_number === selectedChapterNum;
                       const cleanTitle =
-                        c.title?.replace(/^(Chapter|Episode|Ch|Ep)\s*\d+[:\-.]*\s*/i, "").trim() ||
-                        c.title ||
-                        `Episode ${c.chapter_number}`;
+                        c.title?.replace(/^(Chapter|Episode|Ch|Ep)\s*\d+[:\-.]*\s*/i,"").trim() ||
+                        c.title ||`Episode ${c.chapter_number}`;
 
                       return (
                         <button
@@ -1142,15 +1136,15 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                             setIsEpisodeMenuOpen(false);
                           }}
                           className={`w-full px-2.5 py-2 rounded-xl text-left text-xs font-mono transition-all flex items-center justify-between gap-2.5 cursor-pointer ${isSelected
-                            ? "bg-gradient-to-r from-cyan-500/20 to-blue-600/20 border border-cyan-400/40 text-cyan-200 shadow-sm"
-                            : "text-neutral-300 hover:text-white hover:bg-white/[0.06] border border-transparent"
+                            ?"bg-gradient-to-r from-cyan-500/20 to-blue-600/20 border border-cyan-400/40 text-cyan-200 shadow-sm"
+                            :"text-neutral-300 hover:text-white hover:bg-white/[0.06] border border-transparent"
                             }`}
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <span
                               className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold font-mono shrink-0 ${isSelected
-                                ? "bg-cyan-500/30 text-cyan-200 border border-cyan-400/40"
-                                : "bg-white/10 text-neutral-400"
+                                ?"bg-cyan-500/30 text-cyan-200 border border-cyan-400/40"
+                                :"bg-white/10 text-neutral-400"
                                 }`}
                             >
                               Ep {c.chapter_number}
@@ -1174,7 +1168,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
           className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex flex-col items-center p-2 sm:p-3 space-y-2 bg-gradient-to-b from-[#090A10] via-[#07080C] to-[#050608] focus:outline-none relative"
         >
           {/* VIEWPORT 1: Webtoon Continuous Reading Strip (Uncropped, Natural Proportions) */}
-          {viewportMode === "strip" && (
+          {viewportMode ==="strip" && (
             <div
               className="flex flex-col items-center gap-4 transition-all duration-200 shrink-0 pb-3 max-w-full"
             >
@@ -1188,13 +1182,13 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                     key={panel.id || idx}
                     onClick={() => setSelectedPanelIdx(idx)}
                     style={{
-                      height: zoomLevel === 100 ? "calc(100vh - 135px)" : `${Math.round(88 * (zoomLevel / 100))}vh`,
-                      maxHeight: zoomLevel === 100 ? "calc(100vh - 135px)" : undefined,
+                      height: zoomLevel === 100 ?"calc(100vh - 135px)" :`${Math.round(88 * (zoomLevel / 100))}vh`,
+                      maxHeight: zoomLevel === 100 ?"calc(100vh - 135px)" : undefined,
                     }}
-                    className={`relative rounded-2xl bg-[#090A13] border transition-all overflow-hidden shadow-2xl group cursor-pointer flex flex-col items-center justify-center max-w-full ${isManhwa ? "aspect-[2/3]" : isComic ? "aspect-[3/4]" : "aspect-video"
+                    className={`relative rounded-2xl bg-[#090A13] border transition-all overflow-hidden shadow-2xl group cursor-pointer flex flex-col items-center justify-center max-w-full ${isManhwa ?"aspect-[2/3]" : isComic ?"aspect-[3/4]" :"aspect-video"
                       } ${isSelected
-                        ? "ring-2 ring-blue-500 border-blue-400 z-10 "
-                        : "border-white/10 hover:border-white/30"
+                        ?"ring-2 ring-blue-500 border-blue-400 z-10"
+                        :"border-white/10 hover:border-white/30"
                       }`}
                   >
                     <StudioPanelImage
@@ -1211,7 +1205,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                       }
                       screentoneFilter={screentoneFilter}
                       fitMode="contain"
-                      aspectRatioClass={isManhwa ? "aspect-[2/3]" : isComic ? "aspect-[3/4]" : "aspect-video"}
+                      aspectRatioClass={isManhwa ?"aspect-[2/3]" : isComic ?"aspect-[3/4]" :"aspect-video"}
                       onOpenInspector={() => {
                         setSelectedPanelIdx(idx);
                         setIsPanelInspectorOpen(true);
@@ -1223,7 +1217,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                     <div className="absolute top-3 left-3 px-2 py-0.5 rounded-lg bg-black/80 backdrop-blur-md border border-white/15 text-[10px] font-mono font-bold text-white shadow-md flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity z-10">
                       <span>#{idx + 1}</span>
                       {panel.camera_angle && (
-                        <span className="text-neutral-400 font-normal">| {panel.camera_angle.replace(/_/g, " ")}</span>
+                        <span className="text-neutral-400 font-normal">| {panel.camera_angle.replace(/_/g,"")}</span>
                       )}
                     </div>
 
@@ -1257,8 +1251,8 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                           handlePlayAudioLine(idx, panel.audio_url);
                         }}
                         className={`absolute top-3 right-3 p-2 rounded-xl backdrop-blur-md border text-xs shadow-lg transition-all cursor-pointer z-10 ${isAudioPlayingThis
-                          ? "bg-emerald-600 border-emerald-400 text-white animate-pulse"
-                          : "bg-black/60 hover:bg-black/90 border-white/20 text-neutral-300 hover:text-white"
+                          ?"bg-emerald-600 border-emerald-400 text-white animate-pulse"
+                          :"bg-black/60 hover:bg-black/90 border-white/20 text-neutral-300 hover:text-white"
                           }`}
                         title="Play Scene Vocal Dubbing"
                       >
@@ -1276,9 +1270,9 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
           )}
 
           {/* VIEWPORT 2: Classic Manga & Comic Grid (See All Panels Overview) */}
-          {viewportMode === "grid" && (
+          {viewportMode ==="grid" && (
             <div
-              style={{ maxWidth: `${Math.round(1200 * (zoomLevel / 100))}px` }}
+              style={{ maxWidth:`${Math.round(1200 * (zoomLevel / 100))}px` }}
               className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 transition-all duration-200 shrink-0 pb-24"
             >
               {panels.map((panel, idx) => {
@@ -1292,8 +1286,8 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                       setIsPanelInspectorOpen(true);
                     }}
                     className={`relative rounded-2xl overflow-hidden border bg-[#090A13] cursor-pointer transition-all group flex flex-col ${isSelected
-                      ? "border-blue-500  ring-2 ring-blue-500/50 scale-[1.02] z-10"
-                      : "border-white/10 hover:border-white/30 hover:shadow-xl"
+                      ?"border-blue-500  ring-2 ring-blue-500/50 scale-[1.02] z-10"
+                      :"border-white/10 hover:border-white/30 hover:shadow-xl"
                       }`}
                   >
                     {/* Floating Top Header Badges */}
@@ -1303,7 +1297,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                       </span>
                       {panel.camera_angle && (
                         <span className="px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono text-neutral-300">
-                          {panel.camera_angle.replace(/_/g, " ")}
+                          {panel.camera_angle.replace(/_/g,"")}
                         </span>
                       )}
                     </div>
@@ -1337,7 +1331,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                     <div className="p-3 bg-[#0B0C15] border-t border-white/10 flex flex-col gap-1.5">
                       <div className="flex items-center justify-between text-[11px] font-mono">
                         <span className="font-bold text-white flex items-center gap-1.5">
-                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-blue-400 animate-pulse" : "bg-neutral-500"}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ?"bg-blue-400 animate-pulse" :"bg-neutral-500"}`} />
                           Shot #{idx + 1}
                         </span>
                         {panel.audio_url && (
@@ -1348,8 +1342,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                       </div>
 
                       {panel.speech_text ? (
-                        <p className="text-[11px] text-neutral-300 font-sans line-clamp-2 italic bg-black/40 px-2 py-1 rounded-md border border-white/5">
-                          "{panel.speech_text}"
+                        <p className="text-[11px] text-neutral-300 font-sans line-clamp-2 italic bg-black/40 px-2 py-1 rounded-md border border-white/5">"{panel.speech_text}"
                         </p>
                       ) : (
                         <p className="text-[10px] text-neutral-500 font-mono truncate">
@@ -1364,13 +1357,13 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
           )}
 
           {/* VIEWPORT 3: Anime Sakuga Video Cinema */}
-          {viewportMode === "video" && (
+          {viewportMode ==="video" && (
             <div className="w-full max-w-4xl flex flex-col rounded-3xl overflow-hidden bg-black border border-white/15 shadow-2xl shrink-0 pb-16">
               <div className="relative aspect-video w-full bg-neutral-950 flex items-center justify-center overflow-hidden">
                 {activePanel ? (
                   <StudioPanelImage
                     src={activePanel.image_url}
-                    alt={activePanel.prompt || `Shot #${selectedPanelIdx + 1}`}
+                    alt={activePanel.prompt ||`Shot #${selectedPanelIdx + 1}`}
                     shotIndex={selectedPanelIdx}
                     cameraAngle={activePanel.camera_angle}
                     prompt={activePanel.prompt}
@@ -1444,16 +1437,16 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
 
         {/* ── Middle Open Trigger (Portaled directly to document.body on the far right edge of viewport) ── */}
         {!isPanelInspectorOpen &&
-          typeof document !== "undefined" &&
+          typeof document !=="undefined" &&
           createPortal(
             <button
               type="button"
               onClick={() => setIsPanelInspectorOpen(true)}
               style={{
-                position: "fixed",
+                position:"fixed",
                 right: 0,
-                top: "50%",
-                transform: "translateY(-50%)",
+                top:"50%",
+                transform:"translateY(-50%)",
                 zIndex: 9999,
               }}
               className="w-8 h-16 rounded-l-2xl bg-[#0F101D]/95 hover:bg-[#1E2038] border-y border-l border-white/20 hover:border-cyan-400 text-neutral-300 hover:text-cyan-300 flex flex-col items-center justify-center gap-1 shadow-[-4px_0_20px_rgba(0,0,0,0.8)] transition-all cursor-pointer group backdrop-blur-md"
@@ -1481,7 +1474,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
           totalPanels={panels.length}
           panel={activePanel}
           cast={project?.cast}
-          imageModel={project?.image_model || "flux-anime"}
+          imageModel={project?.image_model ||"flux-anime"}
           isRegenerating={isRegeneratingPanel}
           onSelectPanelIdx={setSelectedPanelIdx}
           onUpdatePanel={(updated) => {
@@ -1505,7 +1498,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
             if (activePanel?.audio_url) {
               handlePlayAudioLine(selectedPanelIdx, activePanel.audio_url);
             } else {
-              addNotification("Synthesizing character vocal line...", "info");
+              addNotification("Synthesizing character vocal line...","info");
             }
           }}
           onSynthesizeChapterVisuals={handleSynthesizeChapterVisuals}
@@ -1553,7 +1546,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                   className="p-4 rounded-2xl bg-[#131422] border border-white/10 flex items-start gap-4"
                 >
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center font-bold text-white text-base shadow-md shrink-0">
-                    {char.name?.charAt(0) || "C"}
+                    {char.name?.charAt(0) ||"C"}
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex items-center gap-2">
@@ -1620,7 +1613,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                   Core Logline
                 </span>
                 <p className="text-neutral-200 leading-relaxed font-sans">
-                  {project.logline || "No logline registered."}
+                  {project.logline ||"No logline registered."}
                 </p>
               </div>
 

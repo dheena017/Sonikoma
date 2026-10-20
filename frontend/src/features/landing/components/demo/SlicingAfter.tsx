@@ -1,5 +1,5 @@
-import React from "react";
-import { CheckCircle2, Scissors } from "lucide-react";
+import React from"react";
+import { CheckCircle2, Scissors } from"lucide-react";
 
 export function SlicingAfter() {
   return (
@@ -10,7 +10,7 @@ export function SlicingAfter() {
       </div>
 
       {/* Sliced Panel 1 */}
-      <div className="w-full max-w-[280px] h-36 rounded-xl border-2 border-emerald-400 overflow-hidden relative shadow-lg shadow-emerald-500/10 shrink-0 group transition-transform hover:scale-[1.02]">
+      <div className="w-full max-w-[280px] h-36 rounded-xl border-2 border-emerald-400 overflow-hidden relative shadow-lg shrink-0 group transition-transform hover:scale-[1.02]">
         <img
           src="/motion-scroll-dungeon.jpg"
           alt="AI Sliced comic panel 1"
@@ -29,7 +29,7 @@ export function SlicingAfter() {
       </div>
 
       {/* Sliced Panel 2 */}
-      <div className="w-full max-w-[280px] h-36 rounded-xl border-2 border-blue-400 overflow-hidden relative shadow-lg shadow-blue-500/10 shrink-0 group transition-transform hover:scale-[1.02]">
+      <div className="w-full max-w-[280px] h-36 rounded-xl border-2 border-blue-400 overflow-hidden relative shadow-lg shrink-0 group transition-transform hover:scale-[1.02]">
         <img
           src="/motion-scroll-dungeon.jpg"
           alt="AI Sliced comic panel 2"

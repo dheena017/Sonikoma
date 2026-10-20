@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from"react";
 import {
   Sparkles,
   Film,
@@ -11,7 +11,7 @@ import {
   Layers,
   Volume2,
   Wand2,
-} from "lucide-react";
+} from"lucide-react";
 
 export interface AISeriesStudioLoadingPageProps {
   seriesId?: string;
@@ -25,43 +25,38 @@ export interface AISeriesStudioLoadingPageProps {
 
 const PRODUCTION_STAGES = [
   {
-    id: "dna",
-    title: "Resolving Narrative Bible & Character DNA",
-    description: "Loading visual continuity anchors, character facial features, and style seeds...",
+    id:"dna",
+    title:"Resolving Narrative Bible & Character DNA",
+    description:"Loading visual continuity anchors, character facial features, and style seeds...",
     icon: Sparkles,
   },
   {
-    id: "storyboard",
-    title: "Mounting Chapter Storyboard & Panel Strips",
-    description: "Configuring continuous reading strip and camera composition angles...",
+    id:"storyboard",
+    title:"Mounting Chapter Storyboard & Panel Strips",
+    description:"Configuring continuous reading strip and camera composition angles...",
     icon: Layers,
   },
   {
-    id: "diffusion",
-    title: "Preparing 2D Diffusion & Image Synthesis Cache",
-    description: "Connecting to Flux-Anime & Manga Screentone rendering pipelines...",
+    id:"diffusion",
+    title:"Preparing 2D Diffusion & Image Synthesis Cache",
+    description:"Connecting to Flux-Anime & Manga Screentone rendering pipelines...",
     icon: Wand2,
   },
   {
-    id: "audio",
-    title: "Calibrating Vocal Dubbing & Speech Bubble Physics",
-    description: "Setting up Edge-TTS dialogue synchronizer and sound effect overlays...",
+    id:"audio",
+    title:"Calibrating Vocal Dubbing & Speech Bubble Physics",
+    description:"Setting up Edge-TTS dialogue synchronizer and sound effect overlays...",
     icon: Volume2,
   },
 ];
 
-const STUDIO_TIPS = [
-  "💡 Tip: Use the Shot Director Inspector on the right to edit prompts, camera angles, and dialogue for each shot.",
-  "🎨 Tip: Continuous Webtoon Strip mode preserves authentic 2:3 vertical manhwa proportions with edge-to-edge clarity.",
-  "✨ Tip: You can enhance individual prompts with style tokens like 'Ufotable raytraced sakuga' or 'Solo Leveling mana aura'.",
-  "🎙️ Tip: Vocal Dubbing supports multi-character voice lines with selectable emotional delivery.",
-  "🔍 Tip: Toggle Bubbles ON/OFF anytime in the inspector for a pure cinematic artwork view.",
+const STUDIO_TIPS = ["💡 Tip: Use the Shot Director Inspector on the right to edit prompts, camera angles, and dialogue for each shot.","🎨 Tip: Continuous Webtoon Strip mode preserves authentic 2:3 vertical manhwa proportions with edge-to-edge clarity.","✨ Tip: You can enhance individual prompts with style tokens like 'Ufotable raytraced sakuga' or 'Solo Leveling mana aura'.","🎙️ Tip: Vocal Dubbing supports multi-character voice lines with selectable emotional delivery.","🔍 Tip: Toggle Bubbles ON/OFF anytime in the inspector for a pure cinematic artwork view.",
 ];
 
 export const AISeriesStudioLoadingPage: React.FC<AISeriesStudioLoadingPageProps> = ({
   seriesId,
   seriesTitle,
-  formatType = "manhwa",
+  formatType ="manhwa",
   chapterNumber = 1,
   totalPanels = 8,
   statusMessage,
@@ -96,18 +91,18 @@ export const AISeriesStudioLoadingPage: React.FC<AISeriesStudioLoadingPageProps>
     };
   }, []);
 
-  const fmt = (formatType || "manhwa").toLowerCase();
-  const isAnime = fmt === "anime";
-  const isComic = fmt === "comic_manga";
+  const fmt = (formatType ||"manhwa").toLowerCase();
+  const isAnime = fmt ==="anime";
+  const isComic = fmt ==="comic_manga";
   const FormatIcon = isAnime ? Tv : isComic ? Swords : BookOpen;
-  const formatLabel = isAnime ? "Anime Sakuga Cinema" : isComic ? "Comic Manga" : "2D Manhwa Webtoon";
+  const formatLabel = isAnime ?"Anime Sakuga Cinema" : isComic ?"Comic Manga" :"2D Manhwa Webtoon";
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#07080C] text-[#E5E5E5] overflow-hidden select-none">
       {/* ── Ambient Background Lighting Mesh ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 left-1/3 w-96 h-96 rounded-full bg-blue-600/10 blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/3 w-96 h-96 rounded-full bg-purple-600/10 blur-[140px] animate-pulse [animation-delay:1s]" />
+        
+        
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(7,8,12,0.8)_100%)]" />
       </div>
 
@@ -129,7 +124,7 @@ export const AISeriesStudioLoadingPage: React.FC<AISeriesStudioLoadingPageProps>
         {/* Animated Central Studio Emblem */}
         <div className="relative">
           {/* Rotating Outer Glow Ring */}
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 p-[2px] animate-[spin_8s_linear_infinite] shadow-xl shadow-blue-500/20">
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 p-[2px] animate-[spin_8s_linear_infinite] shadow-xl">
             <div className="w-full h-full bg-[#0D0E18] rounded-[22px]" />
           </div>
 
@@ -154,11 +149,11 @@ export const AISeriesStudioLoadingPage: React.FC<AISeriesStudioLoadingPageProps>
           </div>
 
           <h1 className="text-base sm:text-lg font-bold text-white tracking-tight leading-snug">
-            {seriesTitle || "Constructing AI Series Master Studio"}
+            {seriesTitle ||"Constructing AI Series Master Studio"}
           </h1>
 
           <p className="text-xs text-neutral-400 font-mono">
-            {statusMessage || "Assembling visual sessions, storyboard panels, and dubbing engine..."}
+            {statusMessage ||"Assembling visual sessions, storyboard panels, and dubbing engine..."}
           </p>
         </div>
 
@@ -174,20 +169,20 @@ export const AISeriesStudioLoadingPage: React.FC<AISeriesStudioLoadingPageProps>
                 key={stage.id}
                 className={`p-2.5 rounded-xl border transition-all flex items-center justify-between gap-3 ${
                   isCurrent
-                    ? "bg-blue-600/10 border-blue-500/40 shadow-sm shadow-blue-500/10"
+                    ?"bg-blue-600/10 border-blue-500/40 shadow-sm"
                     : isDone
-                    ? "bg-white/[0.02] border-white/5 opacity-80"
-                    : "bg-transparent border-transparent opacity-40"
+                    ?"bg-white/[0.02] border-white/5 opacity-80"
+                    :"bg-transparent border-transparent opacity-40"
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div
                     className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                       isCurrent
-                        ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
+                        ?"bg-blue-600/20 text-blue-300 border border-blue-500/30"
                         : isDone
-                        ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                        : "bg-white/5 text-neutral-500 border border-white/5"
+                        ?"bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                        :"bg-white/5 text-neutral-500 border border-white/5"
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -195,7 +190,7 @@ export const AISeriesStudioLoadingPage: React.FC<AISeriesStudioLoadingPageProps>
                   <div className="min-w-0">
                     <span
                       className={`text-xs font-mono font-semibold block truncate ${
-                        isCurrent ? "text-white" : isDone ? "text-neutral-200" : "text-neutral-500"
+                        isCurrent ?"text-white" : isDone ?"text-neutral-200" :"text-neutral-500"
                       }`}
                     >
                       {stage.title}
@@ -235,7 +230,7 @@ export const AISeriesStudioLoadingPage: React.FC<AISeriesStudioLoadingPageProps>
           <div className="w-full h-2 rounded-full bg-neutral-900 border border-white/10 overflow-hidden relative">
             <div
               className="h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 transition-all duration-300 relative rounded-full"
-              style={{ width: `${progress}%` }}
+              style={{ width:`${progress}%` }}
             >
               <div className="absolute inset-0 bg-white/20 animate-pulse" />
             </div>

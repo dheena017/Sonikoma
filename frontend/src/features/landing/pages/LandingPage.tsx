@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Play,
   Scissors,
@@ -21,8 +21,8 @@ import {
   Volume2,
   Check,
   UploadCloud,
-} from "lucide-react";
-import { useLandingPage } from "@/features/landing/hooks";
+} from"lucide-react";
+import { useLandingPage } from"@/features/landing/hooks";
 import {
   PricingCard,
   LandingFooter,
@@ -40,113 +40,105 @@ import {
   ComparisonSection,
   TestimonialsSection,
   GenreGallery,
-} from "@/features/landing/components";
-import { LandingAnimeScene } from "@/features/landing/components/LandingAnimeScene";
-import { SonikomaLogo } from "@/shared/ui/branding";
-import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+} from"@/features/landing/components";
+import { LandingAnimeScene } from"@/features/landing/components/LandingAnimeScene";
+import { SonikomaLogo } from"@/shared/ui/branding";
+import { Tooltip } from"@/shared/ui/common/TooltipPortal";
 
 interface LandingPageProps {
   onGetStarted: () => void;
   onLogin: () => void;
-  themeMode?: "dark" | "light";
+  themeMode?:"dark" |"light";
   toggleThemeMode?: () => void;
 }
 
 const SAMPLE_URLS = [
   {
-    name: "Solo Leveling",
-    url: "https://mangadex.org/title/solo-leveling-chapter-1",
-    tag: "Manhwa / Action",
-    icon: "⚡",
-    thumbnail: "/demo-action-hero.jpg",
-    platform: "MangaDex",
-    glowColor:
-      "hover:border-neutral-700 active:border-blue-400",
+    name:"Solo Leveling",
+    url:"https://mangadex.org/title/solo-leveling-chapter-1",
+    tag:"Manhwa / Action",
+    icon:"⚡",
+    thumbnail:"/demo-action-hero.jpg",
+    platform:"MangaDex",
   },
   {
-    name: "Lore Olympus",
-    url: "https://www.webtoons.com/en/romance/lore-olympus/episode-1",
-    tag: "Romance / Drama",
-    icon: "🌸",
-    thumbnail: "/demo-romance.jpg",
-    platform: "Webtoon",
-    glowColor:
-      "hover:border-pink-500 active:border-pink-400",
+    name:"Lore Olympus",
+    url:"https://www.webtoons.com/en/romance/lore-olympus/episode-1",
+    tag:"Romance / Drama",
+    icon:"🌸",
+    thumbnail:"/demo-romance.jpg",
+    platform:"Webtoon",
   },
   {
-    name: "Omniscient Reader",
-    url: "https://www.webtoons.com/en/action/omniscient-reader/episode-1",
-    tag: "Action / Fantasy",
-    icon: "🗡️",
-    thumbnail: "/demo-monarch.jpg",
-    platform: "Webtoon",
-    glowColor:
-      "hover:border-emerald-500 active:border-emerald-400",
+    name:"Omniscient Reader",
+    url:"https://www.webtoons.com/en/action/omniscient-reader/episode-1",
+    tag:"Action / Fantasy",
+    icon:"🗡️",
+    thumbnail:"/demo-monarch.jpg",
+    platform:"Webtoon",
   },
   {
-    name: "Cyberpunk Blade",
-    url: "https://www.webtoons.com/en/action/cyberpunk-blade/episode-1",
-    tag: "Sci-Fi / Action",
-    icon: "🏙️",
-    thumbnail: "/demo-cyberpunk.jpg",
-    platform: "Webtoon",
-    glowColor:
-      "hover:border-cyan-500 active:border-cyan-400",
+    name:"Cyberpunk Blade",
+    url:"https://www.webtoons.com/en/action/cyberpunk-blade/episode-1",
+    tag:"Sci-Fi / Action",
+    icon:"🏙️",
+    thumbnail:"/demo-cyberpunk.jpg",
+    platform:"Webtoon",
   },
 ];
 
 const FAQS = [
   {
-    q: "How does it turn comics into videos?",
-    a: "You paste a chapter link or upload images. The system automatically cuts the individual comic panels, cleans speech bubbles, adds realistic character voice narration, and adds smooth camera pans to generate a vertical video for TikTok, YouTube Shorts, and Instagram Reels.",
+    q:"How does it turn comics into videos?",
+    a:"You paste a chapter link or upload images. The system automatically cuts the individual comic panels, cleans speech bubbles, adds realistic character voice narration, and adds smooth camera pans to generate a vertical video for TikTok, YouTube Shorts, and Instagram Reels.",
   },
   {
-    q: "Can I use foreign comics in Korean or Japanese?",
-    a: "Yes. The AI automatically detects text in Korean, Japanese, Chinese, or other languages, erases the original bubbles, and translates them into clean English with voiced character lines.",
+    q:"Can I use foreign comics in Korean or Japanese?",
+    a:"Yes. The AI automatically detects text in Korean, Japanese, Chinese, or other languages, erases the original bubbles, and translates them into clean English with voiced character lines.",
   },
   {
-    q: "Can I choose different voices for different characters?",
-    a: "Yes. You can assign different male, female, or narrator voices to different characters, choose background music moods, and adjust camera speed.",
+    q:"Can I choose different voices for different characters?",
+    a:"Yes. You can assign different male, female, or narrator voices to different characters, choose background music moods, and adjust camera speed.",
   },
   {
-    q: "Is there a free plan?",
-    a: "Yes! The Free plan gives you 3 video exports every month with all core features so you can test it without entering a credit card.",
+    q:"Is there a free plan?",
+    a:"Yes! The Free plan gives you 3 video exports every month with all core features so you can test it without entering a credit card.",
   },
   {
-    q: "What video resolutions and aspect ratios are supported?",
-    a: "Sonikoma supports 9:16 vertical (optimized for TikTok, Shorts, and Reels), 1:1 square for feed posts, and 16:9 widescreen. You can export in 720p HD, 1080p Full HD, and 4K 60fps Ultra HD.",
+    q:"What video resolutions and aspect ratios are supported?",
+    a:"Sonikoma supports 9:16 vertical (optimized for TikTok, Shorts, and Reels), 1:1 square for feed posts, and 16:9 widescreen. You can export in 720p HD, 1080p Full HD, and 4K 60fps Ultra HD.",
   },
   {
-    q: "Can I monetize or use the generated videos commercially?",
-    a: "Yes! Videos exported on the Pro and Studio plans include a full commercial license for YouTube monetization, TikTok Creator Rewards, and commercial client production, as long as you own or hold the rights to adapt the source artwork.",
+    q:"Can I monetize or use the generated videos commercially?",
+    a:"Yes! Videos exported on the Pro and Studio plans include a full commercial license for YouTube monetization, TikTok Creator Rewards, and commercial client production, as long as you own or hold the rights to adapt the source artwork.",
   },
   {
-    q: "Can I use my own comic images?",
-    a: "Yes. You can start with a supported chapter link or upload your own comic images (PNG, JPEG, WebP, CBZ, and PDF) to begin building a video.",
+    q:"Can I use my own comic images?",
+    a:"Yes. You can start with a supported chapter link or upload your own comic images (PNG, JPEG, WebP, CBZ, and PDF) to begin building a video.",
   },
   {
-    q: "How accurate is speech bubble erasing on complex manga art?",
-    a: "The Gemini Vision AI combined with OpenCV neural inpainting achieves 99.8% precision, seamlessly reconstructing underlying textures, character hair, line art, and screen tones without visible blur.",
+    q:"How accurate is speech bubble erasing on complex manga art?",
+    a:"The Gemini Vision AI combined with OpenCV neural inpainting achieves 99.8% precision, seamlessly reconstructing underlying textures, character hair, line art, and screen tones without visible blur.",
   },
   {
-    q: "Can I adjust the result before exporting?",
-    a: "Yes. Review your panels, dialogue, voices, and pacing in the studio so the final video feels like your story.",
+    q:"Can I adjust the result before exporting?",
+    a:"Yes. Review your panels, dialogue, voices, and pacing in the studio so the final video feels like your story.",
   },
   {
-    q: "Can I make a video from any comic I find online?",
-    a: "Only use material you created or have permission to adapt and share. Copyright and platform rules vary, so you are responsible for confirming that your use is authorized.",
+    q:"Can I make a video from any comic I find online?",
+    a:"Only use material you created or have permission to adapt and share. Copyright and platform rules vary, so you are responsible for confirming that your use is authorized.",
   },
 ];
 
 export default function LandingPage({
   onGetStarted,
   onLogin,
-  themeMode = "dark",
+  themeMode ="dark",
 }: LandingPageProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [pasteCopied, setPasteCopied] = useState(false);
-  const [inputTab, setInputTab] = useState<"url" | "upload">("url");
+  const [inputTab, setInputTab] = useState<"url" |"upload">("url");
 
   const {
     demoTab,
@@ -159,7 +151,7 @@ export default function LandingPage({
     toggleFaq,
   } = useLandingPage();
 
-  const isLight = themeMode === "light";
+  const isLight = themeMode ==="light";
 
   const handleAction = (callback: () => void) => {
     if (landingUrl.trim()) {
@@ -187,7 +179,7 @@ export default function LandingPage({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+    if (e.key ==="Enter") {
       e.preventDefault();
       handleAction(onGetStarted);
     }
@@ -198,26 +190,26 @@ export default function LandingPage({
     const lower = url.toLowerCase();
     if (lower.includes("mangadex.org") || lower.includes("mangadex")) {
       return {
-        name: "MangaDex",
-        tagClass: "bg-orange-500/15 text-orange-400 border-orange-500/30",
+        name:"MangaDex",
+        tagClass:"bg-orange-500/15 text-orange-400 border-orange-500/30",
       };
     }
     if (lower.includes("webtoons.com") || lower.includes("webtoon")) {
       return {
-        name: "Webtoon",
-        tagClass: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+        name:"Webtoon",
+        tagClass:"bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
       };
     }
     if (lower.includes("tapas.io") || lower.includes("tapas")) {
       return {
-        name: "Tapas",
-        tagClass: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+        name:"Tapas",
+        tagClass:"bg-amber-500/15 text-amber-400 border-amber-500/30",
       };
     }
     if (lower.startsWith("http://") || lower.startsWith("https://")) {
       return {
-        name: "Link Ready",
-        tagClass: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+        name:"Link Ready",
+        tagClass:"bg-blue-500/15 text-blue-400 border-blue-500/30",
       };
     }
     return null;
@@ -229,16 +221,16 @@ export default function LandingPage({
     <div
       className={`h-screen flex flex-col transition-colors duration-300 selection:bg-blue-500 selection:text-white ${
         isLight
-          ? "bg-[#f8fafc] text-slate-900"
-          : "bg-[#0a0b0e] text-neutral-100"
+          ?"bg-[#f8fafc] text-slate-900"
+          :"bg-[#0a0b0e] text-neutral-100"
       }`}
     >
       {/* NAVIGATION */}
       <nav
         className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-colors duration-300 flex-shrink-0 ${
           isLight
-            ? "bg-white/95 border-slate-200/90 shadow-xs"
-            : "bg-[#0d0e12]/95 border-[#2F2F2F]"
+            ?"bg-white/95 border-slate-200/90 shadow-xs"
+            :"bg-[#0d0e12]/95 border-[#2F2F2F]"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
@@ -248,56 +240,56 @@ export default function LandingPage({
             subtitleText="Comic to Video AI"
             onClick={() => {
               const el = document.getElementById("landing-scroll-area");
-              if (el) el.scrollTo({ top: 0, behavior: "smooth" });
+              if (el) el.scrollTo({ top: 0, behavior:"smooth" });
             }}
           />
 
           <div className="hidden md:flex items-center gap-1.5">
             {[
               {
-                label: "Features",
-                target: "features",
-                tip: "Explore core AI capabilities",
+                label:"Features",
+                target:"features",
+                tip:"Explore core AI capabilities",
               },
               {
-                label: "How It Works",
-                target: "how-it-works",
-                tip: "Learn how Sonikoma works in 3 steps",
+                label:"How It Works",
+                target:"how-it-works",
+                tip:"Learn how Sonikoma works in 3 steps",
               },
               {
-                label: "Live Demo",
-                target: "demo-showcase",
-                tip: "Interactive transformation preview",
+                label:"Live Demo",
+                target:"demo-showcase",
+                tip:"Interactive transformation preview",
               },
               {
-                label: "Voices",
-                target: "voice-studio",
-                tip: "Audition neural character voice actors",
+                label:"Voices",
+                target:"voice-studio",
+                tip:"Audition neural character voice actors",
               },
               {
-                label: "Gallery",
-                target: "genre-gallery",
-                tip: "Explore comic genres & art showcase",
+                label:"Gallery",
+                target:"genre-gallery",
+                tip:"Explore comic genres & art showcase",
               },
               {
-                label: "Comparison",
-                target: "comparison",
-                tip: "Manual editing vs Sonikoma",
+                label:"Comparison",
+                target:"comparison",
+                tip:"Manual editing vs Sonikoma",
               },
               {
-                label: "Reviews",
-                target: "testimonials",
-                tip: "See what creators are saying",
+                label:"Reviews",
+                target:"testimonials",
+                tip:"See what creators are saying",
               },
               {
-                label: "Pricing",
-                target: "pricing",
-                tip: "View pricing plans & credits",
+                label:"Pricing",
+                target:"pricing",
+                tip:"View pricing plans & credits",
               },
               {
-                label: "FAQ",
-                target: "faq",
-                tip: "Frequently asked questions",
+                label:"FAQ",
+                target:"faq",
+                tip:"Frequently asked questions",
               },
             ].map((link) => (
               <Tooltip key={link.target} text={link.tip} placement="bottom">
@@ -305,12 +297,12 @@ export default function LandingPage({
                   onClick={() => {
                     document
                       .getElementById(link.target)
-                      ?.scrollIntoView({ behavior: "smooth" });
+                      ?.scrollIntoView({ behavior:"smooth" });
                   }}
                   className={`px-3.5 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer select-none focus:outline-none ${
                     isLight
-                      ? "text-slate-600 hover:text-blue-600 hover:bg-slate-100"
-                      : "text-neutral-300 hover:text-white hover:bg-white/5"
+                      ?"text-slate-600 hover:text-blue-600 hover:bg-slate-100"
+                      :"text-neutral-300 hover:text-white hover:bg-white/5"
                   }`}
                 >
                   {link.label}
@@ -326,8 +318,8 @@ export default function LandingPage({
                 onClick={() => handleAction(onLogin)}
                 className={`hidden sm:inline-flex px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer rounded-xl select-none focus:outline-none ${
                   isLight
-                    ? "text-slate-700 hover:text-slate-950 hover:bg-slate-100"
-                    : "text-neutral-300 hover:text-white hover:bg-white/5"
+                    ?"text-slate-700 hover:text-slate-950 hover:bg-slate-100"
+                    :"text-neutral-300 hover:text-white hover:bg-white/5"
                 }`}
               >
                 Sign In
@@ -341,7 +333,7 @@ export default function LandingPage({
               <button
                 disabled={isNavigating}
                 onClick={() => handleAction(onGetStarted)}
-                className="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-60 text-white text-xs sm:text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-500/20 active:scale-95 cursor-pointer select-none focus:outline-none flex items-center gap-2"
+                className="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-60 text-white text-xs sm:text-sm font-bold rounded-xl transition-all duration-200 shadow-md active:scale-95 cursor-pointer select-none focus:outline-none flex items-center gap-2"
               >
                 {isNavigating ? (
                   <>
@@ -359,8 +351,8 @@ export default function LandingPage({
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`md:hidden p-2 rounded-xl border transition-colors cursor-pointer ${
                 isLight
-                  ? "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
-                  : "bg-[#181818] border-[#2F2F2F] text-neutral-300 hover:bg-[#222]"
+                  ?"bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
+                  :"bg-[#181818] border-[#2F2F2F] text-neutral-300 hover:bg-[#222]"
               }`}
               aria-label="Toggle Navigation Menu"
             >
@@ -378,20 +370,20 @@ export default function LandingPage({
           <div
             className={`md:hidden border-t px-4 py-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200 ${
               isLight
-                ? "bg-white border-slate-200 text-slate-900 shadow-lg"
-                : "bg-[#0d0e12] border-[#2F2F2F] text-white shadow-2xl"
+                ?"bg-white border-slate-200 text-slate-900 shadow-lg"
+                :"bg-[#0d0e12] border-[#2F2F2F] text-white shadow-2xl"
             }`}
           >
             {[
-              { label: "Features", target: "features" },
-              { label: "How It Works", target: "how-it-works" },
-              { label: "Live Demo", target: "demo-showcase" },
-              { label: "Voices", target: "voice-studio" },
-              { label: "Gallery", target: "genre-gallery" },
-              { label: "Comparison", target: "comparison" },
-              { label: "Reviews", target: "testimonials" },
-              { label: "Pricing", target: "pricing" },
-              { label: "FAQ", target: "faq" },
+              { label:"Features", target:"features" },
+              { label:"How It Works", target:"how-it-works" },
+              { label:"Live Demo", target:"demo-showcase" },
+              { label:"Voices", target:"voice-studio" },
+              { label:"Gallery", target:"genre-gallery" },
+              { label:"Comparison", target:"comparison" },
+              { label:"Reviews", target:"testimonials" },
+              { label:"Pricing", target:"pricing" },
+              { label:"FAQ", target:"faq" },
             ].map((link) => (
               <button
                 key={link.target}
@@ -399,12 +391,12 @@ export default function LandingPage({
                   setIsMobileMenuOpen(false);
                   document
                     .getElementById(link.target)
-                    ?.scrollIntoView({ behavior: "smooth" });
+                    ?.scrollIntoView({ behavior:"smooth" });
                 }}
                 className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${
                   isLight
-                    ? "hover:bg-slate-100 text-slate-700"
-                    : "hover:bg-white/5 text-neutral-300"
+                    ?"hover:bg-slate-100 text-slate-700"
+                    :"hover:bg-white/5 text-neutral-300"
                 }`}
               >
                 {link.label}
@@ -419,8 +411,8 @@ export default function LandingPage({
                 }}
                 className={`w-full text-center px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer border ${
                   isLight
-                    ? "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100"
-                    : "border-[#2F2F2F] bg-[#181818] text-white hover:bg-[#222]"
+                    ?"border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100"
+                    :"border-[#2F2F2F] bg-[#181818] text-white hover:bg-[#222]"
                 }`}
               >
                 Sign In
@@ -434,7 +426,7 @@ export default function LandingPage({
       <div
         id="landing-scroll-area"
         className={`custom-scrollbar flex-1 overflow-y-auto relative ${
-          isLight ? "bg-[#f8fafc]" : "bg-[#0a0b0e]"
+          isLight ?"bg-[#f8fafc]" :"bg-[#0a0b0e]"
         }`}
       >
         {/* HERO SECTION */}
@@ -446,8 +438,8 @@ export default function LandingPage({
             <div
               className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase border transition-all shadow-sm ${
                 isLight
-                  ? "bg-blue-50 border-blue-200 text-blue-700"
-                  : "bg-blue-500/10 border-blue-500/30 text-blue-400 shadow-blue-500/10"
+                  ?"bg-blue-50 border-blue-200 text-blue-700"
+                  :"bg-blue-500/10 border-blue-500/30 text-blue-400"
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 animate-pulse" />
@@ -457,15 +449,15 @@ export default function LandingPage({
             {/* Main Headline */}
             <h1
               className={`text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.08] max-w-4xl mx-auto transition-colors ${
-                isLight ? "text-slate-950" : "text-white"
+                isLight ?"text-slate-950" :"text-white"
               }`}
             >
               Bring Your Favorite Comics to Life <br />
               <span
                 className={`text-transparent bg-clip-text bg-gradient-to-r ${
                   isLight
-                    ? "from-blue-700 via-indigo-600 to-slate-900"
-                    : "from-blue-400 via-indigo-400 to-cyan-300"
+                    ?"from-blue-700 via-indigo-600 to-slate-900"
+                    :"from-blue-400 via-indigo-400 to-cyan-300"
                 }`}
               >
                 One Panel at a Time
@@ -475,7 +467,7 @@ export default function LandingPage({
             {/* Sub-headline */}
             <p
               className={`text-base md:text-lg max-w-2xl mx-auto font-medium leading-relaxed transition-colors ${
-                isLight ? "text-slate-600" : "text-neutral-300"
+                isLight ?"text-slate-600" :"text-neutral-300"
               }`}
             >
               Turn a chapter link or your own comic images into a vertical
@@ -485,17 +477,12 @@ export default function LandingPage({
 
             {/* HERO COMPONENT: ADVANCED OMNIBAR CARD */}
             <div className="pt-2 sm:pt-4 max-w-3xl mx-auto w-full text-left relative">
-              {/* Subtle ambient cyber glow backdrop */}
-              <div
-                className="absolute -inset-1.5 rounded-[32px] bg-gradient-to-r from-blue-600/20 via-indigo-600/20 to-purple-600/20 blur-xl opacity-75 pointer-events-none"
-                aria-hidden="true"
-              />
 
               <div
                 className={`relative rounded-[30px] border transition-all duration-300 p-4 sm:p-6 backdrop-blur-2xl shadow-[0_24px_70px_rgba(0,0,0,0.38)] space-y-4 ${
                   isLight
-                    ? "bg-white/95 border-slate-200/90 shadow-slate-200/60"
-                    : "bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.1),transparent_35%),rgba(18,19,24,0.96)] border-white/10 shadow-black/80"
+                    ?"bg-white/95 border-slate-200/90 shadow-slate-200/60"
+                    :"bg-[#121318] border-white/10 shadow-black/80"
                 }`}
               >
                 {/* Mode Selector Tabs (URL vs Upload) */}
@@ -505,13 +492,13 @@ export default function LandingPage({
                       type="button"
                       onClick={() => setInputTab("url")}
                       className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        inputTab === "url"
+                        inputTab ==="url"
                           ? isLight
-                            ? "bg-white text-blue-700 shadow-xs"
-                            : "bg-blue-600 text-white shadow-md shadow-blue-600/30"
+                            ?"bg-white text-blue-700 shadow-xs"
+                            :"bg-blue-600 text-white shadow-md"
                           : isLight
-                          ? "text-slate-600 hover:text-slate-900"
-                          : "text-neutral-400 hover:text-white"
+                          ?"text-slate-600 hover:text-slate-900"
+                          :"text-neutral-400 hover:text-white"
                       }`}
                     >
                       <Link2 className="w-3.5 h-3.5" />
@@ -521,13 +508,13 @@ export default function LandingPage({
                       type="button"
                       onClick={() => handleAction(onGetStarted)}
                       className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        inputTab === "upload"
+                        inputTab ==="upload"
                           ? isLight
-                            ? "bg-white text-blue-700 shadow-xs"
-                            : "bg-blue-600 text-white shadow-md shadow-blue-600/30"
+                            ?"bg-white text-blue-700 shadow-xs"
+                            :"bg-blue-600 text-white shadow-md"
                           : isLight
-                          ? "text-slate-600 hover:text-slate-900"
-                          : "text-neutral-400 hover:text-white"
+                          ?"text-slate-600 hover:text-slate-900"
+                          :"text-neutral-400 hover:text-white"
                       }`}
                     >
                       <UploadCloud className="w-3.5 h-3.5" />
@@ -537,7 +524,7 @@ export default function LandingPage({
 
                   <span
                     className={`hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold ${
-                      isLight ? "text-slate-500" : "text-neutral-400"
+                      isLight ?"text-slate-500" :"text-neutral-400"
                     }`}
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -550,16 +537,16 @@ export default function LandingPage({
                   <div
                     className={`flex items-center gap-2.5 flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border transition-all duration-200 ${
                       isLight
-                        ? "bg-slate-50/90 border-slate-300 focus-within:border-blue-600 focus-within:bg-white focus-within:ring-3 focus-within:ring-blue-500/15"
-                        : "bg-[#181a22] border-white/10 hover:border-white/20 focus-within:border-blue-500 focus-within:ring-3 focus-within:ring-blue-500/25"
+                        ?"bg-slate-50/90 border-slate-300 focus-within:border-blue-600 focus-within:bg-white focus-within:ring-3 focus-within:ring-blue-500/15"
+                        :"bg-[#181a22] border-white/10 hover:border-white/20 focus-within:border-blue-500 focus-within:ring-3 focus-within:ring-blue-500/25"
                     }`}
                   >
                     {/* Globe / Link Icon */}
                     <div
                       className={`p-1.5 rounded-lg shrink-0 ${
                         isLight
-                          ? "bg-blue-50 text-blue-600"
-                          : "bg-blue-500/10 text-blue-400"
+                          ?"bg-blue-50 text-blue-600"
+                          :"bg-blue-500/10 text-blue-400"
                       }`}
                     >
                       <Globe className="w-4 h-4" />
@@ -574,8 +561,8 @@ export default function LandingPage({
                       onKeyDown={handleKeyDown}
                       className={`flex-1 bg-transparent outline-none text-xs sm:text-sm min-w-0 font-medium ${
                         isLight
-                          ? "text-slate-900 placeholder:text-slate-400"
-                          : "text-white placeholder:text-neutral-500"
+                          ?"text-slate-900 placeholder:text-slate-400"
+                          :"text-white placeholder:text-neutral-500"
                       }`}
                     />
 
@@ -611,10 +598,10 @@ export default function LandingPage({
                           onClick={handlePasteFromClipboard}
                           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border cursor-pointer shrink-0 ${
                             pasteCopied
-                              ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+                              ?"bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
                               : isLight
-                              ? "bg-slate-200/80 hover:bg-slate-300 border-slate-300 text-slate-700"
-                              : "bg-white/5 hover:bg-white/10 border-white/10 text-neutral-300 hover:text-white"
+                              ?"bg-slate-200/80 hover:bg-slate-300 border-slate-300 text-slate-700"
+                              :"bg-white/5 hover:bg-white/10 border-white/10 text-neutral-300 hover:text-white"
                           }`}
                         >
                           {pasteCopied ? (
@@ -641,7 +628,7 @@ export default function LandingPage({
                     <button
                       disabled={isNavigating}
                       onClick={() => handleAction(onGetStarted)}
-                      className="group relative flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 disabled:opacity-60 text-white font-black text-sm rounded-2xl transition-all duration-300 active:scale-[0.98] cursor-pointer shrink-0  select-none"
+                      className="group relative flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 disabled:opacity-60 text-white font-black text-sm rounded-2xl transition-all duration-300 active:scale-[0.98] cursor-pointer shrink-0 select-none"
                     >
                       {isNavigating ? (
                         <>
@@ -664,7 +651,7 @@ export default function LandingPage({
                 <div className="pt-2 flex flex-wrap items-center gap-2">
                   <span
                     className={`text-xs font-bold mr-1 flex items-center gap-1.5 ${
-                      isLight ? "text-slate-700" : "text-neutral-300"
+                      isLight ?"text-slate-700" :"text-neutral-300"
                     }`}
                   >
                     <span>Try sample comic:</span>
@@ -684,12 +671,12 @@ export default function LandingPage({
                           className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 border cursor-pointer select-none active:scale-95 ${
                             isSelected
                               ? isLight
-                                ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20 -translate-y-0.5"
-                                : "bg-blue-600/30 text-blue-200 border-blue-400 shadow-md shadow-blue-500/20 -translate-y-0.5"
+                                ? "bg-blue-600 text-white border-blue-600 shadow-md -translate-y-0.5"
+                                : "bg-blue-600/30 text-blue-200 border-blue-400 shadow-md -translate-y-0.5"
                               : isLight
                               ? "bg-slate-100 hover:bg-blue-50 border-slate-300 hover:border-neutral-700 text-slate-800 hover:text-blue-700"
                               : "bg-[#181a22] hover:bg-[#20232d] border-white/10 hover:border-neutral-700 text-neutral-300 hover:text-white"
-                          } ${sample.glowColor}`}
+                          }`}
                         >
                           <span className="text-sm leading-none">
                             {sample.icon}
@@ -710,8 +697,8 @@ export default function LandingPage({
                 <span
                   className={`flex items-center gap-2 px-3 py-1 rounded-full border transition-colors ${
                     isLight
-                      ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                      : "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
+                      ?"bg-emerald-50 border-emerald-200 text-emerald-800"
+                      :"bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
                   }`}
                 >
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
@@ -721,8 +708,8 @@ export default function LandingPage({
                 <span
                   className={`flex items-center gap-2 px-3 py-1 rounded-full border transition-colors ${
                     isLight
-                      ? "bg-amber-50 border-amber-200 text-amber-800"
-                      : "bg-amber-500/10 border-amber-500/20 text-amber-300"
+                      ?"bg-amber-50 border-amber-200 text-amber-800"
+                      :"bg-amber-500/10 border-amber-500/20 text-amber-300"
                   }`}
                 >
                   <Zap className="w-4 h-4 text-amber-500" />
@@ -732,8 +719,8 @@ export default function LandingPage({
                 <span
                   className={`hidden sm:flex items-center gap-2 px-3 py-1 rounded-full border transition-colors ${
                     isLight
-                      ? "bg-blue-50 border-blue-200 text-blue-800"
-                      : "bg-blue-500/10 border-blue-500/20 text-blue-300"
+                      ?"bg-blue-50 border-blue-200 text-blue-800"
+                      :"bg-blue-500/10 border-blue-500/20 text-blue-300"
                   }`}
                 >
                   <Film className="w-4 h-4 text-blue-400" />
@@ -750,15 +737,15 @@ export default function LandingPage({
         {/* CREATOR STORY SECTION */}
         <section
           className={`py-20 sm:py-28 px-6 relative z-10 ${
-            isLight ? "bg-white" : "bg-[#0a0b0e]"
+            isLight ?"bg-white" :"bg-[#0a0b0e]"
           }`}
         >
           <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div
               className={`relative min-h-[340px] sm:min-h-[440px] rounded-[32px] overflow-hidden border shadow-2xl ${
                 isLight
-                  ? "border-slate-200 shadow-slate-300/40"
-                  : "border-white/10 shadow-black/40"
+                  ?"border-slate-200 shadow-slate-300/40"
+                  :"border-white/10 shadow-black/40"
               }`}
             >
               <img
@@ -790,24 +777,24 @@ export default function LandingPage({
               <div className="space-y-4">
                 <span
                   className={`text-xs font-bold uppercase tracking-[0.18em] ${
-                    isLight ? "text-blue-700" : "text-blue-400"
+                    isLight ?"text-blue-700" :"text-blue-400"
                   }`}
                 >
                   More than a video maker
                 </span>
                 <h2
                   className={`text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight ${
-                    isLight ? "text-slate-950" : "text-white"
+                    isLight ?"text-slate-950" :"text-white"
                   }`}
                 >
-                  Give every panel{" "}
+                  Give every panel{""}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">
                     a little more life.
                   </span>
                 </h2>
                 <p
                   className={`text-base leading-relaxed max-w-xl ${
-                    isLight ? "text-slate-600" : "text-neutral-400"
+                    isLight ?"text-slate-600" :"text-neutral-400"
                   }`}
                 >
                   Shape the rhythm of your story. Refine panels, bring dialogue
@@ -820,29 +807,26 @@ export default function LandingPage({
                 {[
                   {
                     icon: <Scissors className="h-5 w-5" />,
-                    title: "A cleaner view of every scene",
-                    description:
-                      "Separate long comic pages into focused, easy-to-follow panels.",
+                    title:"A cleaner view of every scene",
+                    description:"Separate long comic pages into focused, easy-to-follow panels.",
                   },
                   {
                     icon: <Volume2 className="h-5 w-5" />,
-                    title: "Dialogue with its own voice",
-                    description:
-                      "Build a distinct listening experience with character voices and narration.",
+                    title:"Dialogue with its own voice",
+                    description:"Build a distinct listening experience with character voices and narration.",
                   },
                   {
                     icon: <Film className="h-5 w-5" />,
-                    title: "A format made for the feed",
-                    description:
-                      "Bring your sequence together as a vertical video for short-form platforms.",
+                    title:"A format made for the feed",
+                    description:"Bring your sequence together as a vertical video for short-form platforms.",
                   },
                 ].map((feature) => (
                   <div key={feature.title} className="flex items-start gap-4">
                     <span
                       className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
                         isLight
-                          ? "border-blue-100 bg-blue-50 text-blue-700"
-                          : "border-blue-400/20 bg-blue-400/10 text-blue-300"
+                          ?"border-blue-100 bg-blue-50 text-blue-700"
+                          :"border-blue-400/20 bg-blue-400/10 text-blue-300"
                       }`}
                     >
                       {feature.icon}
@@ -850,14 +834,14 @@ export default function LandingPage({
                     <div>
                       <h3
                         className={`font-bold ${
-                          isLight ? "text-slate-900" : "text-white"
+                          isLight ?"text-slate-900" :"text-white"
                         }`}
                       >
                         {feature.title}
                       </h3>
                       <p
                         className={`mt-1 text-sm leading-relaxed ${
-                          isLight ? "text-slate-600" : "text-neutral-400"
+                          isLight ?"text-slate-600" :"text-neutral-400"
                         }`}
                       >
                         {feature.description}
@@ -872,7 +856,7 @@ export default function LandingPage({
                 onClick={() =>
                   document
                     .getElementById("demo-showcase")
-                    ?.scrollIntoView({ behavior: "smooth" })
+                    ?.scrollIntoView({ behavior:"smooth" })
                 }
                 className="inline-flex items-center gap-2 rounded-xl border border-blue-500/30 px-4 py-2.5 text-sm font-bold text-blue-500 transition-colors hover:border-blue-500 hover:bg-blue-500/5"
               >
@@ -894,29 +878,29 @@ export default function LandingPage({
           id="how-it-works"
           className={`py-24 px-6 scroll-mt-24 transition-colors relative z-10 ${
             isLight
-              ? "bg-slate-100/70 border-y border-slate-200"
-              : "bg-[#0d0e12] border-y border-[#2F2F2F]"
+              ?"bg-slate-100/70 border-y border-slate-200"
+              :"bg-[#0d0e12] border-y border-[#2F2F2F]"
           }`}
         >
           <div className="max-w-7xl mx-auto space-y-16">
             <div className="text-center space-y-3">
               <span
                 className={`text-xs font-mono font-bold uppercase tracking-widest ${
-                  isLight ? "text-blue-700" : "text-blue-400"
+                  isLight ?"text-blue-700" :"text-blue-400"
                 }`}
               >
                 Autonomous 5-Step Pipeline
               </span>
               <h2
                 className={`text-3xl md:text-4xl font-black tracking-tight ${
-                  isLight ? "text-slate-950" : "text-white"
+                  isLight ?"text-slate-950" :"text-white"
                 }`}
               >
                 From raw comic chapter to finished 4K video
               </h2>
               <p
                 className={`max-w-xl mx-auto text-sm leading-relaxed font-medium ${
-                  isLight ? "text-slate-700" : "text-neutral-400"
+                  isLight ?"text-slate-700" :"text-neutral-400"
                 }`}
               >
                 Start with a chapter link or image archive, then let the neural pipeline
@@ -929,8 +913,8 @@ export default function LandingPage({
               <div
                 className={`p-6 rounded-[24px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between ${
                   isLight
-                    ? "bg-white border-slate-200 shadow-sm hover:border-blue-400 hover:shadow-lg"
-                    : "bg-[#181818] border-[#2F2F2F] hover:border-blue-500/60 hover:shadow-xl hover:shadow-blue-950/20"
+                    ?"bg-white border-slate-200 shadow-sm hover:border-blue-400 hover:shadow-lg"
+                    :"bg-[#181818] border-[#2F2F2F] hover:border-blue-500/60 hover:shadow-xl"
                 }`}
               >
                 <div>
@@ -947,14 +931,14 @@ export default function LandingPage({
                   </span>
                   <h3
                     className={`text-base font-bold mb-1.5 ${
-                      isLight ? "text-slate-950" : "text-white"
+                      isLight ?"text-slate-950" :"text-white"
                     }`}
                   >
                     Scrape URL
                   </h3>
                   <p
                     className={`text-xs leading-relaxed font-normal ${
-                      isLight ? "text-slate-700" : "text-neutral-400"
+                      isLight ?"text-slate-700" :"text-neutral-400"
                     }`}
                   >
                     Paste any chapter link from MangaDex or Webtoon, or upload comic image files.
@@ -966,8 +950,8 @@ export default function LandingPage({
               <div
                 className={`p-6 rounded-[24px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between ${
                   isLight
-                    ? "bg-white border-slate-200 shadow-sm hover:border-purple-400 hover:shadow-lg"
-                    : "bg-[#181818] border-[#2F2F2F] hover:border-purple-500/60 hover:shadow-xl hover:shadow-purple-950/20"
+                    ?"bg-white border-slate-200 shadow-sm hover:border-purple-400 hover:shadow-lg"
+                    :"bg-[#181818] border-[#2F2F2F] hover:border-purple-500/60 hover:shadow-xl"
                 }`}
               >
                 <div>
@@ -984,14 +968,14 @@ export default function LandingPage({
                   </span>
                   <h3
                     className={`text-base font-bold mb-1.5 ${
-                      isLight ? "text-slate-950" : "text-white"
+                      isLight ?"text-slate-950" :"text-white"
                     }`}
                   >
                     Merge &amp; Crop
                   </h3>
                   <p
                     className={`text-xs leading-relaxed font-normal ${
-                      isLight ? "text-slate-700" : "text-neutral-400"
+                      isLight ?"text-slate-700" :"text-neutral-400"
                     }`}
                   >
                     Canny edge algorithms detect gutters and slice vertical strips into clean panels.
@@ -1003,8 +987,8 @@ export default function LandingPage({
               <div
                 className={`p-6 rounded-[24px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between ${
                   isLight
-                    ? "bg-white border-slate-200 shadow-sm hover:border-pink-400 hover:shadow-lg"
-                    : "bg-[#181818] border-[#2F2F2F] hover:border-pink-500/60 hover:shadow-xl hover:shadow-pink-950/20"
+                    ?"bg-white border-slate-200 shadow-sm hover:border-pink-400 hover:shadow-lg"
+                    :"bg-[#181818] border-[#2F2F2F] hover:border-pink-500/60 hover:shadow-xl"
                 }`}
               >
                 <div>
@@ -1021,14 +1005,14 @@ export default function LandingPage({
                   </span>
                   <h3
                     className={`text-base font-bold mb-1.5 ${
-                      isLight ? "text-slate-950" : "text-white"
+                      isLight ?"text-slate-950" :"text-white"
                     }`}
                   >
                     AI Narrative
                   </h3>
                   <p
                     className={`text-xs leading-relaxed font-normal ${
-                      isLight ? "text-slate-700" : "text-neutral-400"
+                      isLight ?"text-slate-700" :"text-neutral-400"
                     }`}
                   >
                     Erases speech bubbles via neural inpainting and composes narrative scripts.
@@ -1040,8 +1024,8 @@ export default function LandingPage({
               <div
                 className={`p-6 rounded-[24px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between ${
                   isLight
-                    ? "bg-white border-slate-200 shadow-sm hover:border-cyan-400 hover:shadow-lg"
-                    : "bg-[#181818] border-[#2F2F2F] hover:border-cyan-500/60 hover:shadow-xl hover:shadow-cyan-950/20"
+                    ?"bg-white border-slate-200 shadow-sm hover:border-cyan-400 hover:shadow-lg"
+                    :"bg-[#181818] border-[#2F2F2F] hover:border-cyan-500/60 hover:shadow-xl"
                 }`}
               >
                 <div>
@@ -1058,14 +1042,14 @@ export default function LandingPage({
                   </span>
                   <h3
                     className={`text-base font-bold mb-1.5 ${
-                      isLight ? "text-slate-950" : "text-white"
+                      isLight ?"text-slate-950" :"text-white"
                     }`}
                   >
                     Voice Audio
                   </h3>
                   <p
                     className={`text-xs leading-relaxed font-normal ${
-                      isLight ? "text-slate-700" : "text-neutral-400"
+                      isLight ?"text-slate-700" :"text-neutral-400"
                     }`}
                   >
                     Synthesizes neural voiceovers and dialogue timing synced to frame transitions.
@@ -1077,8 +1061,8 @@ export default function LandingPage({
               <div
                 className={`p-6 rounded-[24px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between ${
                   isLight
-                    ? "bg-white border-slate-200 shadow-sm hover:border-emerald-400 hover:shadow-lg"
-                    : "bg-[#181818] border-[#2F2F2F] hover:border-emerald-500/60 hover:shadow-xl hover:shadow-emerald-950/20"
+                    ?"bg-white border-slate-200 shadow-sm hover:border-emerald-400 hover:shadow-lg"
+                    :"bg-[#181818] border-[#2F2F2F] hover:border-emerald-500/60 hover:shadow-xl"
                 }`}
               >
                 <div>
@@ -1095,14 +1079,14 @@ export default function LandingPage({
                   </span>
                   <h3
                     className={`text-base font-bold mb-1.5 ${
-                      isLight ? "text-slate-950" : "text-white"
+                      isLight ?"text-slate-950" :"text-white"
                     }`}
                   >
                     Video Render
                   </h3>
                   <p
                     className={`text-xs leading-relaxed font-normal ${
-                      isLight ? "text-slate-700" : "text-neutral-400"
+                      isLight ?"text-slate-700" :"text-neutral-400"
                     }`}
                   >
                     Renders 2.5D camera pan, particle SFX, and exports vertical 4K 60fps MP4 video.
@@ -1122,21 +1106,21 @@ export default function LandingPage({
             <div className="text-center space-y-3">
               <span
                 className={`text-xs font-mono font-bold uppercase tracking-widest ${
-                  isLight ? "text-blue-700" : "text-blue-400"
+                  isLight ?"text-blue-700" :"text-blue-400"
                 }`}
               >
                 Live Preview
               </span>
               <h2
                 className={`text-3xl md:text-4xl font-black tracking-tight ${
-                  isLight ? "text-slate-950" : "text-white"
+                  isLight ?"text-slate-950" :"text-white"
                 }`}
               >
                 See your story take shape
               </h2>
               <p
                 className={`max-w-xl mx-auto text-sm font-medium ${
-                  isLight ? "text-slate-700" : "text-neutral-400"
+                  isLight ?"text-slate-700" :"text-neutral-400"
                 }`}
               >
                 Explore how panel selection, dialogue cleanup, and translation
@@ -1148,28 +1132,28 @@ export default function LandingPage({
             <div className="flex flex-wrap items-center justify-center gap-2.5">
               {[
                 {
-                  id: "slicing",
-                  label: "1. Panel Slicing",
+                  id:"slicing",
+                  label:"1. Panel Slicing",
                   icon: <Scissors className="w-4 h-4" />,
-                  tip: "Automatic comic panel bounding box detection",
+                  tip:"Automatic comic panel bounding box detection",
                 },
                 {
-                  id: "bubbles",
-                  label: "2. Speech Bubble Removal",
+                  id:"bubbles",
+                  label:"2. Speech Bubble Removal",
                   icon: <Sparkles className="w-4 h-4" />,
-                  tip: "Clean speech text bubbles with AI inpainting",
+                  tip:"Clean speech text bubbles with AI inpainting",
                 },
                 {
-                  id: "translation",
-                  label: "3. Auto Translation",
+                  id:"translation",
+                  label:"3. Auto Translation",
                   icon: <Languages className="w-4 h-4" />,
-                  tip: "Detect foreign dialogues & translate into English",
+                  tip:"Detect foreign dialogues & translate into English",
                 },
                 {
-                  id: "render",
-                  label: "4. Cinematic Render",
+                  id:"render",
+                  label:"4. Cinematic Render",
                   icon: <Film className="w-4 h-4" />,
-                  tip: "Animated video with voices and camera motion",
+                  tip:"Animated video with voices and camera motion",
                 },
               ].map((t) => (
                 <Tooltip key={t.id} text={t.tip} placement="top">
@@ -1177,10 +1161,10 @@ export default function LandingPage({
                     onClick={() => setDemoTab(t.id as any)}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
                       demoTab === t.id
-                        ? "bg-blue-600 text-white shadow-md shadow-sm -translate-y-0.5"
+                        ?"bg-blue-600 text-white shadow-md shadow-sm -translate-y-0.5"
                         : isLight
-                        ? "bg-white text-slate-800 border border-slate-300 hover:border-neutral-700 hover:text-blue-600 hover:-translate-y-0.5 shadow-2xs"
-                        : "bg-[#181818] text-neutral-300 border border-[#2F2F2F] hover:border-neutral-700 hover:text-white hover:bg-[#222] hover:-translate-y-0.5 shadow-2xs"
+                        ?"bg-white text-slate-800 border border-slate-300 hover:border-neutral-700 hover:text-blue-600 hover:-translate-y-0.5 shadow-2xs"
+                        :"bg-[#181818] text-neutral-300 border border-[#2F2F2F] hover:border-neutral-700 hover:text-white hover:bg-[#222] hover:-translate-y-0.5 shadow-2xs"
                     }`}
                   >
                     {t.icon}
@@ -1191,7 +1175,7 @@ export default function LandingPage({
             </div>
 
             {/* Visual Demo Showcase */}
-            {demoTab === "render" ? (
+            {demoTab ==="render" ? (
               <div className="max-w-4xl mx-auto">
                 <CinematicRenderDemo
                   onGetStarted={() => handleAction(onGetStarted)}
@@ -1203,8 +1187,8 @@ export default function LandingPage({
                   <div
                     className={`rounded-[28px] border overflow-hidden shadow-xl transition-all ${
                       isLight
-                        ? "border-slate-200 bg-white"
-                        : "border-[#2F2F2F] bg-[#141414]"
+                        ?"border-slate-200 bg-white"
+                        :"border-[#2F2F2F] bg-[#141414]"
                     }`}
                   >
                     <div className="px-4 py-2.5 border-b border-[#2F2F2F] bg-[#181818] flex items-center justify-between">
@@ -1214,16 +1198,16 @@ export default function LandingPage({
                       <span className="w-2 h-2 rounded-full bg-blue-400" />
                     </div>
                     <div className="h-[360px]">
-                      {demoTab === "slicing" && <SlicingBefore />}
-                      {demoTab === "bubbles" && <BubblesBefore />}
-                      {demoTab === "translation" && <TranslationBefore />}
+                      {demoTab ==="slicing" && <SlicingBefore />}
+                      {demoTab ==="bubbles" && <BubblesBefore />}
+                      {demoTab ==="translation" && <TranslationBefore />}
                     </div>
                   </div>
                   <div
                     className={`rounded-[28px] border overflow-hidden shadow-xl transition-all ${
                       isLight
-                        ? "border-slate-200 bg-white"
-                        : "border-[#2F2F2F] bg-[#141414]"
+                        ?"border-slate-200 bg-white"
+                        :"border-[#2F2F2F] bg-[#141414]"
                     }`}
                   >
                     <div className="px-4 py-2.5 border-b border-[#2F2F2F] bg-[#181818] flex items-center justify-between">
@@ -1233,9 +1217,9 @@ export default function LandingPage({
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     </div>
                     <div className="h-[360px]">
-                      {demoTab === "slicing" && <SlicingAfter />}
-                      {demoTab === "bubbles" && <BubblesAfter />}
-                      {demoTab === "translation" && <TranslationAfter />}
+                      {demoTab ==="slicing" && <SlicingAfter />}
+                      {demoTab ==="bubbles" && <BubblesAfter />}
+                      {demoTab ==="translation" && <TranslationAfter />}
                     </div>
                   </div>
                 </div>
@@ -1266,29 +1250,29 @@ export default function LandingPage({
         <section
           className={`py-20 sm:py-24 px-6 relative z-10 ${
             isLight
-              ? "bg-slate-100/70 border-y border-slate-200"
-              : "bg-[#0d0e12] border-y border-[#2F2F2F]"
+              ?"bg-slate-100/70 border-y border-slate-200"
+              :"bg-[#0d0e12] border-y border-[#2F2F2F]"
           }`}
         >
           <div className="max-w-6xl mx-auto space-y-12">
             <div className="max-w-2xl mx-auto text-center space-y-4">
               <span
                 className={`text-xs font-bold uppercase tracking-[0.18em] ${
-                  isLight ? "text-blue-700" : "text-blue-400"
+                  isLight ?"text-blue-700" :"text-blue-400"
                 }`}
               >
                 Your creative direction
               </span>
               <h2
                 className={`text-3xl sm:text-4xl font-black tracking-tight ${
-                  isLight ? "text-slate-950" : "text-white"
+                  isLight ?"text-slate-950" :"text-white"
                 }`}
               >
                 The details are what make it yours.
               </h2>
               <p
                 className={`text-sm sm:text-base leading-relaxed ${
-                  isLight ? "text-slate-600" : "text-neutral-400"
+                  isLight ?"text-slate-600" :"text-neutral-400"
                 }`}
               >
                 Let AI help with the production work, while you stay close to
@@ -1300,41 +1284,38 @@ export default function LandingPage({
               {[
                 {
                   icon: <Languages className="h-5 w-5" />,
-                  number: "01",
-                  title: "Keep dialogue clear",
-                  description:
-                    "Clean speech bubbles and translate dialogue to help more viewers follow along.",
+                  number:"01",
+                  title:"Keep dialogue clear",
+                  description:"Clean speech bubbles and translate dialogue to help more viewers follow along.",
                   accent: isLight
-                    ? "bg-violet-50 border-violet-200 text-violet-700"
-                    : "bg-violet-400/10 border-violet-300/20 text-violet-300",
+                    ?"bg-violet-50 border-violet-200 text-violet-700"
+                    :"bg-violet-400/10 border-violet-300/20 text-violet-300",
                 },
                 {
                   icon: <Volume2 className="h-5 w-5" />,
-                  number: "02",
-                  title: "Set the tone with sound",
-                  description:
-                    "Choose character voices, narration, and sound to give each moment its own mood.",
+                  number:"02",
+                  title:"Set the tone with sound",
+                  description:"Choose character voices, narration, and sound to give each moment its own mood.",
                   accent: isLight
-                    ? "bg-blue-50 border-blue-200 text-blue-700"
-                    : "bg-blue-400/10 border-blue-300/20 text-blue-300",
+                    ?"bg-blue-50 border-blue-200 text-blue-700"
+                    :"bg-blue-400/10 border-blue-300/20 text-blue-300",
                 },
                 {
                   icon: <Film className="h-5 w-5" />,
-                  number: "03",
-                  title: "Find your story's rhythm",
-                  description:
-                    "Arrange panels and camera movement into a vertical sequence made for watching.",
+                  number:"03",
+                  title:"Find your story's rhythm",
+                  description:"Arrange panels and camera movement into a vertical sequence made for watching.",
                   accent: isLight
-                    ? "bg-cyan-50 border-cyan-200 text-cyan-700"
-                    : "bg-cyan-400/10 border-cyan-300/20 text-cyan-300",
+                    ?"bg-cyan-50 border-cyan-200 text-cyan-700"
+                    :"bg-cyan-400/10 border-cyan-300/20 text-cyan-300",
                 },
               ].map((feature) => (
                 <article
                   key={feature.number}
                   className={`rounded-2xl border p-6 sm:p-7 transition-all duration-300 hover:-translate-y-1 ${
                     isLight
-                      ? "bg-white border-slate-200 shadow-sm hover:shadow-lg"
-                      : "bg-[#181818] border-[#2F2F2F] hover:border-white/20 hover:shadow-xl hover:shadow-black/20"
+                      ?"bg-white border-slate-200 shadow-sm hover:shadow-lg"
+                      :"bg-[#181818] border-[#2F2F2F] hover:border-white/20 hover:shadow-xl hover:shadow-black/20"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -1345,7 +1326,7 @@ export default function LandingPage({
                     </span>
                     <span
                       className={`font-mono text-xs font-bold ${
-                        isLight ? "text-slate-400" : "text-neutral-600"
+                        isLight ?"text-slate-400" :"text-neutral-600"
                       }`}
                     >
                       {feature.number}
@@ -1353,14 +1334,14 @@ export default function LandingPage({
                   </div>
                   <h3
                     className={`mt-6 text-lg font-bold ${
-                      isLight ? "text-slate-950" : "text-white"
+                      isLight ?"text-slate-950" :"text-white"
                     }`}
                   >
                     {feature.title}
                   </h3>
                   <p
                     className={`mt-2 text-sm leading-relaxed ${
-                      isLight ? "text-slate-600" : "text-neutral-400"
+                      isLight ?"text-slate-600" :"text-neutral-400"
                     }`}
                   >
                     {feature.description}
@@ -1371,7 +1352,7 @@ export default function LandingPage({
 
             <p
               className={`text-center text-xs leading-relaxed ${
-                isLight ? "text-slate-500" : "text-neutral-500"
+                isLight ?"text-slate-500" :"text-neutral-500"
               }`}
             >
               Always use comics and images you have the right to adapt.
@@ -1393,29 +1374,29 @@ export default function LandingPage({
           id="pricing"
           className={`py-24 px-6 scroll-mt-24 relative z-10 ${
             isLight
-              ? "bg-slate-100/70 border-y border-slate-200"
-              : "bg-[#0d0e12] border-y border-[#2F2F2F]"
+              ?"bg-slate-100/70 border-y border-slate-200"
+              :"bg-[#0d0e12] border-y border-[#2F2F2F]"
           }`}
         >
           <div className="max-w-6xl mx-auto space-y-12">
             <div className="text-center space-y-3">
               <span
                 className={`text-xs font-mono font-bold uppercase tracking-widest ${
-                  isLight ? "text-blue-700" : "text-blue-400"
+                  isLight ?"text-blue-700" :"text-blue-400"
                 }`}
               >
                 Pricing Plans
               </span>
               <h2
                 className={`text-3xl md:text-4xl font-black tracking-tight ${
-                  isLight ? "text-slate-950" : "text-white"
+                  isLight ?"text-slate-950" :"text-white"
                 }`}
               >
                 Simple, Honest Pricing
               </h2>
               <p
                 className={`max-w-xl mx-auto text-sm font-medium ${
-                  isLight ? "text-slate-700" : "text-neutral-400"
+                  isLight ?"text-slate-700" :"text-neutral-400"
                 }`}
               >
                 Start free and upgrade when you are ready to create more videos.
@@ -1425,13 +1406,13 @@ export default function LandingPage({
               <div className="pt-3 flex items-center justify-center gap-3">
                 <span
                   className={`text-sm font-bold ${
-                    billingCycle === "monthly"
+                    billingCycle ==="monthly"
                       ? isLight
-                        ? "text-slate-950"
-                        : "text-white"
+                        ?"text-slate-950"
+                        :"text-white"
                       : isLight
-                      ? "text-slate-500"
-                      : "text-neutral-400"
+                      ?"text-slate-500"
+                      :"text-neutral-400"
                   }`}
                 >
                   Monthly
@@ -1443,16 +1424,16 @@ export default function LandingPage({
                   <button
                     onClick={() =>
                       setBillingCycle(
-                        billingCycle === "monthly" ? "yearly" : "monthly"
+                        billingCycle ==="monthly" ?"yearly" :"monthly"
                       )
                     }
                     className="w-12 h-7 rounded-full bg-blue-600/20 p-1 border border-blue-500/30 hover:border-neutral-700 relative transition-all cursor-pointer"
                   >
                     <div
                       className={`w-5 h-5 rounded-full bg-blue-600 transition-transform ${
-                        billingCycle === "yearly"
-                          ? "translate-x-5"
-                          : "translate-x-0"
+                        billingCycle ==="yearly"
+                          ?"translate-x-5"
+                          :"translate-x-0"
                       }`}
                     />
                   </button>
@@ -1460,13 +1441,13 @@ export default function LandingPage({
                 <div className="flex items-center gap-1.5">
                   <span
                     className={`text-sm font-bold ${
-                      billingCycle === "yearly"
+                      billingCycle ==="yearly"
                         ? isLight
-                          ? "text-slate-950"
-                          : "text-white"
+                          ?"text-slate-950"
+                          :"text-white"
                         : isLight
-                        ? "text-slate-500"
-                        : "text-neutral-400"
+                        ?"text-slate-500"
+                        :"text-neutral-400"
                     }`}
                   >
                     Yearly
@@ -1484,15 +1465,9 @@ export default function LandingPage({
                 price={0}
                 billingPeriod="forever"
                 desc="Try out Sonikoma on your first comic videos."
-                features={[
-                  "3 Video Exports / month",
-                  "720p HD Video Resolution",
-                  "Automatic Panel Slicing",
-                  "Speech Bubble Eraser",
+                features={["3 Video Exports / month","720p HD Video Resolution","Automatic Panel Slicing","Speech Bubble Eraser",
                 ]}
-                excludedFeatures={[
-                  "Character Voice Dubbing",
-                  "Custom 4K Video Exports",
+                excludedFeatures={["Character Voice Dubbing","Custom 4K Video Exports",
                 ]}
                 btnText="Start Free"
                 onClick={() => handleAction(onGetStarted)}
@@ -1501,18 +1476,13 @@ export default function LandingPage({
 
               <PricingCard
                 title="Pro Creator"
-                price={billingCycle === "yearly" ? 19 : 24}
+                price={billingCycle ==="yearly" ? 19 : 24}
                 billingPeriod={
-                  billingCycle === "yearly" ? "/mo (billed yearly)" : "/month"
+                  billingCycle ==="yearly" ?"/mo (billed yearly)" :"/month"
                 }
                 desc="For active creators and video publishers."
                 isPopular={true}
-                features={[
-                  "Unlimited Video Exports",
-                  "1080p & 4K Ultra HD Quality",
-                  "All Character Voices & SFX",
-                  "Foreign Language Translation",
-                  "No Watermark",
+                features={["Unlimited Video Exports","1080p & 4K Ultra HD Quality","All Character Voices & SFX","Foreign Language Translation","No Watermark",
                 ]}
                 btnText="Upgrade to Pro"
                 onClick={() => handleAction(onGetStarted)}
@@ -1521,17 +1491,12 @@ export default function LandingPage({
 
               <PricingCard
                 title="Studio"
-                price={billingCycle === "yearly" ? 49 : 59}
+                price={billingCycle ==="yearly" ? 49 : 59}
                 billingPeriod={
-                  billingCycle === "yearly" ? "/mo (billed yearly)" : "/month"
+                  billingCycle ==="yearly" ?"/mo (billed yearly)" :"/month"
                 }
                 desc="For studios and high-volume production teams."
-                features={[
-                  "Everything in Pro",
-                  "Commercial Usage License",
-                  "Custom Voice Cloning",
-                  "Batch Chapter Importing",
-                  "Fastest Rendering Priority",
+                features={["Everything in Pro","Commercial Usage License","Custom Voice Cloning","Batch Chapter Importing","Fastest Rendering Priority",
                 ]}
                 btnText="Contact Sales"
                 onClick={() => handleAction(onGetStarted)}
@@ -1547,14 +1512,14 @@ export default function LandingPage({
             <div className="text-center space-y-3">
               <span
                 className={`text-xs font-mono font-bold uppercase tracking-widest ${
-                  isLight ? "text-blue-700" : "text-blue-400"
+                  isLight ?"text-blue-700" :"text-blue-400"
                 }`}
               >
                 FAQ
               </span>
               <h2
                 className={`text-3xl font-black tracking-tight ${
-                  isLight ? "text-slate-950" : "text-white"
+                  isLight ?"text-slate-950" :"text-white"
                 }`}
               >
                 Frequently Asked Questions
@@ -1569,8 +1534,8 @@ export default function LandingPage({
                     key={index}
                     className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
                       isLight
-                        ? "bg-white border-slate-200 hover:border-slate-300 shadow-xs"
-                        : "bg-[#181818] border-[#2F2F2F] hover:border-neutral-600"
+                        ?"bg-white border-slate-200 hover:border-slate-300 shadow-xs"
+                        :"bg-[#181818] border-[#2F2F2F] hover:border-neutral-600"
                     }`}
                   >
                     <button
@@ -1581,7 +1546,7 @@ export default function LandingPage({
                     >
                       <span
                         className={`font-bold text-sm sm:text-base ${
-                          isLight ? "text-slate-950" : "text-white"
+                          isLight ?"text-slate-950" :"text-white"
                         }`}
                       >
                         {faq.q}
@@ -1597,8 +1562,8 @@ export default function LandingPage({
                       hidden={!isOpen}
                       className={`px-5 pb-5 pt-0 text-sm leading-relaxed border-t font-normal transition-colors ${
                         isLight
-                          ? "border-slate-100 text-slate-700"
-                          : "border-[#2F2F2F] text-neutral-300"
+                          ?"border-slate-100 text-slate-700"
+                          :"border-[#2F2F2F] text-neutral-300"
                       }`}
                     >
                       {faq.a}
@@ -1615,15 +1580,15 @@ export default function LandingPage({
           <div
             className={`max-w-4xl mx-auto rounded-[28px] p-10 md:p-14 text-center space-y-6 border transition-all ${
               isLight
-                ? "bg-white border-slate-200 shadow-sm"
-                : "border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] shadow-2xl"
+                ?"bg-white border-slate-200 shadow-sm"
+                :"border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] shadow-2xl"
             }`}
           >
             <span
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
                 isLight
-                  ? "bg-slate-100 text-slate-700 border border-slate-200"
-                  : "bg-[#181818] text-neutral-300 border border-[#2F2F2F]"
+                  ?"bg-slate-100 text-slate-700 border border-slate-200"
+                  :"bg-[#181818] text-neutral-300 border border-[#2F2F2F]"
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
@@ -1632,7 +1597,7 @@ export default function LandingPage({
 
             <h2
               className={`text-3xl md:text-5xl font-black leading-tight transition-colors ${
-                isLight ? "text-slate-950" : "text-white"
+                isLight ?"text-slate-950" :"text-white"
               }`}
             >
               Start Creating Comic Videos Today
@@ -1640,7 +1605,7 @@ export default function LandingPage({
 
             <p
               className={`max-w-lg mx-auto text-sm md:text-base font-medium leading-relaxed transition-colors ${
-                isLight ? "text-slate-600" : "text-neutral-400"
+                isLight ?"text-slate-600" :"text-neutral-400"
               }`}
             >
               Turn static webtoon panels into voiced, animated vertical videos
@@ -1654,7 +1619,7 @@ export default function LandingPage({
               <button
                 disabled={isNavigating}
                 onClick={() => handleAction(onGetStarted)}
-                className="mx-auto px-7 py-3.5 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-60 text-white font-bold rounded-xl transition-all duration-200 active:scale-95 cursor-pointer text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-blue-500/20"
+                className="mx-auto px-7 py-3.5 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-60 text-white font-bold rounded-xl transition-all duration-200 active:scale-95 cursor-pointer text-sm flex items-center justify-center gap-2 shadow-md"
               >
                 {isNavigating ? (
                   <>

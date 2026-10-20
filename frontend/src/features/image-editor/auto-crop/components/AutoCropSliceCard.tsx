@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   Maximize2,
   Copy,
@@ -8,9 +8,9 @@ import {
   Scissors,
   Combine,
   CheckCircle2,
-} from "lucide-react";
-import * as api from "@/shared/api";
-import { SafeImage } from "./SafeImage";
+} from"lucide-react";
+import * as api from"@/shared/api";
+import { SafeImage } from"./SafeImage";
 
 export interface AutoCropSliceCardProps {
   url: string;
@@ -18,12 +18,12 @@ export interface AutoCropSliceCardProps {
   totalSlices: number;
   isSelected: boolean;
   box?: api.PanelBoundingBoxInput;
-  viewMode: "grid" | "reel";
+  viewMode:"grid" |"reel";
   onSelect: (idx: number) => void;
   onInspect: (url: string) => void;
   onDuplicate: (idx: number) => void;
   onRemove: (idx: number) => void;
-  onMoveSlice: (fromIdx: number, direction: "left" | "right") => void;
+  onMoveSlice: (fromIdx: number, direction:"left" |"right") => void;
   onSplitHalf: (idx: number) => void;
   onMergeNext: (idx: number) => void;
 }
@@ -54,12 +54,12 @@ export function AutoCropSliceCard({
       onClick={() => onSelect(sliceIdx)}
       className={`relative group rounded-2xl overflow-hidden border-2 transition-all !cursor-pointer bg-neutral-900 flex flex-col ${
         isSelected
-          ? "border-emerald-400 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-500/15 scale-[1.01]"
-          : "border-neutral-800 hover:border-neutral-700"
+          ?"border-emerald-400 ring-2 ring-emerald-500/30 shadow-lg  scale-[1.01]"
+          :"border-neutral-800 hover:border-neutral-700"
       } ${
-        viewMode === "reel"
-          ? "w-[260px] sm:w-[300px] shrink-0 snap-center shadow-2xl"
-          : "w-full"
+        viewMode ==="reel"
+          ?"w-[260px] sm:w-[300px] shrink-0 snap-center shadow-2xl"
+          :"w-full"
       }`}
     >
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-black/50">
@@ -76,7 +76,7 @@ export function AutoCropSliceCard({
           </span>
           {boxH > 0 && (
             <span className="px-1.5 py-0.5 rounded-md bg-black/75 text-[9px] font-mono text-neutral-300 border border-neutral-700">
-              {boxH}px {boxRatio ? `(${boxRatio}:1)` : ""}
+              {boxH}px {boxRatio ?`(${boxRatio}:1)` :""}
             </span>
           )}
         </div>
@@ -130,7 +130,7 @@ export function AutoCropSliceCard({
             disabled={isFirst}
             onClick={(e) => {
               e.stopPropagation();
-              onMoveSlice(sliceIdx, "left");
+              onMoveSlice(sliceIdx,"left");
             }}
             className="p-1.5 sm:p-2 rounded-xl bg-black/90 text-neutral-200 hover:text-white disabled:opacity-20 border border-neutral-700 shadow-lg active:scale-90 transition-all flex items-center justify-center !cursor-pointer disabled:cursor-not-allowed"
             title="Move earlier"
@@ -143,7 +143,7 @@ export function AutoCropSliceCard({
             disabled={isLast}
             onClick={(e) => {
               e.stopPropagation();
-              onMoveSlice(sliceIdx, "right");
+              onMoveSlice(sliceIdx,"right");
             }}
             className="p-1.5 sm:p-2 rounded-xl bg-black/90 text-neutral-200 hover:text-white disabled:opacity-20 border border-neutral-700 shadow-lg active:scale-90 transition-all flex items-center justify-center !cursor-pointer disabled:cursor-not-allowed"
             title="Move later"

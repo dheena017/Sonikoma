@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Menu,
   LayoutGrid,
@@ -7,8 +7,8 @@ import {
   ExternalLink,
   Bot,
   Image as ImageIcon,
-} from "lucide-react";
-import TooltipPortal from "@/shared/ui/common/TooltipPortal";
+} from"lucide-react";
+import TooltipPortal from"@/shared/ui/common/TooltipPortal";
 
 interface CreativeSuiteMiniSidebarProps {
   currentPath: string;
@@ -22,56 +22,56 @@ const CreativeSuiteMiniSidebarInner: React.FC<
 > = ({ currentPath, navigateTo, panels = [], onOpenSidebar }) => {
   const groups = [
     {
-      name: "Hub",
+      name:"Hub",
       items: [
         {
-          id: "dashboard",
-          label: "Creative Hub",
+          id:"dashboard",
+          label:"Creative Hub",
           icon: LayoutGrid,
-          path: "/creative-suite",
+          path:"/creative-suite",
           requiresPanels: false,
         },
       ],
     },
     {
-      name: "Agent",
+      name:"Agent",
       items: [
         {
-          id: "agent",
-          label: "Autonomous Webtoon Agent",
+          id:"agent",
+          label:"Autonomous Webtoon Agent",
           icon: Bot,
-          path: "/creative-suite/agent",
+          path:"/creative-suite/agent",
           requiresPanels: false,
         },
       ],
     },
     {
-      name: "Visuals",
+      name:"Visuals",
       items: [
         {
-          id: "thumbnails",
-          label: "Thumbnail Studio",
+          id:"thumbnails",
+          label:"Thumbnail Studio",
           icon: ImageIcon,
-          path: "/creative-suite/thumbnails",
+          path:"/creative-suite/thumbnails",
           requiresPanels: false,
         },
         {
-          id: "translation",
-          label: "Translation",
+          id:"translation",
+          label:"Translation",
           icon: Globe,
-          path: "/creative-suite/translation",
+          path:"/creative-suite/translation",
           requiresPanels: true,
         },
       ],
     },
     {
-      name: "Distribution",
+      name:"Distribution",
       items: [
         {
-          id: "youtube",
-          label: "YouTube Publisher",
+          id:"youtube",
+          label:"YouTube Publisher",
           icon: Youtube,
-          path: "/creative-suite/youtube",
+          path:"/creative-suite/youtube",
           requiresPanels: false,
         },
       ],
@@ -79,27 +79,27 @@ const CreativeSuiteMiniSidebarInner: React.FC<
   ];
 
   const isActive = (path: string) => {
-    if (path === "/creative-suite") {
+    if (path ==="/creative-suite") {
       return (
-        currentPath === "/creative-suite" ||
-        currentPath === "/creative-suite/" ||
-        currentPath === "/creative-suite-dashboard"
+        currentPath ==="/creative-suite" ||
+        currentPath ==="/creative-suite/" ||
+        currentPath ==="/creative-suite-dashboard"
       );
     }
-    if (path === "/creative-suite/translation") {
+    if (path ==="/creative-suite/translation") {
       return (
-        currentPath === "/creative-suite/translation" ||
+        currentPath ==="/creative-suite/translation" ||
         currentPath.startsWith("/creative-suite/translation") ||
-        currentPath === "/creative-suite/panel-assistant" ||
+        currentPath ==="/creative-suite/panel-assistant" ||
         currentPath.startsWith("/creative-suite/panel-assistant") ||
-        currentPath === "/translation" ||
-        currentPath === "/panel-assistant"
+        currentPath ==="/translation" ||
+        currentPath ==="/panel-assistant"
       );
     }
     return (
       currentPath === path ||
-      currentPath.startsWith(path + "?") ||
-      currentPath.startsWith(path + "/")
+      currentPath.startsWith(path +"?") ||
+      currentPath.startsWith(path +"/")
     );
   };
 
@@ -121,8 +121,8 @@ const CreativeSuiteMiniSidebarInner: React.FC<
         <div
           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
             active
-              ? "h-5 bg-[#3B82F6] opacity-100"
-              : "h-0 bg-transparent opacity-0"
+              ?"h-5 bg-[#3B82F6] opacity-100"
+              :"h-0 bg-transparent opacity-0"
           }`}
         />
 
@@ -136,25 +136,25 @@ const CreativeSuiteMiniSidebarInner: React.FC<
           <div
             className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               active
-                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white"
+                ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white"
                 : isLocked
-                ? "bg-[#121212] border border-[#2F2F2F] opacity-40 cursor-not-allowed"
-                : "bg-transparent border border-transparent text-neutral-400 group-hover:bg-[#1E1E1E] group-hover:border-neutral-700 group-hover:text-white"
+                ?"bg-[#121212] border border-[#2F2F2F] opacity-40 cursor-not-allowed"
+                :"bg-transparent border border-transparent text-neutral-400 group-hover:bg-[#1E1E1E] group-hover:border-neutral-700 group-hover:text-white"
             }`}
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${
                 active
-                  ? "text-white"
+                  ?"text-white"
                   : isLocked
-                  ? "text-neutral-700"
-                  : "text-neutral-400 group-hover:text-[#3B82F6]"
+                  ?"text-neutral-700"
+                  :"text-neutral-400 group-hover:text-[#3B82F6]"
               }`}
             />
           </div>
         </button>
         <TooltipPortal
-          text={`${item.label}${isLocked ? " 🔒 (Locked)" : ""}`}
+          text={`${item.label}${isLocked ?" 🔒 (Locked)" :""}`}
           visible={hover}
           anchorRect={rect}
         />
@@ -180,8 +180,8 @@ const CreativeSuiteMiniSidebarInner: React.FC<
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ? "0.6rem" : "0.2rem",
-                marginBottom: "0.4rem",
+                marginTop: groupIdx > 0 ?"0.6rem" :"0.2rem",
+                marginBottom:"0.4rem",
               }}
             >
               {groupIdx > 0 && (
@@ -210,7 +210,7 @@ const CreativeSuiteMiniSidebarInner: React.FC<
             }}
             onMouseLeave={() => setReturnHover(false)}
             aria-label="Main Dashboard"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg shadow-blue-500/25 active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
           >
             <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
           </button>

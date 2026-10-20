@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Zap,
   Sparkles,
@@ -7,7 +7,7 @@ import {
   ArrowRight,
   ShieldCheck,
   Cpu,
-} from "lucide-react";
+} from"lucide-react";
 
 export interface HeaderCreditsPopoverProps {
   credits: number;
@@ -63,7 +63,7 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
         </div>
         <button
           onClick={onNavigateToBilling}
-          className="text-xs font-semibold px-2.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-955 font-bold rounded-lg transition-all shadow-md hover:shadow-amber-500/20 active:scale-95 cursor-pointer"
+          className="text-xs font-semibold px-2.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-955 font-bold rounded-lg transition-all shadow-md active:scale-95 cursor-pointer"
         >
           Top Up
         </button>
@@ -82,9 +82,9 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
               </div>
               <div className="text-[10px] text-neutral-400 flex items-center gap-1">
                 <Sparkles className="w-2.5 h-2.5 text-amber-400 inline" />
-                Streak:{" "}
+                Streak:{""}
                 <span className="text-[#3B82F6] font-mono font-bold">
-                  {streakDays} Day{streakDays > 1 ? "s" : ""}
+                  {streakDays} Day{streakDays > 1 ?"s" :""}
                 </span>
               </div>
             </div>
@@ -95,8 +95,8 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
             disabled={hasClaimedToday || isClaiming || claimSuccess}
             className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 ${
               hasClaimedToday || claimSuccess
-                ? "bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-700/50"
-                : "bg-[#2A2A2A] hover:bg-[#333333] text-white cursor-pointer shadow-md shadow-sm hover:scale-105 active:scale-95"
+                ?"bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-700/50"
+                :"bg-[#2A2A2A] hover:bg-[#333333] text-white cursor-pointer shadow-md shadow-sm hover:scale-105 active:scale-95"
             }`}
           >
             {hasClaimedToday || claimSuccess ? (
@@ -104,10 +104,8 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
                 <Check className="w-3 h-3 text-emerald-400" />
                 Claimed
               </>
-            ) : isClaiming ? (
-              "Claiming..."
-            ) : (
-              "+50 Bonus"
+            ) : isClaiming ? ("Claiming..."
+            ) : ("+50 Bonus"
             )}
           </button>
         </div>

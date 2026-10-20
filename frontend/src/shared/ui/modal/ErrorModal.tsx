@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   X,
   AlertTriangle,
@@ -8,14 +8,14 @@ import {
   RefreshCw,
   Copy,
   Check,
-} from "lucide-react";
+} from"lucide-react";
 
 export interface ErrorModalDetail {
   title: string;
   message: string;
   technicalDetails?: string;
   suggestion?: string;
-  type?: "error" | "warning" | "info" | "success";
+  type?:"error" |"warning" |"info" |"success";
   onRetry?: () => void;
 }
 
@@ -31,15 +31,15 @@ export default function ErrorModal({ error, onClose }: ErrorModalProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    const textToCopy = `[Error Diagnosis]\nTitle: ${error.title}\nMessage: ${
+    const textToCopy =`[Error Diagnosis]\nTitle: ${error.title}\nMessage: ${
       error.message
-    }\nTechnical logs:\n${error.technicalDetails || "None"}`;
+    }\nTechnical logs:\n${error.technicalDetails ||"None"}`;
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const isWarning = error.type === "warning";
+  const isWarning = error.type ==="warning";
 
   const handleApplyRetry = () => {
     if (error.onRetry) {
@@ -62,17 +62,9 @@ export default function ErrorModal({ error, onClose }: ErrorModalProps) {
       {/* Container */}
       <div
         className={`relative w-full max-w-2xl bg-neutral-950/90 backdrop-blur-2xl border-2 ${
-          isWarning ? "border-amber-500/50" : "border-red-500/50"
+          isWarning ?"border-amber-500/50" :"border-red-500/50"
         } rounded-3xl shadow-2xl p-6 md:p-8 overflow-hidden z-10 animate-in zoom-in-95 duration-200`}
       >
-        {/* Glow Element */}
-        <div
-          className={`absolute top-0 left-1/4 right-1/4 h-1.5 bg-gradient-to-r ${
-            isWarning
-              ? "from-transparent via-amber-500 to-transparent"
-              : "from-transparent via-red-500 to-transparent"
-          } blur-[1px]`}
-        />
 
         {/* Close Button */}
         <button
@@ -89,8 +81,8 @@ export default function ErrorModal({ error, onClose }: ErrorModalProps) {
             <div
               className={`p-3.5 rounded-2xl ${
                 isWarning
-                  ? "bg-amber-500/10 text-amber-400"
-                  : "bg-red-500/10 text-red-500"
+                  ?"bg-amber-500/10 text-amber-400"
+                  :"bg-red-500/10 text-red-500"
               } shrink-0`}
             >
               <AlertTriangle className="h-7 w-7 animate-pulse" />
@@ -99,11 +91,11 @@ export default function ErrorModal({ error, onClose }: ErrorModalProps) {
               <span
                 className={`text-[9.5px] uppercase tracking-widest font-bold font-mono px-2.5 py-0.5 rounded-full ${
                   isWarning
-                    ? "bg-amber-500/15 text-amber-400 border border-amber-500/35"
-                    : "bg-red-500/15 text-red-400 border border-red-500/35"
+                    ?"bg-amber-500/15 text-amber-400 border border-amber-500/35"
+                    :"bg-red-500/15 text-red-400 border border-red-500/35"
                 }`}
               >
-                {isWarning ? "Heuristics Warning" : "Engine Fault Dialog"}
+                {isWarning ?"Heuristics Warning" :"Engine Fault Dialog"}
               </span>
               <h2 className="text-xl font-bold font-sans text-white leading-snug">
                 {error.title}
@@ -118,10 +110,10 @@ export default function ErrorModal({ error, onClose }: ErrorModalProps) {
           {error.suggestion && (
             <div className="bg-neutral-950/60 rounded-2xl border border-neutral-800/40 p-5 space-y-4">
               <p className="text-xs text-neutral-300 leading-relaxed font-sans bg-[#3B82F6]/10 border border-[#3B82F6]/20 p-3 rounded-xl">
-                💡{" "}
+                💡{""}
                 <span className="font-semibold text-[#60A5FA]">
                   Diagnostic Suggestion:
-                </span>{" "}
+                </span>{""}
                 {error.suggestion}
               </p>
             </div>
@@ -182,7 +174,7 @@ export default function ErrorModal({ error, onClose }: ErrorModalProps) {
             {error.onRetry && (
               <button
                 onClick={handleApplyRetry}
-                className="btn-primary w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-semibold tracking-wide shadow-lg shadow-[#3B82F6]/20 hover:shadow-[#3B82F6]/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="btn-primary w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-semibold tracking-wide shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <RefreshCw className="h-3.5 w-3.5 animate-spin-slow" />
                 <span>Auto-Apply & Re-clean Target</span>

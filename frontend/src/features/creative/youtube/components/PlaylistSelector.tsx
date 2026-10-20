@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from"react";
 import {
   ListMusic,
   Loader2,
@@ -7,8 +7,8 @@ import {
   Check,
   FolderPlus,
   X,
-} from "lucide-react";
-import CyberSelect from "@/shared/ui/common/CyberSelect";
+} from"lucide-react";
+import CyberSelect from"@/shared/ui/common/CyberSelect";
 
 interface Playlist {
   id: string;
@@ -45,10 +45,9 @@ export default function PlaylistSelector({
     try {
       const token =
         localStorage.getItem("sonikoma_token") ||
-        localStorage.getItem("token") ||
-        "";
+        localStorage.getItem("token") ||"";
       const res = await fetch("/api/v1/export/youtube/playlists", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization:`Bearer ${token}` },
       });
       if (res.ok) {
         const data = await res.json();
@@ -73,13 +72,11 @@ export default function PlaylistSelector({
     try {
       const token =
         localStorage.getItem("sonikoma_token") ||
-        localStorage.getItem("token") ||
-        "";
+        localStorage.getItem("token") ||"";
       const res = await fetch("/api/v1/export/youtube/playlists", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+        method:"POST",
+        headers: {"Content-Type":"application/json",
+          Authorization:`Bearer ${token}`,
         },
         body: JSON.stringify({
           title: newTitle.trim(),
@@ -98,9 +95,7 @@ export default function PlaylistSelector({
           setNewTitle("");
           setNewDescription("");
           if (addNotification) {
-            addNotification(
-              `Created playlist "${created.title}" successfully!`,
-              "success"
+            addNotification(`Created playlist"${created.title}" successfully!`,"success"
             );
           }
         }
@@ -108,15 +103,14 @@ export default function PlaylistSelector({
         const err = await res.json().catch(() => ({}));
         if (addNotification) {
           addNotification(
-            err.detail || "Failed to create playlist on YouTube",
-            "error"
+            err.detail ||"Failed to create playlist on YouTube","error"
           );
         }
       }
     } catch (err) {
       console.error("Error creating playlist:", err);
       if (addNotification) {
-        addNotification("Network error creating playlist", "error");
+        addNotification("Network error creating playlist","error");
       }
     } finally {
       setIsCreating(false);
@@ -140,7 +134,7 @@ export default function PlaylistSelector({
           >
             <RefreshCw
               className={`w-3 h-3 ${
-                isLoading ? "animate-spin text-red-400" : ""
+                isLoading ?"animate-spin text-red-400" :""
               }`}
             />
             <span>Sync</span>
@@ -164,25 +158,24 @@ export default function PlaylistSelector({
           placeholder="-- No Playlist (Upload as Standalone Video) --"
           options={[
             {
-              value: "",
-              label: "-- No Playlist (Upload as Standalone Video) --",
-              description:
-                "Uploads video directly to channel feed without playlist",
+              value:"",
+              label:"-- No Playlist (Upload as Standalone Video) --",
+              description:"Uploads video directly to channel feed without playlist",
             },
             ...playlists.map((pl) => ({
               value: pl.id,
               label: pl.title,
               description:
                 pl.item_count !== undefined
-                  ? `${pl.item_count} videos in playlist`
+                  ?`${pl.item_count} videos in playlist`
                   : undefined,
             })),
             ...(playlists.length === 0 && !isLoading
               ? [
                   {
-                    value: "none_available",
-                    label: "No playlists found on YouTube channel",
-                    description: 'Click "+ New Playlist" above to create one',
+                    value:"none_available",
+                    label:"No playlists found on YouTube channel",
+                    description: 'Click"+ New Playlist" above to create one',
                     disabled: true,
                   },
                 ]
@@ -253,19 +246,19 @@ export default function PlaylistSelector({
                   onChange={setNewPrivacy}
                   options={[
                     {
-                      value: "public",
-                      label: "Public",
-                      description: "Anyone can find and view",
+                      value:"public",
+                      label:"Public",
+                      description:"Anyone can find and view",
                     },
                     {
-                      value: "unlisted",
-                      label: "Unlisted",
-                      description: "Only with direct link",
+                      value:"unlisted",
+                      label:"Unlisted",
+                      description:"Only with direct link",
                     },
                     {
-                      value: "private",
-                      label: "Private",
-                      description: "Only visible to you",
+                      value:"private",
+                      label:"Private",
+                      description:"Only visible to you",
                     },
                   ]}
                 />
@@ -282,7 +275,7 @@ export default function PlaylistSelector({
                 <button
                   type="submit"
                   disabled={isCreating || !newTitle.trim()}
-                  className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 text-white text-xs font-black font-mono rounded-xl shadow-lg shadow-red-600/30 transition-all cursor-pointer"
+                  className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 text-white text-xs font-black font-mono rounded-xl shadow-lg transition-all cursor-pointer"
                 >
                   {isCreating ? (
                     <>

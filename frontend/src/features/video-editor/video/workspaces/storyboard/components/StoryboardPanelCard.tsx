@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef } from"react";
 import {
   Check,
   Play,
@@ -13,9 +13,9 @@ import {
   Clock,
   Music,
   Zap,
-} from "lucide-react";
-import { getProxiedImageUrl } from "@/shared/utils";
-import { GeneratedPanel } from "@/shared/types";
+} from"lucide-react";
+import { getProxiedImageUrl } from"@/shared/utils";
+import { GeneratedPanel } from"@/shared/types";
 
 export interface StoryboardPanelCardProps {
   panel: GeneratedPanel;
@@ -34,7 +34,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
   panel,
   index,
   isSelected,
-  activeTab = "all",
+  activeTab ="all",
   onSelect,
   onPlayPreview,
   onOpenEditor,
@@ -47,14 +47,14 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const [dialogueText, setDialogueText] = useState(
-    panel.speech_text || panel.narrative || (panel as any).dialogue || ""
+    panel.speech_text || panel.narrative || (panel as any).dialogue ||""
   );
 
   const imgUrl =
-    panel.image_url || (panel as any).imageUrl || (panel as any).url || "";
+    panel.image_url || (panel as any).imageUrl || (panel as any).url ||"";
   const displayUrl = getProxiedImageUrl(imgUrl);
   const duration = panel.duration || 0;
-  const cameraMotion = panel.motion_type || (panel as any).camera_motion || "";
+  const cameraMotion = panel.motion_type || (panel as any).camera_motion ||"";
   const audioUrl =
     panel.audio_url ||
     panel.speech_audio_url ||
@@ -77,7 +77,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
         audioRef.current.pause();
         audioRef.current = null;
       }
-      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      if (typeof window !=="undefined" &&"speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
       setIsPlayingAudio(false);
@@ -103,7 +103,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
   };
 
   const speakFallback = (text: string) => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window && text) {
+    if (typeof window !=="undefined" &&"speechSynthesis" in window && text) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.onend = () => setIsPlayingAudio(false);
@@ -120,8 +120,8 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
       onClick={(e) => onSelect(index, e)}
       className={`relative group rounded-2xl overflow-hidden border transition-all flex flex-col cursor-pointer select-none ${
         isSelected
-          ? "border-[#3B82F6] bg-[#3B82F6]/15 ring-2 ring-[#3B82F6]/50 shadow-md "
-          : "border-white/10 bg-[#18181B] hover:border-neutral-700 shadow-md hover:shadow-md"
+          ?"border-[#3B82F6] bg-[#3B82F6]/15 ring-2 ring-[#3B82F6]/50 shadow-md"
+          :"border-white/10 bg-[#18181B] hover:border-neutral-700 shadow-md hover:shadow-md"
       }`}
     >
       {/* Top Media Bar & Details */}
@@ -138,8 +138,8 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
           <div
             className={`absolute top-1.5 left-1.5 h-4 w-4 rounded flex items-center justify-center border transition-all z-10 ${
               isSelected
-                ? "bg-[#3B82F6] border-[#60A5FA] text-white shadow-sm shadow-blue-500/25"
-                : "bg-black/60 border-white/20 text-transparent group-hover:border-white/50"
+                ?"bg-[#3B82F6] border-[#60A5FA] text-white shadow-sm"
+                :"bg-black/60 border-white/20 text-transparent group-hover:border-white/50"
             }`}
           >
             <Check className="h-3 w-3" />
@@ -195,7 +195,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
                   <button
                     type="button"
                     onClick={handleDialogueSave}
-                    className="px-2 py-0.5 rounded bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-bold shadow-xs shadow-blue-500/25 active:scale-95 cursor-pointer"
+                    className="px-2 py-0.5 rounded bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-bold shadow-xs active:scale-95 cursor-pointer"
                   >
                     Save
                   </button>
@@ -210,8 +210,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
                 className="hover:text-white transition-colors cursor-text line-clamp-2 min-h-[28px] italic"
                 title="Click to edit dialogue / script"
               >
-                {dialogueText ? (
-                  `"${dialogueText}"`
+                {dialogueText ? (`"${dialogueText}"`
                 ) : (
                   <span className="text-neutral-500 not-italic">
                     + Add dialogue or narration...
@@ -229,17 +228,17 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
                 onClick={handleToggleAudioPlay}
                 className={`inline-flex items-center gap-1 text-[8px] font-mono font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
                   isPlayingAudio
-                    ? "bg-[#3B82F6] border-[#60A5FA] text-white shadow-xs shadow-blue-500/25 animate-pulse"
-                    : "bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border-emerald-500/40"
+                    ?"bg-[#3B82F6] border-[#60A5FA] text-white shadow-xs  animate-pulse"
+                    :"bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border-emerald-500/40"
                 }`}
-                title={isPlayingAudio ? "Pause Audio" : "Play Voice Track"}
+                title={isPlayingAudio ?"Pause Audio" :"Play Voice Track"}
               >
                 {isPlayingAudio ? (
                   <Pause className="h-2.5 w-2.5 fill-white" />
                 ) : (
                   <Volume2 className="h-2.5 w-2.5" />
                 )}
-                <span>{isPlayingAudio ? "Playing..." : "Voice Track"}</span>
+                <span>{isPlayingAudio ?"Playing..." :"Voice Track"}</span>
               </button>
             ) : (
               <button

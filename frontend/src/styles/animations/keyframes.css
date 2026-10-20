@@ -165,15 +165,6 @@
   }
 }
 
-@keyframes pulse-glow {
-  0%,
-  100% {
-    opacity: 0.8;
-  }
-  50% {
-    opacity: 1;
-  }
-}
 
 /* Audio & Creative Waves */
 @keyframes wave-bar-dance {

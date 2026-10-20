@@ -1,6 +1,6 @@
-import React from "react";
-import { Check, Plus } from "lucide-react";
-import { AppExtension } from "../../../types/workspace.types";
+import React from"react";
+import { Check, Plus } from"lucide-react";
+import { AppExtension } from"../../../types/workspace.types";
 
 interface AppExtensionCardProps {
   app: AppExtension;
@@ -24,7 +24,7 @@ export const AppExtensionCard: React.FC<AppExtensionCardProps> = ({
             alt={app.name}
             className="h-6 w-6 object-contain"
             onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
+              (e.target as HTMLImageElement).style.display ="none";
             }}
           />
         </div>
@@ -45,8 +45,8 @@ export const AppExtensionCard: React.FC<AppExtensionCardProps> = ({
           onClick={onToggle}
           className={`px-2.5 py-1.5 rounded-lg text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-all shrink-0 ${
             isInstalled
-              ? "bg-green-600/80 hover:bg-red-600/80 text-white"
-              : "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-xs shadow-blue-500/25 active:scale-95"
+              ?"bg-green-600/80 hover:bg-red-600/80 text-white"
+              :"bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-xs  active:scale-95"
           }`}
         >
           {isInstalled ? (

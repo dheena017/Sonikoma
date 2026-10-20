@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   Film,
   Search,
@@ -12,14 +12,14 @@ import {
   Square,
   ArrowUpDown,
   Play,
-} from "lucide-react";
+} from"lucide-react";
 
 export type StoryboardFilterTab =
-  | "all"
-  | "dialogue"
-  | "prompts"
-  | "camera"
-  | "audio";
+  |"all"
+  |"dialogue"
+  |"prompts"
+  |"camera"
+  |"audio";
 
 export interface StoryboardWorkspaceHeaderProps {
   panelCount: number;
@@ -28,7 +28,7 @@ export interface StoryboardWorkspaceHeaderProps {
   onSelectTab: (tab: StoryboardFilterTab) => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
-  sortOrder: "asc" | "desc";
+  sortOrder:"asc" |"desc";
   onToggleSort: () => void;
   selectedCount: number;
   isAllSelected: boolean;
@@ -96,7 +96,7 @@ export const StoryboardWorkspaceHeader: React.FC<
             type="button"
             onClick={onToggleSort}
             className="p-1 rounded-lg bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all text-[10px] flex items-center gap-1 cursor-pointer"
-            title={`Sort ${sortOrder === "asc" ? "Descending" : "Ascending"}`}
+            title={`Sort ${sortOrder ==="asc" ?"Descending" :"Ascending"}`}
           >
             <ArrowUpDown className="h-3 w-3" />
           </button>
@@ -107,10 +107,10 @@ export const StoryboardWorkspaceHeader: React.FC<
             onClick={onToggleSelectAll}
             className={`px-2 py-1 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
               isAllSelected
-                ? "bg-neutral-800 border-neutral-600 text-white"
+                ?"bg-neutral-800 border-neutral-600 text-white"
                 : selectedCount > 0
-                ? "bg-neutral-900 border-neutral-700 text-neutral-200"
-                : "bg-neutral-900/80 hover:bg-neutral-800 border-neutral-800 text-neutral-300"
+                ?"bg-neutral-900 border-neutral-700 text-neutral-200"
+                :"bg-neutral-900/80 hover:bg-neutral-800 border-neutral-800 text-neutral-300"
             }`}
           >
             {isAllSelected ? (
@@ -118,7 +118,7 @@ export const StoryboardWorkspaceHeader: React.FC<
             ) : (
               <Square className="h-3 w-3" />
             )}
-            <span>{isAllSelected ? "Deselect" : "Select All"}</span>
+            <span>{isAllSelected ?"Deselect" :"Select All"}</span>
           </button>
         </div>
       </div>
@@ -126,11 +126,11 @@ export const StoryboardWorkspaceHeader: React.FC<
       {/* Filter Tabs */}
       <div className="px-3 pt-2 pb-1.5 flex items-center gap-1 overflow-x-auto mini-sidebar-scrollbar">
         {[
-          { id: "all", label: "All Panels" },
-          { id: "dialogue", label: "Dialogue" },
-          { id: "prompts", label: "Visual Prompts" },
-          { id: "camera", label: "Camera FX" },
-          { id: "audio", label: "Audio" },
+          { id:"all", label:"All Panels" },
+          { id:"dialogue", label:"Dialogue" },
+          { id:"prompts", label:"Visual Prompts" },
+          { id:"camera", label:"Camera FX" },
+          { id:"audio", label:"Audio" },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -138,8 +138,8 @@ export const StoryboardWorkspaceHeader: React.FC<
             onClick={() => onSelectTab(tab.id as StoryboardFilterTab)}
             className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold whitespace-nowrap transition-all border cursor-pointer ${
               activeTab === tab.id
-                ? "bg-[#3B82F6] hover:bg-[#2563EB] border-[#60A5FA]/60 text-white shadow-sm shadow-blue-500/25"
-                : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
+                ?"bg-[#3B82F6] hover:bg-[#2563EB] border-[#60A5FA]/60 text-white shadow-sm"
+                :"border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
             }`}
           >
             {tab.label}
@@ -182,7 +182,7 @@ export const StoryboardWorkspaceHeader: React.FC<
               <button
                 type="button"
                 onClick={onAutoVoiceover}
-                className="px-2 py-0.5 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm shadow-blue-500/25 transition cursor-pointer active:scale-95"
+                className="px-2 py-0.5 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer active:scale-95"
                 title="Generate AI Voiceover for selected panels"
               >
                 <Volume2 className="h-2.5 w-2.5" />

@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   Film,
   Sparkles,
@@ -11,11 +11,11 @@ import {
   Download,
   X,
   Volume2,
-} from "lucide-react";
-import EditorHeaderFrame from "@/features/workspace/shell/components/EditorHeaderFrame";
+} from"lucide-react";
+import EditorHeaderFrame from"@/features/workspace/shell/components/EditorHeaderFrame";
 import StoryboardFilterBar, {
   StoryboardFilterCounts,
-} from "./StoryboardFilterBar";
+} from"./StoryboardFilterBar";
 
 interface StoryboardHeaderProps {
   panelsLength: number;
@@ -49,8 +49,8 @@ interface StoryboardHeaderProps {
   isBatchMerging?: boolean;
   handleCancelBatch?: () => void;
   handleCancelAnalysis?: () => void;
-  viewLayout?: "scroll" | "grid";
-  setViewLayout?: (layout: "scroll" | "grid") => void;
+  viewLayout?:"scroll" |"grid";
+  setViewLayout?: (layout:"scroll" |"grid") => void;
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
   filterStatus?: string;
@@ -84,18 +84,18 @@ export default function StoryboardHeader({
   isBatchMerging,
   handleCancelBatch,
   handleCancelAnalysis,
-  viewLayout = "scroll",
+  viewLayout ="scroll",
   setViewLayout,
   filteredCount,
-  searchQuery = "",
+  searchQuery ="",
   setSearchQuery,
-  filterStatus = "all",
+  filterStatus ="all",
   setFilterStatus,
   filterCounts,
 }: StoryboardHeaderProps) {
   const isFiltered =
     Boolean(searchQuery?.trim()) ||
-    (filterStatus !== "all" && filterStatus !== "");
+    (filterStatus !=="all" && filterStatus !=="");
   const targetCount =
     isFiltered && filteredCount !== undefined
       ? filteredCount
@@ -105,9 +105,9 @@ export default function StoryboardHeader({
 
   const centerBlock = (
     <StoryboardFilterBar
-      searchQuery={searchQuery || ""}
+      searchQuery={searchQuery ||""}
       setSearchQuery={setSearchQuery || (() => {})}
-      filterStatus={filterStatus || "all"}
+      filterStatus={filterStatus ||"all"}
       setFilterStatus={setFilterStatus || (() => {})}
       viewLayout={viewLayout}
       setViewLayout={setViewLayout}
@@ -127,7 +127,7 @@ export default function StoryboardHeader({
             {selectedCount}
           </div>
           <span className="text-xs font-mono font-bold text-blue-300 whitespace-nowrap">
-            {selectedCount} of {targetCount} {isFiltered ? "Filtered" : ""}{" "}
+            {selectedCount} of {targetCount} {isFiltered ?"Filtered" :""}{""}
             Selected
           </span>
           {clearSelection && (
@@ -155,10 +155,10 @@ export default function StoryboardHeader({
           )}
           <span>
             {isAllSelected
-              ? "Deselect All"
+              ?"Deselect All"
               : isFiltered
-              ? "Select All Filtered"
-              : "Select All"}
+              ?"Select All Filtered"
+              :"Select All"}
           </span>
         </button>
 
@@ -168,14 +168,14 @@ export default function StoryboardHeader({
             <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-400" />
             <span>
               {isBatchCropping
-                ? `Cropping ${batchProgress?.current || 0}/${
+                ?`Cropping ${batchProgress?.current || 0}/${
                     batchProgress?.total || selectedCount
                   }...`
                 : isCleaningBubbles
-                ? `Cleaning ${cleanProgress?.current || 0}/${
+                ?`Cleaning ${cleanProgress?.current || 0}/${
                     cleanProgress?.total || selectedCount
                   }...`
-                : "Merging..."}
+                :"Merging..."}
             </span>
           </div>
         )}
@@ -283,7 +283,7 @@ export default function StoryboardHeader({
   // Standard Mode Left Title Block
   const titleBlock = (
     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-md shadow-blue-500/25">
+      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-md">
         <Film className="h-4 w-4 text-white" />
       </div>
       <div className="min-w-0">
@@ -294,20 +294,20 @@ export default function StoryboardHeader({
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-[10px] font-bold text-blue-400 font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
             {filteredCount !== undefined && filteredCount !== panelsLength
-              ? `${filteredCount} / ${panelsLength}`
-              : panelsLength}{" "}
-            {panelsLength === 1 ? "Scene" : "Scenes"}
+              ?`${filteredCount} / ${panelsLength}`
+              : panelsLength}{""}
+            {panelsLength === 1 ?"Scene" :"Scenes"}
           </span>
-          {viewLayout === "scroll" && panelsLength > 1 && (
+          {viewLayout ==="scroll" && panelsLength > 1 && (
             <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-900/90 border border-neutral-700 text-[10px] text-neutral-300 font-mono shadow-sm">
               <span className="flex items-center justify-center w-3.5 h-3.5 rounded bg-neutral-800 text-neutral-300 text-[9px] font-bold">
                 ⇧
               </span>
               <span>
-                Hold{" "}
+                Hold{""}
                 <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-white font-bold text-[9px] leading-none">
                   Shift
-                </kbd>{" "}
+                </kbd>{""}
                 + Scroll to move horizontally
               </span>
             </span>
@@ -329,10 +329,10 @@ export default function StoryboardHeader({
           onClick={isAllSelected ? clearSelection : selectAllPanels}
           title={
             isAllSelected
-              ? "Deselect all scenes"
+              ?"Deselect all scenes"
               : isFiltered
-              ? "Select filtered scenes"
-              : "Select all scenes"
+              ?"Select filtered scenes"
+              :"Select all scenes"
           }
           className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-colors duration-75 active:scale-95 active:duration-75 cursor-pointer shadow-sm [touch-action:manipulation]"
         >
@@ -343,10 +343,10 @@ export default function StoryboardHeader({
           )}
           <span className="hidden 2xl:inline">
             {isAllSelected
-              ? "Deselect All"
+              ?"Deselect All"
               : isFiltered
-              ? "Select Filtered"
-              : "Select All"}
+              ?"Select Filtered"
+              :"Select All"}
           </span>
         </button>
       )}
@@ -357,11 +357,11 @@ export default function StoryboardHeader({
           onClick={handleAnalyzeAllPanels}
           disabled={isAnalyzingAll || isGeneratingAudio}
           title="Analyze full sequence (Vision & Script Extraction)"
-          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md shadow-blue-900/30 transition-colors duration-75 cursor-pointer active:scale-95 active:duration-75 disabled:opacity-50 disabled:cursor-not-allowed [touch-action:manipulation]"
+          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md transition-colors duration-75 cursor-pointer active:scale-95 active:duration-75 disabled:opacity-50 disabled:cursor-not-allowed [touch-action:manipulation]"
         >
           <RefreshCw
             className={`w-3.5 h-3.5 ${
-              isAnalyzingAll ? "animate-spin text-white" : ""
+              isAnalyzingAll ?"animate-spin text-white" :""
             }`}
           />
           <span className="hidden 2xl:inline">Analyze Sequence</span>
@@ -374,15 +374,15 @@ export default function StoryboardHeader({
           onClick={handleGenerateAllAudio}
           disabled={isGeneratingAudio || isAnalyzingAll}
           title="Generate voice narration & dialogue audio for all panels"
-          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-purple-400/40 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white shadow-md shadow-purple-900/30 transition-colors duration-75 cursor-pointer active:scale-95 active:duration-75 disabled:opacity-50 disabled:cursor-not-allowed [touch-action:manipulation]"
+          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-purple-400/40 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white shadow-md transition-colors duration-75 cursor-pointer active:scale-95 active:duration-75 disabled:opacity-50 disabled:cursor-not-allowed [touch-action:manipulation]"
         >
           <Volume2
             className={`w-3.5 h-3.5 ${
-              isGeneratingAudio ? "animate-pulse text-purple-200" : ""
+              isGeneratingAudio ?"animate-pulse text-purple-200" :""
             }`}
           />
           <span className="hidden 2xl:inline">
-            {isGeneratingAudio ? "Generating Audio..." : "Generate Audio"}
+            {isGeneratingAudio ?"Generating Audio..." :"Generate Audio"}
           </span>
         </button>
       )}
@@ -397,7 +397,7 @@ export default function StoryboardHeader({
         >
           <Download className="w-3.5 h-3.5 text-blue-400" />
           <span className="hidden 2xl:inline">
-            {isZipping ? "Zipping..." : "ZIP"}
+            {isZipping ?"Zipping..." :"ZIP"}
           </span>
         </button>
       )}
@@ -409,8 +409,8 @@ export default function StoryboardHeader({
           title="Bulk actions"
           className={`text-[11px] font-mono font-bold border rounded-xl px-3 py-1.5 transition-colors duration-75 shadow-sm active:scale-95 active:duration-75 cursor-pointer [touch-action:manipulation] ${
             showBulkOps
-              ? "border-blue-500/40 bg-blue-600/20 text-blue-300"
-              : "border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white"
+              ?"border-blue-500/40 bg-blue-600/20 text-blue-300"
+              :"border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white"
           }`}
         >
           <span className="hidden sm:inline">Bulk</span>

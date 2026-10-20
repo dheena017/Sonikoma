@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from"react";
 import {
   Calendar,
   Star,
@@ -20,10 +20,10 @@ import {
   MessageSquare,
   Lock,
   Globe,
-} from "lucide-react";
+} from"lucide-react";
 
-import type { Chapter as BaseChapter } from "../types/ChapterTypes";
-import { getProxiedImageUrl, getSourceName } from "@/shared/utils/imageProxy";
+import type { Chapter as BaseChapter } from"../types/ChapterTypes";
+import { getProxiedImageUrl, getSourceName } from"@/shared/utils/imageProxy";
 
 type ChapterCardChapter = BaseChapter & {
   duration?: string;
@@ -54,21 +54,21 @@ interface ChapterCardProps {
 }
 
 const formatLikesCount = (likesStr?: string): string => {
-  if (!likesStr) return "";
-  const cleaned = likesStr.replace(/likes?/gi, "").replace(/,/g, "").trim();
-  if (!cleaned) return "";
+  if (!likesStr) return"";
+  const cleaned = likesStr.replace(/likes?/gi,"").replace(/,/g,"").trim();
+  if (!cleaned) return"";
   if (/[0-9.]+[KMB]$/i.test(cleaned)) return cleaned.toUpperCase();
   const num = parseFloat(cleaned);
   if (isNaN(num)) return cleaned;
-  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
-  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
+  if (num >= 1_000_000) return`${(num / 1_000_000).toFixed(1)}M`;
+  if (num >= 1_000) return`${(num / 1_000).toFixed(1)}K`;
   return String(num);
 };
 
 const formatViewsCount = (views?: number): string => {
-  if (views === undefined || views === null || views <= 0) return "";
-  if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M`;
-  if (views >= 1_000) return `${(views / 1_000).toFixed(1)}K`;
+  if (views === undefined || views === null || views <= 0) return"";
+  if (views >= 1_000_000) return`${(views / 1_000_000).toFixed(1)}M`;
+  if (views >= 1_000) return`${(views / 1_000).toFixed(1)}K`;
   return String(views);
 };
 
@@ -92,12 +92,12 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     if (chapter.first_panel_image) return chapter.first_panel_image;
     if (chapter.images && chapter.images.length > 0) {
       const first = chapter.images[0];
-      return typeof first === "string" ? first : first?.url || "";
+      return typeof first ==="string" ? first : first?.url ||"";
     }
-    return "";
+    return"";
   };
 
-  const rawCover = chapter.cover_image || getFirstPanel() || "";
+  const rawCover = chapter.cover_image || getFirstPanel() ||"";
   const [imgSrc, setImgSrc] = useState<string>(() =>
     getProxiedImageUrl(rawCover, chapter.url)
   );
@@ -105,7 +105,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
   useEffect(() => {
     setImageError(false);
-    const cover = chapter.cover_image || getFirstPanel() || "";
+    const cover = chapter.cover_image || getFirstPanel() ||"";
     setImgSrc(getProxiedImageUrl(cover, chapter.url));
   }, [chapter.cover_image, chapter.first_panel_image, chapter.images, chapter.url]);
 
@@ -151,12 +151,12 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   const handleExportSingleJSON = (e: React.MouseEvent) => {
     e.stopPropagation();
     const jsonContent = JSON.stringify(chapter, null, 2);
-    const blob = new Blob([jsonContent], { type: "application/json;charset=utf-8;" });
+    const blob = new Blob([jsonContent], { type:"application/json;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    const safeCh = (chapter.number || "ch").replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
-    link.download = `Chapter_${safeCh}_metadata.json`;
+    const safeCh = (chapter.number ||"ch").replace(/[^\w\s-]/g,"").replace(/\s+/g,"_");
+    link.download =`Chapter_${safeCh}_metadata.json`;
     link.click();
     URL.revokeObjectURL(url);
     setIsMenuOpen(false);
@@ -167,25 +167,25 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const rawNum = (chapter.number || "").trim();
+  const rawNum = (chapter.number ||"").trim();
   const cleanNum =
-    rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim() ||
-    (chapter.index !== undefined ? String(chapter.index + 1) : "");
+    rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i,"").trim() ||
+    (chapter.index !== undefined ? String(chapter.index + 1) :"");
 
-  const rawTitle = (chapter.title || "")
-    .replace(/(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}.*$/i, "")
-    .replace(/\blikes?\s*[\d,.]+[KMB]?.*$/i, "")
-    .replace(/#\d+\s*$/, "")
-    .replace(/^(?:episode|ep|chapter|ch)[\s._-]*\d+\s*[-:��]?\s*/i, "")
-    .replace(/^[-:��\s]+|[-:��\s]+$/g, "")
+  const rawTitle = (chapter.title ||"")
+    .replace(/(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}.*$/i,"")
+    .replace(/\blikes?\s*[\d,.]+[KMB]?.*$/i,"")
+    .replace(/#\d+\s*$/,"")
+    .replace(/^(?:episode|ep|chapter|ch)[\s._-]*\d+\s*[-:��]?\s*/i,"")
+    .replace(/^[-:��\s]+|[-:��\s]+$/g,"")
     .trim();
 
   const titleIsSameAsNum =
     !rawTitle ||
     rawTitle.toLowerCase() === cleanNum.toLowerCase() ||
-    rawTitle.toLowerCase() === `chapter ${cleanNum}`.toLowerCase();
+    rawTitle.toLowerCase() ===`chapter ${cleanNum}`.toLowerCase();
 
-  const sourceName = chapter.url ? getSourceName(chapter.url).toUpperCase() : "";
+  const sourceName = chapter.url ? getSourceName(chapter.url).toUpperCase() :"";
   const formattedLikes = formatLikesCount(chapter.likes);
   const formattedViews = formatViewsCount(chapter.views);
   const panelCount =
@@ -202,8 +202,8 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       onClick={handleCardClick}
       className={`w-full flex flex-col group relative rounded-2xl overflow-hidden cursor-pointer bg-[#111116] border transition-all duration-200 ${
         isSelected
-          ? "border-[#3B82F6]/60 shadow-lg shadow-[#3B82F6]/10"
-          : "border-[#1E1E26] hover:border-[#2E2E3A] hover:shadow-xl hover:shadow-black/40"
+          ?"border-[#3B82F6]/60 shadow-lg"
+          :"border-[#1E1E26] hover:border-[#2E2E3A] hover:shadow-xl hover:shadow-black/40"
       }`}
     >
       {/* Cover Image */}
@@ -222,11 +222,11 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
         {imgSrc && !imageError ? (
           <img
             src={imgSrc}
-            alt={chapter.title || `Chapter ${cleanNum}`}
+            alt={chapter.title ||`Chapter ${cleanNum}`}
             className="w-full h-full object-cover"
             onError={() => {
               const firstP = getFirstPanel();
-              const proxiedFirstP = firstP ? getProxiedImageUrl(firstP, chapter.url) : "";
+              const proxiedFirstP = firstP ? getProxiedImageUrl(firstP, chapter.url) :"";
               if (imgSrc.includes("/api/v1/proxy/image") && chapter.cover_image && imgSrc !== chapter.cover_image) {
                 setImgSrc(chapter.cover_image);
               } else if (firstP && imgSrc !== proxiedFirstP && imgSrc !== firstP) {
@@ -242,7 +242,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
               <Sparkles className="w-5 h-5 text-[#3B82F6]/60" />
             </div>
             <span className="text-[10px] font-bold text-neutral-500 font-mono tracking-wider">
-              {cleanNum ? `CH. ${cleanNum}` : "NO COVER"}
+              {cleanNum ?`CH. ${cleanNum}` :"NO COVER"}
             </span>
           </div>
         )}
@@ -251,7 +251,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
         {/* Chapter badge */}
         {cleanNum && (
-          <div className={`absolute top-2.5 ${isMultiSelectMode ? "left-9" : "left-2.5"} z-20`}>
+          <div className={`absolute top-2.5 ${isMultiSelectMode ?"left-9" :"left-2.5"} z-20`}>
             <span className="inline-flex items-center gap-1 bg-black/70 backdrop-blur-sm text-[#60A5FA] text-[10px] font-black px-2 py-0.5 rounded-md font-mono border border-white/5">
               <BookOpen size={9} />
               CH. {cleanNum}
@@ -260,7 +260,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
         )}
 
         {/* Status badges */}
-        <div className={`absolute top-9 ${isMultiSelectMode ? "left-9" : "left-2.5"} z-20 flex flex-col gap-1`}>
+        <div className={`absolute top-9 ${isMultiSelectMode ?"left-9" :"left-2.5"} z-20 flex flex-col gap-1`}>
           {isRead && (
             <span className="inline-flex items-center gap-0.5 bg-emerald-500/80 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md font-mono">
               <CheckCircle2 size={8} /> READ
@@ -282,10 +282,10 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             onClick={handleBookmarkClick}
             className={`p-1.5 rounded-lg backdrop-blur-sm transition-all border cursor-pointer ${
               isBookmarked
-                ? "bg-amber-500 text-black border-amber-400/50"
-                : "bg-black/60 text-neutral-300 hover:bg-white/10 border-white/5"
+                ?"bg-amber-500 text-black border-amber-400/50"
+                :"bg-black/60 text-neutral-300 hover:bg-white/10 border-white/5"
             }`}
-            title={isBookmarked ? "Remove Bookmark" : "Bookmark"}
+            title={isBookmarked ?"Remove Bookmark" :"Bookmark"}
           >
             {isBookmarked ? <BookmarkCheck size={12} className="fill-current" /> : <Bookmark size={12} />}
           </button>
@@ -309,11 +309,11 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           {chapter.is_locked !== undefined && (
             <span className={`inline-flex items-center gap-0.5 text-[9px] font-mono px-1.5 py-0.5 rounded-md ${
               chapter.is_locked
-                ? "bg-rose-950/70 text-rose-400 border border-rose-500/20"
-                : "bg-emerald-950/70 text-emerald-400 border border-emerald-500/20"
+                ?"bg-rose-950/70 text-rose-400 border border-rose-500/20"
+                :"bg-emerald-950/70 text-emerald-400 border border-emerald-500/20"
             }`}>
               <Lock size={8} />
-              {chapter.is_locked ? "Locked" : "Free"}
+              {chapter.is_locked ?"Locked" :"Free"}
             </span>
           )}
         </div>
@@ -325,7 +325,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
         {/* Title */}
         <div className="flex items-start justify-between gap-2">
           <h3 className="flex-1 min-w-0 text-sm font-bold text-white leading-snug line-clamp-2 tracking-tight">
-            <span className="text-[#60A5FA]">{cleanNum ? `Ch. ${cleanNum}` : "Chapter"}</span>
+            <span className="text-[#60A5FA]">{cleanNum ?`Ch. ${cleanNum}` :"Chapter"}</span>
             {!titleIsSameAsNum && rawTitle && (
               <span className="text-neutral-300 font-medium ml-1.5">{rawTitle}</span>
             )}
@@ -354,7 +354,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
                   <Star
                     key={star}
                     size={10}
-                    className={filled ? "fill-amber-400 text-amber-400" : half ? "fill-amber-400/40 text-amber-400" : "fill-[#1E1E26] text-neutral-700"}
+                    className={filled ?"fill-amber-400 text-amber-400" : half ?"fill-amber-400/40 text-amber-400" :"fill-[#1E1E26] text-neutral-700"}
                   />
                 );
               })}
@@ -429,7 +429,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             )}
             <button
               onClick={(e) => { e.stopPropagation(); onClick(chapter); }}
-              className="px-3 py-1.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-lg text-[11px] font-bold font-mono flex items-center gap-1 cursor-pointer transition-all shadow-md shadow-blue-900/30"
+              className="px-3 py-1.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-lg text-[11px] font-bold font-mono flex items-center gap-1 cursor-pointer transition-all shadow-md"
             >
               Import
               <ArrowUpRight size={12} />

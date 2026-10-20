@@ -80,16 +80,10 @@
   pointer-events: none;
 }
 
-/* Soft Ambient Aurora Glows - Disabled */
-.anime-hero-aurora {
-  display: none;
-}
-
+/* Soft Ambient Aurora Glows - Fully Disabled */
+.anime-hero-aurora,
 .anime-aurora-beam {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(80px);
-  opacity: 0.5;
+  display: none !important;
 }
 
 .anime-aurora-beam.beam-1 {

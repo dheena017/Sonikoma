@@ -1,6 +1,6 @@
-import React from "react";
-import { createPortal } from "react-dom";
-import { X, Bot, Sparkles, Trash2, ArrowRight } from "lucide-react";
+import React from"react";
+import { createPortal } from"react-dom";
+import { X, Bot, Sparkles, Trash2, ArrowRight } from"lucide-react";
 
 interface AgentBackgroundActionModalProps {
   runId: string;
@@ -30,8 +30,6 @@ export const AgentBackgroundActionModal: React.FC<AgentBackgroundActionModalProp
 
       {/* Modal Dialog */}
       <div className="relative w-full max-w-xl mx-4 bg-neutral-950/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
-        {/* Top Accent Gradient */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 blur-[1px]" />
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800/80 shrink-0 bg-neutral-900/50">
@@ -44,7 +42,7 @@ export const AgentBackgroundActionModal: React.FC<AgentBackgroundActionModalProp
                 Run Agent in Background?
               </h2>
               <p className="text-xs text-neutral-400 font-mono mt-0.5 truncate max-w-md">
-                {scrapedTitle ? scrapedTitle : `Agent Run: ${runId}`}
+                {scrapedTitle ? scrapedTitle :`Agent Run: ${runId}`}
               </p>
             </div>
           </div>
@@ -99,7 +97,7 @@ export const AgentBackgroundActionModal: React.FC<AgentBackgroundActionModalProp
             <button
               type="button"
               onClick={onRunInBackgroundAndStartNew}
-              className="px-4.5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-500/25 border border-blue-400/40 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 font-mono whitespace-nowrap"
+              className="px-4.5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 shadow-md border border-blue-400/40 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 font-mono whitespace-nowrap"
             >
               <span>Run in Background</span>
               <ArrowRight className="w-3.5 h-3.5" />

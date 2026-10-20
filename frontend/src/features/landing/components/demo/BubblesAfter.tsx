@@ -1,10 +1,10 @@
-import React from "react";
-import { Sparkles, Check } from "lucide-react";
+import React from"react";
+import { Sparkles, Check } from"lucide-react";
 
 export function BubblesAfter() {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center p-3 sm:p-4 bg-[#0d0e15] relative overflow-hidden">
-      <div className="relative w-full max-w-[280px] h-[320px] rounded-2xl overflow-hidden border-2 border-emerald-400 shadow-2xl shadow-emerald-500/20 group">
+      <div className="relative w-full max-w-[280px] h-[320px] rounded-2xl overflow-hidden border-2 border-emerald-400 shadow-2xl group">
         {/* Real Inpainted Clean Manhwa Art */}
         <img
           src="/demo-action-cleaned.jpg"

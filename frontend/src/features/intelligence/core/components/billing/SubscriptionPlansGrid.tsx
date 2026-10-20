@@ -51,7 +51,7 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
 
       {/* Pro Plan */}
       <div className="bg-gradient-to-b from-[#121218]/90 to-[#070709]/90 border border-[#3B82F6]/30 rounded-3xl p-6 text-left space-y-4 shadow-xl relative overflow-hidden flex flex-col justify-between">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-[#3B82F6]/10 rounded-full blur-2xl pointer-events-none" />
+        
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">

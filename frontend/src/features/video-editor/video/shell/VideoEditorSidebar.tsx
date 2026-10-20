@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from"react";
 import {
   X,
   ArrowLeft,
@@ -6,11 +6,11 @@ import {
   FolderSync,
   FolderOpen,
   LayoutDashboard,
-} from "lucide-react";
-import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
-import { SonikomaLogo } from "@/shared/ui/branding";
-import { WorkspaceId } from "../types/workspace.types";
-import { getGroupedWorkspaces } from "../registry/workspaceRegistry";
+} from"lucide-react";
+import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
+import { SonikomaLogo } from"@/shared/ui/branding";
+import { WorkspaceId } from"../types/workspace.types";
+import { getGroupedWorkspaces } from"../registry/workspaceRegistry";
 
 interface VideoEditorSidebarProps {
   isOpen: boolean;
@@ -74,30 +74,29 @@ const ActiveProjectSidebarWidget: React.FC<{
                 <img
                   src={
                     coverUrl.startsWith("http")
-                      ? `/api/v1/proxy/image?url=${encodeURIComponent(
+                      ?`/api/v1/proxy/image?url=${encodeURIComponent(
                           coverUrl
                         )}`
                       : coverUrl
                   }
-                  alt={activeProjectData.project?.title || "Project Cover"}
+                  alt={activeProjectData.project?.title ||"Project Cover"}
                   onError={() => setImgError(true)}
                   className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-blue-600/30 to-blue-600/30 border border-[#3B82F6]/20 flex items-center justify-center text-[#60A5FA] font-bold text-xs">
-                  {activeProjectData.project?.title?.charAt(0).toUpperCase() ||
-                    "P"}
+                  {activeProjectData.project?.title?.charAt(0).toUpperCase() ||"P"}
                 </div>
               )}
             </div>
             <div className="min-w-0 flex-1">
               <h4 className="font-semibold text-xs text-neutral-100 truncate leading-tight">
-                {activeProjectData.project?.title || "Untitled Project"}
+                {activeProjectData.project?.title ||"Untitled Project"}
               </h4>
               <span className="text-[10px] text-neutral-400 truncate font-mono">
                 {activeProjectData.panels?.length ||
                   activeProjectData.project?.panels_count ||
-                  0}{" "}
+                  0}{""}
                 panels
               </span>
             </div>
@@ -118,7 +117,7 @@ const ActiveProjectSidebarWidget: React.FC<{
           </p>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/25 cursor-pointer active:scale-98"
+            className="w-full py-2 px-3 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-98"
           >
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Select Active Project</span>
@@ -132,7 +131,7 @@ const ActiveProjectSidebarWidget: React.FC<{
 const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
   isOpen,
   onClose,
-  activeWorkspace = "imported_assets",
+  activeWorkspace ="imported_assets",
   onSelectWorkspace,
   seriesTitle,
   chapterTitle,
@@ -142,12 +141,12 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
 }) => {
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow ="hidden";
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow ="";
     }
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow ="";
     };
   }, [isOpen]);
 
@@ -155,16 +154,16 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
 
   const globalItems = [
     {
-      id: "dashboard",
-      title: "Main Dashboard",
+      id:"dashboard",
+      title:"Main Dashboard",
       icon: LayoutDashboard,
-      path: "/dashboard",
+      path:"/dashboard",
     },
     {
-      id: "projects",
-      title: "Projects Gallery",
+      id:"projects",
+      title:"Projects Gallery",
       icon: FolderOpen,
-      path: "/projects",
+      path:"/projects",
     },
   ];
 
@@ -179,7 +178,7 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
 
       <aside
         className={`fixed top-0 bottom-0 left-0 h-screen w-[280px] sm:w-[300px] z-50 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          isOpen ?"translate-x-0" :"-translate-x-full"
         }`}
       >
         <div className="w-full h-full bg-[#09090B]/95 backdrop-blur-3xl border-r border-white/8 flex flex-col justify-between shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(59,130,246,0.06)] select-none">
@@ -189,7 +188,7 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
               size="md"
               badge="Studio"
               showSubtitle={true}
-              subtitleText={seriesTitle || "Comic to Video Studio"}
+              subtitleText={seriesTitle ||"Comic to Video Studio"}
               onClick={() => navigateTo?.("/dashboard")}
             />
 
@@ -225,8 +224,8 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
                         <div
                           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${
                             isActive
-                              ? "h-6 bg-[#3B82F6] opacity-100 "
-                              : "h-0 bg-transparent opacity-0"
+                              ?"h-6 bg-[#3B82F6] opacity-100"
+                              :"h-0 bg-transparent opacity-0"
                           }`}
                         />
 
@@ -237,16 +236,16 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
                           }}
                           className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
                             isActive
-                              ? "bg-[#3B82F6] text-white shadow-lg shadow-blue-500/25 font-bold border border-[#60A5FA]/40"
-                              : "text-[#9CA3AF] hover:text-white hover:bg-[#1E1E1E] hover:border-[#2F2F2F] border border-transparent"
+                              ?"bg-[#3B82F6] text-white shadow-lg  font-bold border border-[#60A5FA]/40"
+                              :"text-[#9CA3AF] hover:text-white hover:bg-[#1E1E1E] hover:border-[#2F2F2F] border border-transparent"
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <Icon
                               className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
                                 isActive
-                                  ? "text-white"
-                                  : "text-neutral-400 group-hover:scale-110 group-hover:text-white"
+                                  ?"text-white"
+                                  :"text-neutral-400 group-hover:scale-110 group-hover:text-white"
                               }`}
                             />
                             <span className="text-sm font-bold tracking-wide font-sans">

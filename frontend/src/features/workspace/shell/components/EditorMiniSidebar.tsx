@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Menu,
   Layout,
@@ -14,16 +14,16 @@ import {
   Link2,
   Mic,
   type LucideIcon,
-} from "lucide-react";
-import TooltipPortal from "@/shared/ui/common/TooltipPortal";
+} from"lucide-react";
+import TooltipPortal from"@/shared/ui/common/TooltipPortal";
 import {
   resolveWorkspaceReturnPath,
   getImageEditorPath,
-} from "@/shared/utils/workspaceNavigation";
+} from"@/shared/utils/workspaceNavigation";
 import {
   useImageEditorStore,
   type EditorTool,
-} from "@/features/workspace/shell/hooks/useEditorState";
+} from"@/features/workspace/shell/hooks/useEditorState";
 
 interface EditorMiniSidebarProps {
   isCollapsed: boolean;
@@ -66,7 +66,7 @@ const EditorMiniSidebarInner = ({
   projectId,
   seriesSlug,
   chapterSlug,
-  settingsPath = "/settings",
+  settingsPath ="/settings",
   topOffsetPx = 64,
   locationSearch,
 }: EditorMiniSidebarProps) => {
@@ -101,8 +101,8 @@ const EditorMiniSidebarInner = ({
         {/* Left edge active indicator bar */}
         <div
           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${isActive
-              ? "h-6 bg-[#3B82F6] opacity-100 "
-              : "h-0 bg-transparent opacity-0"
+              ?"h-6 bg-[#3B82F6] opacity-100"
+              :"h-0 bg-transparent opacity-0"
             }`}
         />
 
@@ -120,20 +120,20 @@ const EditorMiniSidebarInner = ({
         >
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${isActive
-                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white shadow-lg shadow-blue-500/25 scale-105"
-                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 "
+                ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white shadow-lg  scale-105"
+                :"bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700"
               }`}
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${isActive
-                  ? "text-white"
-                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                  ?"text-white"
+                  :"text-[#9CA3AF] group-hover:text-[#3B82F6]"
                 }`}
             />
           </div>
 
           {/* Crop Slices Count Badge */}
-          {tool.key === "crop" && slicesCount > 0 && (
+          {tool.key ==="crop" && slicesCount > 0 && (
             <span className="absolute -top-1 -right-1 h-5 min-w-[20px] bg-[#3B82F6] text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1.5 border-2 border-neutral-950 shadow-md z-20">
               {slicesCount}
             </span>
@@ -170,26 +170,26 @@ const EditorMiniSidebarInner = ({
   if (isEditing) {
     const cropToolGroups = [
       {
-        label: "Adjust",
+        label:"Adjust",
         tools: [
-          { key: "adjust" as EditorTool, label: "Adjust", icon: Sparkles },
-          { key: "edit" as EditorTool, label: "Edit", icon: Edit2 },
-          { key: "draw" as EditorTool, label: "Draw", icon: Brush },
+          { key:"adjust" as EditorTool, label:"Adjust", icon: Sparkles },
+          { key:"edit" as EditorTool, label:"Edit", icon: Edit2 },
+          { key:"draw" as EditorTool, label:"Draw", icon: Brush },
         ],
       },
       {
-        label: "Cut",
+        label:"Cut",
         tools: [
-          { key: "slice" as EditorTool, label: "Cut", icon: Scissors },
-          { key: "crop" as EditorTool, label: "Crop", icon: Crop },
-          { key: "merge" as EditorTool, label: "Merge", icon: Link2 },
+          { key:"slice" as EditorTool, label:"Cut", icon: Scissors },
+          { key:"crop" as EditorTool, label:"Crop", icon: Crop },
+          { key:"merge" as EditorTool, label:"Merge", icon: Link2 },
         ],
       },
     ];
 
     return (
       <aside
-        style={{ top: `${topOffsetPx}px` }}
+        style={{ top:`${topOffsetPx}px` }}
         className="hidden md:flex fixed bottom-0 left-0 w-20 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex-col items-center py-3 z-[60] shadow-xl select-none overflow-hidden"
       >
         <div className="flex-1 w-full flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
@@ -202,8 +202,8 @@ const EditorMiniSidebarInner = ({
               <div
                 className="w-full flex flex-col items-center"
                 style={{
-                  marginTop: gi > 0 ? "0.6rem" : "0.2rem",
-                  marginBottom: "0.4rem",
+                  marginTop: gi > 0 ?"0.6rem" :"0.2rem",
+                  marginBottom:"0.4rem",
                 }}
               >
                 {gi > 0 && (
@@ -227,58 +227,58 @@ const EditorMiniSidebarInner = ({
 
   const menuGroups: Array<{ label: string; items: SidebarMenuItem[] }> = [
     {
-      label: "Main",
+      label:"Main",
       items: [
         {
-          id: "storyboard",
-          label: "Storyboard",
+          id:"storyboard",
+          label:"Storyboard",
           icon: Layers,
           badge: panelsCount > 0 ? panelsCount : undefined,
         },
         {
-          id: "assets",
-          label: "Imported Assets",
+          id:"assets",
+          label:"Imported Assets",
           icon: Layout,
           badge: scrapedCount > 0 ? scrapedCount : undefined,
         },
         {
-          id: "monitor",
-          label: "Video Monitor",
+          id:"monitor",
+          label:"Video Monitor",
           icon: Film,
         },
       ],
     },
     {
-      label: "Studios",
+      label:"Studios",
       items: [
         {
-          id: "video-editor",
-          label: "Video Studio",
+          id:"video-editor",
+          label:"Video Studio",
           icon: Film,
         },
         {
-          id: "image-editor",
-          label: "Image Editor",
+          id:"image-editor",
+          label:"Image Editor",
           icon: Edit2,
         },
       ],
     },
     {
-      label: "Preferences",
+      label:"Preferences",
       items: [
         {
-          id: "settings",
-          label: "Video Settings",
+          id:"settings",
+          label:"Video Settings",
           icon: Settings,
         },
         {
-          id: "audio-settings",
-          label: "Audio Settings",
+          id:"audio-settings",
+          label:"Audio Settings",
           icon: Mic,
         },
         {
-          id: "autocrop-settings",
-          label: "Auto-Crop Settings",
+          id:"autocrop-settings",
+          label:"Auto-Crop Settings",
           icon: Scissors,
         },
       ],
@@ -290,17 +290,17 @@ const EditorMiniSidebarInner = ({
     const [rect, setRect] = useState<DOMRect | null>(null);
 
     const isSettingsTab =
-      item.id === "settings" ||
-      item.id === "audio-settings" ||
-      item.id === "autocrop-settings";
+      item.id ==="settings" ||
+      item.id ==="audio-settings" ||
+      item.id ==="autocrop-settings";
 
     const currentTab = params.get("tab");
     const isActive =
       currentSection === item.id ||
       (isSettingsTab && currentTab === item.id) ||
-      (item.id === "video-editor" &&
+      (item.id ==="video-editor" &&
         window.location.pathname.startsWith("/video-editor")) ||
-      (item.id === "image-editor" &&
+      (item.id ==="image-editor" &&
         window.location.pathname.startsWith("/image-editor"));
 
     const Icon = item.icon;
@@ -310,8 +310,8 @@ const EditorMiniSidebarInner = ({
         {/* Left edge active indicator bar */}
         <div
           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${isActive
-              ? "h-6 bg-[#3B82F6] opacity-100 "
-              : "h-0 bg-transparent opacity-0"
+              ?"h-6 bg-[#3B82F6] opacity-100"
+              :"h-0 bg-transparent opacity-0"
             }`}
         />
 
@@ -322,26 +322,26 @@ const EditorMiniSidebarInner = ({
               if (p.has("tab")) {
                 p.delete("tab");
                 const searchStr = p.toString();
-                const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""
+                const newPath =`${window.location.pathname}${searchStr ?"?" + searchStr :""
                   }`;
                 if (navigateTo) {
                   navigateTo(newPath);
                 } else {
-                  window.history.pushState({}, "", newPath);
+                  window.history.pushState({},"", newPath);
                   window.dispatchEvent(new Event("popstate"));
                 }
               }
             }
 
-            if (item.id === "video-editor") {
-              const target = "/video-editor";
+            if (item.id ==="video-editor") {
+              const target ="/video-editor";
               if (navigateTo) {
                 navigateTo(target);
               } else {
-                window.history.pushState({}, "", target);
+                window.history.pushState({},"", target);
                 window.dispatchEvent(new Event("popstate"));
               }
-            } else if (item.id === "image-editor") {
+            } else if (item.id ==="image-editor") {
               const target = getImageEditorPath({
                 seriesSlug,
                 chapterSlug,
@@ -351,21 +351,21 @@ const EditorMiniSidebarInner = ({
               if (navigateTo) {
                 navigateTo(target);
               } else {
-                window.history.pushState({}, "", target);
+                window.history.pushState({},"", target);
                 window.dispatchEvent(new Event("popstate"));
               }
             } else if (isSettingsTab) {
               const p = new URLSearchParams(window.location.search);
               p.set("tab", item.id);
-              const newPath = `${window.location.pathname}?${p.toString()}`;
+              const newPath =`${window.location.pathname}?${p.toString()}`;
               if (navigateTo) {
                 navigateTo(newPath);
               } else {
-                window.history.pushState({}, "", newPath);
+                window.history.pushState({},"", newPath);
                 window.dispatchEvent(new Event("popstate"));
               }
             } else {
-              if (item.id === "monitor") {
+              if (item.id ==="monitor") {
                 useImageEditorStore
                   .getState()
                   .setPlayerSettings({ isPlayerOpen: true });
@@ -374,27 +374,20 @@ const EditorMiniSidebarInner = ({
               requestAnimationFrame(() => {
                 setTimeout(() => {
                   const targetMap: Record<string, string[]> = {
-                    monitor: ["section-monitor", "section-monitor-placeholder"],
-                    storyboard: [
-                      "section-storyboard",
-                      "section-timeline",
-                      "panels_timeline_section",
+                    monitor: ["section-monitor","section-monitor-placeholder"],
+                    storyboard: ["section-storyboard","section-timeline","panels_timeline_section",
                     ],
-                    timeline: [
-                      "section-storyboard",
-                      "section-timeline",
-                      "panels_timeline_section",
+                    timeline: ["section-storyboard","section-timeline","panels_timeline_section",
                     ],
-                    assets: ["section-assets", "section-raw-images"],
+                    assets: ["section-assets","section-raw-images"],
                   };
-                  const candidateIds = targetMap[item.id] || [
-                    `section-${item.id}`,
+                  const candidateIds = targetMap[item.id] || [`section-${item.id}`,
                     item.id,
                   ];
                   for (const id of candidateIds) {
                     const el = document.getElementById(id);
                     if (el) {
-                      el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      el.scrollIntoView({ behavior:"smooth", block:"start" });
                       break;
                     }
                   }
@@ -412,14 +405,14 @@ const EditorMiniSidebarInner = ({
         >
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${isActive
-                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105 shadow-lg shadow-blue-500/25"
-                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 "
+                ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105 shadow-lg"
+                :"bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700"
               }`}
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${isActive
-                  ? "text-white"
-                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                  ?"text-white"
+                  :"text-[#9CA3AF] group-hover:text-[#3B82F6]"
                 }`}
             />
           </div>
@@ -446,7 +439,7 @@ const EditorMiniSidebarInner = ({
 
   return (
     <aside
-      style={{ top: `${topOffsetPx}px` }}
+      style={{ top:`${topOffsetPx}px` }}
       className="hidden md:flex fixed bottom-0 left-0 w-20 bg-[#0A0A0A]/95 backdrop-blur-2xl border-r border-[#2F2F2F] flex-col items-center py-3 z-[90] shadow-xl select-none overflow-hidden"
     >
       {/* Scrollable Tools Area */}
@@ -460,8 +453,8 @@ const EditorMiniSidebarInner = ({
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: gi > 0 ? "0.6rem" : "0.2rem",
-                marginBottom: "0.4rem",
+                marginTop: gi > 0 ?"0.6rem" :"0.2rem",
+                marginBottom:"0.4rem",
               }}
             >
               {gi > 0 && (
@@ -492,7 +485,7 @@ const EditorMiniSidebarInner = ({
             }}
             onMouseLeave={() => setReturnHover(false)}
             aria-label="Return to Workspace"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg shadow-blue-500/25 active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center group"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center group"
           >
             <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
           </button>

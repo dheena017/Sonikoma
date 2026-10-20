@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from"react";
 import {
   Users,
   Activity,
@@ -18,12 +18,12 @@ import {
   ArrowRight,
   ShieldAlert,
   ShieldCheck,
-} from "lucide-react";
-import * as api from "@/shared/api";
-import type { FetchClient } from "@/shared/api";
-import AdminLayout from "@/features/admin/components/AdminLayout";
-import BackendStatusPanel from "@/shared/ui/status/BackendStatusPanel";
-import { DashboardStatsSkeleton } from "@/shared/ui/loading";
+} from"lucide-react";
+import * as api from"@/shared/api";
+import type { FetchClient } from"@/shared/api";
+import AdminLayout from"@/features/admin/components/AdminLayout";
+import BackendStatusPanel from"@/shared/ui/status/BackendStatusPanel";
+import { DashboardStatsSkeleton } from"@/shared/ui/loading";
 
 const AdminDashboardPage = React.memo(
   ({
@@ -64,8 +64,7 @@ const AdminDashboardPage = React.memo(
     // Announcement broadcaster form state
     const [announcementTitle, setAnnouncementTitle] = useState("");
     const [announcementMsg, setAnnouncementMsg] = useState("");
-    const [announcementType, setAnnouncementType] = useState<
-      "info" | "warning" | "success" | "error"
+    const [announcementType, setAnnouncementType] = useState<"info" |"warning" |"success" |"error"
     >("info");
 
     const fetchStats = async () => {
@@ -76,20 +75,20 @@ const AdminDashboardPage = React.memo(
           users: data.database?.users || 0,
           projects: data.database?.projects || 0,
           scenes: data.database?.scenes || 0,
-          memory: `${data.memory?.rssMB || 0}MB`,
+          memory:`${data.memory?.rssMB || 0}MB`,
           dbLatencyMs: data.database?.dbLatencyMs || 0,
           gpuWorkers: data.database?.gpuWorkers || {
             total: 0,
             busy: 0,
             idle: 0,
           },
-          uptime: data.server?.uptime || "",
+          uptime: data.server?.uptime ||"",
           cpuPct: data.memory?.cpuPct || 0,
           activeJobs: data.database?.activeJobs || 0,
         });
         setBackendMetrics(data);
         setBackendOnline(
-          data.status === "healthy" || data.status === "ok" || !!data.server
+          data.status ==="healthy" || data.status ==="ok" || !!data.server
         );
         setLastChecked(new Date().toLocaleTimeString());
       } catch (err) {
@@ -117,8 +116,7 @@ const AdminDashboardPage = React.memo(
 
     const fetchRecentAuditLogs = async () => {
       try {
-        const res = await fetchWithInterceptor(
-          "/api/v1/auth/admin/audit-logs?limit=8"
+        const res = await fetchWithInterceptor("/api/v1/auth/admin/audit-logs?limit=8"
         );
         if (res.ok) {
           const data = await res.json();
@@ -147,8 +145,7 @@ const AdminDashboardPage = React.memo(
 
     const verifyDatabase = async () => {
       try {
-        const res = await fetchWithInterceptor(
-          "/api/v1/auth/admin/db/query?table=admin_settings&limit=1"
+        const res = await fetchWithInterceptor("/api/v1/auth/admin/db/query?table=admin_settings&limit=1"
         );
         if (res.ok) {
           setDbStatus("Healthy");
@@ -170,7 +167,7 @@ const AdminDashboardPage = React.memo(
         verifyDatabase(),
       ]);
       if (addNotification) {
-        addNotification("Dashboard telemetry updated", "success");
+        addNotification("Dashboard telemetry updated","success");
       }
     };
 
@@ -182,24 +179,23 @@ const AdminDashboardPage = React.memo(
 
     const handleExportLogs = async () => {
       try {
-        const res = await fetchWithInterceptor(
-          "/api/v1/auth/admin/activity/export"
+        const res = await fetchWithInterceptor("/api/v1/auth/admin/activity/export"
         );
         if (res.ok) {
           const blob = await res.blob();
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          a.download = `Sonikoma_Audit_Logs_${
+          a.download =`Sonikoma_Audit_Logs_${
             new Date().toISOString().split("T")[0]
           }.csv`;
           a.click();
           if (addNotification)
-            addNotification("Security logs exported as CSV", "success");
+            addNotification("Security logs exported as CSV","success");
         }
       } catch (err) {
         if (addNotification)
-          addNotification("Failed to export security logs", "error");
+          addNotification("Failed to export security logs","error");
       }
     };
 
@@ -207,16 +203,15 @@ const AdminDashboardPage = React.memo(
       e.preventDefault();
       if (!announcementTitle.trim() || !announcementMsg.trim()) {
         if (addNotification)
-          addNotification("Announcement fields cannot be blank", "warning");
+          addNotification("Announcement fields cannot be blank","warning");
         return;
       }
       setProcessingAction("broadcast");
       try {
-        const res = await fetchWithInterceptor(
-          "/api/v1/auth/admin/announcements",
+        const res = await fetchWithInterceptor("/api/v1/auth/admin/announcements",
           {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method:"POST",
+            headers: {"Content-Type":"application/json" },
             body: JSON.stringify({
               title: announcementTitle,
               message: announcementMsg,
@@ -226,17 +221,17 @@ const AdminDashboardPage = React.memo(
         );
         if (res.ok) {
           if (addNotification)
-            addNotification("Broadcast announcement published!", "success");
+            addNotification("Broadcast announcement published!","success");
           setAnnouncementTitle("");
           setAnnouncementMsg("");
           fetchRecentAuditLogs();
         } else {
           if (addNotification)
-            addNotification("Failed to post announcement", "error");
+            addNotification("Failed to post announcement","error");
         }
       } catch (err) {
         if (addNotification)
-          addNotification("Failed to publish announcement", "error");
+          addNotification("Failed to publish announcement","error");
       } finally {
         setProcessingAction(null);
       }
@@ -244,15 +239,13 @@ const AdminDashboardPage = React.memo(
 
     const handleImpersonate = async (userId: string) => {
       if (
-        !confirm(
-          "Impersonate this user? This will log you in as them. You can return back using the floating control."
+        !confirm("Impersonate this user? This will log you in as them. You can return back using the floating control."
         )
       )
         return;
       try {
-        const res = await fetchWithInterceptor(
-          `/api/v1/auth/admin/impersonate/${userId}`,
-          { method: "POST" }
+        const res = await fetchWithInterceptor(`/api/v1/auth/admin/impersonate/${userId}`,
+          { method:"POST" }
         );
         if (res.ok) {
           const data = await res.json();
@@ -262,29 +255,29 @@ const AdminDashboardPage = React.memo(
               localStorage.setItem("sonikoma_admin_token", currentToken);
             }
             localStorage.setItem("sonikoma_token", data.access_token);
-            window.location.href = "/";
+            window.location.href ="/";
           }
         }
       } catch (err) {
         if (addNotification)
-          addNotification("Failed to impersonate user", "error");
+          addNotification("Failed to impersonate user","error");
       }
     };
 
     // Format ISO/SQLite date strings into a readable local date+time
     const formatDate = (raw: string | undefined | null): string => {
-      if (!raw) return "—";
+      if (!raw) return"—";
       try {
         const d = new Date(
-          raw.includes("T") ? raw : raw.replace(" ", "T") + "Z"
+          raw.includes("T") ? raw : raw.replace("","T") +"Z"
         );
         if (isNaN(d.getTime())) return raw;
         return d.toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
+          year:"numeric",
+          month:"short",
+          day:"numeric",
+          hour:"2-digit",
+          minute:"2-digit",
         });
       } catch {
         return raw;
@@ -297,11 +290,11 @@ const AdminDashboardPage = React.memo(
       return users
         .filter(
           (u) =>
-            (u.full_name || "")
+            (u.full_name ||"")
               .toLowerCase()
               .includes(userSearch.toLowerCase()) ||
-            (u.email || "").toLowerCase().includes(userSearch.toLowerCase()) ||
-            (u.username || "").toLowerCase().includes(userSearch.toLowerCase())
+            (u.email ||"").toLowerCase().includes(userSearch.toLowerCase()) ||
+            (u.username ||"").toLowerCase().includes(userSearch.toLowerCase())
         )
         .slice(0, 5);
     }, [users, userSearch]);
@@ -351,23 +344,23 @@ const AdminDashboardPage = React.memo(
       const projectCoords = getCoords(projectChartData);
 
       const makePath = (coords: any[]) => {
-        if (coords.length === 0) return "";
+        if (coords.length === 0) return"";
         return coords.reduce((acc, coord, idx) => {
-          if (idx === 0) return `M ${coord.x} ${coord.y}`;
+          if (idx === 0) return`M ${coord.x} ${coord.y}`;
           // Smooth bezier curve control points
           const prev = coords[idx - 1];
           const cpX1 = prev.x + (coord.x - prev.x) / 3;
           const cpY1 = prev.y;
           const cpX2 = prev.x + (2 * (coord.x - prev.x)) / 3;
           const cpY2 = coord.y;
-          return `${acc} C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${coord.x} ${coord.y}`;
-        }, "");
+          return`${acc} C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${coord.x} ${coord.y}`;
+        },"");
       };
 
       const makeAreaPath = (coords: any[]) => {
-        if (coords.length === 0) return "";
+        if (coords.length === 0) return"";
         const linePath = makePath(coords);
-        return `${linePath} L ${coords[coords.length - 1].x} ${
+        return`${linePath} L ${coords[coords.length - 1].x} ${
           chartHeight - padding.bottom
         } L ${coords[0].x} ${chartHeight - padding.bottom} Z`;
       };
@@ -528,12 +521,12 @@ const AdminDashboardPage = React.memo(
 
     // Developer bypass screen if unauthorized
     const isUserAdmin =
-      user?.creator_role === "admin" || user?.role === "admin";
+      user?.creator_role ==="admin" || user?.role ==="admin";
     if (!isAuthenticated || (user && !isUserAdmin)) {
       return (
         <div className="fixed inset-0 z-50 w-full h-full bg-[#050507] flex flex-col items-center justify-center p-6 overflow-hidden selection:bg-rose-500/30">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-rose-900/20 via-[#050507] to-[#050507] pointer-events-none" />
-          <div className="relative z-10 max-w-md w-full bg-[#0a0a0e]/80 backdrop-blur-xl border border-rose-900/30 p-8 rounded-3xl shadow-2xl shadow-rose-900/20 text-center">
+          <div className="relative z-10 max-w-md w-full bg-[#0a0a0e]/80 backdrop-blur-xl border border-rose-900/30 p-8 rounded-3xl shadow-2xl text-center">
             <div className="w-20 h-20 bg-rose-500/10 rounded-2xl mx-auto flex items-center justify-center mb-6 border border-rose-500/20">
               <ShieldAlert className="w-10 h-10 text-rose-500 animate-pulse" />
             </div>
@@ -557,12 +550,11 @@ const AdminDashboardPage = React.memo(
                       localStorage.getItem("sonikoma_token") ||
                       sessionStorage.getItem("sonikoma_token");
                     const res = await fetch("/api/v1/auth/profile", {
-                      method: "PUT",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
+                      method:"PUT",
+                      headers: {"Content-Type":"application/json",
+                        Authorization:`Bearer ${token}`,
                       },
-                      body: JSON.stringify({ creator_role: "admin" }),
+                      body: JSON.stringify({ creator_role:"admin" }),
                     });
                     if (res.ok) {
                       window.location.reload();
@@ -609,7 +601,7 @@ const AdminDashboardPage = React.memo(
               >
                 <RefreshCw
                   className={`w-3.5 h-3.5 ${
-                    loadingStats ? "animate-spin" : ""
+                    loadingStats ?"animate-spin" :""
                   }`}
                 />
                 <span>Refresh</span>
@@ -654,7 +646,7 @@ const AdminDashboardPage = React.memo(
                   </h3>
                 </div>
                 <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
-                  {stats.users?.toLocaleString() || "0"}
+                  {stats.users?.toLocaleString() ||"0"}
                 </div>
                 <p className="text-[10px] text-[#3B82F6] font-bold flex items-center gap-1 font-mono">
                   <CheckCircle2 className="w-3.5 h-3.5" />
@@ -675,7 +667,7 @@ const AdminDashboardPage = React.memo(
                   </h3>
                 </div>
                 <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
-                  {stats.projects?.toLocaleString() || "0"}
+                  {stats.projects?.toLocaleString() ||"0"}
                 </div>
                 <p className="text-[10px] text-[#10B981] font-bold flex items-center gap-1 font-mono">
                   <TrendingUp className="w-3.5 h-3.5" />
@@ -769,12 +761,12 @@ const AdminDashboardPage = React.memo(
                       <div
                         className={`h-full transition-all duration-1000 ${
                           cpuLoad > 80
-                            ? "bg-rose-500"
+                            ?"bg-rose-500"
                             : cpuLoad > 50
-                            ? "bg-amber-500"
-                            : "bg-[#3B82F6]"
+                            ?"bg-amber-500"
+                            :"bg-[#3B82F6]"
                         }`}
-                        style={{ width: `${cpuLoad}%` }}
+                        style={{ width:`${cpuLoad}%` }}
                       />
                     </div>
                   </div>
@@ -786,14 +778,14 @@ const AdminDashboardPage = React.memo(
                         RSS MEMORY
                       </span>
                       <span className="text-neutral-300">
-                        {stats.memory || "0MB"}
+                        {stats.memory ||"0MB"}
                       </span>
                     </div>
                     <div className="w-full bg-[#040406] h-1.5 rounded-full overflow-hidden border border-neutral-900">
                       <div
                         className="bg-[#3B82F6] h-full transition-all duration-1000"
                         style={{
-                          width: `${Math.min(
+                          width:`${Math.min(
                             ((parseFloat(stats.memory) || 0) / 512) * 100,
                             100
                           )}%`,
@@ -806,7 +798,7 @@ const AdminDashboardPage = React.memo(
                     <div className="flex justify-between items-center">
                       <span className="text-neutral-500">System Uptime</span>
                       <span className="text-neutral-300 font-mono font-bold">
-                        {stats.uptime || "Online"}
+                        {stats.uptime ||"Online"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -819,9 +811,9 @@ const AdminDashboardPage = React.memo(
                       <span className="text-neutral-500">DB Host Status</span>
                       <span
                         className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold ${
-                          dbStatus === "Healthy"
-                            ? "bg-emerald-500/10 text-emerald-400"
-                            : "bg-rose-500/10 text-rose-400"
+                          dbStatus ==="Healthy"
+                            ?"bg-emerald-500/10 text-emerald-400"
+                            :"bg-rose-500/10 text-rose-400"
                         }`}
                       >
                         {dbStatus}
@@ -917,12 +909,12 @@ const AdminDashboardPage = React.memo(
                   </select>
                   <button
                     type="submit"
-                    disabled={processingAction === "broadcast"}
+                    disabled={processingAction ==="broadcast"}
                     className="btn-primary flex-1 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
                   >
-                    {processingAction === "broadcast"
-                      ? "Broadcasting..."
-                      : "Publish Banner"}
+                    {processingAction ==="broadcast"
+                      ?"Broadcasting..."
+                      :"Publish Banner"}
                   </button>
                 </div>
               </form>
@@ -968,7 +960,7 @@ const AdminDashboardPage = React.memo(
                       >
                         <div className="space-y-0.5 min-w-0 flex-1 pr-2">
                           <div className="font-bold text-xs text-[#E5E5E5]">
-                            {u.full_name || "Anonymous"}
+                            {u.full_name ||"Anonymous"}
                           </div>
                           <div className="text-[10px] text-[#9CA3AF] font-mono truncate">
                             {u.email}
@@ -1014,7 +1006,7 @@ const AdminDashboardPage = React.memo(
                             {log.action}
                           </div>
                           <div className="text-[10px] text-[#9CA3AF]">
-                            {log.email || "System"} · {log.ip_address}
+                            {log.email ||"System"} · {log.ip_address}
                           </div>
                           <div className="text-[9px] text-[#6B7280] font-mono flex items-center gap-1">
                             <Clock className="w-2.5 h-2.5 inline" />
@@ -1023,9 +1015,9 @@ const AdminDashboardPage = React.memo(
                         </div>
                         <span
                           className={`flex-shrink-0 px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase ${
-                            log.status === "Success"
-                              ? "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
-                              : "bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30"
+                            log.status ==="Success"
+                              ?"bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
+                              :"bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30"
                           }`}
                         >
                           {log.status}

@@ -1,6 +1,6 @@
-import React from "react";
-import { Play, Pause } from "lucide-react";
-import { AudioTrack } from "../../../types/workspace.types";
+import React from"react";
+import { Play, Pause } from"lucide-react";
+import { AudioTrack } from"../../../types/workspace.types";
 
 interface AudioTrackCardProps {
   track: AudioTrack;
@@ -21,8 +21,8 @@ export const AudioTrackCard: React.FC<AudioTrackCardProps> = ({
         onClick={onTogglePlay}
         className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 transition-all border cursor-pointer ${
           isPlaying
-            ? "bg-[#3B82F6] border-[#60A5FA] text-white shadow-md shadow-blue-500/25"
-            : "bg-neutral-800 border-neutral-700 text-neutral-400 group-hover:text-white"
+            ?"bg-[#3B82F6] border-[#60A5FA] text-white shadow-md"
+            :"bg-neutral-800 border-neutral-700 text-neutral-400 group-hover:text-white"
         }`}
       >
         {isPlaying ? (

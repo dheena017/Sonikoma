@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from"react";
 import {
   Search,
   X,
@@ -14,19 +14,19 @@ import {
   Image as ImageIcon,
   Smartphone,
   Maximize2,
-} from "lucide-react";
+} from"lucide-react";
 
 export type AssetFilterStatus =
-  | "all"
-  | "selected"
-  | "in_storyboard"
-  | "not_in_storyboard"
-  | "portrait"
-  | "landscape"
-  | "tall_strip"
-  | "too_tall_strip";
+  |"all"
+  |"selected"
+  |"in_storyboard"
+  |"not_in_storyboard"
+  |"portrait"
+  |"landscape"
+  |"tall_strip"
+  |"too_tall_strip";
 
-export type AssetSortOrder = "asc" | "desc";
+export type AssetSortOrder ="asc" |"desc";
 
 export interface ImportedAssetsFilterBarProps {
   searchQuery: string;
@@ -35,8 +35,8 @@ export interface ImportedAssetsFilterBarProps {
   setFilterStatus: (status: AssetFilterStatus) => void;
   sortOrder: AssetSortOrder;
   setSortOrder: (order: AssetSortOrder) => void;
-  viewLayout: "scroll" | "grid";
-  setViewLayout: (layout: "scroll" | "grid") => void;
+  viewLayout:"scroll" |"grid";
+  setViewLayout: (layout:"scroll" |"grid") => void;
   totalAssetsCount: number;
   filteredAssetsCount: number;
   selectedCount: number;
@@ -79,22 +79,22 @@ export const ImportedAssetsFilterBar: React.FC<
 
   const getStatusLabel = () => {
     switch (filterStatus) {
-      case "in_storyboard":
-        return "Placed";
-      case "not_in_storyboard":
-        return "Unused";
-      case "selected":
-        return "Selected";
-      case "portrait":
-        return "Portrait";
-      case "landscape":
-        return "Landscape";
-      case "tall_strip":
-        return "Tall Strip";
-      case "too_tall_strip":
-        return "Too Tall";
+      case"in_storyboard":
+        return"Placed";
+      case"not_in_storyboard":
+        return"Unused";
+      case"selected":
+        return"Selected";
+      case"portrait":
+        return"Portrait";
+      case"landscape":
+        return"Landscape";
+      case"tall_strip":
+        return"Tall Strip";
+      case"too_tall_strip":
+        return"Too Tall";
       default:
-        return "All";
+        return"All";
     }
   };
 
@@ -128,16 +128,16 @@ export const ImportedAssetsFilterBar: React.FC<
           type="button"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className={`h-8 px-2 sm:px-3 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer shadow-sm ${
-            filterStatus !== "all"
-              ? "bg-blue-600/20 border-blue-500/40 text-blue-300"
-              : "bg-neutral-950/80 border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700"
+            filterStatus !=="all"
+              ?"bg-blue-600/20 border-blue-500/40 text-blue-300"
+              :"bg-neutral-950/80 border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700"
           }`}
         >
           <Filter className="w-3.5 h-3.5 text-blue-400" />
           <span>{getStatusLabel()}</span>
           <ChevronDown
             className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
-              isDropdownOpen ? "rotate-180 text-blue-400" : ""
+              isDropdownOpen ?"rotate-180 text-blue-400" :""
             }`}
           />
         </button>
@@ -156,9 +156,9 @@ export const ImportedAssetsFilterBar: React.FC<
                 setIsDropdownOpen(false);
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
-                filterStatus === "all"
-                  ? "bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                filterStatus ==="all"
+                  ?"bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
+                  :"text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -177,9 +177,9 @@ export const ImportedAssetsFilterBar: React.FC<
                 setIsDropdownOpen(false);
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
-                filterStatus === "in_storyboard"
-                  ? "bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                filterStatus ==="in_storyboard"
+                  ?"bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
+                  :"text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -198,9 +198,9 @@ export const ImportedAssetsFilterBar: React.FC<
                 setIsDropdownOpen(false);
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
-                filterStatus === "not_in_storyboard"
-                  ? "bg-amber-600/25 text-amber-300 border border-amber-500/30"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                filterStatus ==="not_in_storyboard"
+                  ?"bg-amber-600/25 text-amber-300 border border-amber-500/30"
+                  :"text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -219,9 +219,9 @@ export const ImportedAssetsFilterBar: React.FC<
                 setIsDropdownOpen(false);
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
-                filterStatus === "selected"
-                  ? "bg-cyan-600/25 text-blue-300 border border-blue-500/30"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                filterStatus ==="selected"
+                  ?"bg-cyan-600/25 text-blue-300 border border-blue-500/30"
+                  :"text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -246,9 +246,9 @@ export const ImportedAssetsFilterBar: React.FC<
                 setIsDropdownOpen(false);
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
-                filterStatus === "portrait"
-                  ? "bg-purple-600/25 text-purple-300 border border-purple-500/30"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                filterStatus ==="portrait"
+                  ?"bg-purple-600/25 text-purple-300 border border-purple-500/30"
+                  :"text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -264,9 +264,9 @@ export const ImportedAssetsFilterBar: React.FC<
                 setIsDropdownOpen(false);
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
-                filterStatus === "landscape"
-                  ? "bg-sky-600/25 text-sky-300 border border-sky-500/30"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                filterStatus ==="landscape"
+                  ?"bg-sky-600/25 text-sky-300 border border-sky-500/30"
+                  :"text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -282,9 +282,9 @@ export const ImportedAssetsFilterBar: React.FC<
                 setIsDropdownOpen(false);
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
-                filterStatus === "tall_strip"
-                  ? "bg-blue-600/25 text-blue-300 border border-blue-500/30"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                filterStatus ==="tall_strip"
+                  ?"bg-blue-600/25 text-blue-300 border border-blue-500/30"
+                  :"text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -300,9 +300,9 @@ export const ImportedAssetsFilterBar: React.FC<
                 setIsDropdownOpen(false);
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
-                filterStatus === "too_tall_strip"
-                  ? "bg-rose-600/25 text-rose-300 border border-rose-500/30"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                filterStatus ==="too_tall_strip"
+                  ?"bg-rose-600/25 text-rose-300 border border-rose-500/30"
+                  :"text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -321,9 +321,9 @@ export const ImportedAssetsFilterBar: React.FC<
           onClick={() => setViewLayout("scroll")}
           title="Horizontal Scroll View"
           className={`h-7 px-2.5 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-            viewLayout === "scroll"
-              ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
-              : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
+            viewLayout ==="scroll"
+              ?"bg-blue-600 text-white shadow-sm"
+              :"text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
           }`}
         >
           <Rows className="w-3.5 h-3.5" />
@@ -334,9 +334,9 @@ export const ImportedAssetsFilterBar: React.FC<
           onClick={() => setViewLayout("grid")}
           title="Grid View"
           className={`h-7 px-2.5 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-            viewLayout === "grid"
-              ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
-              : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
+            viewLayout ==="grid"
+              ?"bg-blue-600 text-white shadow-sm"
+              :"text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
           }`}
         >
           <LayoutGrid className="w-3.5 h-3.5" />

@@ -37,15 +37,11 @@ export const ImageEditorEmptyState: React.FC<ImageEditorEmptyStateProps> = ({
           <stop offset="0%" stop-color="#1e293b"/>
           <stop offset="100%" stop-color="#0f172a"/>
         </linearGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="8" result="blur"/>
-          <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-        </filter>
       </defs>
       <rect width="800" height="1200" fill="url(#bg)"/>
       
       <!-- Frame 1 -->
-      <rect x="40" y="50" width="720" height="340" rx="16" fill="url(#p1)" stroke="#3b82f6" stroke-width="3" filter="url(#glow)"/>
+      <rect x="40" y="50" width="720" height="340" rx="16" fill="url(#p1)" stroke="#3b82f6" stroke-width="3"/>
       <text x="400" y="190" fill="#ffffff" font-family="sans-serif" font-size="32" font-weight="900" text-anchor="middle" letter-spacing="2">DEMO WEBTOON PANEL 01</text>
       <text x="400" y="230" fill="#60a5fa" font-family="monospace" font-size="16" text-anchor="middle">SONIKOMA VISION PIPELINE</text>
 

@@ -59,7 +59,7 @@ button:not(:disabled):not(.no-hover-lift):not([data-no-transform]):active,
   -webkit-overflow-scrolling: touch;
 }
 
-/* Primary Accent & Gradient Button Neon Glow */
+/* Primary Accent & Gradient Button Hover Shadow */
 button.bg-blue-600:not(:disabled):hover,
 button.bg-blue-500:not(:disabled):hover,
 button.bg-gradient-to-r:not(:disabled):hover {

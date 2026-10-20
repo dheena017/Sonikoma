@@ -1,5 +1,5 @@
-import React from "react";
-import { Film, Plus, Sparkles } from "lucide-react";
+import React from"react";
+import { Film, Plus, Sparkles } from"lucide-react";
 
 interface AgentHeroBannerProps {
   onOpenHistory?: () => void;
@@ -22,7 +22,7 @@ export const AgentHeroBanner: React.FC<AgentHeroBannerProps> = ({
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#2F2F2F] pb-6">
       <div className="space-y-2 max-w-2xl text-left">
         <h1 className="text-3xl sm:text-4xl font-black text-[#E5E5E5] tracking-tight leading-tight">
-          Autonomous Webtoon{" "}
+          Autonomous Webtoon{""}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#60A5FA]">
             Agent
           </span>
@@ -53,8 +53,8 @@ export const AgentHeroBanner: React.FC<AgentHeroBannerProps> = ({
             onClick={onStartNew}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-mono font-bold tracking-wide transition-all cursor-pointer border active:scale-95 shadow-sm ${
               isCreatingNew || !hasActiveRun
-                ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 text-white border-blue-400 shadow-blue-500/25 ring-2 ring-blue-500/40"
-                : "bg-[#1E1E1E] hover:bg-[#282828] border-[#383838] text-gray-200 hover:text-white"
+                ?"bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 text-white border-blue-400  ring-2 ring-blue-500/40"
+                :"bg-[#1E1E1E] hover:bg-[#282828] border-[#383838] text-gray-200 hover:text-white"
             }`}
             title="Launch creation form to generate a new video"
           >

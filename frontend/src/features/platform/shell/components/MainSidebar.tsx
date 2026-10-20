@@ -23,19 +23,19 @@ import {
   Database,
   Image,
   User,
-} from "lucide-react";
+} from"lucide-react";
 
-import { useThemeMode } from "@/shared/hooks/useThemeMode";
+import { useThemeMode } from"@/shared/hooks/useThemeMode";
 import {
   getHumanEditorPath,
   getImageEditorPath,
-} from "@/shared/utils/workspaceNavigation";
-import { GeneratedPanel } from "@/shared/types";
-import { Notification } from "@/features/platform/notifications";
-import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
-import { SonikomaLogo } from "@/shared/ui/branding";
-import { useMemo } from "react";
-import React from "react";
+} from"@/shared/utils/workspaceNavigation";
+import { GeneratedPanel } from"@/shared/types";
+import { Notification } from"@/features/platform/notifications";
+import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
+import { SonikomaLogo } from"@/shared/ui/branding";
+import { useMemo } from"react";
+import React from"react";
 
 interface SidebarProps {
   isProcessing: boolean;
@@ -109,29 +109,28 @@ export const ActiveProjectSidebarWidget: React.FC<{
                 <img
                   src={
                     coverUrl.startsWith("http")
-                      ? `/api/v1/proxy/image?url=${encodeURIComponent(
+                      ?`/api/v1/proxy/image?url=${encodeURIComponent(
                           coverUrl
                         )}`
                       : coverUrl
                   }
-                  alt={activeProjectData.project?.title || "Project Cover"}
+                  alt={activeProjectData.project?.title ||"Project Cover"}
                   onError={() => setImgError(true)}
                   className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-blue-600/30 to-indigo-600/30 border border-[#3B82F6]/20 flex items-center justify-center text-[#60A5FA] font-bold text-xs">
-                  {activeProjectData.project?.title?.charAt(0).toUpperCase() ||
-                    "P"}
+                  {activeProjectData.project?.title?.charAt(0).toUpperCase() ||"P"}
                 </div>
               )}
             </div>
             <div className="min-w-0 flex-1">
               <h4 className="font-semibold text-xs text-neutral-100 truncate leading-tight">
-                {activeProjectData.project?.title || "Untitled Project"}
+                {activeProjectData.project?.title ||"Untitled Project"}
               </h4>
               <span className="text-[10px] text-neutral-400 truncate font-mono">
                 {activeProjectData.panels?.length || 0} panel
-                {activeProjectData.panels?.length !== 1 ? "s" : ""}
+                {activeProjectData.panels?.length !== 1 ?"s" :""}
               </span>
             </div>
           </div>
@@ -158,7 +157,7 @@ export const ActiveProjectSidebarWidget: React.FC<{
             onClick={() => setDrawerOpen(true)}
             className="w-full py-2 px-3 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-700 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm hover: cursor-pointer active:scale-[0.98]"
           >
-            <FolderOpen className="w-3.5 h-3.5 text-[#3B82F6] " />
+            <FolderOpen className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Select Project</span>
           </button>
         </div>
@@ -192,39 +191,39 @@ const SidebarInner = ({
   const chapterPathMatch = currentPath.match(
     /\/series\/[^\/]+\/chapters\/([^\/]+)/
   );
-  const isWorkspace = currentPath === "/scraper";
-  const isDashboardOverview = currentPath === "/dashboard";
+  const isWorkspace = currentPath ==="/scraper";
+  const isDashboardOverview = currentPath ==="/dashboard";
   const isAdminDashboardPath =
-    currentPath === "/admin" ||
-    currentPath === "/admin/" ||
-    currentPath === "/admin-dashboard";
+    currentPath ==="/admin" ||
+    currentPath ==="/admin/" ||
+    currentPath ==="/admin-dashboard";
   const isAdminPath =
-    currentPath.startsWith("/admin/") && currentPath !== "/admin/";
-  const isAutoCrop = currentPath === "/auto-crop";
+    currentPath.startsWith("/admin/") && currentPath !=="/admin/";
+  const isAutoCrop = currentPath ==="/auto-crop";
   const isEditor =
     currentPath.startsWith("/editor") ||
     currentPath.startsWith("/scraper/editor");
   const isImageEditorPath =
-    currentPath === "/image-editor" ||
-    currentPath === "/image-editor/" ||
+    currentPath ==="/image-editor" ||
+    currentPath ==="/image-editor/" ||
     currentPath.startsWith("/image-editor/") ||
     currentPath.includes("/image-editor");
   const isVideoEditorPath =
-    currentPath === "/video-editor" ||
-    currentPath === "/video-editor/" ||
+    currentPath ==="/video-editor" ||
+    currentPath ==="/video-editor/" ||
     currentPath.startsWith("/video-editor/");
-  const isShortcuts = currentPath === "/shortcuts";
-  const isProjects = currentPath === "/projects";
+  const isShortcuts = currentPath ==="/shortcuts";
+  const isProjects = currentPath ==="/projects";
 
   const isAdmin = useMemo(() => {
-    if (user?.creator_role === "admin" || user?.role === "admin") return true;
-    if (typeof window !== "undefined") {
+    if (user?.creator_role ==="admin" || user?.role ==="admin") return true;
+    if (typeof window !=="undefined") {
       if (localStorage.getItem("sonikoma_admin_token")) return true;
       try {
         const savedUserStr = localStorage.getItem("sonikoma_user");
         if (savedUserStr) {
           const u = JSON.parse(savedUserStr);
-          if (u?.creator_role === "admin" || u?.role === "admin") return true;
+          if (u?.creator_role ==="admin" || u?.role ==="admin") return true;
         }
       } catch (e) {}
     }
@@ -242,14 +241,13 @@ const SidebarInner = ({
     } else {
       if (isDirty) {
         const confirm = (window as any).confirmAsync || window.confirm;
-        const confirmed = await confirm(
-          "You have unsaved changes. Are you sure you want to navigate away? Your changes will be lost."
+        const confirmed = await confirm("You have unsaved changes. Are you sure you want to navigate away? Your changes will be lost."
         );
         if (!confirmed) {
           return;
         }
       }
-      window.history.pushState({}, "", path);
+      window.history.pushState({},"", path);
       window.dispatchEvent(new Event("popstate"));
     }
     onClose(); // Close mobile drawer when navigating
@@ -278,66 +276,66 @@ const SidebarInner = ({
 
   const menuItems = [
     {
-      group: "Main Workspace",
+      group:"Main Workspace",
       items: [
         {
-          label: "Dashboard",
+          label:"Dashboard",
           icon: LayoutDashboard,
           active: isDashboardOverview,
-          path: "/dashboard",
+          path:"/dashboard",
           onClick: handleNavigateToDashboardOverview,
           enabled: true,
         },
         {
-          label: "Projects",
+          label:"Projects",
           icon: FolderOpen,
           active: isProjects,
-          path: "/projects",
+          path:"/projects",
           onClick: () => navigateTo("/projects"),
           enabled: true,
         },
         {
-          label: "Workspace",
+          label:"Workspace",
           icon: Layout,
           active: isWorkspace,
-          path: "/scraper",
+          path:"/scraper",
           onClick: handleNavigateToWorkspace,
           enabled: true,
         },
       ],
     },
     {
-      group: "Creative Studio",
+      group:"Creative Studio",
       items: [
         {
-          label: "Creative Suite",
+          label:"Creative Suite",
           icon: Sparkles,
           active:
-            currentPath === "/creative-suite" ||
+            currentPath ==="/creative-suite" ||
             currentPath.startsWith("/creative-suite/") ||
             (currentPath.startsWith("/ai-") &&
               !currentPath.startsWith("/ai-core")) ||
-            currentPath === "/translation" ||
-            currentPath === "/panel-assistant" ||
-            currentPath === "/youtube",
-          path: "/creative-suite",
+            currentPath ==="/translation" ||
+            currentPath ==="/panel-assistant" ||
+            currentPath ==="/youtube",
+          path:"/creative-suite",
           onClick: () => navigateTo("/creative-suite"),
           enabled: true,
         },
         {
-          label: "AI Core & Multi-Engine",
+          label:"AI Core & Multi-Engine",
           icon: Brain,
           active:
-            currentPath === "/ai-core" || currentPath.startsWith("/ai-core/"),
-          path: "/ai-core",
+            currentPath ==="/ai-core" || currentPath.startsWith("/ai-core/"),
+          path:"/ai-core",
           onClick: () => navigateTo("/ai-core"),
           enabled: true,
         },
         {
-          label: "Image Editor",
+          label:"Image Editor",
           icon: Image,
           active: isImageEditorPath,
-          path: "/image-editor",
+          path:"/image-editor",
           onClick: () =>
             navigateTo(
               getImageEditorPath({
@@ -350,20 +348,20 @@ const SidebarInner = ({
           enabled: true,
         },
         {
-          label: "Video Editor",
+          label:"Video Editor",
           icon: Film,
           active: isVideoEditorPath,
-          path: "/video-editor",
+          path:"/video-editor",
           onClick: () => navigateTo("/video-editor"),
           enabled: true,
         },
         ...(isAdmin
           ? [
               {
-                label: "Admin",
+                label:"Admin",
                 icon: Shield,
                 active: isAdminDashboardPath || isAdminPath,
-                path: "/admin",
+                path:"/admin",
                 onClick: () => navigateTo("/admin"),
                 enabled: true,
               },
@@ -372,30 +370,30 @@ const SidebarInner = ({
       ],
     },
     {
-      group: "Account & Alerts",
+      group:"Account & Alerts",
       items: [
         {
-          label: "Notifications",
+          label:"Notifications",
           icon: Bell,
-          active: currentPath === "/notifications",
-          path: "/notifications",
+          active: currentPath ==="/notifications",
+          path:"/notifications",
           onClick: () => navigateTo("/notifications"),
           enabled: true,
           badge: unreadCount > 0 ? unreadCount : undefined,
         },
         {
-          label: "Shortcuts",
+          label:"Shortcuts",
           icon: Keyboard,
           active: isShortcuts,
-          path: "/shortcuts",
+          path:"/shortcuts",
           onClick: () => navigateTo("/shortcuts"),
           enabled: true,
         },
         {
-          label: "Profile",
+          label:"Profile",
           icon: User,
-          active: currentPath === "/profile",
-          path: "/profile",
+          active: currentPath ==="/profile",
+          path:"/profile",
           onClick: () => navigateTo("/profile"),
           enabled: true,
         },
@@ -450,12 +448,12 @@ const SidebarInner = ({
                         aria-label={item.label}
                         className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold font-sans transition-all duration-200 cursor-pointer text-left relative group disabled:opacity-35 disabled:cursor-not-allowed ${
                           item.active
-                            ? "text-white bg-[#3B82F6] border border-[#60A5FA]/40 shadow-sm"
-                            : "text-neutral-400 bg-transparent hover:text-white hover:bg-[#1E1E1E] hover:border-neutral-700 border border-transparent"
+                            ?"text-white bg-[#3B82F6] border border-[#60A5FA]/40 shadow-sm"
+                            :"text-neutral-400 bg-transparent hover:text-white hover:bg-[#1E1E1E] hover:border-neutral-700 border border-transparent"
                         } ${
                           (item as any).isProcessing
-                            ? "ring-1 ring-[#3B82F6]/50"
-                            : ""
+                            ?"ring-1 ring-[#3B82F6]/50"
+                            :""
                         }`}
                       >
                         {/* Active Left Indicator Pill */}
@@ -467,15 +465,15 @@ const SidebarInner = ({
                           <Icon
                             className={`h-4 w-4 transition-colors duration-150 ${
                               item.active
-                                ? "text-white"
-                                : "text-neutral-400 group-hover:text-[#3B82F6]"
+                                ?"text-white"
+                                :"text-neutral-400 group-hover:text-[#3B82F6]"
                             }`}
                           />
                           <span
                             className={
                               item.active
-                                ? "font-bold text-white"
-                                : "font-medium text-neutral-300 "
+                                ?"font-bold text-white"
+                                :"font-medium text-neutral-300"
                             }
                           >
                             {item.label}
@@ -484,11 +482,11 @@ const SidebarInner = ({
                         {(item as any).badge && (
                           <span
                             className={`text-[10px] px-2 py-0.5 rounded-full font-sans font-bold ${
-                              item.label === "Notifications" && !item.active
-                                ? "bg-[#3B82F6] text-white shadow-sm shadow-blue-900/50"
+                              item.label ==="Notifications" && !item.active
+                                ?"bg-[#3B82F6] text-white shadow-sm"
                                 : item.active
-                                ? "bg-[#1E1E1E] text-white border border-[#3B82F6]/40"
-                                : "bg-[#1E1E1E] text-neutral-400 border border-[#2F2F2F]"
+                                ?"bg-[#1E1E1E] text-white border border-[#3B82F6]/40"
+                                :"bg-[#1E1E1E] text-neutral-400 border border-[#2F2F2F]"
                             }`}
                           >
                             {(item as any).badge}
@@ -554,8 +552,8 @@ const SidebarInner = ({
       <aside
         className={`fixed top-0 bottom-0 left-0 h-screen w-72 shrink-0 bg-neutral-950/80 backdrop-blur-2xl border-r border-white/10 z-50 transition-all duration-300 ease-out transform overflow-hidden ${
           isOpen
-            ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.8)]"
-            : "-translate-x-full"
+            ?"translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.8)]"
+            :"-translate-x-full"
         }`}
       >
         {sidebarContent}

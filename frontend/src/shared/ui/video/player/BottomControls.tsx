@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   Play,
   Pause,
@@ -14,8 +14,8 @@ import {
   Minimize2,
   ChevronRight,
   Sliders,
-} from "lucide-react";
-import { GeneratedPanel } from "@/shared/types";
+} from"lucide-react";
+import { GeneratedPanel } from"@/shared/types";
 
 interface Chapter {
   title: string;
@@ -61,7 +61,7 @@ export interface VideoPreviewBottomControlsProps {
   showSubtitles: boolean;
   setShowSubtitles: (val: boolean) => void;
   togglePictureInPicture: () => void;
-  variant?: "floating" | "theater" | "embedded";
+  variant?:"floating" |"theater" |"embedded";
   isTheaterMode: boolean;
   setIsTheaterMode: (val: boolean) => void;
   toggleFullscreen: () => void;
@@ -113,8 +113,8 @@ export const VideoPreviewBottomControls: React.FC<
     <div
       className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent pt-12 pb-6 px-6 z-30 transition-all duration-300 ${
         visible
-          ? "opacity-100 translate-y-0"
-          : "opacity-0 translate-y-4 pointer-events-none"
+          ?"opacity-100 translate-y-0"
+          :"opacity-0 translate-y-4 pointer-events-none"
       }`}
     >
       {/* PROGRESS SCRUBBER ROW WITH HOVER TIMELINE MARKS & CHIPS */}
@@ -124,8 +124,8 @@ export const VideoPreviewBottomControls: React.FC<
           <div
             className="absolute bottom-6 flex flex-col items-center z-45 transition-all duration-75 pointer-events-none w-48"
             style={{
-              left: `${Math.max(10, Math.min(90, hoverProgress.percent * 100))}%`,
-              transform: "translateX(-50%)",
+              left:`${Math.max(10, Math.min(90, hoverProgress.percent * 100))}%`,
+              transform:"translateX(-50%)",
             }}
           >
             <div className="bg-neutral-900/95 border border-neutral-700/80 rounded-2xl p-2 shadow-2xl backdrop-blur-md flex flex-col gap-1.5 w-full overflow-hidden">
@@ -162,8 +162,7 @@ export const VideoPreviewBottomControls: React.FC<
                         (activePanelForHover as any).imageUrl ||
                         (activePanelForHover as any).img_url ||
                         (activePanelForHover as any).panel_url ||
-                        (activePanelForHover as any).url ||
-                        ""
+                        (activePanelForHover as any).url ||""
                       }
                       className="w-full h-full object-cover"
                       alt="Seeking Panel"
@@ -195,8 +194,7 @@ export const VideoPreviewBottomControls: React.FC<
                   )}
                 </div>
                 {activePanelForHover?.speech_text && (
-                  <p className="text-[9px] text-neutral-300 italic truncate leading-snug font-sans mt-1">
-                    "{activePanelForHover.speech_text}"
+                  <p className="text-[9px] text-neutral-300 italic truncate leading-snug font-sans mt-1">"{activePanelForHover.speech_text}"
                   </p>
                 )}
               </div>
@@ -223,7 +221,7 @@ export const VideoPreviewBottomControls: React.FC<
               <div
                 key={idx}
                 className="absolute top-0 bottom-0 w-0.5 bg-black/80 z-20"
-                style={{ left: `${markerPercent}%` }}
+                style={{ left:`${markerPercent}%` }}
               />
             );
           })}
@@ -233,7 +231,7 @@ export const VideoPreviewBottomControls: React.FC<
             <div
               className="absolute top-0 left-0 h-full bg-white/20 rounded-full z-[5] pointer-events-none transition-all duration-75"
               style={{
-                width: `${Math.max(0, Math.min(100, hoverProgress.percent * 100))}%`,
+                width:`${Math.max(0, Math.min(100, hoverProgress.percent * 100))}%`,
               }}
             />
           )}
@@ -242,7 +240,7 @@ export const VideoPreviewBottomControls: React.FC<
           <div
             className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#3B82F6] to-[#2563EB] rounded-full z-10"
             style={{
-              width: `${
+              width:`${
                 totalDuration > 0
                   ? Math.max(0, Math.min(100, (currentTime / totalDuration) * 100))
                   : 0
@@ -255,7 +253,7 @@ export const VideoPreviewBottomControls: React.FC<
             <div
               className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full aspect-square bg-white/90 border border-[#3B82F6] shadow-sm pointer-events-none z-25 transition-transform duration-75"
               style={{
-                left: `${Math.max(0, Math.min(100, hoverProgress.percent * 100))}%`,
+                left:`${Math.max(0, Math.min(100, hoverProgress.percent * 100))}%`,
               }}
             />
           )}
@@ -264,7 +262,7 @@ export const VideoPreviewBottomControls: React.FC<
           <div
             className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full aspect-square bg-white border-2 border-[#3B82F6] group-hover/scrub:scale-125 pointer-events-none transition-transform duration-150 z-30"
             style={{
-              left: `${
+              left:`${
                 totalDuration > 0
                   ? Math.max(0, Math.min(100, (currentTime / totalDuration) * 100))
                   : 0
@@ -288,7 +286,7 @@ export const VideoPreviewBottomControls: React.FC<
 
           <button
             onClick={togglePlay}
-            className="h-10 w-10 rounded-full bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 shadow-md shadow-blue-500/30 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95"
+            className="h-10 w-10 rounded-full bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 shadow-md text-white flex items-center justify-center transition-all cursor-pointer active:scale-95"
           >
             {isPlaying ? (
               <Pause className="h-4 w-4 fill-white" />
@@ -338,8 +336,8 @@ export const VideoPreviewBottomControls: React.FC<
           {/* TIMERS INDICATORS */}
           <div className="flex items-center gap-2 px-1">
             <span className="text-xs font-mono font-medium text-neutral-200 tabular-nums select-none">
-              {formatTime(currentTime)}{" "}
-              <span className="text-neutral-600">/</span>{" "}
+              {formatTime(currentTime)}{""}
+              <span className="text-neutral-600">/</span>{""}
               {formatTime(totalDuration)}
             </span>
           </div>
@@ -371,15 +369,14 @@ export const VideoPreviewBottomControls: React.FC<
               if (addNotification)
                 addNotification(
                   isLooping
-                    ? "Loop Playback Disabled"
-                    : "Loop Playback Enabled",
-                  "info"
+                    ?"Loop Playback Disabled"
+                    :"Loop Playback Enabled","info"
                 );
             }}
             className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
               isLooping
-                ? "bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
-                : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
+                ?"bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
+                :"hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
             }`}
             title="Loop Playback (L)"
           >
@@ -391,14 +388,13 @@ export const VideoPreviewBottomControls: React.FC<
               setShowSubtitles(!showSubtitles);
               if (addNotification)
                 addNotification(
-                  showSubtitles ? "Subtitles Disabled" : "Subtitles Enabled",
-                  "info"
+                  showSubtitles ?"Subtitles Disabled" :"Subtitles Enabled","info"
                 );
             }}
             className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
               showSubtitles
-                ? "bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
-                : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
+                ?"bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
+                :"hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
             }`}
             title="Toggle Subtitles"
           >
@@ -420,21 +416,21 @@ export const VideoPreviewBottomControls: React.FC<
             }}
             className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
               showSettings
-                ? "bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
-                : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
+                ?"bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
+                :"hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
             }`}
             title="Playback Settings"
           >
             <Settings className="h-4 w-4" />
           </button>
 
-          {variant !== "floating" && (
+          {variant !=="floating" && (
             <button
               onClick={() => setIsTheaterMode(!isTheaterMode)}
               className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
                 isTheaterMode
-                  ? "bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
-                  : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
+                  ?"bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
+                  :"hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
               }`}
               title="Toggle Theater Mode (T)"
             >

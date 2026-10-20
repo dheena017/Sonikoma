@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Sparkles,
   Layers,
@@ -15,8 +15,8 @@ import {
   SlidersHorizontal,
   Headphones,
   Check,
-} from "lucide-react";
-import { AISeriesProject, ChapterSession } from "@/features/intelligence/series/api/aiSeries";
+} from"lucide-react";
+import { AISeriesProject, ChapterSession } from"@/features/intelligence/series/api/aiSeries";
 
 interface AISeriesStudioBarProps {
   seriesId: string;
@@ -29,8 +29,8 @@ interface AISeriesStudioBarProps {
   onSynthesizeAudio: () => Promise<void>;
   isSynthesizingVisuals: boolean;
   isSynthesizingAudio: boolean;
-  viewportMode: "video" | "strip" | "grid";
-  onSetViewportMode: (mode: "video" | "strip" | "grid") => void;
+  viewportMode:"video" |"strip" |"grid";
+  onSetViewportMode: (mode:"video" |"strip" |"grid") => void;
   onOpenCharacterVault?: () => void;
   onOpenWorldBible?: () => void;
   totalChapters?: number;
@@ -56,29 +56,29 @@ export const AISeriesStudioBar: React.FC<AISeriesStudioBarProps> = ({
   const [isChapterDropdownOpen, setIsChapterDropdownOpen] = useState(false);
   const [isSessionDropdownOpen, setIsSessionDropdownOpen] = useState(false);
 
-  const format = (project?.format_type || "manhwa").toLowerCase();
-  const isManhwa = format === "manhwa";
-  const isManga = format === "comic_manga";
-  const isAnime = format === "anime";
+  const format = (project?.format_type ||"manhwa").toLowerCase();
+  const isManhwa = format ==="manhwa";
+  const isManga = format ==="comic_manga";
+  const isAnime = format ==="anime";
 
   const getFormatBadge = () => {
     if (isAnime) {
       return {
-        label: "Cinematic Anime (16:9)",
-        badgeBg: "bg-rose-500/20 text-rose-300 border-rose-500/40",
+        label:"Cinematic Anime (16:9)",
+        badgeBg:"bg-rose-500/20 text-rose-300 border-rose-500/40",
         icon: Tv,
       };
     }
     if (isManga) {
       return {
-        label: "Japanese Manga (3:4 Inked)",
-        badgeBg: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+        label:"Japanese Manga (3:4 Inked)",
+        badgeBg:"bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
         icon: Swords,
       };
     }
     return {
-      label: "Korean Manhwa (2:3 Webtoon)",
-      badgeBg: "bg-purple-500/20 text-purple-300 border-purple-500/40",
+      label:"Korean Manhwa (2:3 Webtoon)",
+      badgeBg:"bg-purple-500/20 text-purple-300 border-purple-500/40",
       icon: BookOpen,
     };
   };
@@ -94,8 +94,8 @@ export const AISeriesStudioBar: React.FC<AISeriesStudioBarProps> = ({
     ? activeSession.chapters
     : Array.from({ length: totalChapters }, (_, i) => ({
         chapter_number: i + 1,
-        title: `Episode ${i + 1}`,
-        status: i + 1 === selectedChapterNum ? "in_progress" : "planned",
+        title:`Episode ${i + 1}`,
+        status: i + 1 === selectedChapterNum ?"in_progress" :"planned",
         panels: [],
       }));
 
@@ -113,7 +113,7 @@ export const AISeriesStudioBar: React.FC<AISeriesStudioBarProps> = ({
 
         {/* Series Title */}
         <div className="font-bold text-white tracking-wide truncate max-w-[200px] sm:max-w-[260px]">
-          {project?.title || "AI Series"}
+          {project?.title ||"AI Series"}
         </div>
 
         <span className="text-neutral-600 hidden sm:inline">•</span>
@@ -140,8 +140,8 @@ export const AISeriesStudioBar: React.FC<AISeriesStudioBarProps> = ({
                   }}
                   className={`w-full text-left px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center justify-between ${
                     selectedSessionNum === sessNum
-                      ? "bg-indigo-600 text-white font-bold"
-                      : "text-neutral-300 hover:bg-white/10 hover:text-white"
+                      ?"bg-indigo-600 text-white font-bold"
+                      :"text-neutral-300 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   <span>Season {sessNum}</span>
@@ -161,7 +161,7 @@ export const AISeriesStudioBar: React.FC<AISeriesStudioBarProps> = ({
           >
             <span className="text-indigo-400">CH {selectedChapterNum}:</span>
             <span className="truncate max-w-[140px] sm:max-w-[180px]">
-              {currentChapter?.title || `Episode ${selectedChapterNum}`}
+              {currentChapter?.title ||`Episode ${selectedChapterNum}`}
             </span>
             <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
           </button>
@@ -184,8 +184,8 @@ export const AISeriesStudioBar: React.FC<AISeriesStudioBarProps> = ({
                       }}
                       className={`w-full text-left px-2.5 py-2 rounded-xl transition-all cursor-pointer flex items-center justify-between ${
                         isCur
-                          ? "bg-indigo-600 text-white font-bold shadow-md"
-                          : "text-neutral-300 hover:bg-white/10 hover:text-white"
+                          ?"bg-indigo-600 text-white font-bold shadow-md"
+                          :"text-neutral-300 hover:bg-white/10 hover:text-white"
                       }`}
                     >
                       <div className="truncate">
@@ -212,9 +212,9 @@ export const AISeriesStudioBar: React.FC<AISeriesStudioBarProps> = ({
             type="button"
             onClick={() => onSetViewportMode("video")}
             className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              viewportMode === "video"
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+              viewportMode ==="video"
+                ?"bg-indigo-600 text-white shadow-sm"
+                :"text-neutral-400 hover:text-white hover:bg-white/5"
             }`}
             title="16:9 Theatrical Video Viewport"
           >
@@ -224,20 +224,20 @@ export const AISeriesStudioBar: React.FC<AISeriesStudioBarProps> = ({
           {!isAnime && (
             <button
               type="button"
-              onClick={() => onSetViewportMode(isManga ? "grid" : "strip")}
+              onClick={() => onSetViewportMode(isManga ?"grid" :"strip")}
               className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                viewportMode === "strip" || viewportMode === "grid"
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-neutral-400 hover:text-white hover:bg-white/5"
+                viewportMode ==="strip" || viewportMode ==="grid"
+                  ?"bg-indigo-600 text-white shadow-sm"
+                  :"text-neutral-400 hover:text-white hover:bg-white/5"
               }`}
               title={
                 isManga
-                  ? "B&W Screentone Page Grid"
-                  : "Continuous Vertical Webtoon Strip"
+                  ?"B&W Screentone Page Grid"
+                  :"Continuous Vertical Webtoon Strip"
               }
             >
               <BookOpen className="w-3 h-3" />
-              <span>{isManga ? "Manga Grid" : "Webtoon Strip"}</span>
+              <span>{isManga ?"Manga Grid" :"Webtoon Strip"}</span>
             </button>
           )}
         </div>
@@ -247,16 +247,16 @@ export const AISeriesStudioBar: React.FC<AISeriesStudioBarProps> = ({
           type="button"
           onClick={onSynthesizeVisuals}
           disabled={isSynthesizingVisuals}
-          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-mono font-bold text-[11px] shadow-md shadow-purple-950/40 border border-purple-400/30 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 active:scale-95"
+          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-mono font-bold text-[11px] shadow-md border border-purple-400/30 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 active:scale-95"
           title="Render high-fidelity diffusion visuals for all panels in this chapter"
         >
           <Sparkles
             className={`w-3.5 h-3.5 text-amber-300 ${
-              isSynthesizingVisuals ? "animate-spin" : "animate-pulse"
+              isSynthesizingVisuals ?"animate-spin" :"animate-pulse"
             }`}
           />
           <span className="hidden sm:inline">
-            {isSynthesizingVisuals ? "Synthesizing Panels..." : "Synthesize Chapter Visuals"}
+            {isSynthesizingVisuals ?"Synthesizing Panels..." :"Synthesize Chapter Visuals"}
           </span>
           <span className="sm:hidden">Visuals</span>
         </button>
@@ -266,16 +266,16 @@ export const AISeriesStudioBar: React.FC<AISeriesStudioBarProps> = ({
           type="button"
           onClick={onSynthesizeAudio}
           disabled={isSynthesizingAudio}
-          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-mono font-bold text-[11px] shadow-md shadow-emerald-950/40 border border-emerald-400/30 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 active:scale-95"
+          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-mono font-bold text-[11px] shadow-md border border-emerald-400/30 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 active:scale-95"
           title="Synthesize Edge-TTS voice dubbing for dialogue and narration"
         >
           <Volume2
             className={`w-3.5 h-3.5 text-white ${
-              isSynthesizingAudio ? "animate-bounce" : ""
+              isSynthesizingAudio ?"animate-bounce" :""
             }`}
           />
           <span className="hidden sm:inline">
-            {isSynthesizingAudio ? "Dubbing Audio..." : "Dub Audio (Edge-TTS)"}
+            {isSynthesizingAudio ?"Dubbing Audio..." :"Dub Audio (Edge-TTS)"}
           </span>
           <span className="sm:hidden">Dub</span>
         </button>

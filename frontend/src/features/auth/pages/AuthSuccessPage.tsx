@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from"react";
 import {
   CheckCircle2,
   AlertCircle,
@@ -8,8 +8,8 @@ import {
   Loader2,
   RefreshCw,
   Home,
-} from "lucide-react";
-import { SonikomaLogo } from "@/shared/ui/branding";
+} from"lucide-react";
+import { SonikomaLogo } from"@/shared/ui/branding";
 
 export interface AuthSuccessPageProps {
   navigateTo: (path: string) => void;
@@ -21,8 +21,7 @@ export default function AuthSuccessPage({
   checkAuth,
 }: AuthSuccessPageProps) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [status, setStatus] = useState<"verifying" | "success" | "error">(
-    "verifying"
+  const [status, setStatus] = useState<"verifying" |"success" |"error">("verifying"
   );
   const [progress, setProgress] = useState<number>(15);
   const [countdown, setCountdown] = useState<number>(2);
@@ -41,13 +40,13 @@ export default function AuthSuccessPage({
 
       let token = params.get("token") || params.get("code");
       const isNewParam =
-        params.get("is_new") === "1" ||
-        params.get("is_new") === "true" ||
-        params.get("is_new_user") === "true" ||
-        params.get("is_new_user") === "1";
+        params.get("is_new") ==="1" ||
+        params.get("is_new") ==="true" ||
+        params.get("is_new_user") ==="true" ||
+        params.get("is_new_user") ==="1";
       isNewUserRef.current = isNewParam;
 
-      if (!token && typeof window !== "undefined") {
+      if (!token && typeof window !=="undefined") {
         token = localStorage.getItem("sonikoma_token");
       }
 
@@ -66,26 +65,24 @@ export default function AuthSuccessPage({
       localStorage.setItem("sonikoma_token", token);
 
       // Clean address bar and set title to canonical /auth-success
-      document.title = "Sonikoma - Authentication Successful";
+      document.title ="Sonikoma - Authentication Successful";
       if (window.history && window.history.replaceState) {
         window.history.replaceState(
-          {},
-          "Sonikoma - Authentication Successful",
-          "/auth-success"
+          {},"Sonikoma - Authentication Successful","/auth-success"
         );
       }
 
       // Store explicit mutually exclusive flag for Welcome modal in Dashboard
       if (isNewParam) {
-        sessionStorage.setItem("sonikoma_show_welcome_user", "true");
+        sessionStorage.setItem("sonikoma_show_welcome_user","true");
         sessionStorage.removeItem("sonikoma_show_welcome_back");
       } else {
-        sessionStorage.setItem("sonikoma_show_welcome_back", "true");
+        sessionStorage.setItem("sonikoma_show_welcome_back","true");
         sessionStorage.removeItem("sonikoma_show_welcome_user");
       }
 
       // Trigger checkAuth in parallel to hydrate user profile in store
-      if (typeof checkAuth === "function") {
+      if (typeof checkAuth ==="function") {
         checkAuth().catch(() => {});
       }
 
@@ -113,30 +110,26 @@ export default function AuthSuccessPage({
         clearInterval(countInterval);
       };
     } catch (err: any) {
-      setErrorMsg(err.message || "Authentication process failed.");
+      setErrorMsg(err.message ||"Authentication process failed.");
       setStatus("error");
     }
   }, [navigateTo, checkAuth]);
 
   const handleEnterDashboard = () => {
     if (isNewUserRef.current) {
-      sessionStorage.setItem("sonikoma_show_welcome_user", "true");
+      sessionStorage.setItem("sonikoma_show_welcome_user","true");
     } else {
-      sessionStorage.setItem("sonikoma_show_welcome_back", "true");
+      sessionStorage.setItem("sonikoma_show_welcome_back","true");
     }
     navigateTo("/dashboard");
   };
 
   return (
     <div className="relative min-h-screen w-full bg-[#08090D] text-white flex flex-col items-center justify-center p-4 sm:p-6 overflow-hidden select-none font-sans">
-      {/* ── Ambient Background Lighting Effects ── */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-gradient-to-tr from-purple-600/15 via-indigo-600/15 to-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-72 h-72 bg-purple-900/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute top-10 right-10 w-72 h-72 bg-cyan-900/10 rounded-full blur-[100px] pointer-events-none" />
 
       {/* ── Central Glassmorphic Card ── */}
       <div className="relative z-10 w-full max-w-md rounded-3xl border border-neutral-800/80 bg-[#10121a]/85 backdrop-blur-2xl p-7 sm:p-9 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] text-center animate-in fade-in zoom-in-95 duration-300">
-        {status === "error" ? (
+        {status ==="error" ? (
           /* ── ERROR VIEW ── */
           <div className="flex flex-col items-center space-y-5 animate-in fade-in">
             <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 shadow-inner">
@@ -183,7 +176,7 @@ export default function AuthSuccessPage({
             <div className="relative group">
               <div className="absolute -inset-2 bg-gradient-to-r from-purple-600/30 via-indigo-500/30 to-cyan-400/30 rounded-full blur-md animate-pulse pointer-events-none" />
               <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-[#161924] border border-neutral-700/60 shadow-xl">
-                {status === "verifying" ? (
+                {status ==="verifying" ? (
                   <Loader2 className="w-10 h-10 text-purple-400 animate-spin" />
                 ) : (
                   <div className="relative flex items-center justify-center">
@@ -216,8 +209,8 @@ export default function AuthSuccessPage({
             <div className="w-full space-y-2 pt-1">
               <div className="w-full h-2 bg-neutral-800/80 rounded-full overflow-hidden p-0.5 border border-neutral-700/40">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 transition-all duration-700 ease-out "
-                  style={{ width: `${progress}%` }}
+                  className="h-full rounded-full bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 transition-all duration-700 ease-out"
+                  style={{ width:`${progress}%` }}
                 />
               </div>
 
@@ -234,7 +227,7 @@ export default function AuthSuccessPage({
             <div className="w-full pt-1">
               <button
                 onClick={handleEnterDashboard}
-                className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-purple-900/30 hover:shadow-purple-700/40 active:scale-[0.98] cursor-pointer"
+                className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-lg active:scale-[0.98] cursor-pointer"
               >
                 <span>Enter Studio Dashboard</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

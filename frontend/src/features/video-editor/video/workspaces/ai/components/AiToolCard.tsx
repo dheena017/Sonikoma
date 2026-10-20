@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   BookOpen,
   Grid,
@@ -14,8 +14,8 @@ import {
   Eraser,
   Sliders,
   Wand2,
-} from "lucide-react";
-import { AiEngineTool } from "../../../types/workspace.types";
+} from"lucide-react";
+import { AiEngineTool } from"../../../types/workspace.types";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   BookOpen,
@@ -62,7 +62,7 @@ export const AiToolCard: React.FC<AiToolCardProps> = ({ tool, onRun }) => {
       </div>
       <button
         onClick={() => onRun(tool.title)}
-        className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold transition-all shadow-sm shadow-blue-500/25 shrink-0 cursor-pointer active:scale-95"
+        className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold transition-all shadow-sm shrink-0 cursor-pointer active:scale-95"
       >
         Run
       </button>

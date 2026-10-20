@@ -1,43 +1,39 @@
-import React from "react";
-import { Sparkles, Film, Volume2, Cpu, Play } from "lucide-react";
-import { ThemeKey } from "@/features/auth/components/constants";
-import { LandingAnimeScene } from "@/features/landing/components/LandingAnimeScene";
-import { SonikomaLogo } from "@/shared/ui/branding";
-import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import React from"react";
+import { Sparkles, Film, Volume2, Cpu, Play } from"lucide-react";
+import { ThemeKey } from"@/features/auth/components/constants";
+import { LandingAnimeScene } from"@/features/landing/components/LandingAnimeScene";
+import { SonikomaLogo } from"@/shared/ui/branding";
+import { Tooltip } from"@/shared/ui/common/TooltipPortal";
 
 interface AuthShowcaseProps {
   activeTheme: ThemeKey;
-  iconType: "login" | "register" | "forgot";
+  iconType:"login" |"register" |"forgot";
 }
 
 const SIMPLE_SLIDES = [
   {
     icon: Sparkles,
-    badge: "Step 1",
-    title: "Auto-Crop Comic Panels",
-    description:
-      "Automatically slice long webtoon strips into independent, perfectly cropped storyboard panels in seconds.",
+    badge:"Step 1",
+    title:"Auto-Crop Comic Panels",
+    description:"Automatically slice long webtoon strips into independent, perfectly cropped storyboard panels in seconds.",
   },
   {
     icon: Film,
-    badge: "Step 2",
-    title: "Smooth Camera Motion",
-    description:
-      "Bring static panels to life with automatic camera zooms, pan effects, and smooth vertical scrolling.",
+    badge:"Step 2",
+    title:"Smooth Camera Motion",
+    description:"Bring static panels to life with automatic camera zooms, pan effects, and smooth vertical scrolling.",
   },
   {
     icon: Volume2,
-    badge: "Step 3",
-    title: "Character Voice Narration",
-    description:
-      "Generate realistic character dialogue voiceovers and sync background music and sound effects automatically.",
+    badge:"Step 3",
+    title:"Character Voice Narration",
+    description:"Generate realistic character dialogue voiceovers and sync background music and sound effects automatically.",
   },
   {
     icon: Cpu,
-    badge: "Step 4",
-    title: "Export Ready Videos",
-    description:
-      "Download high-definition vertical MP4 videos ready to post on TikTok, YouTube Shorts, and Instagram Reels.",
+    badge:"Step 4",
+    title:"Export Ready Videos",
+    description:"Download high-definition vertical MP4 videos ready to post on TikTok, YouTube Shorts, and Instagram Reels.",
   },
 ];
 
@@ -72,8 +68,8 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
               key={idx}
               className={`absolute inset-0 flex flex-col justify-between transition-all duration-500 ease-out transform ${
                 isActive
-                  ? "opacity-100 scale-100 translate-y-0 visible"
-                  : "opacity-0 scale-95 translate-y-4 invisible pointer-events-none"
+                  ?"opacity-100 scale-100 translate-y-0 visible"
+                  :"opacity-0 scale-95 translate-y-4 invisible pointer-events-none"
               }`}
             >
               {/* Slide Title & Description */}
@@ -323,8 +319,8 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                   onClick={() => setCurrentSlide(idx)}
                   className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
                     idx === currentSlide
-                      ? "w-8 bg-blue-500 shadow-sm shadow-blue-500/50"
-                      : "w-2 bg-neutral-700 hover:bg-neutral-500"
+                      ?"w-8 bg-blue-500 shadow-sm"
+                      :"w-2 bg-neutral-700 hover:bg-neutral-500"
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />

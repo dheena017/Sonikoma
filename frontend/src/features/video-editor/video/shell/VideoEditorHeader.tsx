@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from"react";
 import {
   Cloud,
   ChevronDown,
@@ -16,23 +16,23 @@ import {
   FolderSync,
   Keyboard,
   MoreHorizontal,
-} from "lucide-react";
-import VideoCustomizeLayoutModal from "./VideoCustomizeLayoutModal";
-import VideoShortcutsHelpModal from "./VideoShortcutsHelpModal";
-import ProjectConfirmModal from "@/features/platform/projects/components/ProjectConfirmModal";
+} from"lucide-react";
+import VideoCustomizeLayoutModal from"./VideoCustomizeLayoutModal";
+import VideoShortcutsHelpModal from"./VideoShortcutsHelpModal";
+import ProjectConfirmModal from"@/features/platform/projects/components/ProjectConfirmModal";
 import {
   getUserAvatarUrl,
   DEFAULT_USER_AVATAR_DATA_URI,
-} from "@/shared/utils/avatar";
-import NotificationDropdown from "@/features/platform/notifications/components/NotificationDropdown";
-import { HeaderCreditsPopover } from "@/features/intelligence/core";
-import { Notification } from "@/features/platform/notifications";
-import { getUserCreditsPayload, claimDailyCredits } from "@/features/auth/api/auth";
-import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
-import { AIModelSelector } from "@/features/intelligence/core";
-import ServerStatusIndicator from "@/shared/ui/status/ServerStatusIndicator";
-import { SonikomaLogo } from "@/shared/ui/branding";
-import { useBackendHealth } from "@/shared/api/hooks/useBackendHealth";
+} from"@/shared/utils/avatar";
+import NotificationDropdown from"@/features/platform/notifications/components/NotificationDropdown";
+import { HeaderCreditsPopover } from"@/features/intelligence/core";
+import { Notification } from"@/features/platform/notifications";
+import { getUserCreditsPayload, claimDailyCredits } from"@/features/auth/api/auth";
+import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
+import { AIModelSelector } from"@/features/intelligence/core";
+import ServerStatusIndicator from"@/shared/ui/status/ServerStatusIndicator";
+import { SonikomaLogo } from"@/shared/ui/branding";
+import { useBackendHealth } from"@/shared/api/hooks/useBackendHealth";
 
 interface VideoEditorHeaderProps {
   seriesTitle?: string;
@@ -62,15 +62,15 @@ interface VideoEditorHeaderProps {
     rightInspector?: boolean;
     timeline?: boolean;
   };
-  onTogglePanel?: (panel: "mediaBin" | "rightInspector" | "timeline") => void;
+  onTogglePanel?: (panel:"mediaBin" |"rightInspector" |"timeline") => void;
   onNavigateToAll?: () => void;
   navigateTo?: (path: string) => void;
   fetchWithInterceptor?: any;
   user?: any;
   addNotification?: (message: string, type?: string) => void;
-  layoutMode?: "standard" | "full_timeline" | "preview_only";
+  layoutMode?:"standard" |"full_timeline" |"preview_only";
   onLayoutModeChange?: (
-    mode: "standard" | "full_timeline" | "preview_only"
+    mode:"standard" |"full_timeline" |"preview_only"
   ) => void;
 }
 
@@ -104,7 +104,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
   fetchWithInterceptor,
   user,
   addNotification,
-  layoutMode = "standard",
+  layoutMode ="standard",
   onLayoutModeChange,
 }) => {
   // Resolve live user from prop or LocalStorage session cache
@@ -132,14 +132,14 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
       const target = e.target as HTMLElement | null;
       if (
         target &&
-        (target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.tagName === "SELECT" ||
+        (target.tagName ==="INPUT" ||
+          target.tagName ==="TEXTAREA" ||
+          target.tagName ==="SELECT" ||
           target.isContentEditable)
       ) {
         return;
       }
-      if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+      if (e.key ==="?" || (e.shiftKey && e.key ==="/")) {
         e.preventDefault();
         setShowShortcutsModal((prev) => !prev);
       }
@@ -168,10 +168,10 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
     if (!fetchWithInterceptor) return;
     try {
       const res = await claimDailyCredits(fetchWithInterceptor);
-      if (res.success && typeof res.new_balance === "number") {
+      if (res.success && typeof res.new_balance ==="number") {
         setCredits(res.new_balance);
         if (addNotification) {
-          addNotification(res.message || "Claimed daily bonus!", "success");
+          addNotification(res.message ||"Claimed daily bonus!","success");
         }
       }
     } catch {
@@ -231,8 +231,8 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
   const displayTitle =
     seriesTitle && chapterTitle
-      ? `${seriesTitle} · ${chapterTitle}`
-      : seriesTitle ?? "Cyberpunk Story";
+      ?`${seriesTitle} · ${chapterTitle}`
+      : seriesTitle ??"Cyberpunk Story";
 
   return (
     <>
@@ -262,9 +262,9 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             type="button"
             onClick={() => onLayoutModeChange?.("standard")}
             className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-              layoutMode === "standard"
-                ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/50 shadow-sm shadow-blue-500/25"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+              layoutMode ==="standard"
+                ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/50 shadow-sm"
+                :"text-neutral-400 hover:text-white hover:bg-neutral-800"
             }`}
             title="Standard Studio Split Mode"
           >
@@ -275,9 +275,9 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             type="button"
             onClick={() => onLayoutModeChange?.("full_timeline")}
             className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-              layoutMode === "full_timeline"
-                ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/50 shadow-sm shadow-blue-500/25"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+              layoutMode ==="full_timeline"
+                ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/50 shadow-sm"
+                :"text-neutral-400 hover:text-white hover:bg-neutral-800"
             }`}
             title="Full Page Multi-Track Timeline Mode"
           >
@@ -378,8 +378,8 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                       />
                     </svg>
                     {layoutConfig?.mediaBin
-                      ? "Hide Media Bin"
-                      : "Show Media Bin"}
+                      ?"Hide Media Bin"
+                      :"Show Media Bin"}
                   </button>
 
                   <button
@@ -404,7 +404,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                         className="fill-current stroke-none"
                       />
                     </svg>
-                    {layoutConfig?.timeline ? "Hide Timeline" : "Show Timeline"}
+                    {layoutConfig?.timeline ?"Hide Timeline" :"Show Timeline"}
                   </button>
 
                   <button
@@ -430,8 +430,8 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                       />
                     </svg>
                     {layoutConfig?.rightInspector
-                      ? "Hide Inspector"
-                      : "Show Inspector"}
+                      ?"Hide Inspector"
+                      :"Show Inspector"}
                   </button>
                 </div>
               </div>
@@ -449,8 +449,8 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                 title="Your credit balance & daily rewards — click to view"
                 className={`h-8.5 flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl bg-[#2A2A2A] hover:bg-[#2A2A2A] border border-[#2A2A2A] hover:border-[#2F2F2F] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
                   showCreditsPopover
-                    ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#2A2A2A]"
-                    : ""
+                    ?"ring-2 ring-amber-500/40 border-amber-500/60 bg-[#2A2A2A]"
+                    :""
                 }`}
               >
                 <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
@@ -507,13 +507,13 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               onClick={() => onTogglePanel?.("mediaBin")}
               className={`p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center ${
                 layoutConfig?.mediaBin
-                  ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-sm shadow-blue-500/25"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+                  ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-sm"
+                  :"text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               }`}
               title={
                 layoutConfig?.mediaBin
-                  ? "Hide Media Bin (Left Panel)"
-                  : "Show Media Bin (Left Panel)"
+                  ?"Hide Media Bin (Left Panel)"
+                  :"Show Media Bin (Left Panel)"
               }
             >
               <svg
@@ -537,13 +537,13 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               onClick={() => onTogglePanel?.("timeline")}
               className={`p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center ${
                 layoutConfig?.timeline
-                  ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-sm shadow-blue-500/25"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+                  ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-sm"
+                  :"text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               }`}
               title={
                 layoutConfig?.timeline
-                  ? "Hide Timeline (Bottom Panel)"
-                  : "Show Timeline (Bottom Panel)"
+                  ?"Hide Timeline (Bottom Panel)"
+                  :"Show Timeline (Bottom Panel)"
               }
             >
               <svg
@@ -567,13 +567,13 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               onClick={() => onTogglePanel?.("rightInspector")}
               className={`p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center ${
                 layoutConfig?.rightInspector
-                  ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-sm shadow-blue-500/25"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+                  ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-sm"
+                  :"text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               }`}
               title={
                 layoutConfig?.rightInspector
-                  ? "Hide Property Inspector (Right Panel)"
-                  : "Show Property Inspector (Right Panel)"
+                  ?"Hide Property Inspector (Right Panel)"
+                  :"Show Property Inspector (Right Panel)"
               }
             >
               <svg
@@ -602,8 +602,8 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               title="Notifications"
               className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#2A2A2A] hover:bg-[#2A2A2A] border border-[#2A2A2A] hover:border-[#2F2F2F] text-neutral-300 hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
                 showNotifications
-                  ? "ring-2 ring-[#3B82F6] border-[#3B82F6] bg-[#3B82F6]/20 text-white"
-                  : ""
+                  ?"ring-2 ring-[#3B82F6] border-[#3B82F6] bg-[#3B82F6]/20 text-white"
+                  :""
               }`}
             >
               {notificationsMuted ? (
@@ -613,7 +613,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               )}
               {unreadCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 flex h-4.5 w-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF2D55] text-[10px] font-black text-white ring-2 ring-[#18181B] shadow-xs">
-                  {unreadCount > 9 ? "9+" : unreadCount}
+                  {unreadCount > 9 ?"9+" : unreadCount}
                 </span>
               )}
             </button>
@@ -641,10 +641,10 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-xl border border-neutral-700/60 bg-neutral-800/80 text-neutral-300 hover:text-white hover:bg-neutral-800 transition-all cursor-pointer flex items-center justify-center relative shadow-sm shrink-0"
               title={
                 activeProjectId && activeProjectData
-                  ? `Active Project: ${
-                      activeProjectData.project?.title || "Active"
+                  ?`Active Project: ${
+                      activeProjectData.project?.title ||"Active"
                     } — Click to switch`
-                  : "Select Active Project"
+                  :"Select Active Project"
               }
             >
               <FolderSync className="h-4 w-4 text-neutral-400" />
@@ -666,12 +666,12 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                 activeUser?.username ||
                 (activeUser?.email
                   ? activeUser.email.split("@")[0]
-                  : "Studio Creator")}
+                  :"Studio Creator")}
             </span>
             <div className="relative w-7 h-7 rounded-full overflow-hidden border border-neutral-700 bg-[#121212] shrink-0 flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
               <img
                 key={
-                  activeUser?.avatar_url || activeUser?.full_name || "avatar"
+                  activeUser?.avatar_url || activeUser?.full_name ||"avatar"
                 }
                 src={getUserAvatarUrl(activeUser)}
                 referrerPolicy="no-referrer"
@@ -708,21 +708,20 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
         isOpen={showSaveModal}
         onClose={() => setShowSaveModal(false)}
         initialDetails={{
-          seriesTitle: seriesTitle || activeProjectData?.project?.title || "",
+          seriesTitle: seriesTitle || activeProjectData?.project?.title ||"",
           chapterNumber:
-            chapterNumber || activeProjectData?.project?.chapterNumber || "",
+            chapterNumber || activeProjectData?.project?.chapterNumber ||"",
           chapterTitle:
-            chapterTitle || activeProjectData?.project?.chapterTitle || "",
-          scrapedGenre: activeProjectData?.project?.genre || "",
-          seriesAuthor: activeProjectData?.project?.author || "",
+            chapterTitle || activeProjectData?.project?.chapterTitle ||"",
+          scrapedGenre: activeProjectData?.project?.genre ||"",
+          seriesAuthor: activeProjectData?.project?.author ||"",
           seriesCoverImage:
             activeProjectData?.project?.cover_image ||
             activeProjectData?.project?.first_panel_image ||
             activeProjectData?.panels?.[0]?.image_url ||
-            activeProjectData?.scrapedImages?.[0] ||
-            "",
-          seriesSynopsis: activeProjectData?.project?.synopsis || "",
-          status: activeProjectData?.project?.status || "Draft",
+            activeProjectData?.scrapedImages?.[0] ||"",
+          seriesSynopsis: activeProjectData?.project?.synopsis ||"",
+          status: activeProjectData?.project?.status ||"Draft",
         }}
         onConfirm={async (_details, _shouldGenerate) => {
           onSave?.();

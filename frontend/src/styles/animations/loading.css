@@ -45,10 +45,6 @@
   justify-content: center;
 }
 
-/* Ambient Radial Glow Behind Logo - Disabled */
-.loading-logo-glow {
-  display: none;
-}
 
 /* Logo Image Shell */
 .loading-logo-box {
@@ -199,17 +195,6 @@
   }
 }
 
-@keyframes loading-glow-pulse {
-  0%,
-  100% {
-    opacity: 0.65;
-    transform: scale(0.95);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-}
 
 @keyframes loading-logo-float {
   0%,

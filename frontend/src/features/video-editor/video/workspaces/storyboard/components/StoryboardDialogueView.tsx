@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   MessageSquare,
   Sparkles,
@@ -7,9 +7,9 @@ import {
   Check,
   Edit3,
   User,
-} from "lucide-react";
-import { getProxiedImageUrl } from "@/shared/utils";
-import { GeneratedPanel } from "@/shared/types";
+} from"lucide-react";
+import { getProxiedImageUrl } from"@/shared/utils";
+import { GeneratedPanel } from"@/shared/types";
 
 interface StoryboardDialogueViewProps {
   panels: GeneratedPanel[];
@@ -20,12 +20,7 @@ interface StoryboardDialogueViewProps {
   onTriggerFeedback?: (msg: string) => void;
 }
 
-const COMMON_SPEAKERS = [
-  "Narrator",
-  "Protagonist",
-  "Antagonist",
-  "System AI",
-  "Supporting Cast",
+const COMMON_SPEAKERS = ["Narrator","Protagonist","Antagonist","System AI","Supporting Cast",
 ];
 
 export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
@@ -52,7 +47,7 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
           onClick={() =>
             onTriggerFeedback?.("AI Generated dialogue for all empty panels")
           }
-          className="px-2 py-0.5 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer shadow-sm shadow-blue-500/25 transition active:scale-95"
+          className="px-2 py-0.5 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer shadow-sm transition active:scale-95"
         >
           <Wand2 className="h-2.5 w-2.5" />
           <span>Auto-Script</span>
@@ -61,14 +56,14 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
 
       {panels.map((panel, index) => {
         const isSelected = selectedIndices.includes(index);
-        const imgUrl = panel.image_url || (panel as any).imageUrl || "";
+        const imgUrl = panel.image_url || (panel as any).imageUrl ||"";
         const displayUrl = getProxiedImageUrl(imgUrl);
         const text =
-          panel.speech_text || panel.narrative || (panel as any).dialogue || "";
+          panel.speech_text || panel.narrative || (panel as any).dialogue ||"";
         const speaker =
           panel.speaker_name ||
           panel.character_name ||
-          (index % 2 === 0 ? "Narrator" : "Protagonist");
+          (index % 2 === 0 ?"Narrator" :"Protagonist");
 
         return (
           <div
@@ -76,8 +71,8 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
             onClick={(e) => onSelect(index, e)}
             className={`p-3 rounded-2xl border transition-all flex flex-col gap-2.5 cursor-pointer ${
               isSelected
-                ? "border-[#3B82F6] bg-[#3B82F6]/15 ring-2 ring-[#3B82F6]/50 shadow-md"
-                : "border-white/10 bg-[#121212] hover:border-neutral-700"
+                ?"border-[#3B82F6] bg-[#3B82F6]/15 ring-2 ring-[#3B82F6]/50 shadow-md"
+                :"border-white/10 bg-[#121212] hover:border-neutral-700"
             }`}
           >
             {/* Top row: Panel thumbnail + Speaker selector */}
@@ -111,11 +106,10 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
                   onClick={(e) => {
                     e.stopPropagation();
                     const newText = text
-                      ? `[Dramatic] ${text}`
-                      : "Look out! Behind you!";
+                      ?`[Dramatic] ${text}`
+                      :"Look out! Behind you!";
                     onUpdateDialogue(index, newText);
-                    onTriggerFeedback?.(
-                      `AI Enhanced line for Panel #${index + 1}`
+                    onTriggerFeedback?.(`AI Enhanced line for Panel #${index + 1}`
                     );
                   }}
                   className="px-2 py-0.5 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white text-[8px] font-mono flex items-center gap-1"

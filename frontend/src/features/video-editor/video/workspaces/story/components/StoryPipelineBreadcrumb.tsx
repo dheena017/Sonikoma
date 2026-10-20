@@ -1,5 +1,5 @@
-import React from "react";
-import { ChevronRight } from "lucide-react";
+import React from"react";
+import { ChevronRight } from"lucide-react";
 
 interface PipelineStep {
   label: string;
@@ -22,8 +22,8 @@ export const StoryPipelineBreadcrumb: React.FC<
             <div
               className={`flex items-center gap-1.5 text-[9px] font-mono font-bold px-2 py-0.5 rounded-full transition-all whitespace-nowrap ${
                 step.active
-                  ? "bg-[#3B82F6] text-white border border-[#60A5FA]/50 shadow-sm shadow-blue-500/25"
-                  : "text-neutral-500 border border-transparent"
+                  ?"bg-[#3B82F6] text-white border border-[#60A5FA]/50 shadow-sm"
+                  :"text-neutral-500 border border-transparent"
               }`}
             >
               {step.logo && (

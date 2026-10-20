@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from"react";
 import {
   Youtube,
   ExternalLink,
@@ -17,9 +17,9 @@ import {
   Edit3,
   CheckCheck,
   Play,
-} from "lucide-react";
-import { AgentYouTubeMetadata } from "../types";
-import YouTubeOfficialLogo from "@/features/creative/youtube/components/YouTubeOfficialLogo";
+} from"lucide-react";
+import { AgentYouTubeMetadata } from"../types";
+import YouTubeOfficialLogo from"@/features/creative/youtube/components/YouTubeOfficialLogo";
 
 interface AgentYouTubeSuccessCardProps {
   youtubeUrl?: string | null;
@@ -44,7 +44,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
   videoUrl,
   metadata,
   scrapedTitle,
-  videoFormat = "shorts",
+  videoFormat ="shorts",
   onReset,
   onConnectYouTube,
   onReupload,
@@ -58,17 +58,17 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(
-    metadata?.title || scrapedTitle || "Untitled Story Recap"
+    metadata?.title || scrapedTitle ||"Untitled Story Recap"
   );
   const [editedDescription, setEditedDescription] = useState(
-    metadata?.description || ""
+    metadata?.description ||""
   );
 
   const [activeTimestamp, setActiveTimestamp] = useState<number | null>(null);
   const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const isShort = videoFormat === "shorts" || metadata?.is_short === true;
+  const isShort = videoFormat ==="shorts" || metadata?.is_short === true;
   const isPublished = Boolean(youtubeUrl && !youtubeUrl.includes("preview"));
 
   // Keep state in sync if metadata prop updates from backend
@@ -85,7 +85,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
 
   // Extract clickable chapter timestamps from description
   const timestamps: ParsedTimestamp[] = React.useMemo(() => {
-    const text = editedDescription || metadata?.description || "";
+    const text = editedDescription || metadata?.description ||"";
     const regex = /(?:^|\n)\s*(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–—:]\s*([^\n\r]+)/g;
     const results: ParsedTimestamp[] = [];
     let match;
@@ -144,8 +144,8 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
   };
 
   const handleCopyAll = async () => {
-    const tagsFormatted = metadata?.tags?.map((t) => `#${t}`).join(" ") || "";
-    const combined = `TITLE:\n${editedTitle}\n\nDESCRIPTION:\n${editedDescription}\n\nTAGS:\n${tagsFormatted}`;
+    const tagsFormatted = metadata?.tags?.map((t) =>`#${t}`).join("") ||"";
+    const combined =`TITLE:\n${editedTitle}\n\nDESCRIPTION:\n${editedDescription}\n\nTAGS:\n${tagsFormatted}`;
     try {
       await navigator.clipboard.writeText(combined);
       setCopiedAll(true);
@@ -202,11 +202,11 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
               )}
               <span className="text-[10px] font-mono uppercase font-bold px-2.5 py-0.5 rounded-full bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/30 flex items-center gap-1">
                 {isShort ? <Smartphone className="w-3 h-3" /> : <Monitor className="w-3 h-3" />}
-                {isShort ? "Shorts (9:16)" : "16:9 Video"}
+                {isShort ?"Shorts (9:16)" :"16:9 Video"}
               </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-[#E5E5E5] mt-1">
-              {isPublished ? "Your YouTube Video Is Live & Ready!" : "Cinematic Video Compiled & Ready!"}
+              {isPublished ?"Your YouTube Video Is Live & Ready!" :"Cinematic Video Compiled & Ready!"}
             </h2>
           </div>
         </div>
@@ -286,7 +286,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                   href={youtubeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 sm:flex-initial px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-mono font-bold uppercase tracking-wide flex items-center justify-center gap-2 transition-all shadow-md shadow-red-950/40 cursor-pointer"
+                  className="flex-1 sm:flex-initial px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-mono font-bold uppercase tracking-wide flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
                 >
                   <span>Watch on YouTube</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -321,7 +321,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                 Why isn't this video on YouTube yet?
               </span>
               <p className="text-xs text-[#A3A3A3] font-sans leading-relaxed max-w-2xl">
-                Google requires you to connect and authorize your YouTube account before uploading videos to your channel. Your {isShort ? "9:16 Shorts" : "16:9"} video is <span className="text-white font-semibold">100% rendered and saved</span>. Connect your channel to publish with 1 click, or download the MP4 file to upload manually to YouTube Studio with the AI metadata below.
+                Google requires you to connect and authorize your YouTube account before uploading videos to your channel. Your {isShort ?"9:16 Shorts" :"16:9"} video is <span className="text-white font-semibold">100% rendered and saved</span>. Connect your channel to publish with 1 click, or download the MP4 file to upload manually to YouTube Studio with the AI metadata below.
               </p>
             </div>
 
@@ -331,7 +331,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                   type="button"
                   onClick={handleTriggerReupload}
                   disabled={isReuploading}
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-500 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-md shadow-red-950/40 cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-500 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-md cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Upload / retry uploading this rendered video to your YouTube channel"
                 >
                   {isReuploading ? (
@@ -366,7 +366,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                   download
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-md shadow-blue-950/40 cursor-pointer active:scale-95"
+                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-md cursor-pointer active:scale-95"
                 >
                   <Film className="w-3.5 h-3.5" />
                   <span>Download MP4</span>
@@ -443,16 +443,16 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
-              { key: "A", hook: "HE UNLOCKED S-RANK?", ctr: "94.8% CTR (Top Pick 🔥)", style: "Climax Shock" },
-              { key: "B", hook: "FORBIDDEN SHADOWS", ctr: "88.5% CTR (High Intrigue)", style: "Monarch Mystery" },
-              { key: "C", hook: "NEVER ANGER THE S-RANK", ctr: "81.2% CTR (Character Peak)", style: "Guild Betrayal" },
+              { key:"A", hook:"HE UNLOCKED S-RANK?", ctr:"94.8% CTR (Top Pick 🔥)", style:"Climax Shock" },
+              { key:"B", hook:"FORBIDDEN SHADOWS", ctr:"88.5% CTR (High Intrigue)", style:"Monarch Mystery" },
+              { key:"C", hook:"NEVER ANGER THE S-RANK", ctr:"81.2% CTR (Character Peak)", style:"Guild Betrayal" },
             ].map((v) => (
               <div key={v.key} className="p-2.5 rounded-lg bg-[#181818] border border-[#2E2E2E] space-y-1">
                 <div className="flex items-center justify-between text-[11px] font-mono font-bold text-[#E5E5E5]">
                   <span>Variant {v.key}</span>
                   <span className="text-emerald-400 text-[10px]">{v.ctr}</span>
                 </div>
-                <div className="text-[10px] text-[#9CA3AF] font-mono">Hook: "{v.hook}"</div>
+                <div className="text-[10px] text-[#9CA3AF] font-mono">Hook:"{v.hook}"</div>
                 <div className="text-[9px] text-[#60A5FA] font-mono">{v.style}</div>
               </div>
             ))}
@@ -464,7 +464,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left: Video Player Preview (if videoUrl is present) */}
         {videoUrl && (
-          <div className={isShort ? "lg:col-span-5 space-y-3" : "lg:col-span-6 space-y-3"}>
+          <div className={isShort ?"lg:col-span-5 space-y-3" :"lg:col-span-6 space-y-3"}>
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
                 <Film className="w-3.5 h-3.5 text-[#3B82F6]" />
@@ -472,14 +472,14 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
               </span>
               <span className="text-[10px] font-mono font-bold text-[#3B82F6] px-2 py-0.5 bg-[#3B82F6]/10 rounded border border-[#3B82F6]/20 flex items-center gap-1">
                 {isShort ? <Smartphone className="w-3 h-3" /> : <Monitor className="w-3 h-3" />}
-                {isShort ? "9:16 Shorts" : "16:9 Video"}
+                {isShort ?"9:16 Shorts" :"16:9 Video"}
               </span>
             </div>
             <div
               className={`relative rounded-xl overflow-hidden border border-[#2F2F2F] bg-black flex items-center justify-center max-h-[460px] mx-auto shadow-lg ${
                 isShort
-                  ? "aspect-[9/16] w-full max-w-[270px]"
-                  : "aspect-video w-full"
+                  ?"aspect-[9/16] w-full max-w-[270px]"
+                  :"aspect-video w-full"
               }`}
             >
               {videoError ? (
@@ -526,7 +526,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
         )}
 
         {/* Right: AI-Generated YouTube Headers & Timestamps */}
-        <div className={videoUrl ? (isShort ? "lg:col-span-7 space-y-4" : "lg:col-span-6 space-y-4") : "lg:col-span-12 space-y-4"}>
+        <div className={videoUrl ? (isShort ?"lg:col-span-7 space-y-4" :"lg:col-span-6 space-y-4") :"lg:col-span-12 space-y-4"}>
           {/* Header Bar with Copy All & Edit Toggles */}
           <div className="flex flex-wrap items-center justify-between gap-2 pb-1 border-b border-[#282828]">
             <div className="flex items-center gap-2">
@@ -547,13 +547,13 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                 onClick={() => setIsEditing(!isEditing)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold flex items-center gap-1.5 transition-all cursor-pointer border ${
                   isEditing
-                    ? "bg-[#3B82F6] text-white border-[#3B82F6] shadow-sm"
-                    : "bg-[#181818] hover:bg-[#222] text-[#9CA3AF] hover:text-[#E5E5E5] border-[#2F2F2F]"
+                    ?"bg-[#3B82F6] text-white border-[#3B82F6] shadow-sm"
+                    :"bg-[#181818] hover:bg-[#222] text-[#9CA3AF] hover:text-[#E5E5E5] border-[#2F2F2F]"
                 }`}
                 title="Edit video title and description before re-uploading"
               >
                 <Edit3 className="w-3 h-3" />
-                <span>{isEditing ? "Done Editing" : "Edit Metadata"}</span>
+                <span>{isEditing ?"Done Editing" :"Edit Metadata"}</span>
               </button>
 
               <button
@@ -587,10 +587,10 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                 <span
                   className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${
                     editedTitle.length <= 70
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                      ?"bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                       : editedTitle.length <= 100
-                      ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                      : "bg-red-500/10 text-red-400 border-red-500/30"
+                      ?"bg-amber-500/10 text-amber-400 border-amber-500/30"
+                      :"bg-red-500/10 text-red-400 border-red-500/30"
                   }`}
                 >
                   {editedTitle.length}/100
@@ -628,7 +628,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
               />
             ) : (
               <h3 className="text-sm font-bold text-[#E5E5E5] leading-snug tracking-tight">
-                {editedTitle || "Untitled Story Recap"}
+                {editedTitle ||"Untitled Story Recap"}
               </h3>
             )}
           </div>
@@ -656,12 +656,12 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                       onClick={() => handleSeek(ts.seconds)}
                       className={`px-2.5 py-1 rounded-lg text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer text-left ${
                         isActive
-                          ? "bg-[#3B82F6] text-white border border-[#60A5FA] shadow-sm shadow-blue-900/50 scale-[1.02]"
-                          : "bg-[#1E1E1E] hover:bg-[#262626] border border-[#2F2F2F] hover:border-neutral-600 text-[#D4D4D4] hover:text-white"
+                          ?"bg-[#3B82F6] text-white border border-[#60A5FA] shadow-sm  scale-[1.02]"
+                          :"bg-[#1E1E1E] hover:bg-[#262626] border border-[#2F2F2F] hover:border-neutral-600 text-[#D4D4D4] hover:text-white"
                       }`}
                       title={`Jump to ${ts.time} (${ts.label})`}
                     >
-                      <Play className={`w-2.5 h-2.5 ${isActive ? "fill-white" : "fill-[#3B82F6] text-[#3B82F6]"}`} />
+                      <Play className={`w-2.5 h-2.5 ${isActive ?"fill-white" :"fill-[#3B82F6] text-[#3B82F6]"}`} />
                       <span className="font-bold text-[#60A5FA]">{ts.time}</span>
                       <span className="text-[11px] truncate max-w-[130px] sm:max-w-[200px]">
                         {ts.label}
@@ -716,7 +716,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
             ) : (
               <div className="p-3 bg-[#181818] rounded-lg border border-[#262626] max-h-56 overflow-y-auto">
                 <pre className="text-xs text-[#A3A3A3] font-sans whitespace-pre-wrap leading-relaxed select-text">
-                  {editedDescription || "No description provided."}
+                  {editedDescription ||"No description provided."}
                 </pre>
               </div>
             )}
@@ -745,12 +745,12 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                       onClick={() => handleCopyTag(tag)}
                       className={`text-[11px] px-2.5 py-0.5 rounded-md font-mono transition-all cursor-pointer border ${
                         isTagCopied
-                          ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
-                          : "bg-[#1E1E1E] hover:bg-[#252525] border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5]"
+                          ?"bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+                          :"bg-[#1E1E1E] hover:bg-[#252525] border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5]"
                       }`}
                       title="Click to copy tag"
                     >
-                      {isTagCopied ? "Copied!" : `#${tag}`}
+                      {isTagCopied ?"Copied!" :`#${tag}`}
                     </button>
                   );
                 })}

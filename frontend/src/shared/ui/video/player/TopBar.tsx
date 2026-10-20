@@ -1,5 +1,5 @@
-import React from "react";
-import { Monitor, X } from "lucide-react";
+import React from"react";
+import { Monitor, X } from"lucide-react";
 
 interface Chapter {
   title: string;
@@ -16,13 +16,13 @@ export interface VideoPreviewTopBarProps {
 }
 
 const getPreviewDisplayLabel = (videoUrl: string | null) => {
-  if (!videoUrl) return "VIDEO PREVIEW PLAYER";
+  if (!videoUrl) return"VIDEO PREVIEW PLAYER";
 
   const sanitizedUrl = videoUrl.split("?")[0];
-  const fileName = sanitizedUrl.split("/").filter(Boolean).pop() ?? "";
-  const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+  const fileName = sanitizedUrl.split("/").filter(Boolean).pop() ??"";
+  const nameWithoutExt = fileName.replace(/\.[^/.]+$/,"");
 
-  return nameWithoutExt || "VIDEO PREVIEW PLAYER";
+  return nameWithoutExt ||"VIDEO PREVIEW PLAYER";
 };
 
 export const VideoPreviewTopBar: React.FC<VideoPreviewTopBarProps> = ({
@@ -38,12 +38,12 @@ export const VideoPreviewTopBar: React.FC<VideoPreviewTopBarProps> = ({
     <div
       className={`absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-black/80 to-transparent flex items-center justify-between px-6 z-30 transition-all duration-300 ${
         visible
-          ? "opacity-100 translate-y-0"
-          : "opacity-0 -translate-y-4 pointer-events-none"
+          ?"opacity-100 translate-y-0"
+          :"opacity-0 -translate-y-4 pointer-events-none"
       }`}
     >
       <div className="flex items-center gap-3">
-        <div className="h-7 w-7 rounded-lg bg-blue-600 border border-blue-400/40 shadow-sm shadow-blue-500/25 flex items-center justify-center">
+        <div className="h-7 w-7 rounded-lg bg-blue-600 border border-blue-400/40 shadow-sm flex items-center justify-center">
           <Monitor className="h-3.5 w-3.5 text-white" />
         </div>
         <div>
@@ -57,8 +57,8 @@ export const VideoPreviewTopBar: React.FC<VideoPreviewTopBarProps> = ({
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-neutral-200">
               {activeChapter
-                ? `${activeChapter.title} Segment`
-                : "Preview Track"}
+                ?`${activeChapter.title} Segment`
+                :"Preview Track"}
             </span>
             {/* PANEL/SCENE COUNTER CHIP */}
             <span className="bg-neutral-900/90 border border-neutral-800/80 rounded px-2 py-0.5 text-[9px] font-mono font-bold text-[#60A5FA] tracking-wider">

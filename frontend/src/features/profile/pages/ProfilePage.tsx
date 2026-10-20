@@ -1,8 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useMemo } from"react";
 import {
   getUserAvatarUrl,
   DEFAULT_USER_AVATAR_DATA_URI,
-} from "@/shared/utils/avatar";
+} from"@/shared/utils/avatar";
 import {
   User,
   FolderGit2,
@@ -18,22 +18,22 @@ import {
   ChevronRight,
   Globe,
   Pencil,
-} from "lucide-react";
+} from"lucide-react";
 
 import {
   ProfileAccountTab,
   ProfileAnalyticsTab,
   ProfileBillingTab,
   ProfileSecurityTab,
-} from "../components";
+} from"../components";
 
-import { useProfileState, ProfileTabId } from "../hooks/useProfileState";
-import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import { useProfileState, ProfileTabId } from"../hooks/useProfileState";
+import { Tooltip } from"@/shared/ui/common/TooltipPortal";
 import {
   ConfirmModal,
   GoodbyeUserModal,
   ComeBackUserModal,
-} from "@/shared/ui/modal";
+} from"@/shared/ui/modal";
 
 export interface ProfilePageProps {
   user?: any;
@@ -46,7 +46,7 @@ export interface ProfilePageProps {
   navigateTo?: (path: string) => void;
   addNotification?: (
     msg: string,
-    type: "success" | "error" | "info" | "warning"
+    type:"success" |"error" |"info" |"warning"
   ) => void;
   fetchWithInterceptor?: any;
   initialTab?: string;
@@ -117,26 +117,26 @@ export default function ProfilePage(props: ProfilePageProps) {
   const tabsList = useMemo(
     () => [
       {
-        id: "account" as ProfileTabId,
-        label: "Account",
+        id:"account" as ProfileTabId,
+        label:"Account",
         icon: User,
         badge: null,
       },
       {
-        id: "analytics" as ProfileTabId,
-        label: "Analytics",
+        id:"analytics" as ProfileTabId,
+        label:"Analytics",
         icon: BarChart3,
         badge: null,
       },
       {
-        id: "billing" as ProfileTabId,
-        label: "Billing & Credits",
+        id:"billing" as ProfileTabId,
+        label:"Billing & Credits",
         icon: CreditCard,
-        badge: `${state.userCredits} CR`,
+        badge:`${state.userCredits} CR`,
       },
       {
-        id: "security" as ProfileTabId,
-        label: "Security",
+        id:"security" as ProfileTabId,
+        label:"Security",
         icon: ShieldCheck,
         badge: null,
       },
@@ -183,8 +183,6 @@ export default function ProfilePage(props: ProfilePageProps) {
 
         {/* Premium Glassmorphic Hero Banner */}
         <div className="relative w-full rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900/90 via-neutral-900/50 to-neutral-950 p-5 sm:p-6 shadow-xl overflow-hidden">
-          {/* Subtle top ambient glow line */}
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#3B82F6]/40 to-transparent" />
 
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
             {/* User Profile Identity Block */}
@@ -217,11 +215,11 @@ export default function ProfilePage(props: ProfilePageProps) {
               <div className="space-y-1">
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-sans">
-                    {state.profileUser.fullName || "Creator"}
+                    {state.profileUser.fullName ||"Creator"}
                   </h1>
                   <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono tracking-wider uppercase font-bold bg-[#3B82F6]/15 text-[#60A5FA] border border-[#3B82F6]/30 flex items-center gap-1.5 shadow-sm">
                     <Sparkles className="w-3 h-3 text-[#3B82F6]" />
-                    {state.subscriptionTier || "Free"} Tier
+                    {state.subscriptionTier ||"Free"} Tier
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-neutral-400 font-mono flex-wrap">
@@ -231,7 +229,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                   <span className="text-neutral-700">•</span>
                   <span className="flex items-center gap-1.5 text-neutral-400">
                     <Globe className="w-3 h-3 text-[#3B82F6]" />
-                    <span className="capitalize">{state.profileUser.role || "Creator"}</span>
+                    <span className="capitalize">{state.profileUser.role ||"Creator"}</span>
                   </span>
                 </div>
               </div>
@@ -289,7 +287,7 @@ export default function ProfilePage(props: ProfilePageProps) {
               <Tooltip text="Claim daily login bonus" placement="top">
                 <button
                   onClick={state.handleClaimCredits}
-                  className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black text-xs font-mono font-bold shrink-0 flex items-center gap-1.5 uppercase tracking-wider cursor-pointer shadow-md shadow-amber-500/20 transition-all"
+                  className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black text-xs font-mono font-bold shrink-0 flex items-center gap-1.5 uppercase tracking-wider cursor-pointer shadow-md transition-all"
                   aria-label="Claim Daily Credits"
                 >
                   <Zap className="w-3.5 h-3.5 fill-black" />
@@ -312,13 +310,13 @@ export default function ProfilePage(props: ProfilePageProps) {
                   onClick={() => state.setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
                     isActive
-                      ? "bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/25 border border-blue-400/30 font-bold"
-                      : "text-neutral-400 hover:text-white hover:bg-neutral-900 border border-transparent"
+                      ?"bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white shadow-md  border border-blue-400/30 font-bold"
+                      :"text-neutral-400 hover:text-white hover:bg-neutral-900 border border-transparent"
                   }`}
                 >
                   <Icon
                     className={`w-3.5 h-3.5 ${
-                      isActive ? "text-white" : "text-neutral-400"
+                      isActive ?"text-white" :"text-neutral-400"
                     }`}
                   />
                   <span>{tab.label}</span>
@@ -326,8 +324,8 @@ export default function ProfilePage(props: ProfilePageProps) {
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                         isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-neutral-900 text-neutral-400 border border-neutral-800"
+                          ?"bg-white/20 text-white"
+                          :"bg-neutral-900 text-neutral-400 border border-neutral-800"
                       }`}
                     >
                       {tab.badge}
@@ -341,7 +339,7 @@ export default function ProfilePage(props: ProfilePageProps) {
 
         {/* Tab Canvas Area */}
         <div className="w-full flex-1 pb-8">
-          {state.activeTab === "account" && (
+          {state.activeTab ==="account" && (
             <ProfileAccountTab
               user={user}
               profileUser={state.profileUser}
@@ -359,9 +357,9 @@ export default function ProfilePage(props: ProfilePageProps) {
             />
           )}
 
-          {state.activeTab === "analytics" && <ProfileAnalyticsTab />}
+          {state.activeTab ==="analytics" && <ProfileAnalyticsTab />}
 
-          {state.activeTab === "billing" && (
+          {state.activeTab ==="billing" && (
             <ProfileBillingTab
               credits={state.userCredits}
               hasClaimedToday={state.hasClaimedToday}
@@ -380,7 +378,7 @@ export default function ProfilePage(props: ProfilePageProps) {
             />
           )}
 
-          {state.activeTab === "security" && (
+          {state.activeTab ==="security" && (
             <ProfileSecurityTab
               passwordState={state.passwordState}
               setPasswordState={state.setPasswordState}
@@ -399,7 +397,7 @@ export default function ProfilePage(props: ProfilePageProps) {
         </div>
       </div>
 
-      {/* STAGE 1: Confirmation Modal when clicking "Log Out" / "Sign Out" */}
+      {/* STAGE 1: Confirmation Modal when clicking"Log Out" /"Sign Out" */}
       {showSignOutConfirm && (
         <ConfirmModal
           title="Sign Out Confirmation"
@@ -422,7 +420,7 @@ export default function ProfilePage(props: ProfilePageProps) {
         onCancel={() => setShowComeBackModal(false)}
       />
 
-      {/* STAGE 1: Confirmation Modal when clicking "Delete Account" */}
+      {/* STAGE 1: Confirmation Modal when clicking"Delete Account" */}
       {showDeleteAccountConfirm && (
         <ConfirmModal
           title="Delete Account Confirmation"

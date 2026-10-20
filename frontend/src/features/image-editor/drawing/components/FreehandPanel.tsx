@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import * as api from "@/shared/api";
+import React, { useState } from"react";
+import * as api from"@/shared/api";
 import {
   Pen,
   Eraser,
@@ -20,7 +20,7 @@ import {
   Sparkles,
   RefreshCw,
   Wand2,
-} from "lucide-react";
+} from"lucide-react";
 
 interface FreehandPanelProps {
   brushSize: number;
@@ -37,8 +37,8 @@ interface FreehandPanelProps {
   setFontFamily?: (font: string) => void;
   textStrokeColor?: string;
   setTextStrokeColor?: (color: string) => void;
-  textAlign?: "left" | "center" | "right";
-  setTextAlign?: (align: "left" | "center" | "right") => void;
+  textAlign?:"left" |"center" |"right";
+  setTextAlign?: (align:"left" |"center" |"right") => void;
   isFilled?: boolean;
   setIsFilled?: (val: boolean) => void;
   activeStoryboardPanel?: any;
@@ -47,24 +47,16 @@ interface FreehandPanelProps {
   fetchWithInterceptor?: any;
 }
 
-const PRESET_COLORS = [
-  "#ffffff",
-  "#000000",
-  "#ef4444",
-  "#3b82f6",
-  "#eab308",
-  "#22c55e",
-  "#3b82f6",
-  "#ec4899",
+const PRESET_COLORS = ["#ffffff","#000000","#ef4444","#3b82f6","#eab308","#22c55e","#3b82f6","#ec4899",
 ];
 
 const FONT_OPTIONS = [
-  { label: "Comic Sans MS", value: "Comic Sans MS" },
-  { label: "Bangers", value: "Bangers" },
-  { label: "Impact", value: "Impact" },
-  { label: "Arial", value: "Arial" },
-  { label: "Courier New", value: "Courier New" },
-  { label: "Georgia", value: "Georgia" },
+  { label:"Comic Sans MS", value:"Comic Sans MS" },
+  { label:"Bangers", value:"Bangers" },
+  { label:"Impact", value:"Impact" },
+  { label:"Arial", value:"Arial" },
+  { label:"Courier New", value:"Courier New" },
+  { label:"Georgia", value:"Georgia" },
 ];
 
 export default function FreehandPanel({
@@ -74,15 +66,15 @@ export default function FreehandPanel({
   setBrushAction,
   fillColor,
   setFillColor,
-  textBgColor = "#ffffff",
+  textBgColor ="#ffffff",
   setTextBgColor,
   opacity = 100,
   setOpacity,
-  fontFamily = "Comic Sans MS",
+  fontFamily ="Comic Sans MS",
   setFontFamily,
-  textStrokeColor = "#000000",
+  textStrokeColor ="#000000",
   setTextStrokeColor,
-  textAlign = "center",
+  textAlign ="center",
   setTextAlign,
   isFilled = false,
   setIsFilled,
@@ -94,7 +86,7 @@ export default function FreehandPanel({
   const [localOpacity, setLocalOpacity] = useState(opacity);
   const [localFont, setLocalFont] = useState(fontFamily);
   const [localStroke, setLocalStroke] = useState(textStrokeColor);
-  const [localAlign, setLocalAlign] = useState<"left" | "center" | "right">(
+  const [localAlign, setLocalAlign] = useState<"left" |"center" |"right">(
     textAlign
   );
   const [localFilled, setLocalFilled] = useState(isFilled);
@@ -102,9 +94,7 @@ export default function FreehandPanel({
 
   const handleEyedropper = async () => {
     if (!("EyeDropper" in window)) {
-      addNotification?.(
-        "Eyedropper API is not supported in this browser.",
-        "warning"
+      addNotification?.("Eyedropper API is not supported in this browser.","warning"
       );
       return;
     }
@@ -113,7 +103,7 @@ export default function FreehandPanel({
       const result = await eyeDropper.open();
       if (result?.sRGBHex) {
         setFillColor(result.sRGBHex);
-        addNotification?.(`Picked color ${result.sRGBHex}`, "info");
+        addNotification?.(`Picked color ${result.sRGBHex}`,"info");
       }
     } catch (err) {
       // User cancelled
@@ -122,28 +112,24 @@ export default function FreehandPanel({
 
   const handleAiBubbleClean = async () => {
     if (!activeStoryboardPanel?.image_url) {
-      addNotification?.(
-        "No active panel selected for AI Speech Bubble Clean.",
-        "warning"
+      addNotification?.("No active panel selected for AI Speech Bubble Clean.","warning"
       );
       return;
     }
 
     setIsAiCleaning(true);
-    addNotification?.(
-      "Running AI Speech Bubble Removal & Inpainting...",
-      "info"
+    addNotification?.("Running AI Speech Bubble Removal & Inpainting...","info"
     );
 
     try {
       const data = await api.removeSpeechBubbles(fetchWithInterceptor, {
         url: activeStoryboardPanel.image_url,
-        method: "auto",
+        method:"auto",
       });
 
       if (!data?.success || !data?.url) {
         throw new Error(
-          data?.message || "AI inpaint did not return an updated image."
+          data?.message ||"AI inpaint did not return an updated image."
         );
       }
 
@@ -164,9 +150,9 @@ export default function FreehandPanel({
         )
       );
 
-      addNotification?.("AI Inpainting complete!", "success");
+      addNotification?.("AI Inpainting complete!","success");
     } catch (err: any) {
-      addNotification?.(`AI Inpaint Error: ${err.message}`, "error");
+      addNotification?.(`AI Inpaint Error: ${err.message}`,"error");
     } finally {
       setIsAiCleaning(false);
     }
@@ -204,9 +190,9 @@ export default function FreehandPanel({
             type="button"
             onClick={() => setBrushAction("paint")}
             className={`py-1.5 rounded-lg flex items-center justify-center gap-1 text-[10px] font-mono font-bold transition-all cursor-pointer ${
-              ["paint", "highlighter", "spray"].includes(brushAction)
-                ? "bg-[#2A2A2A] text-white shadow-md shadow-black/50"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+              ["paint","highlighter","spray"].includes(brushAction)
+                ?"bg-[#2A2A2A] text-white shadow-md shadow-black/50"
+                :"text-neutral-400 hover:text-white hover:bg-white/5"
             }`}
           >
             <Pen className="h-3 w-3" />
@@ -217,9 +203,9 @@ export default function FreehandPanel({
             type="button"
             onClick={() => setBrushAction("rect")}
             className={`py-1.5 rounded-lg flex items-center justify-center gap-1 text-[10px] font-mono font-bold transition-all cursor-pointer ${
-              ["line", "arrow", "rect", "circle"].includes(brushAction)
-                ? "bg-[#2A2A2A] text-white shadow-md shadow-black/50"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+              ["line","arrow","rect","circle"].includes(brushAction)
+                ?"bg-[#2A2A2A] text-white shadow-md shadow-black/50"
+                :"text-neutral-400 hover:text-white hover:bg-white/5"
             }`}
           >
             <Square className="h-3 w-3" />
@@ -230,9 +216,9 @@ export default function FreehandPanel({
             type="button"
             onClick={() => setBrushAction("text")}
             className={`py-1.5 rounded-lg flex items-center justify-center gap-1 text-[10px] font-mono font-bold transition-all cursor-pointer ${
-              brushAction === "text"
-                ? "bg-[#2A2A2A] text-white shadow-md shadow-black/50"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+              brushAction ==="text"
+                ?"bg-[#2A2A2A] text-white shadow-md shadow-black/50"
+                :"text-neutral-400 hover:text-white hover:bg-white/5"
             }`}
           >
             <Type className="h-3 w-3" />
@@ -243,9 +229,9 @@ export default function FreehandPanel({
             type="button"
             onClick={() => setBrushAction("blur")}
             className={`py-1.5 rounded-lg flex items-center justify-center gap-1 text-[10px] font-mono font-bold transition-all cursor-pointer ${
-              brushAction === "blur"
-                ? "bg-[#2A2A2A] text-white shadow-md shadow-black/50"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+              brushAction ==="blur"
+                ?"bg-[#2A2A2A] text-white shadow-md shadow-black/50"
+                :"text-neutral-400 hover:text-white hover:bg-white/5"
             }`}
           >
             <EyeOff className="h-3 w-3" />
@@ -255,7 +241,7 @@ export default function FreehandPanel({
       </div>
 
       {/* Brush Sub-Types (When Brush Mode Active) */}
-      {["paint", "highlighter", "spray", "erase"].includes(brushAction) && (
+      {["paint","highlighter","spray","erase"].includes(brushAction) && (
         <div className="space-y-1.5 pt-1">
           <label className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block">
             Brush Style
@@ -265,9 +251,9 @@ export default function FreehandPanel({
               type="button"
               onClick={() => setBrushAction("paint")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                brushAction === "paint"
-                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
-                  : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
+                brushAction ==="paint"
+                  ?"border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
+                  :"border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
               <Pen className="h-3 w-3" />
@@ -278,9 +264,9 @@ export default function FreehandPanel({
               type="button"
               onClick={() => setBrushAction("highlighter")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                brushAction === "highlighter"
-                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
-                  : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
+                brushAction ==="highlighter"
+                  ?"border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
+                  :"border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
               <Highlighter className="h-3 w-3" />
@@ -291,9 +277,9 @@ export default function FreehandPanel({
               type="button"
               onClick={() => setBrushAction("spray")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                brushAction === "spray"
-                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
-                  : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
+                brushAction ==="spray"
+                  ?"border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
+                  :"border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
               <Cloud className="h-3 w-3" />
@@ -304,9 +290,9 @@ export default function FreehandPanel({
               type="button"
               onClick={() => setBrushAction("erase")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                brushAction === "erase"
-                  ? "border-red-500 bg-red-950/40 text-red-300"
-                  : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
+                brushAction ==="erase"
+                  ?"border-red-500 bg-red-950/40 text-red-300"
+                  :"border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
               <Eraser className="h-3 w-3" />
@@ -317,7 +303,7 @@ export default function FreehandPanel({
       )}
 
       {/* Shape Sub-Types (When Shapes Mode Active) */}
-      {["line", "arrow", "rect", "circle"].includes(brushAction) && (
+      {["line","arrow","rect","circle"].includes(brushAction) && (
         <div className="space-y-1.5 pt-1">
           <div className="flex items-center justify-between">
             <label className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block">
@@ -341,9 +327,9 @@ export default function FreehandPanel({
               type="button"
               onClick={() => setBrushAction("line")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                brushAction === "line"
-                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
-                  : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
+                brushAction ==="line"
+                  ?"border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
+                  :"border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
               <Minus className="h-3 w-3" />
@@ -354,9 +340,9 @@ export default function FreehandPanel({
               type="button"
               onClick={() => setBrushAction("arrow")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                brushAction === "arrow"
-                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
-                  : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
+                brushAction ==="arrow"
+                  ?"border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
+                  :"border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
               <MoveRight className="h-3 w-3" />
@@ -367,9 +353,9 @@ export default function FreehandPanel({
               type="button"
               onClick={() => setBrushAction("rect")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                brushAction === "rect"
-                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
-                  : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
+                brushAction ==="rect"
+                  ?"border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
+                  :"border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
               <Square className="h-3 w-3" />
@@ -380,9 +366,9 @@ export default function FreehandPanel({
               type="button"
               onClick={() => setBrushAction("circle")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                brushAction === "circle"
-                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
-                  : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
+                brushAction ==="circle"
+                  ?"border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
+                  :"border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
               <Circle className="h-3 w-3" />
@@ -393,7 +379,7 @@ export default function FreehandPanel({
       )}
 
       {/* Typography Formatting Controls (When Text Mode Active) */}
-      {brushAction === "text" && (
+      {brushAction ==="text" && (
         <div className="space-y-3 p-3 bg-black/30 rounded-xl border border-white/5">
           <div className="space-y-1">
             <label className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block">
@@ -427,9 +413,9 @@ export default function FreehandPanel({
                   setTextAlign?.("left");
                 }}
                 className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
-                  localAlign === "left"
-                    ? "bg-[#2A2A2A] text-white"
-                    : "text-neutral-500 hover:text-neutral-300"
+                  localAlign ==="left"
+                    ?"bg-[#2A2A2A] text-white"
+                    :"text-neutral-500 hover:text-neutral-300"
                 }`}
               >
                 <AlignLeft className="h-3.5 w-3.5" />
@@ -441,9 +427,9 @@ export default function FreehandPanel({
                   setTextAlign?.("center");
                 }}
                 className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
-                  localAlign === "center"
-                    ? "bg-[#2A2A2A] text-white"
-                    : "text-neutral-500 hover:text-neutral-300"
+                  localAlign ==="center"
+                    ?"bg-[#2A2A2A] text-white"
+                    :"text-neutral-500 hover:text-neutral-300"
                 }`}
               >
                 <AlignCenter className="h-3.5 w-3.5" />
@@ -455,9 +441,9 @@ export default function FreehandPanel({
                   setTextAlign?.("right");
                 }}
                 className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
-                  localAlign === "right"
-                    ? "bg-[#2A2A2A] text-white"
-                    : "text-neutral-500 hover:text-neutral-300"
+                  localAlign ==="right"
+                    ?"bg-[#2A2A2A] text-white"
+                    :"text-neutral-500 hover:text-neutral-300"
                 }`}
               >
                 <AlignRight className="h-3.5 w-3.5" />
@@ -472,7 +458,7 @@ export default function FreehandPanel({
         <div className="space-y-1">
           <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider">
             <span>
-              {brushAction === "text" ? "Font Size" : "Stroke / Tool Size"}
+              {brushAction ==="text" ?"Font Size" :"Stroke / Tool Size"}
             </span>
             <span className="text-[#3B82F6] font-bold">{brushSize}px</span>
           </div>
@@ -507,10 +493,10 @@ export default function FreehandPanel({
       </div>
 
       {/* Color Palette & Swatches */}
-      {brushAction !== "erase" && (
+      {brushAction !=="erase" && (
         <div className="space-y-2 pt-1">
           <label className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block">
-            {brushAction === "text" ? "Primary Color" : "Color Picker"}
+            {brushAction ==="text" ?"Primary Color" :"Color Picker"}
           </label>
           <div className="flex items-center gap-2">
             <input
@@ -527,8 +513,8 @@ export default function FreehandPanel({
                   onClick={() => setFillColor(c)}
                   className={`h-5 w-5 rounded-full border transition-all cursor-pointer ${
                     fillColor.toLowerCase() === c.toLowerCase()
-                      ? "border-[#60A5FA] scale-110 shadow-md shadow-black/50"
-                      : "border-white/10 hover:scale-105"
+                      ?"border-[#60A5FA] scale-110 shadow-md shadow-black/50"
+                      :"border-white/10 hover:scale-105"
                   }`}
                   style={{ backgroundColor: c }}
                 />
@@ -536,7 +522,7 @@ export default function FreehandPanel({
             </div>
           </div>
 
-          {brushAction === "text" && (
+          {brushAction ==="text" && (
             <div className="grid grid-cols-2 gap-2 pt-1">
               <div>
                 <label className="text-[8px] font-mono text-neutral-500 uppercase font-bold block mb-1">
@@ -585,8 +571,8 @@ export default function FreehandPanel({
           )}
           <span>
             {isAiCleaning
-              ? "AI Inpainting Speech..."
-              : "AI Clean Speech & Inpaint"}
+              ?"AI Inpainting Speech..."
+              :"AI Clean Speech & Inpaint"}
           </span>
         </button>
       </div>
@@ -606,7 +592,7 @@ export default function FreehandPanel({
         <button
           type="button"
           onClick={() => window.dispatchEvent(new Event("FABRIC_SAVE_REQUEST"))}
-          className="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold transition-all shadow-lg shadow-emerald-900/40 cursor-pointer"
+          className="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold transition-all shadow-lg cursor-pointer"
         >
           <Save className="h-3.5 w-3.5" />
           Save & Apply Drawing

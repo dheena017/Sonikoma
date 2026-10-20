@@ -92,7 +92,7 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
   return (
     <div className="w-[340px] sm:w-[385px] bg-neutral-950/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden p-5 text-white font-sans z-50 animate-in fade-in zoom-in-95 duration-150 select-none relative">
       {/* Top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-400 blur-[1px]" />
+      
 
       {/* Top Banner Header */}
       <div className="flex items-center justify-between border-b border-neutral-850 pb-3.5 mb-3.5 pt-1">

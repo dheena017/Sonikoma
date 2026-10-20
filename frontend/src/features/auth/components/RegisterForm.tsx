@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   Mail,
   Lock,
@@ -22,12 +22,12 @@ import {
   Gift,
   ShieldCheck,
   CheckSquare,
-} from "lucide-react";
-import AuthPageShell from "@/features/auth/components/AuthPageShell";
-import { useRegisterForm } from "@/features/auth/hooks";
-import { Tooltip } from "@/shared/ui/common/TooltipPortal";
-import { SonikomaLogo } from "@/shared/ui/branding";
-import { WelcomeUserModal } from "@/shared/ui/modal";
+} from"lucide-react";
+import AuthPageShell from"@/features/auth/components/AuthPageShell";
+import { useRegisterForm } from"@/features/auth/hooks";
+import { Tooltip } from"@/shared/ui/common/TooltipPortal";
+import { SonikomaLogo } from"@/shared/ui/branding";
+import { WelcomeUserModal } from"@/shared/ui/modal";
 
 interface RegisterFormProps {
   onRegister: (data: any) => Promise<any>;
@@ -37,35 +37,35 @@ interface RegisterFormProps {
 
 const CREATOR_ROLES = [
   {
-    id: "manga_artist",
-    label: "Manga & Webtoon",
-    subtitle: "AI panel slicing & art",
+    id:"manga_artist",
+    label:"Manga & Webtoon",
+    subtitle:"AI panel slicing & art",
     icon: Palette,
   },
   {
-    id: "animator",
-    label: "Motion Animator",
-    subtitle: "Camera pan & keyframes",
+    id:"animator",
+    label:"Motion Animator",
+    subtitle:"Camera pan & keyframes",
     icon: Video,
   },
   {
-    id: "voice_actor",
-    label: "Voice & Audio",
-    subtitle: "Neural anime dubbing",
+    id:"voice_actor",
+    label:"Voice & Audio",
+    subtitle:"Neural anime dubbing",
     icon: Mic,
   },
   {
-    id: "content_creator",
-    label: "Video Studio",
-    subtitle: "TikTok, Shorts & Reels",
+    id:"content_creator",
+    label:"Video Studio",
+    subtitle:"TikTok, Shorts & Reels",
     icon: Flame,
   },
 ];
 
 const PERKS = [
-  { icon: Gift, label: "3 Free Exports / mo" },
-  { icon: Sparkles, label: "Smart Panel Slicer" },
-  { icon: ShieldCheck, label: "No Credit Card Needed" },
+  { icon: Gift, label:"3 Free Exports / mo" },
+  { icon: Sparkles, label:"Smart Panel Slicer" },
+  { icon: ShieldCheck, label:"No Credit Card Needed" },
 ];
 
 export default function RegisterForm({
@@ -207,7 +207,7 @@ export default function RegisterForm({
                   onClick={() => handleSocialRegister("Google")}
                   className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl bg-[#1A1D24] hover:bg-[#232730] border border-[#2F2F2F] hover:border-neutral-500 disabled:opacity-60 text-white font-semibold text-xs sm:text-sm transition-all duration-200 cursor-pointer shadow-sm active:scale-[0.99]"
                 >
-                  {socialProviderLoading === "Google" ? (
+                  {socialProviderLoading ==="Google" ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
                       <span>Connecting...</span>
@@ -246,7 +246,7 @@ export default function RegisterForm({
                   onClick={() => handleSocialRegister("GitHub")}
                   className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl bg-[#1A1D24] hover:bg-[#232730] border border-[#2F2F2F] hover:border-neutral-500 disabled:opacity-60 text-white font-semibold text-xs sm:text-sm transition-all duration-200 cursor-pointer shadow-sm active:scale-[0.99]"
                 >
-                  {socialProviderLoading === "GitHub" ? (
+                  {socialProviderLoading ==="GitHub" ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin text-neutral-300" />
                       <span>Connecting...</span>
@@ -278,7 +278,7 @@ export default function RegisterForm({
             <form noValidate className="space-y-4" onSubmit={handleSubmit}>
               {/* Dismissible Error Alert */}
               {error && (
-                <div className="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-medium flex items-start justify-between gap-2.5 shadow-lg shadow-rose-950/20 animate-in fade-in">
+                <div className="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-medium flex items-start justify-between gap-2.5 shadow-lg animate-in fade-in">
                   <div className="flex items-start gap-2 min-w-0">
                     <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
                     <span className="leading-relaxed">{error}</span>
@@ -318,8 +318,8 @@ export default function RegisterForm({
                     onChange={(e) => setFullName(e.target.value)}
                     className={`w-full bg-[#121417] border rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none transition-all font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${
                       fieldErrors.fullName
-                        ? "border-rose-500 ring-2 ring-rose-500/20"
-                        : "border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                        ?"border-rose-500 ring-2 ring-rose-500/20"
+                        :"border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
                     }`}
                     placeholder="Enter your creator name or studio"
                   />
@@ -341,10 +341,10 @@ export default function RegisterForm({
                   {email && !fieldErrors.email && (
                     <span
                       className={`text-[10px] font-bold ${
-                        isEmailValid ? "text-emerald-400" : "text-amber-400"
+                        isEmailValid ?"text-emerald-400" :"text-amber-400"
                       }`}
                     >
-                      {isEmailValid ? "Valid format" : "Check email format"}
+                      {isEmailValid ?"Valid format" :"Check email format"}
                     </span>
                   )}
                 </div>
@@ -359,8 +359,8 @@ export default function RegisterForm({
                     onChange={(e) => setEmail(e.target.value)}
                     className={`w-full bg-[#121417] border rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none transition-all font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${
                       fieldErrors.email
-                        ? "border-rose-500 ring-2 ring-rose-500/20"
-                        : "border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                        ?"border-rose-500 ring-2 ring-rose-500/20"
+                        :"border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
                     }`}
                     placeholder="Enter your email address"
                   />
@@ -394,15 +394,15 @@ export default function RegisterForm({
                         onClick={() => setCreatorRole(role.id)}
                         className={`p-2.5 rounded-xl border text-left transition-all duration-200 cursor-pointer flex items-start gap-2.5 ${
                           isSelected
-                            ? "bg-blue-600/15 border-blue-500 ring-1 ring-blue-500/30 text-white shadow-sm"
-                            : "bg-[#121417] border-[#2A2D35] hover:border-neutral-500 text-neutral-300 hover:text-white"
+                            ?"bg-blue-600/15 border-blue-500 ring-1 ring-blue-500/30 text-white shadow-sm"
+                            :"bg-[#121417] border-[#2A2D35] hover:border-neutral-500 text-neutral-300 hover:text-white"
                         }`}
                       >
                         <div
                           className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
                             isSelected
-                              ? "bg-blue-500/20 text-blue-400"
-                              : "bg-neutral-800 text-neutral-400"
+                              ?"bg-blue-500/20 text-blue-400"
+                              :"bg-neutral-800 text-neutral-400"
                           }`}
                         >
                           <RoleIcon className="w-3.5 h-3.5" />
@@ -446,7 +446,7 @@ export default function RegisterForm({
                     <Lock className="w-4 h-4" />
                   </div>
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ?"text" :"password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -454,21 +454,21 @@ export default function RegisterForm({
                     onKeyUp={checkCapsLock}
                     className={`w-full bg-[#121417] border rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none transition-all font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${
                       fieldErrors.password
-                        ? "border-rose-500 ring-2 ring-rose-500/20"
-                        : "border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                        ?"border-rose-500 ring-2 ring-rose-500/20"
+                        :"border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
                     }`}
                     placeholder="Create a strong password"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
                     <Tooltip
-                      text={showPassword ? "Hide password" : "Show password"}
+                      text={showPassword ?"Hide password" :"Show password"}
                       placement="top"
                     >
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer flex items-center justify-center rounded-lg hover:bg-neutral-800"
-                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        aria-label={showPassword ?"Hide password" :"Show password"}
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -512,13 +512,13 @@ export default function RegisterForm({
                       <div
                         className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md transition-colors ${
                           hasMinLength
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            : "bg-neutral-800/60 text-neutral-400 border border-neutral-700/40"
+                            ?"bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            :"bg-neutral-800/60 text-neutral-400 border border-neutral-700/40"
                         }`}
                       >
                         <Check
                           className={`w-3 h-3 stroke-[3px] ${
-                            hasMinLength ? "opacity-100" : "opacity-30"
+                            hasMinLength ?"opacity-100" :"opacity-30"
                           }`}
                         />
                         <span>8+ chars</span>
@@ -527,13 +527,13 @@ export default function RegisterForm({
                       <div
                         className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md transition-colors ${
                           hasUppercase && hasLowercase
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            : "bg-neutral-800/60 text-neutral-400 border border-neutral-700/40"
+                            ?"bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            :"bg-neutral-800/60 text-neutral-400 border border-neutral-700/40"
                         }`}
                       >
                         <Check
                           className={`w-3 h-3 stroke-[3px] ${
-                            hasUppercase && hasLowercase ? "opacity-100" : "opacity-30"
+                            hasUppercase && hasLowercase ?"opacity-100" :"opacity-30"
                           }`}
                         />
                         <span>A-Z & a-z</span>
@@ -542,13 +542,13 @@ export default function RegisterForm({
                       <div
                         className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md transition-colors ${
                           hasNumber
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            : "bg-neutral-800/60 text-neutral-400 border border-neutral-700/40"
+                            ?"bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            :"bg-neutral-800/60 text-neutral-400 border border-neutral-700/40"
                         }`}
                       >
                         <Check
                           className={`w-3 h-3 stroke-[3px] ${
-                            hasNumber ? "opacity-100" : "opacity-30"
+                            hasNumber ?"opacity-100" :"opacity-30"
                           }`}
                         />
                         <span>Number (0-9)</span>
@@ -557,13 +557,13 @@ export default function RegisterForm({
                       <div
                         className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md transition-colors ${
                           hasSpecial
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            : "bg-neutral-800/60 text-neutral-400 border border-neutral-700/40"
+                            ?"bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            :"bg-neutral-800/60 text-neutral-400 border border-neutral-700/40"
                         }`}
                       >
                         <Check
                           className={`w-3 h-3 stroke-[3px] ${
-                            hasSpecial ? "opacity-100" : "opacity-30"
+                            hasSpecial ?"opacity-100" :"opacity-30"
                           }`}
                         />
                         <span>Symbol (!@#)</span>
@@ -582,7 +582,7 @@ export default function RegisterForm({
                   {confirmPassword && (
                     <span
                       className={`text-[10px] font-bold flex items-center gap-1 ${
-                        passwordsMatch ? "text-emerald-400" : "text-amber-400"
+                        passwordsMatch ?"text-emerald-400" :"text-amber-400"
                       }`}
                     >
                       {passwordsMatch ? (
@@ -604,7 +604,7 @@ export default function RegisterForm({
                     <Lock className="w-4 h-4" />
                   </div>
                   <input
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={showConfirmPassword ?"text" :"password"}
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -612,21 +612,21 @@ export default function RegisterForm({
                     onKeyUp={checkCapsLock}
                     className={`w-full bg-[#121417] border rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none transition-all font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${
                       fieldErrors.confirmPassword
-                        ? "border-rose-500 ring-2 ring-rose-500/20"
-                        : "border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                        ?"border-rose-500 ring-2 ring-rose-500/20"
+                        :"border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
                     }`}
                     placeholder="Re-enter your password"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
                     <Tooltip
-                      text={showConfirmPassword ? "Hide password" : "Show password"}
+                      text={showConfirmPassword ?"Hide password" :"Show password"}
                       placement="top"
                     >
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer flex items-center justify-center rounded-lg hover:bg-neutral-800"
-                        aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                        aria-label={showConfirmPassword ?"Hide password" :"Show password"}
                       >
                         {showConfirmPassword ? (
                           <EyeOff className="w-4 h-4" />
@@ -660,18 +660,18 @@ export default function RegisterForm({
                       <div
                         className={`w-4 h-4 rounded border transition-all duration-200 flex items-center justify-center ${
                           acceptTerms
-                            ? "bg-blue-600 border-blue-600"
+                            ?"bg-blue-600 border-blue-600"
                             : fieldErrors.acceptTerms
-                            ? "bg-[#181818] border-rose-500 ring-1 ring-rose-500/30"
-                            : "bg-[#181818] border-[#2F2F2F] group-hover:border-neutral-500"
+                            ?"bg-[#181818] border-rose-500 ring-1 ring-rose-500/30"
+                            :"bg-[#181818] border-[#2F2F2F] group-hover:border-neutral-500"
                         }`}
                       >
                         {acceptTerms && <Check className="w-3 h-3 text-white stroke-[3px]" />}
                       </div>
                     </div>
                     <span className="text-xs text-neutral-300 group-hover:text-white transition-colors leading-relaxed">
-                      I agree to the{" "}
-                      <span className="text-blue-400 hover:underline">Terms of Service</span> and{" "}
+                      I agree to the{""}
+                      <span className="text-blue-400 hover:underline">Terms of Service</span> and{""}
                       <span className="text-blue-400 hover:underline">Privacy Policy</span>
                     </span>
                   </label>
@@ -696,8 +696,8 @@ export default function RegisterForm({
                       <div
                         className={`w-4 h-4 rounded border transition-all duration-200 flex items-center justify-center ${
                           subscribeNewsletter
-                            ? "bg-blue-600 border-blue-600"
-                            : "bg-[#181818] border-[#2F2F2F] group-hover:border-neutral-500"
+                            ?"bg-blue-600 border-blue-600"
+                            :"bg-[#181818] border-[#2F2F2F] group-hover:border-neutral-500"
                         }`}
                       >
                         {subscribeNewsletter && (
@@ -717,7 +717,7 @@ export default function RegisterForm({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl  active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
+                  className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
                 >
                   {isLoading ? (
                     <>
@@ -737,7 +737,7 @@ export default function RegisterForm({
 
           {/* Login Link */}
           <p className="text-center text-sm text-neutral-400 font-medium">
-            Already have an account?{" "}
+            Already have an account?{""}
             <Tooltip text="Sign in to your existing account" placement="bottom">
               <button
                 type="button"

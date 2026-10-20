@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from"react";
 import {
   Focus,
   LayoutPanelTop,
@@ -19,22 +19,22 @@ import {
   Tag,
   ExternalLink,
   BookOpen,
-} from "lucide-react";
+} from"lucide-react";
 import {
   getUserAvatarUrl,
   DEFAULT_USER_AVATAR_DATA_URI,
-} from "@/shared/utils/avatar";
-import NotificationDropdown from "@/features/platform/notifications/components/NotificationDropdown";
-import { Notification } from "@/features/platform/notifications";
-import { getUserCreditsPayload, claimDailyCredits } from "@/features/auth/api/auth";
-import { HeaderCreditsPopover } from "@/features/intelligence/core";
-import { useImageEditorStore } from "@/features/workspace/shell/hooks/useEditorState";
-import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
-import { useBackendHealth } from "@/shared/api/hooks/useBackendHealth";
-import { AIModelSelector } from "@/features/intelligence/core";
-import ServerStatusIndicator from "@/shared/ui/status/ServerStatusIndicator";
-import { Tooltip } from "@/shared/ui/common/TooltipPortal";
-import { SonikomaLogo } from "@/shared/ui/branding";
+} from"@/shared/utils/avatar";
+import NotificationDropdown from"@/features/platform/notifications/components/NotificationDropdown";
+import { Notification } from"@/features/platform/notifications";
+import { getUserCreditsPayload, claimDailyCredits } from"@/features/auth/api/auth";
+import { HeaderCreditsPopover } from"@/features/intelligence/core";
+import { useImageEditorStore } from"@/features/workspace/shell/hooks/useEditorState";
+import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
+import { useBackendHealth } from"@/shared/api/hooks/useBackendHealth";
+import { AIModelSelector } from"@/features/intelligence/core";
+import ServerStatusIndicator from"@/shared/ui/status/ServerStatusIndicator";
+import { Tooltip } from"@/shared/ui/common/TooltipPortal";
+import { SonikomaLogo } from"@/shared/ui/branding";
 
 interface EditorPageHeaderProps {
   title: string;
@@ -106,8 +106,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   // Smoothly slide out of view if the mobile/drawer sidebar is open
   const headerVisibilityClass = isSidebarOpen
-    ? "-translate-y-full opacity-0 pointer-events-none"
-    : "opacity-100";
+    ?"-translate-y-full opacity-0 pointer-events-none"
+    :"opacity-100";
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreditsPopover, setShowCreditsPopover] = useState(false);
@@ -121,10 +121,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
     if (!fetchWithInterceptor) return;
     try {
       const res = await claimDailyCredits(fetchWithInterceptor);
-      if (res.success && typeof res.new_balance === "number") {
+      if (res.success && typeof res.new_balance ==="number") {
         setCredits(res.new_balance);
         if (addNotification) {
-          addNotification(res.message || "Claimed daily bonus!", "success");
+          addNotification(res.message ||"Claimed daily bonus!","success");
         }
       }
     } catch {
@@ -182,10 +182,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
     if (!projectUrl) return null;
     try {
       const host = new URL(
-        projectUrl.startsWith("http") ? projectUrl : `https://${projectUrl}`
+        projectUrl.startsWith("http") ? projectUrl :`https://${projectUrl}`
       ).hostname
         .toLowerCase()
-        .replace(/^www\./, "");
+        .replace(/^www\./,"");
 
       if (!host) return null;
 
@@ -198,12 +198,12 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       const displayName = mainName
         .split(/[-_]/)
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
+        .join("");
 
       return {
         name: displayName,
         domain: host,
-        badgeColor: "bg-neutral-900 border border-neutral-800 text-neutral-300",
+        badgeColor:"bg-neutral-900 border border-neutral-800 text-neutral-300",
       };
     } catch {
       return null;
@@ -213,7 +213,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-nowrap items-center justify-between gap-1 sm:gap-2.5 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl pl-0 pr-3 sm:pr-6 md:pr-8 shadow-md shadow-black/20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
-        className || ""
+        className ||""
       }`}
       style={style}
     >
@@ -225,7 +225,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             <button
               onClick={onToggleSidebar}
               className="w-11 h-11 rounded-2xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-700 text-neutral-300 hover:text-white cursor-pointer transition-all duration-200 active:scale-95 flex items-center justify-center shadow-sm"
-              title={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
+              title={isSidebarCollapsed ?"Open sidebar" :"Close sidebar"}
               aria-label="Toggle navigation menu"
             >
               <Menu className="h-5 w-5" />
@@ -248,7 +248,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
               {websiteInfo && (
                 <a
-                  href={projectUrl || "#"}
+                  href={projectUrl ||"#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
@@ -359,8 +359,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
               aria-label="Toggle Floating Player"
               className={`flex items-center justify-center h-8.5 w-8.5 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
                 isPlayerOpen
-                  ? "border-neutral-700 bg-neutral-800 text-white shadow-sm"
-                  : "border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white"
+                  ?"border-neutral-700 bg-neutral-800 text-white shadow-sm"
+                  :"border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white"
               }`}
             >
               <Monitor className="h-4 w-4" />
@@ -371,17 +371,17 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         {/* Focus Mode - Hidden on narrow screens (<520px) */}
         <div className="hidden min-[520px]:block">
           <Tooltip
-            text={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
+            text={isFocusMode ?"Exit Focus Mode" :"Focus Mode"}
             placement="bottom"
           >
             <button
               type="button"
               onClick={() => setIsFocusMode((value) => !value)}
-              aria-label={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
+              aria-label={isFocusMode ?"Exit Focus Mode" :"Focus Mode"}
               className={`flex items-center justify-center h-8.5 w-8.5 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
                 isFocusMode
-                  ? "border-neutral-700 bg-neutral-800 text-white shadow-sm"
-                  : "border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white"
+                  ?"border-neutral-700 bg-neutral-800 text-white shadow-sm"
+                  :"border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white"
               }`}
             >
               <Focus className="h-4 w-4" />
@@ -391,33 +391,33 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
         {/* Save Button */}
         <Tooltip
-          text={isDirty ? "Save Unsaved Changes (Ctrl+S)" : "Project Saved"}
+          text={isDirty ?"Save Unsaved Changes (Ctrl+S)" :"Project Saved"}
           placement="bottom"
         >
           <button
             type="button"
             onClick={onSave}
             disabled={isSaving}
-            aria-label={isDirty ? "Save Unsaved Changes" : "Project Saved"}
+            aria-label={isDirty ?"Save Unsaved Changes" :"Project Saved"}
             className={`flex items-center gap-1.5 px-2.5 sm:px-3 h-8.5 rounded-xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border shrink-0 ${
               isSaving
-                ? "bg-[#2A2A2A] border-[#3B82F6]/40 text-[#3B82F6] cursor-wait opacity-80"
+                ?"bg-[#2A2A2A] border-[#3B82F6]/40 text-[#3B82F6] cursor-wait opacity-80"
                 : isDirty
-                ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border-blue-400/40 shadow-md shadow-blue-900/30 font-bold"
-                : "bg-[#202127] hover:bg-[#282a32] border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white"
+                ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white border-blue-400/40 shadow-md  font-bold"
+                :"bg-[#202127] hover:bg-[#282a32] border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white"
             }`}
           >
             <Save
               className={`h-3.5 w-3.5 ${
                 isSaving
-                  ? "animate-spin text-white"
+                  ?"animate-spin text-white"
                   : isDirty
-                  ? "text-white"
-                  : "text-neutral-400"
+                  ?"text-white"
+                  :"text-neutral-400"
               }`}
             />
             <span className="hidden min-[480px]:inline font-sans text-[11px]">
-              {isSaving ? "Saving..." : isDirty ? "Save*" : "Save"}
+              {isSaving ?"Saving..." : isDirty ?"Save*" :"Save"}
             </span>
           </button>
         </Tooltip>
@@ -462,10 +462,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           <Tooltip
             text={
               activeProjectId && activeProjectData
-                ? `Active Project: ${
-                    activeProjectData.project?.title || "Active"
+                ?`Active Project: ${
+                    activeProjectData.project?.title ||"Active"
                   }`
-                : "Select Active Project"
+                :"Select Active Project"
             }
             placement="bottom"
           >
@@ -492,11 +492,11 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             <span className="text-xs font-bold text-white group-hover:text-white truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
               {user?.full_name ||
                 user?.username ||
-                (user?.email ? user.email.split("@")[0] : "Studio Creator")}
+                (user?.email ? user.email.split("@")[0] :"Studio Creator")}
             </span>
             <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
               <img
-                key={user?.avatar_url || user?.full_name || "avatar"}
+                key={user?.avatar_url || user?.full_name ||"avatar"}
                 src={getUserAvatarUrl(user)}
                 referrerPolicy="no-referrer"
                 onError={(e) => {

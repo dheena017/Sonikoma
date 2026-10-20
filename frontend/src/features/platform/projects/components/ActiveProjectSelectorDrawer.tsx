@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from"react";
 import {
   Search,
   X,
@@ -20,13 +20,13 @@ import {
   Tv,
   Swords,
   BookOpen,
-} from "lucide-react";
-import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
-import { useThemeMode } from "@/shared/hooks/useThemeMode";
-import { SonikomaLogo } from "@/shared/ui/branding";
-import { getProxiedImageUrl, getSourceIcon, getSourceName } from "@/shared/utils";
-import { timeAgo } from "@/shared/utils/dateUtils";
-import { aiSeriesApi, AISeriesProject } from "@/features/intelligence/series/api/aiSeries";
+} from"lucide-react";
+import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
+import { useThemeMode } from"@/shared/hooks/useThemeMode";
+import { SonikomaLogo } from"@/shared/ui/branding";
+import { getProxiedImageUrl, getSourceIcon, getSourceName } from"@/shared/utils";
+import { timeAgo } from"@/shared/utils/dateUtils";
+import { aiSeriesApi, AISeriesProject } from"@/features/intelligence/series/api/aiSeries";
 
 interface ProjectItem {
   project_id: string;
@@ -55,10 +55,10 @@ interface ActiveProjectSelectorDrawerProps {
 }
 
 function formatDuration(seconds: number): string {
-  if (!seconds || seconds <= 0) return "0s";
+  if (!seconds || seconds <= 0) return"0s";
   const m = Math.floor(seconds / 60);
   const s = Math.round(seconds % 60);
-  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+  return m > 0 ?`${m}m ${s}s` :`${s}s`;
 }
 
 export const ActiveProjectSelectorDrawer: React.FC<
@@ -81,13 +81,11 @@ export const ActiveProjectSelectorDrawer: React.FC<
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<
-    "all" | "ai_series" | "recent" | "draft" | "processing" | "completed" | "favorites"
+  const [activeTab, setActiveTab] = useState<"all" |"ai_series" |"recent" |"draft" |"processing" |"completed" |"favorites"
   >("all");
   const [aiSeriesList, setAiSeriesList] = useState<AISeriesProject[]>([]);
   const [loadingAiSeries, setLoadingAiSeries] = useState(false);
-  const [sortBy, setSortBy] = useState<
-    "newest" | "oldest" | "panels" | "title"
+  const [sortBy, setSortBy] = useState<"newest" |"oldest" |"panels" |"title"
   >("newest");
 
   // Favorites management via localStorage
@@ -107,8 +105,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
         ? prev.filter((item) => item !== id)
         : [...prev, id];
       try {
-        localStorage.setItem(
-          "sonikoma_favorite_projects",
+        localStorage.setItem("sonikoma_favorite_projects",
           JSON.stringify(updated)
         );
       } catch {}
@@ -123,12 +120,12 @@ export const ActiveProjectSelectorDrawer: React.FC<
   // Lock body scroll when drawer is open
   useEffect(() => {
     if (isDrawerOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow ="hidden";
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow ="";
     }
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow ="";
     };
   }, [isDrawerOpen]);
 
@@ -143,11 +140,10 @@ export const ActiveProjectSelectorDrawer: React.FC<
         const fetcher = fetchWithInterceptor || window.fetch;
         const token =
           localStorage.getItem("sonikoma_token") ||
-          sessionStorage.getItem("sonikoma_token") ||
-          "";
+          sessionStorage.getItem("sonikoma_token") ||"";
 
         const res = await fetcher("/api/v1/projects", {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: token ? { Authorization:`Bearer ${token}` } : {},
         });
 
         if (res.ok) {
@@ -190,46 +186,46 @@ export const ActiveProjectSelectorDrawer: React.FC<
   // Real Filter & Sort projects
   const filteredProjects = useMemo(() => {
     let result = projects.filter((p) => {
-      const titleMatch = (p.title || "")
+      const titleMatch = (p.title ||"")
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
-      const chapterMatch = (p.chapter_slug || "")
+      const chapterMatch = (p.chapter_slug ||"")
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
       const matchesSearch = titleMatch || chapterMatch;
 
       if (!matchesSearch) return false;
 
-      const status = (p.status || "ready").toLowerCase();
-      if (activeTab === "favorites") return favorites.includes(p.project_id);
-      if (activeTab === "recent") return true;
-      if (activeTab === "draft") return status === "draft";
-      if (activeTab === "processing") return status === "processing";
-      if (activeTab === "completed")
-        return status === "completed" || status === "ready";
-      return true; // "all"
+      const status = (p.status ||"ready").toLowerCase();
+      if (activeTab ==="favorites") return favorites.includes(p.project_id);
+      if (activeTab ==="recent") return true;
+      if (activeTab ==="draft") return status ==="draft";
+      if (activeTab ==="processing") return status ==="processing";
+      if (activeTab ==="completed")
+        return status ==="completed" || status ==="ready";
+      return true; //"all"
     });
 
     return result.sort((a, b) => {
-      if (sortBy === "newest") {
+      if (sortBy ==="newest") {
         return (
           new Date(b.created_at || b.updated_at || 0).getTime() -
           new Date(a.created_at || a.updated_at || 0).getTime()
         );
       }
-      if (sortBy === "oldest") {
+      if (sortBy ==="oldest") {
         return (
           new Date(a.created_at || a.updated_at || 0).getTime() -
           new Date(b.created_at || b.updated_at || 0).getTime()
         );
       }
-      if (sortBy === "panels") {
+      if (sortBy ==="panels") {
         const countA = a.panels_count ?? a.panel_count ?? a.panels?.length ?? 0;
         const countB = b.panels_count ?? b.panel_count ?? b.panels?.length ?? 0;
         return countB - countA;
       }
-      if (sortBy === "title") {
-        return (a.title || "").localeCompare(b.title || "");
+      if (sortBy ==="title") {
+        return (a.title ||"").localeCompare(b.title ||"");
       }
       return 0;
     });
@@ -258,7 +254,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
     // Update URL query param
     const url = new URL(window.location.href);
     url.searchParams.set("project_id", id);
-    window.history.replaceState({}, "", url.toString());
+    window.history.replaceState({},"", url.toString());
 
     setDrawerOpen(false);
   };
@@ -323,8 +319,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
     activeProjectObj?.first_panel_image ||
     activePanels[0]?.image_url ||
     null;
-  const ActiveSourceIcon = getSourceIcon(activeProjectObj?.url || "");
-  const activeSourceName = getSourceName(activeProjectObj?.url || "");
+  const ActiveSourceIcon = getSourceIcon(activeProjectObj?.url ||"");
+  const activeSourceName = getSourceName(activeProjectObj?.url ||"");
 
   if (!isDrawerOpen) return null;
 
@@ -393,13 +389,13 @@ export const ActiveProjectSelectorDrawer: React.FC<
         {/* ─── Global Project Context Banner (4 States: idle, loading, missing, active) ─── */}
         {(() => {
           if (
-            projectState === "missing" ||
+            projectState ==="missing" ||
             (activeProjectId &&
               !activeProjectData &&
               !useProjectStore.getState().isHydrating)
           ) {
             const missingId =
-              missingProjectInfo?.missingId || activeProjectId || "Unknown ID";
+              missingProjectInfo?.missingId || activeProjectId ||"Unknown ID";
             const isJobId =
               missingProjectInfo?.isJobId || missingId.startsWith("job_");
 
@@ -407,7 +403,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
               <div className="p-4 border-b border-rose-500/20 bg-gradient-to-b from-rose-950/20 to-[#0d0e19] space-y-3.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] uppercase font-bold text-rose-400 tracking-wider flex items-center gap-1.5 font-mono">
-                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />{" "}
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />{""}
                     Project Unavailable
                   </span>
                   <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-400 font-mono">
@@ -420,13 +416,13 @@ export const ActiveProjectSelectorDrawer: React.FC<
                     <h4 className="font-extrabold text-sm text-white flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
                       {isJobId
-                        ? `Processing Job ID "${missingId}"`
-                        : `Requested Project ID "${missingId}"`}
+                        ?`Processing Job ID"${missingId}"`
+                        :`Requested Project ID"${missingId}"`}
                     </h4>
                     <p className="text-xs text-neutral-300 mt-1 leading-relaxed">
                       {isJobId
-                        ? "This identifier is a processing job ID and is no longer associated with an active project record. The project selector chooses projects, not processing jobs."
-                        : "The requested project could not be found or may have been deleted from the database."}
+                        ?"This identifier is a processing job ID and is no longer associated with an active project record. The project selector chooses projects, not processing jobs."
+                        :"The requested project could not be found or may have been deleted from the database."}
                     </p>
                   </div>
 
@@ -457,14 +453,14 @@ export const ActiveProjectSelectorDrawer: React.FC<
           }
 
           if (
-            projectState === "loading" ||
+            projectState ==="loading" ||
             (activeProjectId && !activeProjectData)
           ) {
             return (
               <div className="p-4 border-b border-white/10 bg-gradient-to-b from-[#131427] to-[#0d0e19] space-y-3.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] uppercase font-bold text-[#3B82F6] tracking-wider flex items-center gap-1.5 font-mono">
-                    <Activity className="w-3.5 h-3.5 text-[#3B82F6] animate-spin" />{" "}
+                    <Activity className="w-3.5 h-3.5 text-[#3B82F6] animate-spin" />{""}
                     Active Project Context
                   </span>
                   <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#60A5FA] font-mono">
@@ -527,45 +523,45 @@ export const ActiveProjectSelectorDrawer: React.FC<
             activeProjectData.scrapedImages?.length ??
             0;
           const hasVideo = !!proj?.video_url;
-          const statusLower = (proj?.status || "pending").toLowerCase();
+          const statusLower = (proj?.status ||"pending").toLowerCase();
           const statusColor =
-            statusLower === "processing"
-              ? "text-amber-400 bg-amber-500/10 border-amber-500/30"
-              : statusLower === "draft"
-              ? "text-neutral-400 bg-neutral-800 border-neutral-700"
-              : statusLower === "completed" || statusLower === "ready"
-              ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
-              : "text-blue-400 bg-blue-500/10 border-blue-500/30";
+            statusLower ==="processing"
+              ?"text-amber-400 bg-amber-500/10 border-amber-500/30"
+              : statusLower ==="draft"
+              ?"text-neutral-400 bg-neutral-800 border-neutral-700"
+              : statusLower ==="completed" || statusLower ==="ready"
+              ?"text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
+              :"text-blue-400 bg-blue-500/10 border-blue-500/30";
 
-          // Build a clean subtitle: prefer "Ep. X" or chapter slug short form
+          // Build a clean subtitle: prefer"Ep. X" or chapter slug short form
           const episodeLabel = proj?.episode
-            ? `Ep. ${proj.episode}`
+            ?`Ep. ${proj.episode}`
             : proj?.chapter_slug
             ? proj.chapter_slug.length > 24
-              ? proj.chapter_slug.slice(0, 24) + "…"
+              ? proj.chapter_slug.slice(0, 24) +"…"
               : proj.chapter_slug
             : null;
 
           const infoLine = [
-            proj?.author ? `by ${proj.author}` : null,
+            proj?.author ?`by ${proj.author}` : null,
             episodeLabel,
             proj?.genre,
           ]
             .filter(Boolean)
-            .join(" · ");
+            .join(" ·");
 
           return (
             <div className="p-4 border-b border-[#2F2F2F] bg-[#181818] space-y-3.5">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] uppercase font-black text-[#3B82F6] tracking-wider flex items-center gap-2 font-mono">
-                  <span className="w-2 h-2 rounded-full bg-[#3B82F6] " />
+                  <span className="w-2 h-2 rounded-full bg-[#3B82F6]" />
                   Active Project Context
                 </span>
                 <span
                   className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1.5 font-mono capitalize ${statusColor}`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                  {proj?.status || "Active"}
+                  {proj?.status ||"Active"}
                 </span>
               </div>
 
@@ -581,7 +577,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                       />
                     ) : (
                       <div className="w-full h-full bg-[#121212] flex items-center justify-center text-[#3B82F6] font-black text-lg border border-[#2F2F2F]">
-                        {proj?.title?.charAt(0).toUpperCase() || "P"}
+                        {proj?.title?.charAt(0).toUpperCase() ||"P"}
                       </div>
                     )}
                   </div>
@@ -598,7 +594,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                       )}
                     </div>
                     <h4 className="font-extrabold text-sm text-[#E5E5E5] truncate font-sans leading-tight">
-                      {proj?.title || "Untitled Project"}
+                      {proj?.title ||"Untitled Project"}
                     </h4>
                     {infoLine && (
                       <p className="text-[11px] text-[#9CA3AF] font-mono truncate">
@@ -614,8 +610,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                       <button
                         onClick={() => {
                           setDrawerOpen(false);
-                          navigateTo(
-                            `/scraper/editor?project_id=${encodeURIComponent(
+                          navigateTo(`/scraper/editor?project_id=${encodeURIComponent(
                               activeProjectId!
                             )}`
                           );
@@ -630,8 +625,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                       <button
                         onClick={() => {
                           setDrawerOpen(false);
-                          navigateTo(
-                            `/editor/image?project_id=${encodeURIComponent(
+                          navigateTo(`/editor/image?project_id=${encodeURIComponent(
                               activeProjectId!
                             )}`
                           );
@@ -648,8 +642,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         <button
                           onClick={() => {
                             setDrawerOpen(false);
-                            navigateTo(
-                              `/projects/${encodeURIComponent(
+                            navigateTo(`/projects/${encodeURIComponent(
                                 proj.series_slug!
                               )}`
                             );
@@ -695,7 +688,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   <div className="w-full h-2 rounded-full bg-[#121212] overflow-hidden border border-[#2F2F2F]">
                     <div
                       className="h-full bg-gradient-to-r from-[#3B82F6] to-[#3B82F6] transition-all duration-500 rounded-full"
-                      style={{ width: `${activeProgressPct}%` }}
+                      style={{ width:`${activeProgressPct}%` }}
                     />
                   </div>
                 </div>
@@ -717,7 +710,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   </span>
                   <span
                     className={`font-bold font-mono text-sm ${
-                      importedCount > 0 ? "text-[#3B82F6]" : "text-[#6B7280]"
+                      importedCount > 0 ?"text-[#3B82F6]" :"text-[#6B7280]"
                     }`}
                   >
                     {importedCount}
@@ -730,8 +723,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   <span
                     className={`font-bold font-mono text-sm ${
                       activeSpeechCount > 0
-                        ? "text-[#10B981]"
-                        : "text-[#6B7280]"
+                        ?"text-[#10B981]"
+                        :"text-[#6B7280]"
                     }`}
                   >
                     {activeSpeechCount}
@@ -743,7 +736,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   </span>
                   <span
                     className={`font-bold font-mono text-sm ${
-                      activeAudioCount > 0 ? "text-[#F59E0B]" : "text-[#6B7280]"
+                      activeAudioCount > 0 ?"text-[#F59E0B]" :"text-[#6B7280]"
                     }`}
                   >
                     {activeAudioCount}
@@ -770,8 +763,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         onClick={() => {
                           setDrawerOpen(false);
                           if (navigateTo) {
-                            navigateTo(
-                              `/scraper/editor?project_id=${encodeURIComponent(
+                            navigateTo(`/scraper/editor?project_id=${encodeURIComponent(
                                 activeProjectId!
                               )}&panel=${i}`
                             );
@@ -788,7 +780,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                             onError={(e) => {
                               (
                                 e.currentTarget as HTMLImageElement
-                              ).style.display = "none";
+                              ).style.display ="none";
                             }}
                           />
                         ) : (
@@ -842,7 +834,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                             onError={(e) => {
                               (
                                 e.currentTarget as HTMLImageElement
-                              ).style.display = "none";
+                              ).style.display ="none";
                             }}
                           />
                         </div>
@@ -902,18 +894,18 @@ export const ActiveProjectSelectorDrawer: React.FC<
           {/* Category Filter Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-xs">
             {[
-              { id: "all", label: "All Projects" },
+              { id:"all", label:"All Projects" },
               {
-                id: "ai_series",
-                label: "AI Series",
+                id:"ai_series",
+                label:"AI Series",
                 isAi: true,
                 count: aiSeriesList.length,
               },
-              { id: "favorites", label: "★ Favorites" },
-              { id: "recent", label: "Recent" },
-              { id: "draft", label: "Drafts" },
-              { id: "processing", label: "Processing" },
-              { id: "completed", label: "Completed" },
+              { id:"favorites", label:"★ Favorites" },
+              { id:"recent", label:"Recent" },
+              { id:"draft", label:"Drafts" },
+              { id:"processing", label:"Processing" },
+              { id:"completed", label:"Completed" },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -922,8 +914,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`px-3 py-1.5 rounded-xl transition-all text-xs font-medium whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                     isActive
-                      ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold "
-                      : "text-[#9CA3AF] bg-[#121212] border border-[#2F2F2F] hover:text-white hover:border-neutral-700 hover:bg-[#2A2A2A]"
+                      ?"bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
+                      :"text-[#9CA3AF] bg-[#121212] border border-[#2F2F2F] hover:text-white hover:border-neutral-700 hover:bg-[#2A2A2A]"
                   }`}
                 >
                   {tab.isAi && (
@@ -934,8 +926,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                     <span
                       className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${
                         isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-neutral-800 text-neutral-400"
+                          ?"bg-white/20 text-white"
+                          :"bg-neutral-800 text-neutral-400"
                       }`}
                     >
                       {tab.count}
@@ -949,7 +941,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
 
         {/* ─── Real Projects List ─── */}
         <div className="flex-grow overflow-y-auto p-4 space-y-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-[#141414]">
-          {activeTab === "ai_series" ? (
+          {activeTab ==="ai_series" ? (
             loadingAiSeries ? (
               <div className="flex flex-col items-center justify-center py-20 text-[#9CA3AF] gap-3">
                 <Loader2 className="w-7 h-7 animate-spin text-[#3B82F6]" />
@@ -968,8 +960,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   </p>
                   <p className="text-xs text-[#9CA3AF] mt-1">
                     {searchQuery
-                      ? `No AI series match "${searchQuery}".`
-                      : "No AI series created yet. Generate one in the AI Studio."}
+                      ?`No AI series match"${searchQuery}".`
+                      :"No AI series created yet. Generate one in the AI Studio."}
                   </p>
                 </div>
                 {navigateTo && (
@@ -987,16 +979,16 @@ export const ActiveProjectSelectorDrawer: React.FC<
               </div>
             ) : (
               filteredAiSeries.map((s) => {
-                const fmt = (s.format_type || "manhwa").toLowerCase();
-                const isAnime = fmt === "anime";
-                const isManga = fmt === "comic_manga";
+                const fmt = (s.format_type ||"manhwa").toLowerCase();
+                const isAnime = fmt ==="anime";
+                const isManga = fmt ==="comic_manga";
                 const FormatIcon = isAnime ? Tv : isManga ? Swords : BookOpen;
                 const chapterCount =
                   s.sessions?.[0]?.chapters?.length ||
                   s.chapters_per_session ||
                   s.total_episodes ||
                   8;
-                const studioUrl = `/ai-series/${s.series_id}?format=${fmt}`;
+                const studioUrl =`/ai-series/${s.series_id}?format=${fmt}`;
 
                 return (
                   <div
@@ -1024,7 +1016,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         <div className="flex items-center gap-1.5">
                           <FormatIcon className="w-3 h-3 text-[#3B82F6] shrink-0" />
                           <span className="text-[10px] text-[#60A5FA] font-mono uppercase font-bold truncate">
-                            {fmt.replace("_", " ")}
+                            {fmt.replace("_","")}
                           </span>
                           <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md border font-mono capitalize text-[#10B981] bg-[#10B981]/10 border-[#10B981]/30">
                             Ready
@@ -1037,12 +1029,12 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         <div className="flex items-center gap-2 text-[11px] text-[#9CA3AF] flex-wrap">
                           <span className="inline-flex items-center gap-1 font-mono">
                             <Layers className="w-3 h-3 text-[#9CA3AF]" />
-                            {chapterCount}{" "}
-                            {chapterCount === 1 ? "Chapter" : "Chapters"}
+                            {chapterCount}{""}
+                            {chapterCount === 1 ?"Chapter" :"Chapters"}
                           </span>
                           <span>•</span>
                           <span className="font-mono text-[#F59E0B]">
-                            {s.genre || "Action Fantasy"}
+                            {s.genre ||"Action Fantasy"}
                           </span>
                         </div>
                       </div>
@@ -1083,8 +1075,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                 </p>
                 <p className="text-xs text-[#9CA3AF] mt-1">
                   {searchQuery
-                    ? "No matches for your search term."
-                    : "No projects in this category."}
+                    ?"No matches for your search term."
+                    :"No projects in this category."}
                 </p>
               </div>
               {navigateTo && (
@@ -1111,19 +1103,19 @@ export const ActiveProjectSelectorDrawer: React.FC<
               const panelCount =
                 p.panels_count ?? p.panel_count ?? p.panels?.length ?? 0;
               const importedCount = p.imported_assets_count ?? 0;
-              const status = (p.status || "ready").toLowerCase();
-              const ItemSourceIcon = getSourceIcon(p.url || "");
-              const itemSourceName = getSourceName(p.url || "");
+              const status = (p.status ||"ready").toLowerCase();
+              const ItemSourceIcon = getSourceIcon(p.url ||"");
+              const itemSourceName = getSourceName(p.url ||"");
               const itemTimeAgo = timeAgo(p.created_at || p.updated_at);
 
               const statusColor =
-                status === "processing"
-                  ? "text-[#F59E0B] bg-[#F59E0B]/10 border-[#F59E0B]/30"
-                  : status === "draft"
-                  ? "text-[#9CA3AF] bg-[#181818] border-[#2F2F2F]"
-                  : status === "completed" || status === "ready"
-                  ? "text-[#10B981] bg-[#10B981]/10 border-[#10B981]/30"
-                  : "text-[#9CA3AF] bg-[#181818] border-[#2F2F2F]";
+                status ==="processing"
+                  ?"text-[#F59E0B] bg-[#F59E0B]/10 border-[#F59E0B]/30"
+                  : status ==="draft"
+                  ?"text-[#9CA3AF] bg-[#181818] border-[#2F2F2F]"
+                  : status ==="completed" || status ==="ready"
+                  ?"text-[#10B981] bg-[#10B981]/10 border-[#10B981]/30"
+                  :"text-[#9CA3AF] bg-[#181818] border-[#2F2F2F]";
 
               return (
                 <div
@@ -1131,8 +1123,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   onClick={() => handleSelectProject(p.project_id)}
                   className={`group relative p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                     isActive
-                      ? "bg-[#1E1E1E] border-[#3B82F6] shadow-md ring-1 ring-[#3B82F6]/50"
-                      : "bg-[#181818] hover:bg-[#262626] border-[#2F2F2F] hover:border-neutral-700"
+                      ?"bg-[#1E1E1E] border-[#3B82F6] shadow-md ring-1 ring-[#3B82F6]/50"
+                      :"bg-[#181818] hover:bg-[#262626] border-[#2F2F2F] hover:border-neutral-700"
                   }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
@@ -1145,7 +1137,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         />
                       ) : (
                         <div className="w-full h-full bg-[#121212] flex items-center justify-center text-[#3B82F6] font-bold text-sm border border-[#2F2F2F]">
-                          {p.title?.charAt(0).toUpperCase() || "P"}
+                          {p.title?.charAt(0).toUpperCase() ||"P"}
                         </div>
                       )}
                     </div>
@@ -1169,7 +1161,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                       <div className="flex items-center gap-2 text-[11px] text-[#9CA3AF] flex-wrap">
                         <span className="inline-flex items-center gap-1 font-mono">
                           <Layers className="w-3 h-3 text-[#9CA3AF]" />
-                          {panelCount} {panelCount === 1 ? "Panel" : "Panels"}
+                          {panelCount} {panelCount === 1 ?"Panel" :"Panels"}
                         </span>
                         {importedCount > 0 && (
                           <>
@@ -1194,15 +1186,15 @@ export const ActiveProjectSelectorDrawer: React.FC<
                       onClick={(e) => toggleFavorite(e, p.project_id)}
                       className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                         isFav
-                          ? "text-[#F59E0B]"
-                          : "text-[#6B7280] hover:text-[#9CA3AF]"
+                          ?"text-[#F59E0B]"
+                          :"text-[#6B7280] hover:text-[#9CA3AF]"
                       }`}
                       title={
-                        isFav ? "Remove from Favorites" : "Add to Favorites"
+                        isFav ?"Remove from Favorites" :"Add to Favorites"
                       }
                     >
                       <Star
-                        className={`w-4 h-4 ${isFav ? "fill-[#F59E0B]" : ""}`}
+                        className={`w-4 h-4 ${isFav ?"fill-[#F59E0B]" :""}`}
                       />
                     </button>
 
@@ -1255,7 +1247,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
               </button>
               <button
                 onClick={handleConfirmSwitch}
-                className="flex-1 py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-colors shadow-lg shadow-rose-600/20 cursor-pointer"
+                className="flex-1 py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-colors shadow-lg cursor-pointer"
               >
                 Switch Anyway
               </button>

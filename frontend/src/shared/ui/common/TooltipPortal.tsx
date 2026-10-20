@@ -7,35 +7,35 @@ import React, {
   cloneElement,
   isValidElement,
   ReactElement,
-} from "react";
-import ReactDOM from "react-dom";
+} from"react";
+import ReactDOM from"react-dom";
 
 export type TooltipPlacement =
-  | "top"
-  | "top-start"
-  | "top-end"
-  | "bottom"
-  | "bottom-start"
-  | "bottom-end"
-  | "left"
-  | "left-start"
-  | "left-end"
-  | "right"
-  | "right-start"
-  | "right-end";
+  |"top"
+  |"top-start"
+  |"top-end"
+  |"bottom"
+  |"bottom-start"
+  |"bottom-end"
+  |"left"
+  |"left-start"
+  |"left-end"
+  |"right"
+  |"right-start"
+  |"right-end";
 
 export type TooltipVariant =
-  | "dark"
-  | "glass"
-  | "neon"
-  | "cyber"
-  | "gradient"
-  | "primary"
-  | "success"
-  | "warning"
-  | "danger";
+  |"dark"
+  |"glass"
+  |"neon"
+  |"cyber"
+  |"gradient"
+  |"primary"
+  |"success"
+  |"warning"
+  |"danger";
 
-export type TooltipSize = "xs" | "sm" | "md" | "lg";
+export type TooltipSize ="xs" |"sm" |"md" |"lg";
 
 export interface TooltipPortalProps {
   /** Text or React element to display in the tooltip */
@@ -66,16 +66,14 @@ export interface TooltipPortalProps {
   badge?: React.ReactNode;
   /** Badge color scheme */
   badgeVariant?:
-    | "default"
-    | "primary"
-    | "success"
-    | "warning"
-    | "danger"
-    | "purple";
+    |"default"
+    |"primary"
+    |"success"
+    |"warning"
+    |"danger"
+    |"purple";
   /** Whether to render a pointer arrow pointing to the anchor */
   showArrow?: boolean;
-  /** Add subtle atmospheric glow */
-  glow?: boolean;
   /** Custom max width (defaults to 320px for multiline, or auto) */
   maxWidth?: number | string;
   /** Custom className for the tooltip container */
@@ -92,45 +90,28 @@ export interface TooltipPortalProps {
 // Variant & Style Helpers
 // --------------------------------------------------------------------------
 const VARIANT_STYLES: Record<TooltipVariant, string> = {
-  dark: "bg-[#111116]/95 border-[#282832] text-neutral-100 ",
-  glass:
-    "bg-neutral-900/85 backdrop-blur-xl border-white/15 text-neutral-100 shadow-[0_8px_32px_rgba(0,0,0,0.6)]",
-  neon: "bg-[#0c1017]/95 border-neutral-700 text-neutral-100 shadow-xl",
-  cyber: "bg-[#110d1f]/95 border-neutral-700 text-neutral-100 shadow-black/50",
-  gradient:
-    "bg-gradient-to-r from-neutral-900/95 via-[#2A2A2A] to-neutral-900/95 border-neutral-700 text-white shadow-2xl shadow-black/50",
-  primary:
-    "bg-neutral-900/95 border-neutral-700 text-neutral-100 shadow-2xl shadow-black/50",
-  success:
-    "bg-emerald-950/95 border-emerald-500/50 text-emerald-50 shadow-2xl shadow-emerald-950/60",
-  warning:
-    "bg-amber-950/95 border-amber-500/50 text-amber-50 shadow-2xl shadow-amber-950/60",
-  danger:
-    "bg-rose-950/95 border-rose-500/50 text-rose-50 shadow-2xl shadow-rose-950/60",
+  dark:"bg-[#111116]/95 border-[#282832] text-neutral-100",
+  glass:"bg-neutral-900/85 backdrop-blur-xl border-white/15 text-neutral-100 shadow-[0_8px_32px_rgba(0,0,0,0.6)]",
+  neon:"bg-[#0c1017]/95 border-neutral-700 text-neutral-100 shadow-xl",
+  cyber:"bg-[#110d1f]/95 border-neutral-700 text-neutral-100 shadow-black/50",
+  gradient:"bg-gradient-to-r from-neutral-900/95 via-[#2A2A2A] to-neutral-900/95 border-neutral-700 text-white shadow-2xl shadow-black/50",
+  primary:"bg-neutral-900/95 border-neutral-700 text-neutral-100 shadow-2xl shadow-black/50",
+  success:"bg-emerald-950/95 border-emerald-500/50 text-emerald-50 shadow-2xl",
+  warning:"bg-amber-950/95 border-amber-500/50 text-amber-50 shadow-2xl",
+  danger:"bg-rose-950/95 border-rose-500/50 text-rose-50 shadow-2xl",
 };
 
-const GLOW_COLORS: Record<TooltipVariant, string> = {
-  dark: "",
-  glass: "",
-  neon: "",
-  cyber: "",
-  gradient: "",
-  primary: "",
-  success: "",
-  warning: "",
-  danger: "",
-};
 
 const ARROW_STYLES: Record<TooltipVariant, string> = {
-  dark: "bg-[#111116] border-[#282832]",
-  glass: "bg-neutral-900 border-white/20",
-  neon: "bg-[#0c1017] border-neutral-700",
-  cyber: "bg-[#110d1f] border-neutral-700",
-  gradient: "bg-[#1f1f26] border-neutral-700",
-  primary: "bg-neutral-900 border-neutral-700",
-  success: "bg-emerald-950 border-emerald-500/50",
-  warning: "bg-amber-950 border-amber-500/50",
-  danger: "bg-rose-950 border-rose-500/50",
+  dark:"bg-[#111116] border-[#282832]",
+  glass:"bg-neutral-900 border-white/20",
+  neon:"bg-[#0c1017] border-neutral-700",
+  cyber:"bg-[#110d1f] border-neutral-700",
+  gradient:"bg-[#1f1f26] border-neutral-700",
+  primary:"bg-neutral-900 border-neutral-700",
+  success:"bg-emerald-950 border-emerald-500/50",
+  warning:"bg-amber-950 border-amber-500/50",
+  danger:"bg-rose-950 border-rose-500/50",
 };
 
 const SIZE_STYLES: Record<
@@ -138,38 +119,38 @@ const SIZE_STYLES: Record<
   { root: string; text: string; shortcut: string; desc: string }
 > = {
   xs: {
-    root: "px-2 py-0.5 gap-1 text-[11px] rounded-lg",
-    text: "text-[11px] font-medium",
-    shortcut: "text-[9px] px-1 py-0.5",
-    desc: "text-[10px]",
+    root:"px-2 py-0.5 gap-1 text-[11px] rounded-lg",
+    text:"text-[11px] font-medium",
+    shortcut:"text-[9px] px-1 py-0.5",
+    desc:"text-[10px]",
   },
   sm: {
-    root: "px-2.5 py-1.5 gap-1.5 text-xs rounded-xl",
-    text: "text-xs font-medium tracking-normal text-neutral-200",
-    shortcut: "text-[10px] px-1.5 py-0.5",
-    desc: "text-[11px] text-neutral-400",
+    root:"px-2.5 py-1.5 gap-1.5 text-xs rounded-xl",
+    text:"text-xs font-medium tracking-normal text-neutral-200",
+    shortcut:"text-[10px] px-1.5 py-0.5",
+    desc:"text-[11px] text-neutral-400",
   },
   md: {
-    root: "px-3.5 py-2 gap-2 text-xs rounded-xl",
-    text: "text-xs font-semibold",
-    shortcut: "text-[11px] px-1.5 py-0.5",
-    desc: "text-xs",
+    root:"px-3.5 py-2 gap-2 text-xs rounded-xl",
+    text:"text-xs font-semibold",
+    shortcut:"text-[11px] px-1.5 py-0.5",
+    desc:"text-xs",
   },
   lg: {
-    root: "px-4.5 py-2.5 gap-2.5 text-sm rounded-2xl",
-    text: "text-sm font-semibold",
-    shortcut: "text-xs px-2 py-0.5",
-    desc: "text-xs",
+    root:"px-4.5 py-2.5 gap-2.5 text-sm rounded-2xl",
+    text:"text-sm font-semibold",
+    shortcut:"text-xs px-2 py-0.5",
+    desc:"text-xs",
   },
 };
 
 const BADGE_STYLES: Record<string, string> = {
-  default: "bg-neutral-800 text-neutral-300 border-neutral-700",
-  primary: "bg-neutral-800 text-neutral-300 border-neutral-700",
-  success: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
-  warning: "bg-amber-500/20 text-amber-300 border-amber-500/40",
-  danger: "bg-rose-500/20 text-rose-300 border-rose-500/40",
-  purple: "bg-neutral-800 text-neutral-300 border-neutral-700",
+  default:"bg-neutral-800 text-neutral-300 border-neutral-700",
+  primary:"bg-neutral-800 text-neutral-300 border-neutral-700",
+  success:"bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+  warning:"bg-amber-500/20 text-amber-300 border-amber-500/40",
+  danger:"bg-rose-500/20 text-rose-300 border-rose-500/40",
+  purple:"bg-neutral-800 text-neutral-300 border-neutral-700",
 };
 
 // --------------------------------------------------------------------------
@@ -180,25 +161,24 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
   children,
   visible,
   anchorRect,
-  placement = "right",
+  placement ="right",
   offset = 12,
   crossOffset = 0,
-  variant = "dark",
-  size = "sm",
+  variant ="dark",
+  size ="sm",
   shortcut,
   description,
   icon,
   badge,
-  badgeVariant = "default",
+  badgeVariant ="default",
   showArrow = true,
-  glow = false,
   maxWidth = 320,
-  className = "",
+  className ="",
   style: userStyle,
   container,
   id,
 }) => {
-  const [mounted, setMounted] = useState(() => typeof document !== "undefined");
+  const [mounted, setMounted] = useState(() => typeof document !=="undefined");
 
   useEffect(() => {
     setMounted(true);
@@ -221,15 +201,15 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
         return {
           calculatedStyle: {},
           resolvedPlacement: placement,
-          arrowPlacement: "left",
+          arrowPlacement:"left",
           arrowDeltaX: 0,
         };
       }
 
       const { top, left, right, bottom, width, height } = anchorRect;
-      const vpWidth = typeof window !== "undefined" ? window.innerWidth : 1920;
+      const vpWidth = typeof window !=="undefined" ? window.innerWidth : 1920;
       const vpHeight =
-        typeof window !== "undefined" ? window.innerHeight : 1080;
+        typeof window !=="undefined" ? window.innerHeight : 1080;
 
       let finalPlacement = placement;
 
@@ -239,36 +219,28 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
         right + offset + 120 > vpWidth &&
         left - offset > 120
       ) {
-        finalPlacement = finalPlacement.replace(
-          "right",
-          "left"
+        finalPlacement = finalPlacement.replace("right","left"
         ) as TooltipPlacement;
       } else if (
         finalPlacement.startsWith("left") &&
         left - offset - 120 < 0 &&
         vpWidth - right > 120
       ) {
-        finalPlacement = finalPlacement.replace(
-          "left",
-          "right"
+        finalPlacement = finalPlacement.replace("left","right"
         ) as TooltipPlacement;
       } else if (
         finalPlacement.startsWith("top") &&
         top - offset - 36 < 0 &&
         vpHeight - bottom > 60
       ) {
-        finalPlacement = finalPlacement.replace(
-          "top",
-          "bottom"
+        finalPlacement = finalPlacement.replace("top","bottom"
         ) as TooltipPlacement;
       } else if (
         finalPlacement.startsWith("bottom") &&
         bottom + offset + 36 > vpHeight &&
         top - offset > 60
       ) {
-        finalPlacement = finalPlacement.replace(
-          "bottom",
-          "top"
+        finalPlacement = finalPlacement.replace("bottom","top"
         ) as TooltipPlacement;
       }
 
@@ -281,64 +253,64 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
       const deltaX = anchorCenterX - clampedLeft;
 
       const posStyle: React.CSSProperties = {
-        position: "fixed",
+        position:"fixed",
         zIndex: 9900,
-        pointerEvents: "none",
+        pointerEvents:"none",
       };
 
-      let arrowPos = "left";
+      let arrowPos ="left";
 
       switch (finalPlacement) {
-        case "right":
+        case"right":
           posStyle.left = right + offset;
           posStyle.top = top + height / 2 + crossOffset;
-          posStyle.transform = "translateY(-50%)";
-          arrowPos = "left";
+          posStyle.transform ="translateY(-50%)";
+          arrowPos ="left";
           break;
-        case "right-start":
+        case"right-start":
           posStyle.left = right + offset;
           posStyle.top = top + crossOffset;
-          arrowPos = "left-start";
+          arrowPos ="left-start";
           break;
-        case "right-end":
+        case"right-end":
           posStyle.left = right + offset;
           posStyle.top = bottom + crossOffset;
-          posStyle.transform = "translateY(-100%)";
-          arrowPos = "left-end";
+          posStyle.transform ="translateY(-100%)";
+          arrowPos ="left-end";
           break;
-        case "left":
+        case"left":
           posStyle.left = left - offset;
           posStyle.top = top + height / 2 + crossOffset;
-          posStyle.transform = "translate(-100%, -50%)";
-          arrowPos = "right";
+          posStyle.transform ="translate(-100%, -50%)";
+          arrowPos ="right";
           break;
-        case "left-start":
+        case"left-start":
           posStyle.left = left - offset;
           posStyle.top = top + crossOffset;
-          posStyle.transform = "translateX(-100%)";
-          arrowPos = "right-start";
+          posStyle.transform ="translateX(-100%)";
+          arrowPos ="right-start";
           break;
-        case "left-end":
+        case"left-end":
           posStyle.left = left - offset;
           posStyle.top = bottom + crossOffset;
-          posStyle.transform = "translate(-100%, -100%)";
-          arrowPos = "right-end";
+          posStyle.transform ="translate(-100%, -100%)";
+          arrowPos ="right-end";
           break;
-        case "top":
-        case "top-start":
-        case "top-end":
+        case"top":
+        case"top-start":
+        case"top-end":
           posStyle.left = clampedLeft;
           posStyle.top = top - offset;
-          posStyle.transform = "translate(-50%, -100%)";
-          arrowPos = "bottom";
+          posStyle.transform ="translate(-50%, -100%)";
+          arrowPos ="bottom";
           break;
-        case "bottom":
-        case "bottom-start":
-        case "bottom-end":
+        case"bottom":
+        case"bottom-start":
+        case"bottom-end":
           posStyle.left = clampedLeft;
           posStyle.top = bottom + offset;
-          posStyle.transform = "translateX(-50%)";
-          arrowPos = "top";
+          posStyle.transform ="translateX(-50%)";
+          arrowPos ="top";
           break;
       }
 
@@ -355,20 +327,19 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
   }
 
   const isLongText =
-    typeof content === "string" ? content.length > 25 : Boolean(description);
+    typeof content ==="string" ? content.length > 25 : Boolean(description);
   const sizeConfig = SIZE_STYLES[size] || SIZE_STYLES.sm;
   const variantClass = VARIANT_STYLES[variant] || VARIANT_STYLES.dark;
-  const glowClass = glow ? GLOW_COLORS[variant] || "" : "";
 
   // Animation origin class based on placement
   const getAnimationClass = (place: TooltipPlacement) => {
     if (place.startsWith("right"))
-      return "animate-in fade-in-0 duration-150";
+      return"animate-in fade-in-0 duration-150";
     if (place.startsWith("left"))
-      return "animate-in fade-in-0 duration-150";
+      return"animate-in fade-in-0 duration-150";
     if (place.startsWith("top"))
-      return "animate-in fade-in-0 duration-150";
-    return "animate-in fade-in-0 duration-150";
+      return"animate-in fade-in-0 duration-150";
+    return"animate-in fade-in-0 duration-150";
   };
 
   const getArrowStyle = (): {
@@ -376,55 +347,55 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
     style: React.CSSProperties;
   } => {
     const arrowVariantTheme = ARROW_STYLES[variant] || ARROW_STYLES.dark;
-    const base = `absolute w-2 h-2 pointer-events-none rotate-45 ${arrowVariantTheme}`;
+    const base =`absolute w-2 h-2 pointer-events-none rotate-45 ${arrowVariantTheme}`;
     switch (arrowPlacement) {
-      case "left":
+      case"left":
         return {
-          className: `${base} -left-1 top-1/2 -translate-y-1/2 border-t-0 border-r-0`,
+          className:`${base} -left-1 top-1/2 -translate-y-1/2 border-t-0 border-r-0`,
           style: {},
         };
-      case "left-start":
+      case"left-start":
         return {
-          className: `${base} -left-1 top-2.5 border-t-0 border-r-0`,
+          className:`${base} -left-1 top-2.5 border-t-0 border-r-0`,
           style: {},
         };
-      case "left-end":
+      case"left-end":
         return {
-          className: `${base} -left-1 bottom-2.5 border-t-0 border-r-0`,
+          className:`${base} -left-1 bottom-2.5 border-t-0 border-r-0`,
           style: {},
         };
-      case "right":
+      case"right":
         return {
-          className: `${base} -right-1 top-1/2 -translate-y-1/2 border-b-0 border-l-0`,
+          className:`${base} -right-1 top-1/2 -translate-y-1/2 border-b-0 border-l-0`,
           style: {},
         };
-      case "right-start":
+      case"right-start":
         return {
-          className: `${base} -right-1 top-2.5 border-b-0 border-l-0`,
+          className:`${base} -right-1 top-2.5 border-b-0 border-l-0`,
           style: {},
         };
-      case "right-end":
+      case"right-end":
         return {
-          className: `${base} -right-1 bottom-2.5 border-b-0 border-l-0`,
+          className:`${base} -right-1 bottom-2.5 border-b-0 border-l-0`,
           style: {},
         };
-      case "top":
+      case"top":
         return {
-          className: `${base} -top-1 -translate-x-1/2 border-b-0 border-r-0`,
+          className:`${base} -top-1 -translate-x-1/2 border-b-0 border-r-0`,
           style: {
-            left: `calc(50% + ${Math.max(-70, Math.min(70, arrowDeltaX))}px)`,
+            left:`calc(50% + ${Math.max(-70, Math.min(70, arrowDeltaX))}px)`,
           },
         };
-      case "bottom":
+      case"bottom":
         return {
-          className: `${base} -bottom-1 -translate-x-1/2 border-t-0 border-l-0`,
+          className:`${base} -bottom-1 -translate-x-1/2 border-t-0 border-l-0`,
           style: {
-            left: `calc(50% + ${Math.max(-70, Math.min(70, arrowDeltaX))}px)`,
+            left:`calc(50% + ${Math.max(-70, Math.min(70, arrowDeltaX))}px)`,
           },
         };
       default:
         return {
-          className: `${base} -left-1 top-1/2 -translate-y-1/2 border-t-0 border-r-0`,
+          className:`${base} -left-1 top-1/2 -translate-y-1/2 border-t-0 border-r-0`,
           style: {},
         };
     }
@@ -439,19 +410,17 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
       aria-hidden={!visible}
       style={{
         ...calculatedStyle,
-        width: "max-content",
+        width:"max-content",
         maxWidth: isLongText ? 220 : maxWidth,
         ...userStyle,
       }}
       className={` pointer-events-none border backdrop-blur-md flex flex-col items-center justify-center
         duration-150 ease-out select-none z-[9900]
-        ${isLongText ? "whitespace-normal text-center" : "whitespace-nowrap"}
+        ${isLongText ?"whitespace-normal text-center" :"whitespace-nowrap"}
         ${sizeConfig.root}
         ${variantClass}
-        ${glowClass}
         ${getAnimationClass(resolvedPlacement)}
-        ${className}
-      `}
+        ${className}`}
     >
       {/* Arrow Indicator */}
       {showArrow && arrow && (
@@ -468,8 +437,8 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
           <span
             className={`font-medium tracking-normal break-words text-center ${
               isLongText
-                ? "whitespace-normal leading-snug"
-                : "whitespace-nowrap"
+                ?"whitespace-normal leading-snug"
+                :"whitespace-nowrap"
             } ${sizeConfig.text}`}
           >
             {content}
@@ -480,8 +449,7 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
         {badge && (
           <span
             className={` inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-semibold uppercase tracking-wider border
-              ${BADGE_STYLES[badgeVariant] || BADGE_STYLES.default}
-            `}
+              ${BADGE_STYLES[badgeVariant] || BADGE_STYLES.default}`}
           >
             {badge}
           </span>
@@ -494,8 +462,7 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
               <kbd
                 key={idx}
                 className={` inline-flex items-center justify-center font-mono font-semibold rounded bg-white/10 text-white/90 border border-white/15 shadow-[0_1px_0_rgba(0,0,0,0.5)]
-                  ${sizeConfig.shortcut}
-                `}
+                  ${sizeConfig.shortcut}`}
               >
                 {key}
               </kbd>
@@ -516,7 +483,7 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
   );
 
   const mountContainer =
-    container || (typeof document !== "undefined" ? document.body : null);
+    container || (typeof document !=="undefined" ? document.body : null);
   if (!mountContainer) return null;
 
   return ReactDOM.createPortal(node, mountContainer);
@@ -526,7 +493,7 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
 // Tooltip Wrapper Component (Declarative Usage)
 // --------------------------------------------------------------------------
 export interface TooltipProps
-  extends Omit<TooltipPortalProps, "visible" | "anchorRect"> {
+  extends Omit<TooltipPortalProps,"visible" |"anchorRect"> {
   /** The interactive trigger element (e.g. <button>, <a>, <div>) */
   children: ReactElement;
   /** Delay in milliseconds before showing tooltip */
@@ -543,18 +510,17 @@ export const Tooltip: React.FC<TooltipProps> = ({
   hideDelay = 0,
   disabled = false,
   text,
-  placement = "top",
+  placement ="top",
   offset = 8,
   crossOffset,
-  variant = "dark",
-  size = "sm",
+  variant ="dark",
+  size ="sm",
   shortcut,
   description,
   icon,
   badge,
   badgeVariant,
   showArrow = true,
-  glow = false,
   maxWidth,
   className,
   style,
@@ -690,9 +656,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
     ref: (node: HTMLElement | null) => {
       triggerRef.current = node;
       const existingRef = (children as any).ref;
-      if (typeof existingRef === "function") {
+      if (typeof existingRef ==="function") {
         existingRef(node);
-      } else if (existingRef && typeof existingRef === "object") {
+      } else if (existingRef && typeof existingRef ==="object") {
         existingRef.current = node;
       }
     },
@@ -737,7 +703,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
         badge={badge}
         badgeVariant={badgeVariant}
         showArrow={showArrow}
-        glow={glow}
         maxWidth={maxWidth}
         className={className}
         style={style}

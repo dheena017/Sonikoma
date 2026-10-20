@@ -1,16 +1,16 @@
-import React, { useState } from "react";
-import { WorkspaceLayout } from "../../shared/WorkspaceLayout";
+import React, { useState } from"react";
+import { WorkspaceLayout } from"../../shared/WorkspaceLayout";
 import {
   CHARACTER_SUB_TABS,
   DEFAULT_PROJECT_CHARACTERS,
   getDicebearAvatar,
-} from "../../data/characterData";
-import { CharacterItem } from "../../types/workspace.types";
-import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
-import { Plus, User, Sparkles, Wand2, Mic } from "lucide-react";
-import { CharactersWorkspaceHeader } from "./components/CharactersWorkspaceHeader";
-import { CharacterAiToolbar } from "./components/CharacterAiToolbar";
-import { CharacterRosterCard } from "./components/CharacterRosterCard";
+} from"../../data/characterData";
+import { CharacterItem } from"../../types/workspace.types";
+import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
+import { Plus, User, Sparkles, Wand2, Mic } from"lucide-react";
+import { CharactersWorkspaceHeader } from"./components/CharactersWorkspaceHeader";
+import { CharacterAiToolbar } from"./components/CharacterAiToolbar";
+import { CharacterRosterCard } from"./components/CharacterRosterCard";
 
 interface CharactersWorkspaceProps {
   onTriggerFeedback?: (msg: string) => void;
@@ -33,14 +33,11 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
 
   // New Character Creator Form State
   const [newCharName, setNewCharName] = useState("");
-  const [newCharRole, setNewCharRole] = useState<
-    "Protagonist" | "Antagonist" | "Sidekick" | "Narrator"
+  const [newCharRole, setNewCharRole] = useState<"Protagonist" |"Antagonist" |"Sidekick" |"Narrator"
   >("Protagonist");
-  const [newCharVoice, setNewCharVoice] = useState(
-    "Hiroshi (Anime Protagonist)"
+  const [newCharVoice, setNewCharVoice] = useState("Hiroshi (Anime Protagonist)"
   );
-  const [newCharStyle, setNewCharStyle] = useState<
-    "adventurer" | "lorelei" | "bottts"
+  const [newCharStyle, setNewCharStyle] = useState<"adventurer" |"lorelei" |"bottts"
   >("adventurer");
 
   const filteredCharacters = characters.filter((c) => {
@@ -58,7 +55,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
     if (!newCharName.trim()) return;
 
     const newChar: CharacterItem = {
-      id: `char-${Date.now()}`,
+      id:`char-${Date.now()}`,
       name: newCharName.trim(),
       role: newCharRole,
       avatar: getDicebearAvatar(newCharName.trim(), newCharStyle),
@@ -77,7 +74,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
 
     setNewCharName("");
     setActiveTab("Roster");
-    onTriggerFeedback(`Added "${newChar.name}" to project cast roster!`);
+    onTriggerFeedback(`Added"${newChar.name}" to project cast roster!`);
   };
 
   return (
@@ -98,7 +95,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
 
       <WorkspaceLayout.Content>
         {/* Character Library View */}
-        {activeTab === "Roster" && (
+        {activeTab ==="Roster" && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
@@ -107,7 +104,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab("Character Creator")}
-                className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer shadow-sm shadow-blue-500/25 transition-all active:scale-95"
+                className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer shadow-sm transition-all active:scale-95"
               >
                 <Plus className="h-3 w-3" />
                 <span>+ Add Cast</span>
@@ -123,8 +120,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
                     if (appLogic?.setVoiceActor && char.voiceActor) {
                       appLogic.setVoiceActor(char.voiceActor);
                     }
-                    onTriggerFeedback(
-                      `Linked voice: ${char.voiceActor} to active timeline`
+                    onTriggerFeedback(`Linked voice: ${char.voiceActor} to active timeline`
                     );
                   }}
                 />
@@ -134,7 +130,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
         )}
 
         {/* Character Creator with Live DiceBear Avatar Preview */}
-        {activeTab === "Character Creator" && (
+        {activeTab ==="Character Creator" && (
           <form
             onSubmit={handleAddCharacter}
             className="space-y-3 p-3 bg-neutral-900/80 rounded-2xl border border-[#2F2F2F] shadow-md font-mono text-xs"
@@ -147,13 +143,13 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
             {/* Live DiceBear Avatar Preview */}
             <div className="flex items-center gap-3 p-2.5 bg-black/60 rounded-xl border border-white/10">
               <img
-                src={getDicebearAvatar(newCharName || "Hero", newCharStyle)}
+                src={getDicebearAvatar(newCharName ||"Hero", newCharStyle)}
                 alt="Avatar Preview"
                 className="w-14 h-14 rounded-full border-2 border-[#60A5FA] bg-neutral-800 shrink-0 shadow-md"
               />
               <div className="min-w-0 flex-1">
                 <p className="text-white font-bold text-sm truncate">
-                  {newCharName || "Character Name"}
+                  {newCharName ||"Character Name"}
                 </p>
                 <p className="text-[#60A5FA] text-[10px]">
                   {newCharRole} • {newCharVoice}
@@ -213,7 +209,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
 
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/25 transition-all active:scale-95 mt-2"
+              className="w-full py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-95 mt-2"
             >
               <Plus className="h-4 w-4" /> Save Character to Project
             </button>
@@ -221,7 +217,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
         )}
 
         {/* Voice Cast Tab */}
-        {activeTab === "Voice Cast" && (
+        {activeTab ==="Voice Cast" && (
           <div className="space-y-2">
             <h4 className="text-xs font-bold text-white font-mono uppercase">
               Voice Cast Mapping
@@ -246,11 +242,10 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
                     if (appLogic?.setVoiceActor && char.voiceActor) {
                       appLogic.setVoiceActor(char.voiceActor);
                     }
-                    onTriggerFeedback(
-                      `Set active studio voice to ${char.voiceActor}`
+                    onTriggerFeedback(`Set active studio voice to ${char.voiceActor}`
                     );
                   }}
-                  className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] border border-[#60A5FA]/40 text-white text-[10px] font-mono font-bold cursor-pointer shadow-sm shadow-blue-500/25 active:scale-95"
+                  className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] border border-[#60A5FA]/40 text-white text-[10px] font-mono font-bold cursor-pointer shadow-sm active:scale-95"
                 >
                   Bind Voice
                 </button>

@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   Mail,
   Lock,
@@ -17,11 +17,11 @@ import {
   WifiOff,
   X,
   RotateCw,
-} from "lucide-react";
-import AuthShowcase from "@/features/auth/components/AuthShowcase";
-import { useLoginForm } from "@/features/auth/hooks";
-import { Tooltip } from "@/shared/ui/common/TooltipPortal";
-import { SonikomaLogo } from "@/shared/ui/branding";
+} from"lucide-react";
+import AuthShowcase from"@/features/auth/components/AuthShowcase";
+import { useLoginForm } from"@/features/auth/hooks";
+import { Tooltip } from"@/shared/ui/common/TooltipPortal";
+import { SonikomaLogo } from"@/shared/ui/branding";
 
 interface LoginPageProps {
   onLogin: (data: any) => Promise<any>;
@@ -159,7 +159,7 @@ export default function LoginPage({
 
             {/* Smart Categorized Error Message Banner */}
             {error && (
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-medium flex items-start justify-between gap-3 shadow-lg shadow-rose-950/20 animate-in fade-in duration-300">
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-medium flex items-start justify-between gap-3 shadow-lg animate-in fade-in duration-300">
                 <div className="flex items-start gap-2.5 min-w-0 flex-1">
                   <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
                   <div className="space-y-1.5 min-w-0">
@@ -168,7 +168,7 @@ export default function LoginPage({
                     </span>
 
                     {/* Quick Recovery Action Buttons inside Error Banner */}
-                    {errorType === "invalid_credentials" && (
+                    {errorType ==="invalid_credentials" && (
                       <button
                         type="button"
                         onClick={onNavigateToForgotPassword}
@@ -179,7 +179,7 @@ export default function LoginPage({
                       </button>
                     )}
 
-                    {errorType === "user_not_found" && (
+                    {errorType ==="user_not_found" && (
                       <button
                         type="button"
                         onClick={onNavigateToRegister}
@@ -190,7 +190,7 @@ export default function LoginPage({
                       </button>
                     )}
 
-                    {errorType === "network" && (
+                    {errorType ==="network" && (
                       <button
                         type="button"
                         onClick={() => window.location.reload()}
@@ -227,7 +227,7 @@ export default function LoginPage({
                   onClick={() => handleSocialLogin("Google")}
                   className="w-full flex items-center justify-center gap-3 py-3 px-5 rounded-xl bg-[#1A1D24] hover:bg-[#232730] border border-[#2F2F2F] hover:border-neutral-500 disabled:opacity-60 text-white font-semibold text-sm transition-all duration-200 cursor-pointer shadow-sm active:scale-[0.99] group"
                 >
-                  {socialProviderLoading === "Google" ? (
+                  {socialProviderLoading ==="Google" ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
                       <span>Connecting to Google...</span>
@@ -281,10 +281,10 @@ export default function LoginPage({
                     {email && !fieldErrors.email && (
                       <span
                         className={`text-[10px] font-bold ${
-                          isEmailValid ? "text-emerald-400" : "text-amber-400"
+                          isEmailValid ?"text-emerald-400" :"text-amber-400"
                         }`}
                       >
-                        {isEmailValid ? "Valid format" : "Check email format"}
+                        {isEmailValid ?"Valid format" :"Check email format"}
                       </span>
                     )}
                   </div>
@@ -299,8 +299,8 @@ export default function LoginPage({
                       onChange={(e) => setEmail(e.target.value)}
                       className={`w-full bg-[#121417] border rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none transition-all font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${
                         fieldErrors.email
-                          ? "border-rose-500 ring-2 ring-rose-500/20"
-                          : "border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                          ?"border-rose-500 ring-2 ring-rose-500/20"
+                          :"border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
                       }`}
                       placeholder="Enter your email address"
                     />
@@ -337,7 +337,7 @@ export default function LoginPage({
                       <Lock className="w-4 h-4" />
                     </div>
                     <input
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ?"text" :"password"}
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -345,14 +345,14 @@ export default function LoginPage({
                       onKeyUp={checkCapsLock}
                       className={`w-full bg-[#121417] border rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none transition-all font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${
                         fieldErrors.password
-                          ? "border-rose-500 ring-2 ring-rose-500/20"
-                          : "border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                          ?"border-rose-500 ring-2 ring-rose-500/20"
+                          :"border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
                       }`}
                       placeholder="Enter your password"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
                       <Tooltip
-                        text={showPassword ? "Hide password" : "Show password"}
+                        text={showPassword ?"Hide password" :"Show password"}
                         placement="top"
                       >
                         <button
@@ -360,7 +360,7 @@ export default function LoginPage({
                           onClick={() => setShowPassword(!showPassword)}
                           className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer flex items-center justify-center rounded-lg hover:bg-neutral-800"
                           aria-label={
-                            showPassword ? "Hide password" : "Show password"
+                            showPassword ?"Hide password" :"Show password"
                           }
                         >
                           {showPassword ? (
@@ -405,8 +405,8 @@ export default function LoginPage({
                         <div
                           className={`w-4 h-4 rounded border transition-all duration-200 flex items-center justify-center ${
                             rememberMe
-                              ? "bg-blue-600 border-blue-600"
-                              : "bg-[#141414] border-[#2F2F2F] group-hover:border-neutral-500"
+                              ?"bg-blue-600 border-blue-600"
+                              :"bg-[#141414] border-[#2F2F2F] group-hover:border-neutral-500"
                           }`}
                         >
                           {rememberMe && (
@@ -429,7 +429,7 @@ export default function LoginPage({
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] text-white font-bold py-3.5 rounded-xl  active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
+                    className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] text-white font-bold py-3.5 rounded-xl active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
                   >
                     {isLoading ? (
                       <>
@@ -449,7 +449,7 @@ export default function LoginPage({
 
             {/* Create Account Link */}
             <p className="text-center text-sm text-neutral-400 font-medium">
-              Don't have an account?{" "}
+              Don't have an account?{""}
               <Tooltip
                 text="Sign up for free and get 3 monthly exports"
                 placement="bottom"

@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { Youtube, Check } from "lucide-react";
-import type { GeneratedPanel } from "@/shared/types";
-import YouTubeOfficialLogo from "../components/YouTubeOfficialLogo";
-import PublishMonitor from "../components/PublishMonitor";
-import StudioDetailsTab from "../components/studio/StudioDetailsTab";
-import StudioElementsTab from "../components/studio/StudioElementsTab";
-import StudioChecksTab from "../components/studio/StudioChecksTab";
-import StudioVisibilityTab from "../components/studio/StudioVisibilityTab";
+import React, { useState } from"react";
+import { Youtube, Check } from"lucide-react";
+import type { GeneratedPanel } from"@/shared/types";
+import YouTubeOfficialLogo from"../components/YouTubeOfficialLogo";
+import PublishMonitor from"../components/PublishMonitor";
+import StudioDetailsTab from"../components/studio/StudioDetailsTab";
+import StudioElementsTab from"../components/studio/StudioElementsTab";
+import StudioChecksTab from"../components/studio/StudioChecksTab";
+import StudioVisibilityTab from"../components/studio/StudioVisibilityTab";
 
 interface YouTubeStudioPageProps {
   // Video & File state
@@ -133,7 +133,7 @@ interface YouTubeStudioPageProps {
   onResetUploadState?: () => void;
   handleGenerateMetadata: () => void;
   handleInjectPowerWord: (word: string) => void;
-  handleApplyPresetTemplate: (type: "recap" | "trailer") => void;
+  handleApplyPresetTemplate: (type:"recap" |"trailer") => void;
   handleCompileChapters: () => void;
   handleAppendTunedChapters: (text: string) => void;
   handleInsertDisclaimer: () => void;
@@ -149,7 +149,7 @@ interface YouTubeStudioPageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-type StudioStep = "details" | "elements" | "checks" | "visibility";
+type StudioStep ="details" |"elements" |"checks" |"visibility";
 
 export default function YouTubeStudioPage({
   activeVideoUrl,
@@ -269,10 +269,10 @@ export default function YouTubeStudioPage({
   const isChecksDone = seoScore >= 60 || tags.length > 0;
 
   const STEPS = [
-    { id: "details", label: "Details", isDone: isDetailsDone, num: 1 },
-    { id: "elements", label: "Video elements", isDone: isElementsDone, num: 2 },
-    { id: "checks", label: "Checks", isDone: isChecksDone, num: 3 },
-    { id: "visibility", label: "Visibility", isDone: false, num: 4 },
+    { id:"details", label:"Details", isDone: isDetailsDone, num: 1 },
+    { id:"elements", label:"Video elements", isDone: isElementsDone, num: 2 },
+    { id:"checks", label:"Checks", isDone: isChecksDone, num: 3 },
+    { id:"visibility", label:"Visibility", isDone: false, num: 4 },
   ];
 
   return (
@@ -295,10 +295,10 @@ export default function YouTubeStudioPage({
                   <div
                     className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs font-mono transition-all duration-300 ${
                       isActive
-                        ? "bg-red-600 text-white shadow-lg shadow-red-600/50 ring-4 ring-red-600/20"
+                        ?"bg-red-600 text-white shadow-lg  ring-4 ring-red-600/20"
                         : isCompleted
-                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-900/30"
-                        : "bg-neutral-800 text-neutral-400 group-hover:bg-neutral-700 group-hover:text-white"
+                        ?"bg-emerald-600 text-white shadow-md"
+                        :"bg-neutral-800 text-neutral-400 group-hover:bg-neutral-700 group-hover:text-white"
                     }`}
                   >
                     {isCompleted ? (
@@ -311,10 +311,10 @@ export default function YouTubeStudioPage({
                     <span
                       className={`text-xs font-bold font-sans transition-colors block ${
                         isActive
-                          ? "text-white"
+                          ?"text-white"
                           : isCompleted
-                          ? "text-emerald-400"
-                          : "text-neutral-400 group-hover:text-neutral-200"
+                          ?"text-emerald-400"
+                          :"text-neutral-400 group-hover:text-neutral-200"
                       }`}
                     >
                       {step.label}
@@ -328,8 +328,8 @@ export default function YouTubeStudioPage({
                     <div
                       className={`h-full transition-all duration-500 ${
                         STEPS[idx + 1].isDone || isActive
-                          ? "w-full bg-gradient-to-r from-red-600 to-rose-500"
-                          : "w-0 bg-neutral-800"
+                          ?"w-full bg-gradient-to-r from-red-600 to-rose-500"
+                          :"w-0 bg-neutral-800"
                       }`}
                     />
                   </div>
@@ -378,7 +378,7 @@ export default function YouTubeStudioPage({
         {/* COLUMN 2: Studio Step Content Canvas */}
         <div className="lg:col-span-7 rounded-3xl border border-neutral-800/80 bg-neutral-900/60 p-5 sm:p-7 shadow-2xl flex flex-col space-y-6">
           {/* ── STEP 1: DETAILS ── */}
-          {currentStep === "details" && (
+          {currentStep ==="details" && (
             <StudioDetailsTab
               title={title}
               setTitle={setTitle}
@@ -411,7 +411,7 @@ export default function YouTubeStudioPage({
           )}
 
           {/* ── STEP 2: VIDEO ELEMENTS ── */}
-          {currentStep === "elements" && (
+          {currentStep ==="elements" && (
             <StudioElementsTab
               description={description}
               handleCompileChapters={handleCompileChapters}
@@ -436,7 +436,7 @@ export default function YouTubeStudioPage({
           )}
 
           {/* ── STEP 3: CHECKS ── */}
-          {currentStep === "checks" && (
+          {currentStep ==="checks" && (
             <StudioChecksTab
               seoScore={seoScore}
               tags={tags}
@@ -454,7 +454,7 @@ export default function YouTubeStudioPage({
           )}
 
           {/* ── STEP 4: VISIBILITY ── */}
-          {currentStep === "visibility" && (
+          {currentStep ==="visibility" && (
             <StudioVisibilityTab
               privacy={privacy}
               setPrivacy={setPrivacy}

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Square } from "lucide-react";
-import CreativeSuiteHeader from "@/features/creative/suite/components/CreativeSuiteHeader";
-import CreativeSuiteMiniSidebar from "@/features/creative/suite/components/CreativeSuiteMiniSidebar";
-import CreativeSuiteSidebar from "@/features/creative/suite/components/CreativeSuiteSidebar";
-import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
+import React, { useEffect, useState } from"react";
+import { Square } from"lucide-react";
+import CreativeSuiteHeader from"@/features/creative/suite/components/CreativeSuiteHeader";
+import CreativeSuiteMiniSidebar from"@/features/creative/suite/components/CreativeSuiteMiniSidebar";
+import CreativeSuiteSidebar from"@/features/creative/suite/components/CreativeSuiteSidebar";
+import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
 
 interface CreativeSuiteLayoutProps {
   children: React.ReactNode;
@@ -47,14 +47,12 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
     };
 
     updateActiveSkillRequests();
-    window.addEventListener(
-      "sonikoma-skill-request-count",
+    window.addEventListener("sonikoma-skill-request-count",
       updateActiveSkillRequests
     );
 
     return () => {
-      window.removeEventListener(
-        "sonikoma-skill-request-count",
+      window.removeEventListener("sonikoma-skill-request-count",
         updateActiveSkillRequests
       );
     };
@@ -79,7 +77,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
         <button
           type="button"
           onClick={() => window.__sonikomaAbortAllSkillRequests?.()}
-          className="flex items-center gap-1.5 px-3.5 py-2 bg-rose-600/90 hover:bg-rose-500 text-white border border-rose-500/70 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-rose-950/40 active:scale-95 self-start sm:self-center"
+          className="flex items-center gap-1.5 px-3.5 py-2 bg-rose-600/90 hover:bg-rose-500 text-white border border-rose-500/70 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg active:scale-95 self-start sm:self-center"
         >
           <Square className="h-3.5 w-3.5 fill-current" />
           Stop Generation
@@ -89,9 +87,9 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   );
 
   const isOverviewHub =
-    currentPath === "/creative-suite" ||
-    currentPath === "/creative-suite/" ||
-    currentPath === "/creative-suite-dashboard";
+    currentPath ==="/creative-suite" ||
+    currentPath ==="/creative-suite/" ||
+    currentPath ==="/creative-suite-dashboard";
 
   if (hideSidebarAndHeader) {
     return (

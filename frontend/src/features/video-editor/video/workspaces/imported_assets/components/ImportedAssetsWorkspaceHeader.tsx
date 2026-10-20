@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   ArrowUpDown,
   CheckSquare,
@@ -10,9 +10,9 @@ import {
   Sparkles,
   Trash2,
   Loader2,
-} from "lucide-react";
+} from"lucide-react";
 
-export type AssetFilterTab = "all" | "timeline" | "unassigned" | "favorites";
+export type AssetFilterTab ="all" |"timeline" |"unassigned" |"favorites";
 
 export interface ImportedAssetsWorkspaceHeaderProps {
   filteredCount: number;
@@ -21,7 +21,7 @@ export interface ImportedAssetsWorkspaceHeaderProps {
   onSelectTab: (tab: AssetFilterTab) => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
-  sortOrder: "asc" | "desc";
+  sortOrder:"asc" |"desc";
   onToggleSort: () => void;
   selectedCount: number;
   isAllSelected: boolean;
@@ -78,7 +78,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<
             type="button"
             onClick={onToggleSort}
             className="p-1 rounded-lg bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all text-[10px] flex items-center gap-1 cursor-pointer"
-            title={`Sort ${sortOrder === "asc" ? "Descending" : "Ascending"}`}
+            title={`Sort ${sortOrder ==="asc" ?"Descending" :"Ascending"}`}
           >
             <ArrowUpDown className="h-3 w-3" />
           </button>
@@ -89,10 +89,10 @@ export const ImportedAssetsWorkspaceHeader: React.FC<
             onClick={onToggleSelectAll}
             className={`px-2 py-1 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
               isAllSelected
-                ? "bg-neutral-800 border-neutral-600 text-white"
+                ?"bg-neutral-800 border-neutral-600 text-white"
                 : selectedCount > 0
-                ? "bg-neutral-900 border-neutral-700 text-neutral-200"
-                : "bg-neutral-900/80 hover:bg-neutral-800 border-neutral-800 text-neutral-300"
+                ?"bg-neutral-900 border-neutral-700 text-neutral-200"
+                :"bg-neutral-900/80 hover:bg-neutral-800 border-neutral-800 text-neutral-300"
             }`}
           >
             {isAllSelected ? (
@@ -100,7 +100,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<
             ) : (
               <Square className="h-3 w-3" />
             )}
-            <span>{isAllSelected ? "Deselect" : "Select All"}</span>
+            <span>{isAllSelected ?"Deselect" :"Select All"}</span>
           </button>
         </div>
       </div>
@@ -108,10 +108,10 @@ export const ImportedAssetsWorkspaceHeader: React.FC<
       {/* Filter Tabs */}
       <div className="px-3 pt-2 pb-1.5 flex items-center gap-1 overflow-x-auto mini-sidebar-scrollbar">
         {[
-          { id: "all", label: "All" },
-          { id: "timeline", label: "Timeline" },
-          { id: "unassigned", label: "Unassigned" },
-          { id: "favorites", label: "Starred" },
+          { id:"all", label:"All" },
+          { id:"timeline", label:"Timeline" },
+          { id:"unassigned", label:"Unassigned" },
+          { id:"favorites", label:"Starred" },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -119,8 +119,8 @@ export const ImportedAssetsWorkspaceHeader: React.FC<
             onClick={() => onSelectTab(tab.id as AssetFilterTab)}
             className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold whitespace-nowrap transition-all border cursor-pointer ${
               activeTab === tab.id
-                ? "bg-[#3B82F6] hover:bg-[#2563EB] border-[#60A5FA]/60 text-white shadow-sm shadow-blue-500/25"
-                : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
+                ?"bg-[#3B82F6] hover:bg-[#2563EB] border-[#60A5FA]/60 text-white shadow-sm"
+                :"border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
             }`}
           >
             {tab.label}
@@ -164,7 +164,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<
                 type="button"
                 onClick={onAddSelectedToTimeline}
                 disabled={isAddingSelected}
-                className="px-2.5 py-1 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm shadow-blue-500/25 transition cursor-pointer active:scale-95 disabled:opacity-60"
+                className="px-2.5 py-1 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer active:scale-95 disabled:opacity-60"
                 title="Add selected frames to storyboard timeline"
               >
                 {isAddingSelected ? (
@@ -173,7 +173,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<
                   <Plus className="h-2.5 w-2.5" />
                 )}
                 <span>
-                  {isAddingSelected ? "Adding..." : `Add (${selectedCount})`}
+                  {isAddingSelected ?"Adding..." :`Add (${selectedCount})`}
                 </span>
               </button>
             )}
@@ -191,7 +191,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<
                 ) : (
                   <Scissors className="h-2.5 w-2.5" />
                 )}
-                <span>{isBatchCropping ? "Cropping..." : "Auto Crop"}</span>
+                <span>{isBatchCropping ?"Cropping..." :"Auto Crop"}</span>
               </button>
             )}
 
@@ -208,7 +208,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<
                 ) : (
                   <Sparkles className="h-2.5 w-2.5" />
                 )}
-                <span>{isCleaningBubbles ? "Cleaning..." : "Clean"}</span>
+                <span>{isCleaningBubbles ?"Cleaning..." :"Clean"}</span>
               </button>
             )}
 

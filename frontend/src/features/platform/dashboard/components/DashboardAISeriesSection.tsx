@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from"react";
 import {
   Sparkles,
   Plus,
@@ -9,9 +9,9 @@ import {
   Clock,
   ShieldCheck,
   Zap,
-} from "lucide-react";
-import { aiSeriesApi, AISeriesProject } from "@/features/intelligence/series/api/aiSeries";
-import { useSeriesNavigation } from "@/features/intelligence/series/hooks/useSeriesNavigation";
+} from"lucide-react";
+import { aiSeriesApi, AISeriesProject } from"@/features/intelligence/series/api/aiSeries";
+import { useSeriesNavigation } from"@/features/intelligence/series/hooks/useSeriesNavigation";
 
 let cachedSeriesList: AISeriesProject[] = [];
 let cachedSeriesLoaded = false;
@@ -46,9 +46,9 @@ export const DashboardAISeriesSection: React.FC = () => {
   }, []);
 
   const getFormatBadge = (fmt: string) => {
-    if (fmt === "anime") return "Anime Cinema (24fps)";
-    if (fmt === "manhwa") return "Vertical Webtoon";
-    return "Comic & Manga";
+    if (fmt ==="anime") return"Anime Cinema (24fps)";
+    if (fmt ==="manhwa") return"Vertical Webtoon";
+    return"Comic & Manga";
   };
 
   return (
@@ -81,7 +81,7 @@ export const DashboardAISeriesSection: React.FC = () => {
           </button>
           <button
             onClick={() => navigate("/series-generator")}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium text-xs transition-all shadow-md shadow-violet-900/20"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium text-xs transition-all shadow-md"
           >
             <Plus className="w-3.5 h-3.5" /> New AI Series
           </button>
@@ -116,14 +116,14 @@ export const DashboardAISeriesSection: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {seriesList.slice(0, 3).map((series) => {
-            const seriesId = series.series_id || series.id || "";
-            const format = series.format_type || "manhwa";
+            const seriesId = series.series_id || series.id ||"";
+            const format = series.format_type ||"manhwa";
             const studioPath =
-              format === "anime"
-                ? `/studio/anime/${seriesId}`
-                : format === "comic_manga"
-                ? `/studio/comic/${seriesId}`
-                : `/studio/manhwa/${seriesId}`;
+              format ==="anime"
+                ?`/studio/anime/${seriesId}`
+                : format ==="comic_manga"
+                ?`/studio/comic/${seriesId}`
+                :`/studio/manhwa/${seriesId}`;
 
             return (
               <div

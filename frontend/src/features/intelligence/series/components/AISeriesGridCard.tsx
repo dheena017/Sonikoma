@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Sparkles,
   Tv,
@@ -13,9 +13,9 @@ import {
   Clock,
   CheckCircle2,
   Loader2,
-} from "lucide-react";
-import type { AISeriesProject } from "@/features/intelligence/series/api/aiSeries";
-import { timeAgo } from "@/shared/utils/dateUtils";
+} from"lucide-react";
+import type { AISeriesProject } from"@/features/intelligence/series/api/aiSeries";
+import { timeAgo } from"@/shared/utils/dateUtils";
 
 interface AISeriesGridCardProps {
   series: AISeriesProject;
@@ -33,9 +33,9 @@ export const AISeriesGridCard: React.FC<AISeriesGridCardProps> = ({
   const [openMenu, setOpenMenu] = useState(false);
   const [coverLoading, setCoverLoading] = useState<boolean>(Boolean(series.cover_image_url));
   const [coverError, setCoverError] = useState<boolean>(false);
-  const fmt = (series.format_type || "manhwa").toLowerCase();
-  const isAnime = fmt === "anime";
-  const isManga = fmt === "comic_manga";
+  const fmt = (series.format_type ||"manhwa").toLowerCase();
+  const isAnime = fmt ==="anime";
+  const isManga = fmt ==="comic_manga";
   const FormatIcon = isAnime ? Tv : isManga ? Swords : BookOpen;
 
   const chapterCount =
@@ -44,17 +44,17 @@ export const AISeriesGridCard: React.FC<AISeriesGridCardProps> = ({
     series.total_episodes ||
     8;
 
-  const studioUrl = `/ai-series/${series.series_id}?format=${fmt}`;
+  const studioUrl =`/ai-series/${series.series_id}?format=${fmt}`;
 
   const handleCardClick = () => {
     if (onOpen) {
       onOpen(series);
     } else {
       const nav = (window as any).navigateTo;
-      if (typeof nav === "function") {
+      if (typeof nav ==="function") {
         nav(studioUrl);
       } else {
-        window.history.pushState({}, "", studioUrl);
+        window.history.pushState({},"", studioUrl);
         window.dispatchEvent(new Event("popstate"));
       }
     }
@@ -66,7 +66,7 @@ export const AISeriesGridCard: React.FC<AISeriesGridCardProps> = ({
     if (onCopyLink) {
       onCopyLink(series);
     } else {
-      const fullUrl = `${window.location.origin}${studioUrl}`;
+      const fullUrl =`${window.location.origin}${studioUrl}`;
       navigator.clipboard.writeText(fullUrl);
     }
   };
@@ -80,17 +80,17 @@ export const AISeriesGridCard: React.FC<AISeriesGridCardProps> = ({
   };
 
   const formatLabel = isAnime
-    ? "Anime Cinema"
+    ?"Anime Cinema"
     : isManga
-    ? "Manga Grid"
-    : "Webtoon Strip";
+    ?"Manga Grid"
+    :"Webtoon Strip";
 
   const timeAgoText = timeAgo(series.updated_at || series.created_at);
 
   return (
     <div
       onClick={handleCardClick}
-      className="group relative flex flex-col rounded-2xl sm:rounded-3xl border border-[#282834] bg-[#121217] hover:bg-[#181822] hover:border-[#3B82F6]/60 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-[#3B82F6]/10 overflow-hidden text-left"
+      className="group relative flex flex-col rounded-2xl sm:rounded-3xl border border-[#282834] bg-[#121217] hover:bg-[#181822] hover:border-[#3B82F6]/60 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl overflow-hidden text-left"
     >
       {/* ─── Top Thumbnail Banner ─── */}
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-gradient-to-br from-neutral-900 via-[#181a29] to-[#0c0d14]">
@@ -106,7 +106,7 @@ export const AISeriesGridCard: React.FC<AISeriesGridCardProps> = ({
               src={series.cover_image_url}
               alt={series.title}
               className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ease-out ${
-                coverLoading ? "opacity-0" : "opacity-100"
+                coverLoading ?"opacity-0" :"opacity-100"
               }`}
               onLoad={() => setCoverLoading(false)}
               onError={() => {
@@ -134,7 +134,7 @@ export const AISeriesGridCard: React.FC<AISeriesGridCardProps> = ({
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold tracking-wide border border-[#3B82F6]/30 bg-black/60 backdrop-blur-md text-[#60A5FA]">
             <FormatIcon className="w-3.5 h-3.5 text-[#3B82F6]" />
-            <span className="capitalize">{fmt.replace("_", " ")}</span>
+            <span className="capitalize">{fmt.replace("_","")}</span>
           </span>
 
           <div className="flex items-center gap-1.5">
@@ -189,7 +189,7 @@ export const AISeriesGridCard: React.FC<AISeriesGridCardProps> = ({
         <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-neutral-300 z-10 pointer-events-none">
           <span className="inline-flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10 text-white font-bold">
             <Layers className="w-3 h-3 text-[#3B82F6]" />
-            {chapterCount} {chapterCount === 1 ? "Chapter" : "Chapters"}
+            {chapterCount} {chapterCount === 1 ?"Chapter" :"Chapters"}
           </span>
           <span className="inline-flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10 text-neutral-400">
             <Clock className="w-3 h-3 text-neutral-400" />
@@ -212,10 +212,10 @@ export const AISeriesGridCard: React.FC<AISeriesGridCardProps> = ({
           {/* Genre & Art Style Badges */}
           <div className="flex items-center gap-2 flex-wrap text-xs">
             <span className="text-[10px] font-bold bg-[#3B82F6]/15 text-[#60A5FA] border border-[#3B82F6]/30 px-2 py-0.5 rounded-md">
-              {series.genre || "Action Fantasy"}
+              {series.genre ||"Action Fantasy"}
             </span>
             <span className="text-[11px] font-mono text-neutral-400 capitalize">
-              {series.art_style?.replace(/_/g, " ") || "2D Cel"}
+              {series.art_style?.replace(/_/g,"") ||"2D Cel"}
             </span>
             <span className="text-neutral-600">•</span>
             <span className="text-[11px] font-mono text-amber-400/90 flex items-center gap-1">
@@ -237,7 +237,7 @@ export const AISeriesGridCard: React.FC<AISeriesGridCardProps> = ({
           <div className="flex items-center gap-1 text-[11px] font-mono text-neutral-400">
             <span className="text-neutral-500">Pacing:</span>
             <span className="font-semibold text-neutral-300 capitalize">
-              {series.pacing || "balanced"}
+              {series.pacing ||"balanced"}
             </span>
           </div>
 
@@ -247,7 +247,7 @@ export const AISeriesGridCard: React.FC<AISeriesGridCardProps> = ({
               e.stopPropagation();
               handleCardClick();
             }}
-            className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-xl border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-blue-500/25 active:scale-95 shrink-0"
+            className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-xl border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-xs font-bold text-white transition-all cursor-pointer shadow-md active:scale-95 shrink-0"
           >
             <span>Launch Studio</span>
             <ArrowRight className="w-3 h-3 text-white group-hover:translate-x-0.5 transition-transform" />

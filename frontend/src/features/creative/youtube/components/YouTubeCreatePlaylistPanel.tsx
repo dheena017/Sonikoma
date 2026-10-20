@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from"react";
 import {
   ListVideo,
   Plus,
@@ -28,9 +28,9 @@ import {
   Bookmark,
   TrendingUp,
   X,
-} from "lucide-react";
-import type { YouTubeVideoItem } from "./YouTubeChannelHome";
-import CyberSelect from "@/shared/ui/common/CyberSelect";
+} from"lucide-react";
+import type { YouTubeVideoItem } from"./YouTubeChannelHome";
+import CyberSelect from"@/shared/ui/common/CyberSelect";
 
 interface YouTubeCreatePlaylistPanelProps {
   onPlaylistCreated?: (playlist: any) => void;
@@ -39,29 +39,29 @@ interface YouTubeCreatePlaylistPanelProps {
 
 const PRESET_TEMPLATES = [
   {
-    title: "Webtoon Episode Recaps",
-    desc: "Complete recap and story analysis of all episodes in chronological order.",
-    tags: ["#WebtoonRecap", "#Manhwa", "#StoryRecap", "#AnimeRecap"],
+    title:"Webtoon Episode Recaps",
+    desc:"Complete recap and story analysis of all episodes in chronological order.",
+    tags: ["#WebtoonRecap","#Manhwa","#StoryRecap","#AnimeRecap"],
   },
   {
-    title: "Season 1 Official Storyline",
-    desc: "Binge all Season 1 episodes from the beginning to the climactic season finale.",
-    tags: ["#Season1", "#FullSeries", "#BingeWatch", "#WebtoonAnimation"],
+    title:"Season 1 Official Storyline",
+    desc:"Binge all Season 1 episodes from the beginning to the climactic season finale.",
+    tags: ["#Season1","#FullSeries","#BingeWatch","#WebtoonAnimation"],
   },
   {
-    title: "Character Lore & Power Scaling",
-    desc: "Deep dive character origins, backstories, tier lists, and combat abilities.",
-    tags: ["#CharacterLore", "#PowerScaling", "#TierList", "#AnimeLore"],
+    title:"Character Lore & Power Scaling",
+    desc:"Deep dive character origins, backstories, tier lists, and combat abilities.",
+    tags: ["#CharacterLore","#PowerScaling","#TierList","#AnimeLore"],
   },
   {
-    title: "Epic Action & Combat Highlights",
-    desc: "The most intense fight scenes, sakuga animation highlights, and climax moments.",
-    tags: ["#ActionHighlights", "#FightScenes", "#AnimeAction", "#Sakuga"],
+    title:"Epic Action & Combat Highlights",
+    desc:"The most intense fight scenes, sakuga animation highlights, and climax moments.",
+    tags: ["#ActionHighlights","#FightScenes","#AnimeAction","#Sakuga"],
   },
   {
-    title: "Ambient Reading & Official OST",
-    desc: "Relaxing soundscapes, background music, and atmospheric audiobooks for reading.",
-    tags: ["#AmbientMusic", "#WebtoonOST", "#RelaxingReading", "#BGM"],
+    title:"Ambient Reading & Official OST",
+    desc:"Relaxing soundscapes, background music, and atmospheric audiobooks for reading.",
+    tags: ["#AmbientMusic","#WebtoonOST","#RelaxingReading","#BGM"],
   },
 ];
 
@@ -71,8 +71,7 @@ export default function YouTubeCreatePlaylistPanel({
 }: YouTubeCreatePlaylistPanelProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [privacy, setPrivacy] = useState<"public" | "unlisted" | "private">(
-    "public"
+  const [privacy, setPrivacy] = useState<"public" |"unlisted" |"private">("public"
   );
 
   // Video Selection & Ordering
@@ -85,8 +84,7 @@ export default function YouTubeCreatePlaylistPanel({
 
   // Search & Filter
   const [searchVideo, setSearchVideo] = useState("");
-  const [privacyFilter, setPrivacyFilter] = useState<
-    "all" | "public" | "unlisted" | "private"
+  const [privacyFilter, setPrivacyFilter] = useState<"all" |"public" |"unlisted" |"private"
   >("all");
 
   // AI Generation & Processing
@@ -97,18 +95,16 @@ export default function YouTubeCreatePlaylistPanel({
 
   const getToken = () =>
     localStorage.getItem("sonikoma_token") ||
-    localStorage.getItem("token") ||
-    "";
+    localStorage.getItem("token") ||"";
 
   // Fetch channel videos for the picker
   useEffect(() => {
     const fetchVideos = async () => {
       setLoadingVideos(true);
       try {
-        const res = await fetch(
-          "/api/v1/export/youtube/videos?max_results=50",
+        const res = await fetch("/api/v1/export/youtube/videos?max_results=50",
           {
-            headers: { Authorization: `Bearer ${getToken()}` },
+            headers: { Authorization:`Bearer ${getToken()}` },
           }
         );
         if (res.ok) {
@@ -154,8 +150,8 @@ export default function YouTubeCreatePlaylistPanel({
 
   const selectTopViews = (count: number) => {
     const sorted = [...availableVideos].sort((a, b) => {
-      const av = parseInt(a.view_count?.replace(/,/g, "") || "0");
-      const bv = parseInt(b.view_count?.replace(/,/g, "") || "0");
+      const av = parseInt(a.view_count?.replace(/,/g,"") ||"0");
+      const bv = parseInt(b.view_count?.replace(/,/g,"") ||"0");
       return bv - av;
     });
     setSelectedVideoIds(sorted.slice(0, count).map((v) => v.id));
@@ -171,10 +167,10 @@ export default function YouTubeCreatePlaylistPanel({
   };
 
   // Reordering helpers
-  const moveVideoOrder = (id: string, direction: "up" | "down") => {
+  const moveVideoOrder = (id: string, direction:"up" |"down") => {
     const idx = selectedVideoIds.indexOf(id);
     if (idx === -1) return;
-    const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+    const targetIdx = direction ==="up" ? idx - 1 : idx + 1;
     if (targetIdx < 0 || targetIdx >= selectedVideoIds.length) return;
 
     const next = [...selectedVideoIds];
@@ -188,16 +184,16 @@ export default function YouTubeCreatePlaylistPanel({
     setSelectedVideoIds((prev) => [...prev].reverse());
   };
 
-  const sortByViews = (order: "desc" | "asc") => {
+  const sortByViews = (order:"desc" |"asc") => {
     const videoMap = new Map(availableVideos.map((v) => [v.id, v]));
     const sorted = [...selectedVideoIds].sort((idA, idB) => {
       const vA = parseInt(
-        videoMap.get(idA)?.view_count?.replace(/,/g, "") || "0"
+        videoMap.get(idA)?.view_count?.replace(/,/g,"") ||"0"
       );
       const vB = parseInt(
-        videoMap.get(idB)?.view_count?.replace(/,/g, "") || "0"
+        videoMap.get(idB)?.view_count?.replace(/,/g,"") ||"0"
       );
-      return order === "desc" ? vB - vA : vA - vB;
+      return order ==="desc" ? vB - vA : vA - vB;
     });
     setSelectedVideoIds(sorted);
   };
@@ -211,7 +207,7 @@ export default function YouTubeCreatePlaylistPanel({
         v.description?.toLowerCase().includes(searchVideo.toLowerCase());
 
       const matchPrivacy =
-        privacyFilter === "all" || v.privacy_status === privacyFilter;
+        privacyFilter ==="all" || v.privacy_status === privacyFilter;
 
       return matchSearch && matchPrivacy;
     });
@@ -228,7 +224,7 @@ export default function YouTubeCreatePlaylistPanel({
   // Aggregated analytics of selected videos
   const totalSelectedViews = useMemo(() => {
     return selectedVideoObjects.reduce((acc, v) => {
-      return acc + (parseInt(v.view_count?.replace(/,/g, "") || "0") || 0);
+      return acc + (parseInt(v.view_count?.replace(/,/g,"") ||"0") || 0);
     }, 0);
   }, [selectedVideoObjects]);
 
@@ -241,7 +237,7 @@ export default function YouTubeCreatePlaylistPanel({
     setErrorMsg("");
     try {
       const promptToSend =
-        customTopic || aiPrompt || title || "Series recaps and top highlights";
+        customTopic || aiPrompt || title ||"Series recaps and top highlights";
       const payload = {
         prompt: promptToSend,
         videos: availableVideos.map((v) => ({
@@ -250,14 +246,13 @@ export default function YouTubeCreatePlaylistPanel({
           description: v.description,
           view_count: v.view_count,
         })),
-        channel_name: "Webtoon Anime Studio",
+        channel_name:"Webtoon Anime Studio",
       };
 
       const res = await fetch("/api/v1/export/youtube/playlist/ai-generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
+        method:"POST",
+        headers: {"Content-Type":"application/json",
+          Authorization:`Bearer ${getToken()}`,
         },
         body: JSON.stringify(payload),
       });
@@ -283,16 +278,14 @@ export default function YouTubeCreatePlaylistPanel({
         }
       } else {
         const err = await res.json().catch(() => ({}));
-        console.warn(
-          "AI generation endpoint error, applying smart template:",
+        console.warn("AI generation endpoint error, applying smart template:",
           err
         );
         // Fallback to random preset if server error
         const randomTemplate =
           PRESET_TEMPLATES[Math.floor(Math.random() * PRESET_TEMPLATES.length)];
         setTitle(randomTemplate.title);
-        setDescription(
-          `${randomTemplate.desc}\n\n${randomTemplate.tags.join(" ")}`
+        setDescription(`${randomTemplate.desc}\n\n${randomTemplate.tags.join("")}`
         );
         if (selectedVideoIds.length === 0 && availableVideos.length > 0) {
           selectTopViews(Math.min(5, availableVideos.length));
@@ -303,8 +296,7 @@ export default function YouTubeCreatePlaylistPanel({
       const randomTemplate =
         PRESET_TEMPLATES[Math.floor(Math.random() * PRESET_TEMPLATES.length)];
       setTitle(randomTemplate.title);
-      setDescription(
-        `${randomTemplate.desc}\n\n${randomTemplate.tags.join(" ")}`
+      setDescription(`${randomTemplate.desc}\n\n${randomTemplate.tags.join("")}`
       );
       if (selectedVideoIds.length === 0 && availableVideos.length > 0) {
         selectTopViews(Math.min(5, availableVideos.length));
@@ -321,7 +313,7 @@ export default function YouTubeCreatePlaylistPanel({
 
   const addHashtag = (tag: string) => {
     if (!description.includes(tag)) {
-      setDescription((prev) => (prev ? `${prev.trim()} ${tag}` : tag));
+      setDescription((prev) => (prev ?`${prev.trim()} ${tag}` : tag));
     }
   };
 
@@ -348,10 +340,9 @@ export default function YouTubeCreatePlaylistPanel({
       }
 
       const res = await fetch("/api/v1/export/youtube/playlists", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
+        method:"POST",
+        headers: {"Content-Type":"application/json",
+          Authorization:`Bearer ${getToken()}`,
         },
         body: JSON.stringify({
           title: title.trim(),
@@ -363,7 +354,7 @@ export default function YouTubeCreatePlaylistPanel({
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        setErrorMsg(err.detail || "Failed to create playlist on YouTube.");
+        setErrorMsg(err.detail ||"Failed to create playlist on YouTube.");
         return;
       }
 
@@ -396,7 +387,7 @@ export default function YouTubeCreatePlaylistPanel({
       {/* ── 1. HEADER BANNER ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-red-950/40 via-neutral-900 to-neutral-950 p-5 rounded-3xl border border-red-900/30 shadow-2xl">
         <div className="flex items-center gap-3.5">
-          <div className="p-3.5 bg-gradient-to-br from-red-600 to-rose-700 rounded-2xl shadow-xl shadow-red-600/30">
+          <div className="p-3.5 bg-gradient-to-br from-red-600 to-rose-700 rounded-2xl shadow-xl">
             <ListVideo className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -423,10 +414,10 @@ export default function YouTubeCreatePlaylistPanel({
           >
             <Sparkles
               className={`w-3.5 h-3.5 ${
-                isAiGenerating ? "animate-spin" : "animate-pulse text-red-400"
+                isAiGenerating ?"animate-spin" :"animate-pulse text-red-400"
               }`}
             />
-            <span>{isAiGenerating ? "Generating..." : "AI Auto-Fill"}</span>
+            <span>{isAiGenerating ?"Generating..." :"AI Auto-Fill"}</span>
           </button>
           {onNavigatePlaylists && (
             <button
@@ -451,7 +442,7 @@ export default function YouTubeCreatePlaylistPanel({
                   Playlist Created Successfully on YouTube!
                 </h3>
                 <p className="text-xs text-emerald-300/80 font-mono mt-0.5">
-                  &ldquo;{createdResult.title}&rdquo; with{" "}
+                  &ldquo;{createdResult.title}&rdquo; with{""}
                   {createdResult.item_count || selectedVideoIds.length} videos
                   is live.
                 </p>
@@ -469,8 +460,7 @@ export default function YouTubeCreatePlaylistPanel({
           <div className="flex items-center gap-3 pt-1">
             <a
               href={
-                createdResult.url ||
-                `https://youtube.com/playlist?list=${createdResult.id}`
+                createdResult.url ||`https://youtube.com/playlist?list=${createdResult.id}`
               }
               target="_blank"
               rel="noreferrer"
@@ -529,7 +519,7 @@ export default function YouTubeCreatePlaylistPanel({
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
+                    if (e.key ==="Enter") {
                       e.preventDefault();
                       handleAiAutoFill();
                     }
@@ -541,12 +531,11 @@ export default function YouTubeCreatePlaylistPanel({
                   type="button"
                   onClick={() => handleAiAutoFill()}
                   disabled={isAiGenerating}
-                  className="px-3.5 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shrink-0 shadow-md shadow-red-600/30"
+                  className="px-3.5 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shrink-0 shadow-md"
                 >
                   {isAiGenerating ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    "Generate"
+                  ) : ("Generate"
                   )}
                 </button>
               </div>
@@ -582,7 +571,7 @@ export default function YouTubeCreatePlaylistPanel({
                 </label>
                 <span
                   className={`text-[10px] font-mono ${
-                    title.length > 90 ? "text-amber-400" : "text-neutral-500"
+                    title.length > 90 ?"text-amber-400" :"text-neutral-500"
                   }`}
                 >
                   {title.length}/100
@@ -607,22 +596,22 @@ export default function YouTubeCreatePlaylistPanel({
                 {(
                   [
                     {
-                      id: "public",
-                      label: "Public",
+                      id:"public",
+                      label:"Public",
                       icon: Globe,
-                      desc: "Searchable by all",
+                      desc:"Searchable by all",
                     },
                     {
-                      id: "unlisted",
-                      label: "Unlisted",
+                      id:"unlisted",
+                      label:"Unlisted",
                       icon: Link,
-                      desc: "Direct link only",
+                      desc:"Direct link only",
                     },
                     {
-                      id: "private",
-                      label: "Private",
+                      id:"private",
+                      label:"Private",
                       icon: Lock,
-                      desc: "Only you",
+                      desc:"Only you",
                     },
                   ] as const
                 ).map((opt) => {
@@ -635,8 +624,8 @@ export default function YouTubeCreatePlaylistPanel({
                       onClick={() => setPrivacy(opt.id)}
                       className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border text-xs font-mono transition-all cursor-pointer ${
                         isSelected
-                          ? "bg-red-950/40 border-red-500/80 text-red-300 font-bold shadow-md shadow-red-950/30"
-                          : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:text-white"
+                          ?"bg-red-950/40 border-red-500/80 text-red-300 font-bold shadow-md"
+                          :"bg-neutral-950 border-neutral-800 text-neutral-400 hover:text-white"
                       }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -661,8 +650,8 @@ export default function YouTubeCreatePlaylistPanel({
                 <span
                   className={`text-[10px] font-mono ${
                     description.length > 4800
-                      ? "text-amber-400"
-                      : "text-neutral-500"
+                      ?"text-amber-400"
+                      :"text-neutral-500"
                   }`}
                 >
                   {description.length}/5000
@@ -682,14 +671,7 @@ export default function YouTubeCreatePlaylistPanel({
                   <Hash className="w-3 h-3 text-red-400" />
                   Add tags:
                 </span>
-                {[
-                  "#Webtoon",
-                  "#Manhwa",
-                  "#Recap",
-                  "#Anime",
-                  "#Manga",
-                  "#OST",
-                  "#Action",
+                {["#Webtoon","#Manhwa","#Recap","#Anime","#Manga","#OST","#Action",
                 ].map((tag) => (
                   <button
                     key={tag}
@@ -713,7 +695,7 @@ export default function YouTubeCreatePlaylistPanel({
             <button
               onClick={() => handleCreate()}
               disabled={isCreating || !title.trim()}
-              className="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-red-600 via-red-500 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-black font-mono rounded-xl shadow-lg shadow-red-600/30 transition-all cursor-pointer active:scale-[0.99]"
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-red-600 via-red-500 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-black font-mono rounded-xl shadow-lg transition-all cursor-pointer active:scale-[0.99]"
             >
               {isCreating ? (
                 <>
@@ -769,7 +751,7 @@ export default function YouTubeCreatePlaylistPanel({
 
               <div className="p-4 space-y-2 bg-neutral-950/90">
                 <h4 className="text-sm font-bold text-white line-clamp-1 font-sans">
-                  {title.trim() || "Untitled Playlist Draft"}
+                  {title.trim() ||"Untitled Playlist Draft"}
                 </h4>
                 <div className="flex items-center justify-between text-[10px] font-mono text-neutral-500">
                   <span className="capitalize text-neutral-400">
@@ -861,10 +843,10 @@ export default function YouTubeCreatePlaylistPanel({
                 value={privacyFilter}
                 onChange={(val: any) => setPrivacyFilter(val)}
                 options={[
-                  { value: "all", label: "All Privacy Types" },
-                  { value: "public", label: "Public Only" },
-                  { value: "unlisted", label: "Unlisted Only" },
-                  { value: "private", label: "Private Only" },
+                  { value:"all", label:"All Privacy Types" },
+                  { value:"public", label:"Public Only" },
+                  { value:"unlisted", label:"Unlisted Only" },
+                  { value:"private", label:"Private Only" },
                 ]}
               />
             </div>
@@ -923,8 +905,8 @@ export default function YouTubeCreatePlaylistPanel({
                     key={vid.id}
                     className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${
                       isSelected
-                        ? "bg-red-950/20 border-red-500/70 shadow-md shadow-red-950/10"
-                        : "bg-neutral-950/80 border-neutral-800/80 hover:border-neutral-700"
+                        ?"bg-red-950/20 border-red-500/70 shadow-md"
+                        :"bg-neutral-950/80 border-neutral-800/80 hover:border-neutral-700"
                     }`}
                   >
                     {/* Checkbox / Selection Toggle */}
@@ -933,8 +915,8 @@ export default function YouTubeCreatePlaylistPanel({
                       onClick={() => toggleSelectVideo(vid.id)}
                       className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 transition-all cursor-pointer ${
                         isSelected
-                          ? "bg-red-600 border-red-500 text-white"
-                          : "border-neutral-700 bg-neutral-900 hover:border-neutral-500"
+                          ?"bg-red-600 border-red-500 text-white"
+                          :"border-neutral-700 bg-neutral-900 hover:border-neutral-500"
                       }`}
                     >
                       {isSelected && (
@@ -969,8 +951,8 @@ export default function YouTubeCreatePlaylistPanel({
                         onClick={() => toggleSelectVideo(vid.id)}
                         className={`text-xs font-bold font-sans line-clamp-1 cursor-pointer ${
                           isSelected
-                            ? "text-white"
-                            : "text-neutral-300 hover:text-white"
+                            ?"text-white"
+                            :"text-neutral-300 hover:text-white"
                         }`}
                       >
                         {vid.title}
@@ -983,11 +965,11 @@ export default function YouTubeCreatePlaylistPanel({
                         <span>•</span>
                         <span
                           className={`capitalize ${
-                            vid.privacy_status === "public"
-                              ? "text-emerald-400"
-                              : vid.privacy_status === "unlisted"
-                              ? "text-amber-400"
-                              : "text-neutral-500"
+                            vid.privacy_status ==="public"
+                              ?"text-emerald-400"
+                              : vid.privacy_status ==="unlisted"
+                              ?"text-amber-400"
+                              :"text-neutral-500"
                           }`}
                         >
                           {vid.privacy_status}
@@ -1004,15 +986,15 @@ export default function YouTubeCreatePlaylistPanel({
                           title="Set as playlist cover thumbnail"
                           className={`p-1.5 rounded-lg border text-[10px] font-mono transition-colors cursor-pointer ${
                             isCover
-                              ? "bg-amber-500/20 border-amber-500/50 text-amber-400"
-                              : "bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-neutral-300"
+                              ?"bg-amber-500/20 border-amber-500/50 text-amber-400"
+                              :"bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-neutral-300"
                           }`}
                         >
                           <ImageIcon className="w-3.5 h-3.5" />
                         </button>
                         <button
                           type="button"
-                          onClick={() => moveVideoOrder(vid.id, "up")}
+                          onClick={() => moveVideoOrder(vid.id,"up")}
                           disabled={orderIndex === 0}
                           title="Move up in playlist order"
                           className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 disabled:opacity-30 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
@@ -1021,7 +1003,7 @@ export default function YouTubeCreatePlaylistPanel({
                         </button>
                         <button
                           type="button"
-                          onClick={() => moveVideoOrder(vid.id, "down")}
+                          onClick={() => moveVideoOrder(vid.id,"down")}
                           disabled={orderIndex === selectedVideoIds.length - 1}
                           title="Move down in playlist order"
                           className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 disabled:opacity-30 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"

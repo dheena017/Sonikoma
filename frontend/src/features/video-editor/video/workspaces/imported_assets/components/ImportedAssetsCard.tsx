@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Plus,
   Star,
@@ -9,8 +9,8 @@ import {
   Loader2,
   Sparkles,
   Scissors,
-} from "lucide-react";
-import { getProxiedImageUrl } from "@/shared/utils";
+} from"lucide-react";
+import { getProxiedImageUrl } from"@/shared/utils";
 
 export interface ImportedAssetsCardProps {
   url: string;
@@ -53,7 +53,7 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const displayUrl = getProxiedImageUrl(url);
-  const title = `Frame #${index + 1}`;
+  const title =`Frame #${index + 1}`;
 
   const isProcessing = isMerging || isCropping || isCleaning || isAdding;
 
@@ -73,16 +73,15 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
       onDragStart={(e) => {
         if (isProcessing) return;
         e.dataTransfer.setData("text/plain", url);
-        e.dataTransfer.setData(
-          "application/json",
+        e.dataTransfer.setData("application/json",
           JSON.stringify({ image_url: url, index })
         );
       }}
       onClick={(e) => onSelect(index, url, e)}
       className={`relative group rounded-2xl overflow-hidden border transition-all flex flex-col cursor-pointer select-none ${
         isSelected
-          ? "border-[#3B82F6] bg-[#3B82F6]/15 ring-2 ring-[#3B82F6]/50 shadow-md"
-          : "border-white/10 bg-[#121212] hover:border-neutral-700 shadow-md hover:shadow-md"
+          ?"border-[#3B82F6] bg-[#3B82F6]/15 ring-2 ring-[#3B82F6]/50 shadow-md"
+          :"border-white/10 bg-[#121212] hover:border-neutral-700 shadow-md hover:shadow-md"
       }`}
     >
       {/* Thumbnail Image Container */}
@@ -93,8 +92,8 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
           loading="lazy"
           className={`w-full h-full object-cover transition-transform duration-300 ${
             isProcessing
-              ? "scale-95 blur-[1px] opacity-60"
-              : "group-hover:scale-105"
+              ?"scale-95 blur-[1px] opacity-60"
+              :"group-hover:scale-105"
           }`}
         />
 
@@ -107,8 +106,8 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
             <div
               className={`h-4 w-4 rounded flex items-center justify-center border transition-all ${
                 isSelected
-                  ? "bg-[#3B82F6] border-[#60A5FA] text-white shadow-sm shadow-blue-500/25"
-                  : "bg-black/60 border-white/20 text-transparent group-hover:border-white/50"
+                  ?"bg-[#3B82F6] border-[#60A5FA] text-white shadow-sm"
+                  :"bg-black/60 border-white/20 text-transparent group-hover:border-white/50"
               }`}
             >
               <Check className="h-3 w-3" />
@@ -122,11 +121,11 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
             type="button"
             onClick={(e) => onToggleFavorite(index, e)}
             className="p-1 rounded-full bg-black/60 hover:bg-black/90 border border-white/10 text-neutral-400 hover:text-amber-300 transition-colors"
-            title={isFav ? "Favorited" : "Favorite"}
+            title={isFav ?"Favorited" :"Favorite"}
           >
             <Star
               className={`h-3 w-3 ${
-                isFav ? "text-amber-400 fill-amber-400" : ""
+                isFav ?"text-amber-400 fill-amber-400" :""
               }`}
             />
           </button>
@@ -147,21 +146,21 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
           <div className="absolute inset-0 z-20 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center gap-2 p-3 text-center animate-in fade-in duration-150">
             <div className="relative flex items-center justify-center">
               <div className="w-9 h-9 rounded-full bg-[#3B82F6]/20 border border-[#3B82F6]/40 animate-ping absolute inset-0" />
-              <div className="w-8 h-8 rounded-full bg-[#3B82F6] border border-[#60A5FA]/60 text-white flex items-center justify-center shadow-sm shadow-blue-500/25">
+              <div className="w-8 h-8 rounded-full bg-[#3B82F6] border border-[#60A5FA]/60 text-white flex items-center justify-center shadow-sm">
                 <Loader2 className="h-4 w-4 text-[#60A5FA] animate-spin" />
               </div>
             </div>
 
             <span className="text-[9px] font-bold font-mono text-[#3B82F6] tracking-wider uppercase">
               {isCropping
-                ? "Auto Cropping..."
+                ?"Auto Cropping..."
                 : isCleaning
-                ? "Cleaning..."
+                ?"Cleaning..."
                 : isMerging
-                ? "Merging..."
+                ?"Merging..."
                 : isAdding
-                ? "Adding..."
-                : "Processing..."}
+                ?"Adding..."
+                :"Processing..."}
             </span>
           </div>
         )}
@@ -176,8 +175,8 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
           disabled={isProcessing}
           className={`w-full py-1 px-2 rounded-lg font-mono text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 shadow-sm transition active:scale-95 cursor-pointer ${
             isAdding
-              ? "bg-[#3B82F6] text-white opacity-90 cursor-wait"
-              : "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25"
+              ?"bg-[#3B82F6] text-white opacity-90 cursor-wait"
+              :"bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm"
           }`}
         >
           {isAdding ? (
@@ -185,7 +184,7 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
           ) : (
             <Plus className="h-2.5 w-2.5" />
           )}
-          <span>{isAdding ? "Adding..." : "Add to Timeline"}</span>
+          <span>{isAdding ?"Adding..." :"Add to Timeline"}</span>
         </button>
 
         {/* Secondary Action Button: Merge with Next */}
@@ -198,10 +197,10 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
           disabled={isProcessing || isMerging || index >= totalImagesCount - 1}
           className={`w-full py-1 px-2 rounded-lg font-mono text-[9px] font-bold flex items-center justify-center gap-1 transition border ${
             index >= totalImagesCount - 1
-              ? "bg-white/[0.02] border-white/[0.05] text-neutral-600 cursor-not-allowed select-none opacity-40"
+              ?"bg-white/[0.02] border-white/[0.05] text-neutral-600 cursor-not-allowed select-none opacity-40"
               : isMerging
-              ? "bg-[#3B82F6]/20 border-[#3B82F6]/40 text-white cursor-wait"
-              : "bg-white/5 hover:bg-[#3B82F6] border-white/10 hover:border-[#60A5FA]/40 text-neutral-300 hover:text-white cursor-pointer"
+              ?"bg-[#3B82F6]/20 border-[#3B82F6]/40 text-white cursor-wait"
+              :"bg-white/5 hover:bg-[#3B82F6] border-white/10 hover:border-[#60A5FA]/40 text-neutral-300 hover:text-white cursor-pointer"
           }`}
         >
           {isMerging ? (
@@ -211,10 +210,10 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
           )}
           <span>
             {isMerging
-              ? "Merging..."
+              ?"Merging..."
               : index >= totalImagesCount - 1
-              ? "End of Chapter"
-              : "Merge with Next"}
+              ?"End of Chapter"
+              :"Merge with Next"}
           </span>
         </button>
 

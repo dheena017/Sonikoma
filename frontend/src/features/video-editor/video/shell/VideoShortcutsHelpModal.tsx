@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo } from"react";
 import {
   X,
   Keyboard,
@@ -8,8 +8,8 @@ import {
   ZoomIn,
   Sliders,
   Sparkles,
-} from "lucide-react";
-import { useAppShortcuts } from "@/features/platform/shortcuts/hooks/useShortcutsRegistry";
+} from"lucide-react";
+import { useAppShortcuts } from"@/features/platform/shortcuts/hooks/useShortcutsRegistry";
 
 export interface VideoShortcutsHelpModalProps {
   isOpen: boolean;
@@ -17,11 +17,11 @@ export interface VideoShortcutsHelpModalProps {
 }
 
 const CATEGORIES = [
-  { id: "all", label: "All Shortcuts", icon: Keyboard },
-  { id: "playback", label: "Playback & Navigation", icon: Play },
-  { id: "edit", label: "Clip & Track Editing", icon: Scissors },
-  { id: "zoom", label: "Zoom & Grid", icon: ZoomIn },
-  { id: "layout", label: "General & Layout", icon: Sliders },
+  { id:"all", label:"All Shortcuts", icon: Keyboard },
+  { id:"playback", label:"Playback & Navigation", icon: Play },
+  { id:"edit", label:"Clip & Track Editing", icon: Scissors },
+  { id:"zoom", label:"Zoom & Grid", icon: ZoomIn },
+  { id:"layout", label:"General & Layout", icon: Sliders },
 ];
 
 export const VideoShortcutsHelpModal: React.FC<
@@ -35,165 +35,164 @@ export const VideoShortcutsHelpModal: React.FC<
     return [
       // Playback
       {
-        id: "play_pause",
-        label: "Play / Pause",
-        description: "Toggle video and timeline playback",
-        keys: (shortcuts.playback_toggle || "Space").split("+"),
-        category: "playback" as const,
+        id:"play_pause",
+        label:"Play / Pause",
+        description:"Toggle video and timeline playback",
+        keys: (shortcuts.playback_toggle ||"Space").split("+"),
+        category:"playback" as const,
       },
       {
-        id: "step_back",
-        label: "Step Backward",
-        description: "Nudge playhead 0.5s backward",
+        id:"step_back",
+        label:"Step Backward",
+        description:"Nudge playhead 0.5s backward",
         keys: ["←"],
-        category: "playback" as const,
+        category:"playback" as const,
       },
       {
-        id: "step_forward",
-        label: "Step Forward",
-        description: "Nudge playhead 0.5s forward",
+        id:"step_forward",
+        label:"Step Forward",
+        description:"Nudge playhead 0.5s forward",
         keys: ["→"],
-        category: "playback" as const,
+        category:"playback" as const,
       },
       {
-        id: "jump_back",
-        label: "Jump 2s Backward",
-        description: "Quickly seek backward by 2 seconds",
-        keys: ["Shift", "←"],
-        category: "playback" as const,
+        id:"jump_back",
+        label:"Jump 2s Backward",
+        description:"Quickly seek backward by 2 seconds",
+        keys: ["Shift","←"],
+        category:"playback" as const,
       },
       {
-        id: "jump_forward",
-        label: "Jump 2s Forward",
-        description: "Quickly seek forward by 2 seconds",
-        keys: ["Shift", "→"],
-        category: "playback" as const,
+        id:"jump_forward",
+        label:"Jump 2s Forward",
+        description:"Quickly seek forward by 2 seconds",
+        keys: ["Shift","→"],
+        category:"playback" as const,
       },
       {
-        id: "jump_start",
-        label: "Jump to Start",
-        description: "Move playhead to 0:00",
+        id:"jump_start",
+        label:"Jump to Start",
+        description:"Move playhead to 0:00",
         keys: ["Home"],
-        category: "playback" as const,
+        category:"playback" as const,
       },
       {
-        id: "jump_end",
-        label: "Jump to End",
-        description: "Move playhead to end of timeline",
+        id:"jump_end",
+        label:"Jump to End",
+        description:"Move playhead to end of timeline",
         keys: ["End"],
-        category: "playback" as const,
+        category:"playback" as const,
       },
 
       // Editing
       {
-        id: "split_clip",
-        label: "Split Clip",
-        description: "Slice selected clip at current playhead position",
-        keys: (shortcuts.timeline_split || "S").split("+"),
-        category: "edit" as const,
+        id:"split_clip",
+        label:"Split Clip",
+        description:"Slice selected clip at current playhead position",
+        keys: (shortcuts.timeline_split ||"S").split("+"),
+        category:"edit" as const,
       },
       {
-        id: "delete_clip",
-        label: "Delete Selected",
-        description: "Remove clip or reset custom duration",
-        keys: (shortcuts.timeline_delete || "Delete").split("+"),
-        category: "edit" as const,
+        id:"delete_clip",
+        label:"Delete Selected",
+        description:"Remove clip or reset custom duration",
+        keys: (shortcuts.timeline_delete ||"Delete").split("+"),
+        category:"edit" as const,
       },
       {
-        id: "copy_clip",
-        label: "Copy Clip",
-        description: "Copy selected panel or audio clip",
-        keys: (shortcuts.timeline_copy || "Ctrl+C").split("+"),
-        category: "edit" as const,
+        id:"copy_clip",
+        label:"Copy Clip",
+        description:"Copy selected panel or audio clip",
+        keys: (shortcuts.timeline_copy ||"Ctrl+C").split("+"),
+        category:"edit" as const,
       },
       {
-        id: "paste_clip",
-        label: "Paste Clip",
-        description: "Paste copied clip to active track",
-        keys: (shortcuts.timeline_paste || "Ctrl+V").split("+"),
-        category: "edit" as const,
+        id:"paste_clip",
+        label:"Paste Clip",
+        description:"Paste copied clip to active track",
+        keys: (shortcuts.timeline_paste ||"Ctrl+V").split("+"),
+        category:"edit" as const,
       },
       {
-        id: "duplicate_clip",
-        label: "Duplicate Clip",
-        description: "Create an immediate clone of selected clip",
-        keys: (shortcuts.timeline_duplicate || "Ctrl+D").split("+"),
-        category: "edit" as const,
+        id:"duplicate_clip",
+        label:"Duplicate Clip",
+        description:"Create an immediate clone of selected clip",
+        keys: (shortcuts.timeline_duplicate ||"Ctrl+D").split("+"),
+        category:"edit" as const,
       },
       {
-        id: "add_keyframe",
-        label: "Add Keyframe",
-        description: "Insert animation transform keyframe on selected clip",
-        keys: (shortcuts.timeline_keyframe || "K").split("+"),
-        category: "edit" as const,
+        id:"add_keyframe",
+        label:"Add Keyframe",
+        description:"Insert animation transform keyframe on selected clip",
+        keys: (shortcuts.timeline_keyframe ||"K").split("+"),
+        category:"edit" as const,
       },
       {
-        id: "toggle_mute",
-        label: "Toggle Track Mute",
-        description: "Mute or unmute track of selected clip",
-        keys: (shortcuts.timeline_mute || "M").split("+"),
-        category: "edit" as const,
+        id:"toggle_mute",
+        label:"Toggle Track Mute",
+        description:"Mute or unmute track of selected clip",
+        keys: (shortcuts.timeline_mute ||"M").split("+"),
+        category:"edit" as const,
       },
       {
-        id: "toggle_lock",
-        label: "Toggle Track Lock",
-        description: "Lock or unlock track to prevent accidental moves",
-        keys: (shortcuts.timeline_lock || "L").split("+"),
-        category: "edit" as const,
+        id:"toggle_lock",
+        label:"Toggle Track Lock",
+        description:"Lock or unlock track to prevent accidental moves",
+        keys: (shortcuts.timeline_lock ||"L").split("+"),
+        category:"edit" as const,
       },
 
       // Zoom & Tools
       {
-        id: "zoom_in",
-        label: "Zoom In Timeline",
-        description: "Increase timeline scale & pixel density",
-        keys: (shortcuts.timeline_zoom_in || "+").split("+"),
-        category: "zoom" as const,
+        id:"zoom_in",
+        label:"Zoom In Timeline",
+        description:"Increase timeline scale & pixel density",
+        keys: (shortcuts.timeline_zoom_in ||"+").split("+"),
+        category:"zoom" as const,
       },
       {
-        id: "zoom_out",
-        label: "Zoom Out Timeline",
-        description: "Decrease timeline scale to see more duration",
-        keys: (shortcuts.timeline_zoom_out || "-").split("+"),
-        category: "zoom" as const,
+        id:"zoom_out",
+        label:"Zoom Out Timeline",
+        description:"Decrease timeline scale to see more duration",
+        keys: (shortcuts.timeline_zoom_out ||"-").split("+"),
+        category:"zoom" as const,
       },
       {
-        id: "zoom_reset",
-        label: "Reset Zoom (100%)",
-        description: "Reset timeline scale to default 30px/s",
-        keys: (shortcuts.timeline_zoom_reset || "0").split("+"),
-        category: "zoom" as const,
+        id:"zoom_reset",
+        label:"Reset Zoom (100%)",
+        description:"Reset timeline scale to default 30px/s",
+        keys: (shortcuts.timeline_zoom_reset ||"0").split("+"),
+        category:"zoom" as const,
       },
       {
-        id: "toggle_snap",
-        label: "Magnetic Snapping",
-        description: "Toggle magnetic clip edge alignment",
-        keys: (shortcuts.timeline_snap || "N").split("+"),
-        category: "zoom" as const,
+        id:"toggle_snap",
+        label:"Magnetic Snapping",
+        description:"Toggle magnetic clip edge alignment",
+        keys: (shortcuts.timeline_snap ||"N").split("+"),
+        category:"zoom" as const,
       },
 
       // Layout & General
       {
-        id: "horizontal_scroll",
-        label: "Horizontal Scrolling",
-        description:
-          "Hold Shift or Ctrl while scrolling mouse wheel to scroll horizontally",
-        keys: ["Shift", "Scroll"],
-        category: "layout" as const,
+        id:"horizontal_scroll",
+        label:"Horizontal Scrolling",
+        description:"Hold Shift or Ctrl while scrolling mouse wheel to scroll horizontally",
+        keys: ["Shift","Scroll"],
+        category:"layout" as const,
       },
       {
-        id: "open_shortcuts",
-        label: "Keyboard Shortcuts",
-        description: "Open this cheat sheet modal",
+        id:"open_shortcuts",
+        label:"Keyboard Shortcuts",
+        description:"Open this cheat sheet modal",
         keys: ["?"],
-        category: "layout" as const,
+        category:"layout" as const,
       },
     ];
   }, [shortcuts]);
 
   const filtered = useMemo(() => {
     return shortcutsList.filter((item) => {
-      if (activeCat !== "all" && item.category !== activeCat) return false;
+      if (activeCat !=="all" && item.category !== activeCat) return false;
       if (!search.trim()) return true;
       const q = search.toLowerCase();
       return (
@@ -262,8 +261,8 @@ export const VideoShortcutsHelpModal: React.FC<
                   onClick={() => setActiveCat(cat.id)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer shrink-0 ${
                     isSelected
-                      ? "bg-[#2A2A2A] text-white shadow-sm"
-                      : "bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10 border border-white/5"
+                      ?"bg-[#2A2A2A] text-white shadow-sm"
+                      :"bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10 border border-white/5"
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -320,7 +319,7 @@ export const VideoShortcutsHelpModal: React.FC<
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium transition cursor-pointer shadow-md shadow-blue-500/25 active:scale-95"
+            className="px-4 py-1.5 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium transition cursor-pointer shadow-md active:scale-95"
           >
             Got it
           </button>

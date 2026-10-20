@@ -1,10 +1,10 @@
-import React from "react";
+import React from"react";
 import {
   ShieldCheck,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
+} from"lucide-react";
 
 export interface StudioChecksTabProps {
   seoScore: number;
@@ -89,10 +89,10 @@ export default function StudioChecksTab({
           <span
             className={`text-xs font-black font-mono ${
               seoScore >= 70
-                ? "text-emerald-400"
+                ?"text-emerald-400"
                 : seoScore >= 40
-                ? "text-amber-400"
-                : "text-red-400"
+                ?"text-amber-400"
+                :"text-red-400"
             }`}
           >
             {seoScore}/100
@@ -102,20 +102,20 @@ export default function StudioChecksTab({
           <div
             className={`h-full rounded-full transition-all duration-700 ${
               seoScore >= 70
-                ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
+                ?"bg-gradient-to-r from-emerald-500 to-emerald-400"
                 : seoScore >= 40
-                ? "bg-gradient-to-r from-amber-500 to-amber-400"
-                : "bg-gradient-to-r from-red-600 to-red-400"
+                ?"bg-gradient-to-r from-amber-500 to-amber-400"
+                :"bg-gradient-to-r from-red-600 to-red-400"
             }`}
-            style={{ width: `${seoScore}%` }}
+            style={{ width:`${seoScore}%` }}
           />
         </div>
         <p className="text-[10.5px] text-neutral-400 font-mono">
           {seoScore >= 70
-            ? "Great! Your video is well-optimized for search."
+            ?"Great! Your video is well-optimized for search."
             : seoScore >= 40
-            ? "Add more tags and a longer description to improve ranking."
-            : "Add a title, description, and tags to improve discoverability."}
+            ?"Add more tags and a longer description to improve ranking."
+            :"Add a title, description, and tags to improve discoverability."}
         </p>
       </div>
 
@@ -128,8 +128,8 @@ export default function StudioChecksTab({
           <span
             className={`text-[10px] font-mono ${
               tags.join(",").length > 450
-                ? "text-amber-400"
-                : "text-neutral-600"
+                ?"text-amber-400"
+                :"text-neutral-600"
             }`}
           >
             {tags.join(",").length}/500 chars
@@ -141,7 +141,7 @@ export default function StudioChecksTab({
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === ",") {
+              if (e.key ==="Enter" || e.key ===",") {
                 e.preventDefault();
                 handleAddTag();
               }
@@ -215,10 +215,10 @@ export default function StudioChecksTab({
           {(Object.entries(ratings) as [keyof typeof ratings, boolean][]).map(
             ([key, val]) => {
               const labels: Record<string, string> = {
-                noLanguage: "No strong language or profanity",
-                noViolence: "No graphic violence or disturbing imagery",
-                noAdultContent: "No sexual content or nudity",
-                noHarmfulActs: "No dangerous or harmful acts",
+                noLanguage:"No strong language or profanity",
+                noViolence:"No graphic violence or disturbing imagery",
+                noAdultContent:"No sexual content or nudity",
+                noHarmfulActs:"No dangerous or harmful acts",
               };
               return (
                 <label
@@ -254,7 +254,7 @@ export default function StudioChecksTab({
         </button>
         <button
           onClick={onNext}
-          className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold font-mono rounded-xl shadow-lg shadow-red-600/30 transition-all cursor-pointer"
+          className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold font-mono rounded-xl shadow-lg transition-all cursor-pointer"
         >
           <span>Next: Visibility</span>
           <ChevronRight className="w-4 h-4" />

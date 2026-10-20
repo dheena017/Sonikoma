@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Zap,
   Smartphone,
@@ -23,20 +23,20 @@ import {
   MessageSquare,
   ArrowDownUp,
   SlidersHorizontal,
-} from "lucide-react";
+} from"lucide-react";
 
 export type PresetType =
-  | "webtoon"
-  | "manga"
-  | "shorts"
-  | "landscape"
-  | "square"
-  | "granular"
-  | "safe_bleed";
+  |"webtoon"
+  |"manga"
+  |"shorts"
+  |"landscape"
+  |"square"
+  |"granular"
+  |"safe_bleed";
 
 export interface AutoCropTuningTabProps {
-  engineMode?: "opencv" | "ai";
-  onEngineModeChange?: (mode: "opencv" | "ai") => void;
+  engineMode?:"opencv" |"ai";
+  onEngineModeChange?: (mode:"opencv" |"ai") => void;
   padding: number;
   sensitivity: number;
   aspectRatioLock: string;
@@ -66,7 +66,7 @@ export interface AutoCropTuningTabProps {
 }
 
 export function AutoCropTuningTab({
-  engineMode = "opencv",
+  engineMode ="opencv",
   onEngineModeChange,
   padding,
   sensitivity,
@@ -74,12 +74,12 @@ export function AutoCropTuningTab({
   backgroundColorMode,
   minPanelHeightPx = 80,
   overlapMergeThreshold = 8,
-  outputFormat = "webp",
+  outputFormat ="webp",
   outputQuality = 90,
   filterGutterSfx = true,
   mergeSpeechBubbles = true,
   autoTrimGutter = true,
-  readingFlow = "top_to_bottom",
+  readingFlow ="top_to_bottom",
   onPaddingChange,
   onSensitivityChange,
   onAspectRatioChange,
@@ -96,13 +96,13 @@ export function AutoCropTuningTab({
   onApplySettingsAndRecrop,
 }: AutoCropTuningTabProps) {
   const [activePreset, setActivePreset] = useState<PresetType>("webtoon");
-  const [applyScope, setApplyScope] = useState<"current" | "all">("current");
+  const [applyScope, setApplyScope] = useState<"current" |"all">("current");
 
   const handleSelectPreset = (preset: PresetType) => {
     setActivePreset(preset);
     onApplyPreset(preset);
     switch (preset) {
-      case "webtoon":
+      case"webtoon":
         onPaddingChange(8);
         onSensitivityChange(50);
         onAspectRatioChange("free");
@@ -110,7 +110,7 @@ export function AutoCropTuningTab({
         onMinPanelHeightChange?.(80);
         onReadingFlowChange?.("top_to_bottom");
         break;
-      case "manga":
+      case"manga":
         onPaddingChange(4);
         onSensitivityChange(70);
         onAspectRatioChange("free");
@@ -118,32 +118,32 @@ export function AutoCropTuningTab({
         onMinPanelHeightChange?.(60);
         onReadingFlowChange?.("right_to_left");
         break;
-      case "shorts":
+      case"shorts":
         onPaddingChange(12);
         onSensitivityChange(45);
         onAspectRatioChange("9:16");
         onBackgroundColorModeChange("black");
         onMinPanelHeightChange?.(120);
         break;
-      case "landscape":
+      case"landscape":
         onPaddingChange(10);
         onSensitivityChange(45);
         onAspectRatioChange("16:9");
         onBackgroundColorModeChange("auto");
         break;
-      case "square":
+      case"square":
         onPaddingChange(6);
         onSensitivityChange(50);
         onAspectRatioChange("1:1");
         onBackgroundColorModeChange("auto");
         break;
-      case "granular":
+      case"granular":
         onPaddingChange(2);
         onSensitivityChange(85);
         onAspectRatioChange("free");
         onMinPanelHeightChange?.(40);
         break;
-      case "safe_bleed":
+      case"safe_bleed":
         onPaddingChange(22);
         onSensitivityChange(35);
         onAspectRatioChange("free");
@@ -169,16 +169,16 @@ export function AutoCropTuningTab({
             type="button"
             onClick={() => onEngineModeChange?.("opencv")}
             className={`p-3 rounded-2xl border text-left transition-all flex items-start gap-3 !cursor-pointer active:scale-95 ${
-              engineMode === "opencv"
-                ? "bg-emerald-500/15 border-emerald-500 text-white shadow-md shadow-emerald-500/10 font-medium"
-                : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
+              engineMode ==="opencv"
+                ?"bg-emerald-500/15 border-emerald-500 text-white shadow-md  font-medium"
+                :"bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
             }`}
           >
             <div
               className={`p-2 rounded-xl shrink-0 ${
-                engineMode === "opencv"
-                  ? "bg-emerald-500 text-black font-bold"
-                  : "bg-neutral-800 text-neutral-400"
+                engineMode ==="opencv"
+                  ?"bg-emerald-500 text-black font-bold"
+                  :"bg-neutral-800 text-neutral-400"
               }`}
             >
               <Zap className="h-4 w-4" />
@@ -201,16 +201,16 @@ export function AutoCropTuningTab({
             type="button"
             onClick={() => onEngineModeChange?.("ai")}
             className={`p-3 rounded-2xl border text-left transition-all flex items-start gap-3 !cursor-pointer active:scale-95 ${
-              engineMode === "ai"
-                ? "bg-sky-500/15 border-sky-500 text-white shadow-md shadow-sky-500/10 font-medium"
-                : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
+              engineMode ==="ai"
+                ?"bg-sky-500/15 border-sky-500 text-white shadow-md  font-medium"
+                :"bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
             }`}
           >
             <div
               className={`p-2 rounded-xl shrink-0 ${
-                engineMode === "ai"
-                  ? "bg-sky-500 text-black font-bold"
-                  : "bg-neutral-800 text-neutral-400"
+                engineMode ==="ai"
+                  ?"bg-sky-500 text-black font-bold"
+                  :"bg-neutral-800 text-neutral-400"
               }`}
             >
               <Sparkles className="h-4 w-4" />
@@ -249,9 +249,9 @@ export function AutoCropTuningTab({
             type="button"
             onClick={() => handleSelectPreset("webtoon")}
             className={`p-2.5 rounded-2xl border text-xs font-medium transition-all flex flex-col items-center text-center gap-1.5 !cursor-pointer active:scale-95 ${
-              activePreset === "webtoon"
-                ? "bg-emerald-500/15 border-emerald-500 text-emerald-300 shadow-md shadow-emerald-500/10 font-bold"
-                : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
+              activePreset ==="webtoon"
+                ?"bg-emerald-500/15 border-emerald-500 text-emerald-300 shadow-md  font-bold"
+                :"bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
             }`}
           >
             <Smartphone className="h-4 w-4 text-emerald-400" />
@@ -266,9 +266,9 @@ export function AutoCropTuningTab({
             type="button"
             onClick={() => handleSelectPreset("manga")}
             className={`p-2.5 rounded-2xl border text-xs font-medium transition-all flex flex-col items-center text-center gap-1.5 !cursor-pointer active:scale-95 ${
-              activePreset === "manga"
-                ? "bg-purple-500/15 border-purple-500 text-purple-300 shadow-md shadow-purple-500/10 font-bold"
-                : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
+              activePreset ==="manga"
+                ?"bg-purple-500/15 border-purple-500 text-purple-300 shadow-md  font-bold"
+                :"bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
             }`}
           >
             <BookOpen className="h-4 w-4 text-purple-400" />
@@ -283,9 +283,9 @@ export function AutoCropTuningTab({
             type="button"
             onClick={() => handleSelectPreset("shorts")}
             className={`p-2.5 rounded-2xl border text-xs font-medium transition-all flex flex-col items-center text-center gap-1.5 !cursor-pointer active:scale-95 ${
-              activePreset === "shorts"
-                ? "bg-sky-500/15 border-sky-500 text-sky-300 shadow-md shadow-sky-500/10 font-bold"
-                : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
+              activePreset ==="shorts"
+                ?"bg-sky-500/15 border-sky-500 text-sky-300 shadow-md  font-bold"
+                :"bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
             }`}
           >
             <Film className="h-4 w-4 text-sky-400" />
@@ -300,9 +300,9 @@ export function AutoCropTuningTab({
             type="button"
             onClick={() => handleSelectPreset("landscape")}
             className={`p-2.5 rounded-2xl border text-xs font-medium transition-all flex flex-col items-center text-center gap-1.5 !cursor-pointer active:scale-95 ${
-              activePreset === "landscape"
-                ? "bg-amber-500/15 border-amber-500 text-amber-300 shadow-md shadow-amber-500/10 font-bold"
-                : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
+              activePreset ==="landscape"
+                ?"bg-amber-500/15 border-amber-500 text-amber-300 shadow-md  font-bold"
+                :"bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
             }`}
           >
             <Monitor className="h-4 w-4 text-amber-400" />
@@ -317,9 +317,9 @@ export function AutoCropTuningTab({
             type="button"
             onClick={() => handleSelectPreset("square")}
             className={`p-2.5 rounded-2xl border text-xs font-medium transition-all flex flex-col items-center text-center gap-1.5 !cursor-pointer active:scale-95 ${
-              activePreset === "square"
-                ? "bg-pink-500/15 border-pink-500 text-pink-300 shadow-md shadow-pink-500/10 font-bold"
-                : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
+              activePreset ==="square"
+                ?"bg-pink-500/15 border-pink-500 text-pink-300 shadow-md  font-bold"
+                :"bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
             }`}
           >
             <Square className="h-4 w-4 text-pink-400" />
@@ -334,9 +334,9 @@ export function AutoCropTuningTab({
             type="button"
             onClick={() => handleSelectPreset("granular")}
             className={`p-2.5 rounded-2xl border text-xs font-medium transition-all flex flex-col items-center text-center gap-1.5 !cursor-pointer active:scale-95 ${
-              activePreset === "granular"
-                ? "bg-teal-500/15 border-teal-500 text-teal-300 shadow-md shadow-teal-500/10 font-bold"
-                : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
+              activePreset ==="granular"
+                ?"bg-teal-500/15 border-teal-500 text-teal-300 shadow-md  font-bold"
+                :"bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
             }`}
           >
             <Scissors className="h-4 w-4 text-teal-400" />
@@ -351,9 +351,9 @@ export function AutoCropTuningTab({
             type="button"
             onClick={() => handleSelectPreset("safe_bleed")}
             className={`p-2.5 rounded-2xl border text-xs font-medium transition-all flex flex-col items-center text-center gap-1.5 !cursor-pointer active:scale-95 ${
-              activePreset === "safe_bleed"
-                ? "bg-indigo-500/15 border-indigo-500 text-indigo-300 shadow-md shadow-indigo-500/10 font-bold"
-                : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
+              activePreset ==="safe_bleed"
+                ?"bg-indigo-500/15 border-indigo-500 text-indigo-300 shadow-md  font-bold"
+                :"bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
             }`}
           >
             <Shield className="h-4 w-4 text-indigo-400" />
@@ -662,9 +662,9 @@ export function AutoCropTuningTab({
               type="button"
               onClick={() => setApplyScope("current")}
               className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all !cursor-pointer ${
-                applyScope === "current"
-                  ? "bg-neutral-800 text-white shadow-sm"
-                  : "text-neutral-400 hover:text-white"
+                applyScope ==="current"
+                  ?"bg-neutral-800 text-white shadow-sm"
+                  :"text-neutral-400 hover:text-white"
               }`}
             >
               Current Strip
@@ -673,9 +673,9 @@ export function AutoCropTuningTab({
               type="button"
               onClick={() => setApplyScope("all")}
               className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all !cursor-pointer ${
-                applyScope === "all"
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
-                  : "text-neutral-400 hover:text-white"
+                applyScope ==="all"
+                  ?"bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
+                  :"text-neutral-400 hover:text-white"
               }`}
             >
               All Strip Batch
@@ -686,12 +686,12 @@ export function AutoCropTuningTab({
         <button
           type="button"
           onClick={onApplySettingsAndRecrop}
-          className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold flex items-center gap-2 transition-all !cursor-pointer shadow-xl shadow-emerald-500/20 active:scale-95"
+          className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold flex items-center gap-2 transition-all !cursor-pointer shadow-xl active:scale-95"
         >
           <RefreshCw className="h-4 w-4" />
           <span>
             Apply Parameters & Re-Detect (
-            {applyScope === "all" ? "All" : "Current"})
+            {applyScope ==="all" ?"All" :"Current"})
           </span>
         </button>
       </div>

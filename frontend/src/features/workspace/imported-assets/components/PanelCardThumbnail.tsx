@@ -1,10 +1,10 @@
-import React from "react";
-import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
-import { Check, RotateCw, FlipHorizontal, Undo2 } from "lucide-react";
+import React from"react";
+import { getProxiedImageUrl } from"@/shared/utils/imageProxy";
+import { Check, RotateCw, FlipHorizontal, Undo2 } from"lucide-react";
 import {
   PanelProcessingOverlay,
   getPanelProcessingLabel,
-} from "@/features/workspace/shell/components/PanelProcessingOverlay";
+} from"@/features/workspace/shell/components/PanelProcessingOverlay";
 
 interface PanelCardThumbnailProps {
   imgUrl: string;
@@ -27,21 +27,21 @@ const getScrapedImageStatus = (url: string) => {
   if (!url) return null;
   if (url.includes("_cropped")) {
     return {
-      text: "CROPPED",
-      bg: "bg-gradient-to-r from-sky-600 to-blue-600 border-sky-400/50 text-sky-100 ",
+      text:"CROPPED",
+      bg:"bg-gradient-to-r from-sky-600 to-blue-600 border-sky-400/50 text-sky-100",
     };
   }
   if (url.includes("_cleaned")) {
     return {
-      text: "CLEANED",
-      bg: "bg-gradient-to-r from-fuchsia-600 to-blue-600 border-blue-400/50 text-white ",
+      text:"CLEANED",
+      bg:"bg-gradient-to-r from-fuchsia-600 to-blue-600 border-blue-400/50 text-white",
     };
   }
 
   if (url.includes("transform_")) {
     return {
-      text: "EDITED",
-      bg: "bg-gradient-to-r from-amber-500 to-orange-600 border-amber-400/50 text-amber-100 ",
+      text:"EDITED",
+      bg:"bg-gradient-to-r from-amber-500 to-orange-600 border-amber-400/50 text-amber-100",
     };
   }
   return null;
@@ -137,11 +137,11 @@ export function PanelCardThumbnail({
           src={resolvedImgSrc}
           alt={`Panel #${resolvedDisplayIdx + 1}`}
           className={`w-full h-full object-contain transition-all duration-300 ease-out z-10 ${
-            !isLoaded ? "opacity-90 scale-98" : "opacity-100 scale-100"
+            !isLoaded ?"opacity-90 scale-98" :"opacity-100 scale-100"
           } ${
             isProcessing
-              ? "opacity-20 scale-95 blur-[3px]"
-              : "group-hover:scale-105"
+              ?"opacity-20 scale-95 blur-[3px]"
+              :"group-hover:scale-105"
           }`}
           decoding="async"
           draggable={false}
@@ -173,7 +173,7 @@ export function PanelCardThumbnail({
               setHasError(true);
               return;
             }
-            img.dataset.retried = "1";
+            img.dataset.retried ="1";
 
             if (
               currentSrc.includes("/api/v1/proxy/image") ||
@@ -185,7 +185,7 @@ export function PanelCardThumbnail({
               return;
             }
 
-            img.src = `/api/v1/proxy/image?url=${encodeURIComponent(
+            img.src =`/api/v1/proxy/image?url=${encodeURIComponent(
               currentSrc
             )}`;
           }}
@@ -206,12 +206,11 @@ export function PanelCardThumbnail({
 
       {/* Index badge */}
       <div
-        className={[
-          "absolute top-2 left-2 z-20 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border transition-all duration-300",
+        className={["absolute top-2 left-2 z-20 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border transition-all duration-300",
           isSelected
-            ? "bg-gradient-to-r from-blue-600 to-indigo-600 border-blue-400 text-white shadow-md shadow-blue-500/30"
-            : "bg-neutral-900 border-neutral-700 text-blue-400 shadow-inner",
-        ].join(" ")}
+            ?"bg-gradient-to-r from-blue-600 to-indigo-600 border-blue-400 text-white shadow-md"
+            :"bg-neutral-900 border-neutral-700 text-blue-400 shadow-inner",
+        ].join("")}
       >
         #{resolvedDisplayIdx + 1}
       </div>
@@ -219,11 +218,9 @@ export function PanelCardThumbnail({
       {/* Operation status badge */}
       {status && (
         <div
-          className={[
-            "absolute top-2 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border z-20 transition-all duration-300",
-            "left-12",
+          className={["absolute top-2 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border z-20 transition-all duration-300","left-12",
             status.bg,
-          ].join(" ")}
+          ].join("")}
         >
           {status.text}
         </div>
@@ -233,7 +230,7 @@ export function PanelCardThumbnail({
       {isInTimeline && (
         <div
           className={`absolute top-2 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border z-20 transition-all duration-300 border-emerald-400/60 bg-gradient-to-r from-emerald-600 to-teal-600 text-emerald-100  flex items-center gap-1 ${
-            status ? "left-28" : "left-12"
+            status ?"left-28" :"left-12"
           }`}
         >
           <span>✓</span>
@@ -245,16 +242,15 @@ export function PanelCardThumbnail({
       <div className="absolute top-2 right-2 z-20">
         <div
           onClick={onCheckboxClick}
-          className={[
-            "relative rounded-full p-1 border transition-all duration-300 ease-out cursor-pointer active:scale-90",
+          className={["relative rounded-full p-1 border transition-all duration-300 ease-out cursor-pointer active:scale-90",
             isSelected
-              ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-500/30 scale-105"
-              : "bg-neutral-900/60 border-neutral-700 hover:border-neutral-500 opacity-0 group-hover:opacity-100",
-          ].join(" ")}
+              ?"bg-blue-600 border-blue-500 text-white shadow-md  scale-105"
+              :"bg-neutral-900/60 border-neutral-700 hover:border-neutral-500 opacity-0 group-hover:opacity-100",
+          ].join("")}
         >
           <Check
             className={`h-2.5 w-2.5 ${
-              isSelected ? "text-white" : "text-neutral-400"
+              isSelected ?"text-white" :"text-neutral-400"
             }`}
             strokeWidth={3.5}
           />

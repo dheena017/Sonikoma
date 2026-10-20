@@ -1303,8 +1303,6 @@ const ImportedAssetsDeck = React.memo(
                 onClick={() => setShowDeleteConfirm(false)}
               />
               <div className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
-                {/* Glow Accent */}
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 blur-[1px]" />
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">

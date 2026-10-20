@@ -1,6 +1,6 @@
-import React from "react";
-import { Package, Copy, Check } from "lucide-react";
-import { ResourceItem } from "../../../types/workspace.types";
+import React from"react";
+import { Package, Copy, Check } from"lucide-react";
+import { ResourceItem } from"../../../types/workspace.types";
 
 interface ResourceItemCardProps {
   resource: ResourceItem;
@@ -53,7 +53,7 @@ export const ResourceItemCard: React.FC<ResourceItemCardProps> = ({
       ) : (
         <button
           onClick={() => onApply(resource.title)}
-          className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold shrink-0 transition-all shadow-sm shadow-blue-500/25 cursor-pointer active:scale-95"
+          className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold shrink-0 transition-all shadow-sm cursor-pointer active:scale-95"
         >
           Apply
         </button>

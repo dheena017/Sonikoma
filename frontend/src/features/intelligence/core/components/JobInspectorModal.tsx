@@ -106,8 +106,6 @@ export default function JobInspectorModal({
 
       {/* Modal Card */}
       <div className="relative w-full max-w-4xl max-h-[90vh] bg-neutral-950/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
-        {/* Glow Accent Line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#3B82F6] blur-[1px]" />
 
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-neutral-850 flex items-center justify-between shrink-0 bg-neutral-900/50">

@@ -177,7 +177,6 @@ export function AdminTrainingTab({
     sub,
     icon: Icon,
     iconColor,
-    glowColor,
     pulse,
   }: {
     label: string;
@@ -185,11 +184,10 @@ export function AdminTrainingTab({
     sub?: string;
     icon: React.ElementType;
     iconColor: string;
-    glowColor: string;
     pulse?: boolean;
   }) => (
     <div className="relative bg-gradient-to-br from-[#111117] to-[#0d0d12] border border-white/[0.07] rounded-2xl p-5 overflow-hidden hover:border-white/[0.12] transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
-      <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-20 ${glowColor} pointer-events-none`} />
+      
       <div className="flex items-start justify-between gap-3">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/[0.04] border border-white/[0.07] shrink-0">
           <Icon className={`w-[18px] h-[18px] ${iconColor}`} />
@@ -248,7 +246,6 @@ export function AdminTrainingTab({
           sub="correction samples total"
           icon={Database}
           iconColor="text-blue-400"
-          glowColor="bg-blue-500"
         />
         <StatCard
           label="Training Status"
@@ -256,7 +253,6 @@ export function AdminTrainingTab({
           sub={status?.is_training ? `${formatElapsed(status.elapsed_seconds)} elapsed` : "Ready to fine-tune"}
           icon={status?.is_training ? Cpu : Shield}
           iconColor={status?.is_training ? "text-purple-400" : "text-emerald-400"}
-          glowColor={status?.is_training ? "bg-purple-500" : "bg-emerald-500"}
           pulse={status?.is_training}
         />
         <StatCard
@@ -265,7 +261,6 @@ export function AdminTrainingTab({
           sub={`${samplesUntilAutoTrigger} until auto-trigger`}
           icon={TrendingUp}
           iconColor="text-amber-400"
-          glowColor="bg-amber-500"
         />
         <StatCard
           label="Last Run Dataset Size"
@@ -273,7 +268,6 @@ export function AdminTrainingTab({
           sub="pairs at last training run"
           icon={Clock}
           iconColor="text-cyan-400"
-          glowColor="bg-cyan-500"
         />
       </div>
 

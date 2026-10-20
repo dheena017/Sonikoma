@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   Mail,
   ArrowLeft,
@@ -9,10 +9,10 @@ import {
   Sparkles,
   Eye,
   EyeOff,
-} from "lucide-react";
-import AuthShowcase from "@/features/auth/components/AuthShowcase";
-import { useForgotPasswordForm } from "@/features/auth/hooks";
-import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+} from"lucide-react";
+import AuthShowcase from"@/features/auth/components/AuthShowcase";
+import { useForgotPasswordForm } from"@/features/auth/hooks";
+import { Tooltip } from"@/shared/ui/common/TooltipPortal";
 
 interface ForgotPasswordPageProps {
   onForgotPassword: (email: string) => Promise<void>;
@@ -106,7 +106,7 @@ export default function ForgotPasswordPage({
                   <Tooltip text="Go to Sign In" placement="bottom">
                     <button
                       onClick={onNavigateToLogin}
-                      className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] text-white font-bold py-3.5 rounded-xl  transition-all cursor-pointer text-sm"
+                      className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] text-white font-bold py-3.5 rounded-xl transition-all cursor-pointer text-sm"
                     >
                       Go to Login
                     </button>
@@ -147,7 +147,7 @@ export default function ForgotPasswordPage({
                         <Lock className="w-4 h-4" />
                       </div>
                       <input
-                        type={showPassword ? "text" : "password"}
+                        type={showPassword ?"text" :"password"}
                         required
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
@@ -157,7 +157,7 @@ export default function ForgotPasswordPage({
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
                         <Tooltip
                           text={
-                            showPassword ? "Hide password" : "Show password"
+                            showPassword ?"Hide password" :"Show password"
                           }
                           placement="top"
                         >
@@ -166,7 +166,7 @@ export default function ForgotPasswordPage({
                             onClick={() => setShowPassword(!showPassword)}
                             className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer flex items-center justify-center rounded-lg hover:bg-neutral-800"
                             aria-label={
-                              showPassword ? "Hide password" : "Show password"
+                              showPassword ?"Hide password" :"Show password"
                             }
                           >
                             {showPassword ? (
@@ -189,7 +189,7 @@ export default function ForgotPasswordPage({
                         <Lock className="w-4 h-4" />
                       </div>
                       <input
-                        type={showPassword ? "text" : "password"}
+                        type={showPassword ?"text" :"password"}
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
@@ -206,7 +206,7 @@ export default function ForgotPasswordPage({
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
+                      className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-3.5 rounded-xl shadow-md active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
                     >
                       {isLoading ? (
                         <>
@@ -235,10 +235,10 @@ export default function ForgotPasswordPage({
                       {email && (
                         <span
                           className={`text-[10px] font-bold ${
-                            isEmailValid ? "text-emerald-400" : "text-amber-400"
+                            isEmailValid ?"text-emerald-400" :"text-amber-400"
                           }`}
                         >
-                          {isEmailValid ? "Valid format" : "Check email"}
+                          {isEmailValid ?"Valid format" :"Check email"}
                         </span>
                       )}
                     </div>
@@ -264,7 +264,7 @@ export default function ForgotPasswordPage({
                     <button
                       type="submit"
                       disabled={isLoading || !isEmailValid}
-                      className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl  active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
+                      className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
                     >
                       {isLoading ? (
                         <>
@@ -319,7 +319,7 @@ export default function ForgotPasswordPage({
 
             {/* Back to Login Link */}
             <p className="text-center text-sm text-neutral-400 font-medium">
-              Remember your password?{" "}
+              Remember your password?{""}
               <Tooltip text="Return to Sign In" placement="bottom">
                 <button
                   onClick={onNavigateToLogin}

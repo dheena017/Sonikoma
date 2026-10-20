@@ -1,5 +1,5 @@
-import React from "react";
-import { createPortal } from "react-dom";
+import React from"react";
+import { createPortal } from"react-dom";
 import {
   Scissors,
   Sparkles,
@@ -26,10 +26,10 @@ import {
   Brain,
   Trash,
   Settings2,
-} from "lucide-react";
-import * as api from "@/shared/api";
-import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
-import { ScraperSelectionToolbar } from "./ScraperSelectionToolbar";
+} from"lucide-react";
+import * as api from"@/shared/api";
+import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
+import { ScraperSelectionToolbar } from"./ScraperSelectionToolbar";
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -96,7 +96,7 @@ interface FloatingSelectionBarProps {
   handleDuplicateSelected?: () => void;
   handleDuplicateToTimeline?: () => void;
   handleAnalyzeAll?: () => void;
-  handleSortSelected?: (order: "asc" | "desc") => void;
+  handleSortSelected?: (order:"asc" |"desc") => void;
   handleExportIndividual?: () => void;
   handleCopyMetadata?: () => void;
   handleMoveToPosition?: (position: number) => void;
@@ -127,7 +127,7 @@ async function editSelectedUrls(
   errorPrefix?: string
 ): Promise<Record<string, string>> {
   if (urls.length === 0 || !fetchWithInterceptor) return {};
-  addNotification?.(progressMsg || "Processing images...", "info");
+  addNotification?.(progressMsg ||"Processing images...","info");
   const results: Record<string, string> = {};
   for (const url of urls) {
     try {
@@ -141,11 +141,11 @@ async function editSelectedUrls(
       }
     } catch (err: any) {
       console.error(err);
-      addNotification?.(`${errorPrefix || "Error"}: ${err.message}`, "error");
+      addNotification?.(`${errorPrefix ||"Error"}: ${err.message}`,"error");
     }
   }
   if (Object.keys(results).length > 0) {
-    addNotification?.(successMsg || "Processed successfully!", "success");
+    addNotification?.(successMsg ||"Processed successfully!","success");
   }
   return results;
 }
@@ -155,12 +155,12 @@ function exportUrls(
   addNotification?: (msg: string, type: any) => void
 ) {
   if (urls.length === 0) return;
-  addNotification?.("Downloading individual assets...", "info");
+  addNotification?.("Downloading individual assets...","info");
   urls.forEach(({ url, filename }) => {
     const link = document.createElement("a");
     link.href = url;
     link.download = filename;
-    link.target = "_blank";
+    link.target ="_blank";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -173,7 +173,7 @@ function copyTextToClipboard(
   successMsg?: string
 ) {
   navigator.clipboard.writeText(text);
-  addNotification?.(successMsg || "Copied to clipboard!", "success");
+  addNotification?.(successMsg ||"Copied to clipboard!","success");
 }
 
 export function FloatingSelectionBar({
@@ -254,7 +254,7 @@ export function FloatingSelectionBar({
 
   React.useEffect(() => {
     if (!isTimeline) return;
-    if (typeof document === "undefined") return;
+    if (typeof document ==="undefined") return;
 
     let resizeObserver: ResizeObserver | null = null;
     let elementMutationObserver: MutationObserver | null = null;
@@ -305,7 +305,7 @@ export function FloatingSelectionBar({
     bodyMutationObserver = new MutationObserver((mutations) => {
       let shouldCheck = false;
       for (const mutation of mutations) {
-        if (mutation.type === "childList") {
+        if (mutation.type ==="childList") {
           shouldCheck = true;
           break;
         }
@@ -328,7 +328,7 @@ export function FloatingSelectionBar({
 
   // Detect any modal/confirmation panel open in DOM via data-modal="true"
   React.useEffect(() => {
-    if (typeof document === "undefined") return;
+    if (typeof document ==="undefined") return;
 
     const checkModal = () => {
       const hasModal = !!document.querySelector('[data-modal="true"]');
@@ -354,22 +354,22 @@ export function FloatingSelectionBar({
   const visible =
     ((totalCount > 0 && selectedCount > 0) || isAnyBusy) && !isModalOpen;
 
-  const zIndexClass = isTimeline ? "z-[9998]" : "z-[9999]";
+  const zIndexClass = isTimeline ?"z-[9998]" :"z-[9999]";
   const outerClass = leftDock
-    ? `fixed left-24 top-16 bottom-4 ${zIndexClass} transition-all duration-300 ease-out ${
+    ?`fixed left-24 top-16 bottom-4 ${zIndexClass} transition-all duration-300 ease-out ${
         visible
-          ? "translate-x-0 opacity-100 pointer-events-auto"
-          : "-translate-x-1/4 opacity-0 pointer-events-none"
+          ?"translate-x-0 opacity-100 pointer-events-auto"
+          :"-translate-x-1/4 opacity-0 pointer-events-none"
       }`
-    : `fixed left-0 right-0 ${zIndexClass} transition-all duration-300 ease-out ${
+    :`fixed left-0 right-0 ${zIndexClass} transition-all duration-300 ease-out ${
         visible
-          ? "translate-y-0 opacity-100 pointer-events-auto"
-          : "translate-y-full opacity-0 pointer-events-none"
+          ?"translate-y-0 opacity-100 pointer-events-auto"
+          :"translate-y-full opacity-0 pointer-events-none"
       }`;
 
   const stackStyle: React.CSSProperties =
     !leftDock && visible && isTimeline && assetsHeight > 0
-      ? { bottom: `${assetsHeight}px` }
+      ? { bottom:`${assetsHeight}px` }
       : { bottom: 0 };
 
   const flipSelected =
@@ -391,10 +391,7 @@ export function FloatingSelectionBar({
             urls,
             { flipHorizontal: true },
             fetchWithInterceptor,
-            addNotification,
-            `Flipping ${selectedPanelIds.size} panels...`,
-            "Flipped selected panels successfully!",
-            "Flip failed"
+            addNotification,`Flipping ${selectedPanelIds.size} panels...`,"Flipped selected panels successfully!","Flip failed"
           );
           if (Object.keys(results).length > 0) {
             setPanels((prev) =>
@@ -418,10 +415,7 @@ export function FloatingSelectionBar({
             selectedScraped,
             { flipHorizontal: true },
             fetchWithInterceptor,
-            addNotification,
-            `Flipping ${selectedScraped.length} images...`,
-            "Flipped selected frames successfully!",
-            "Flip failed"
+            addNotification,`Flipping ${selectedScraped.length} images...`,"Flipped selected frames successfully!","Flip failed"
           );
           if (Object.keys(results).length > 0) {
             setScrapedImages((prev) => prev.map((img) => results[img] ?? img));
@@ -451,10 +445,7 @@ export function FloatingSelectionBar({
             urls,
             { rotate: 90 },
             fetchWithInterceptor,
-            addNotification,
-            `Rotating ${selectedPanelIds.size} panels...`,
-            "Rotated selected panels successfully!",
-            "Rotate failed"
+            addNotification,`Rotating ${selectedPanelIds.size} panels...`,"Rotated selected panels successfully!","Rotate failed"
           );
           if (Object.keys(results).length > 0) {
             setPanels((prev) =>
@@ -478,10 +469,7 @@ export function FloatingSelectionBar({
             selectedScraped,
             { rotate: 90 },
             fetchWithInterceptor,
-            addNotification,
-            `Rotating ${selectedScraped.length} images...`,
-            "Rotated selected frames successfully!",
-            "Rotate failed"
+            addNotification,`Rotating ${selectedScraped.length} images...`,"Rotated selected frames successfully!","Rotate failed"
           );
           if (Object.keys(results).length > 0) {
             setScrapedImages((prev) => prev.map((img) => results[img] ?? img));
@@ -514,9 +502,7 @@ export function FloatingSelectionBar({
             return nextList;
           });
           clearSelection?.();
-          addNotification?.(
-            `Duplicated ${selectedPanelIds.size} panels successfully!`,
-            "success"
+          addNotification?.(`Duplicated ${selectedPanelIds.size} panels successfully!`,"success"
           );
         }
       } else {
@@ -526,7 +512,7 @@ export function FloatingSelectionBar({
 
   const sortSelected =
     handleSortSelected ||
-    ((order: "asc" | "desc") => {
+    ((order:"asc" |"desc") => {
       if (isTimeline) {
         if (selectedPanelIds && selectedPanelIds.size >= 2 && setPanels) {
           setPanels((prev) => {
@@ -536,7 +522,7 @@ export function FloatingSelectionBar({
 
             const selectedItems = selectedIndices.map((idx) => prev[idx]);
             selectedItems.sort((a, b) => {
-              return order === "asc" ? a.id - b.id : b.id - a.id;
+              return order ==="asc" ? a.id - b.id : b.id - a.id;
             });
 
             const nextList = [...prev];
@@ -545,19 +531,17 @@ export function FloatingSelectionBar({
             });
             return nextList;
           });
-          addNotification?.(`Sorted timeline panels successfully!`, "success");
+          addNotification?.(`Sorted timeline panels successfully!`,"success");
         }
       } else {
         if (selectedScraped && setSelectedScraped) {
           const sorted = [...selectedScraped].sort((a, b) => {
             const idxA = scrapedImages.indexOf(a);
             const idxB = scrapedImages.indexOf(b);
-            return order === "asc" ? idxA - idxB : idxB - idxA;
+            return order ==="asc" ? idxA - idxB : idxB - idxA;
           });
           setSelectedScraped(sorted);
-          addNotification?.(
-            `Selection sorted in ${order}ending order`,
-            "success"
+          addNotification?.(`Selection sorted in ${order}ending order`,"success"
           );
         }
       }
@@ -572,7 +556,7 @@ export function FloatingSelectionBar({
             .filter((p) => selectedPanelIds.has(p.id))
             .map((p) => ({
               url: p.image_url,
-              filename: `timeline-panel-${p.id}.png`,
+              filename:`timeline-panel-${p.id}.png`,
             }));
           exportUrls(items, addNotification);
         }
@@ -580,7 +564,7 @@ export function FloatingSelectionBar({
         if (selectedScraped && selectedScraped.length > 0) {
           const items = selectedScraped.map((url, i) => ({
             url,
-            filename: `imported-asset-${i + 1}.png`,
+            filename:`imported-asset-${i + 1}.png`,
           }));
           exportUrls(items, addNotification);
         }
@@ -595,8 +579,7 @@ export function FloatingSelectionBar({
           const selected = panels.filter((p) => selectedPanelIds.has(p.id));
           copyTextToClipboard(
             JSON.stringify(selected, null, 2),
-            addNotification,
-            "Copied metadata JSON to clipboard!"
+            addNotification,"Copied metadata JSON to clipboard!"
           );
         }
       } else {
@@ -604,12 +587,11 @@ export function FloatingSelectionBar({
           const meta = selectedScraped.map((url) => ({
             index: scrapedImages.indexOf(url) + 1,
             source_url: url,
-            type: "imported_asset",
+            type:"imported_asset",
           }));
           copyTextToClipboard(
             JSON.stringify(meta, null, 2),
-            addNotification,
-            "Copied metadata JSON to clipboard!"
+            addNotification,"Copied metadata JSON to clipboard!"
           );
         }
       }
@@ -628,7 +610,7 @@ export function FloatingSelectionBar({
             nextList.splice(targetIdx, 0, ...itemsToMove);
             return nextList;
           });
-          addNotification?.(`Moved panels to position #${pos}`, "success");
+          addNotification?.(`Moved panels to position #${pos}`,"success");
         }
       } else {
         if (selectedScraped && selectedScraped.length > 0 && setScrapedImages) {
@@ -645,9 +627,7 @@ export function FloatingSelectionBar({
           const nextList = [...remaining];
           nextList.splice(targetIdx, 0, ...itemsToMove);
           setScrapedImages(nextList);
-          addNotification?.(
-            `Moved ${selectedScraped.length} assets to position #${pos}`,
-            "success"
+          addNotification?.(`Moved ${selectedScraped.length} assets to position #${pos}`,"success"
           );
         }
       }
@@ -661,10 +641,10 @@ export function FloatingSelectionBar({
         createPortal(
           <div
             style={{
-              bottom: `${
-                (typeof stackStyle.bottom === "number"
+              bottom:`${
+                (typeof stackStyle.bottom ==="number"
                   ? stackStyle.bottom
-                  : parseInt(stackStyle.bottom || "0", 10) || 0) + barHeight
+                  : parseInt(stackStyle.bottom ||"0", 10) || 0) + barHeight
               }px`,
             }}
             className="fixed left-0 right-0 z-[10001] bg-neutral-950/90 backdrop-blur-2xl border-t border-b border-neutral-800/40 px-6 py-4 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] w-full animate-in slide-in-from-bottom-2 duration-200"
@@ -679,7 +659,7 @@ export function FloatingSelectionBar({
                     Extended Actions
                   </span>
                   <span className="text-[9px] text-neutral-400 font-bold font-mono px-2 py-0.5 bg-neutral-900 border border-neutral-800/80 rounded-lg shadow-inner">
-                    {isTimeline ? "Storyboard" : "Imported Assets"}
+                    {isTimeline ?"Storyboard" :"Imported Assets"}
                   </span>
                 </div>
                 <button
@@ -725,7 +705,7 @@ export function FloatingSelectionBar({
                   disabled={isAnalyzingAll || busyLocal}
                   className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-[#2A2A2A] border-[#2F2F2F] hover:bg-[#3B82F6] hover:border-[#2F2F2F] text-[#60A5FA] hover:text-white transition-all active:scale-95 disabled:opacity-40"
                 >
-                  <Brain className="h-4 w-4 text-[#3B82F6] group-hover:text-white" />{" "}
+                  <Brain className="h-4 w-4 text-[#3B82F6] group-hover:text-white" />{""}
                   AI Analyze
                 </button>
               )}
@@ -796,8 +776,8 @@ export function FloatingSelectionBar({
       <div
         id={
           isTimeline
-            ? "timeline-selection-bar-portal"
-            : "scraper-selection-bar-portal"
+            ?"timeline-selection-bar-portal"
+            :"scraper-selection-bar-portal"
         }
         className={outerClass}
         style={leftDock ? undefined : stackStyle}
@@ -806,22 +786,22 @@ export function FloatingSelectionBar({
           ref={barRef}
           className={
             leftDock
-              ? "h-full w-72 bg-neutral-950/90 backdrop-blur-2xl border border-neutral-800/80 px-3 py-4 shadow-2xl shadow-black/50 rounded-2xl"
-              : "relative flex flex-col"
+              ?"h-full w-72 bg-neutral-950/90 backdrop-blur-2xl border border-neutral-800/80 px-3 py-4 shadow-2xl shadow-black/50 rounded-2xl"
+              :"relative flex flex-col"
           }
         >
           <div
             className={
               leftDock
-                ? "h-full flex flex-col gap-3 overflow-auto custom-purple-scrollbar pb-1"
-                : "bg-neutral-950/95 backdrop-blur-2xl border-t border-neutral-700/50 px-6 py-4 shadow-2xl shadow-black/60 w-full"
+                ?"h-full flex flex-col gap-3 overflow-auto custom-purple-scrollbar pb-1"
+                :"bg-neutral-950/95 backdrop-blur-2xl border-t border-neutral-700/50 px-6 py-4 shadow-2xl shadow-black/60 w-full"
             }
           >
             <div
               className={
                 leftDock
-                  ? ""
-                  : "max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap md:flex-nowrap"
+                  ?""
+                  :"max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap md:flex-nowrap"
               }
             >
               <div className="flex items-center gap-3 shrink-0">
@@ -832,12 +812,12 @@ export function FloatingSelectionBar({
                   <div>
                     <p className="text-xs font-bold text-white leading-tight whitespace-nowrap">
                       {isTimeline
-                        ? "Storyboard Panels Selected"
-                        : "Imported Assets Selected"}
+                        ?"Storyboard Panels Selected"
+                        :"Imported Assets Selected"}
                     </p>
                     <p className="text-[9px] text-[#3B82F6] font-mono leading-tight whitespace-nowrap">
-                      {selectedCount} of {totalCount}{" "}
-                      {isTimeline ? "frames" : "images"}
+                      {selectedCount} of {totalCount}{""}
+                      {isTimeline ?"frames" :"images"}
                     </p>
                   </div>
                 </div>
@@ -849,12 +829,12 @@ export function FloatingSelectionBar({
                       <RefreshCw className="h-3.5 w-3.5 animate-spin text-[#3B82F6]" />
                       <span className="font-bold tracking-tight whitespace-nowrap">
                         {isBatchCropping && batchProgress
-                          ? `Cropping ${batchProgress.current}/${batchProgress.total}`
+                          ?`Cropping ${batchProgress.current}/${batchProgress.total}`
                           : isCleaningBubbles && cleanProgress
-                          ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
+                          ?`Cleaning ${cleanProgress.current}/${cleanProgress.total}`
                           : isBatchMerging
-                          ? "Stitching..."
-                          : "Processing..."}
+                          ?"Stitching..."
+                          :"Processing..."}
                       </span>
                     </div>
                   </div>
@@ -906,7 +886,7 @@ export function FloatingSelectionBar({
                   ) : (
                     <CheckSquare className="h-4 w-4 text-[#3B82F6]" />
                   )}
-                  {isAllSelected ? "Deselect All" : "Select All"}
+                  {isAllSelected ?"Deselect All" :"Select All"}
                 </button>
 
                 {/* AI Analyze Selected */}
@@ -915,7 +895,7 @@ export function FloatingSelectionBar({
                     <button
                       type="button"
                       onClick={handleCancelAnalysis}
-                      className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-600 border-rose-500 hover:bg-rose-500 text-white shadow-md hover:shadow-rose-500/20"
+                      className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-600 border-rose-500 hover:bg-rose-500 text-white shadow-md"
                     >
                       <X className="h-4 w-4 text-white" />
                       Stop
@@ -957,8 +937,7 @@ export function FloatingSelectionBar({
                       onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        console.log(
-                          "[FloatingSelectionBar] Opening AutoCrop modal"
+                        console.log("[FloatingSelectionBar] Opening AutoCrop modal"
                         );
                         setShowAutoCropModal?.(true);
                       }}

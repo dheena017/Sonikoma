@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Film, Activity, ExternalLink, Sparkles, Folder } from "lucide-react";
-import { getSourceIcon } from "@/shared/utils";
-import ProjectCard from "@/features/platform/projects/components/ProjectCard";
-import { ProjectCardSkeleton } from "@/shared/ui/loading";
-import type { Project } from "@/features/platform/projects/hooks/ProjectTypes";
-import { aiSeriesApi, type AISeriesProject } from "@/features/intelligence/series/api/aiSeries";
-import AISeriesGridCard from "@/features/intelligence/series/components/AISeriesGridCard";
+import React, { useState, useEffect, useCallback, useMemo } from"react";
+import { Film, Activity, ExternalLink, Sparkles, Folder } from"lucide-react";
+import { getSourceIcon } from"@/shared/utils";
+import ProjectCard from"@/features/platform/projects/components/ProjectCard";
+import { ProjectCardSkeleton } from"@/shared/ui/loading";
+import type { Project } from"@/features/platform/projects/hooks/ProjectTypes";
+import { aiSeriesApi, type AISeriesProject } from"@/features/intelligence/series/api/aiSeries";
+import AISeriesGridCard from"@/features/intelligence/series/components/AISeriesGridCard";
 
 interface DashboardProjectSectionProps {
   themeMode: string;
@@ -46,7 +46,7 @@ export default function DashboardProjectSection({
   onToggleMenu,
   onSaveRename,
 }: DashboardProjectSectionProps) {
-  const [activeTab, setActiveTab] = useState<"normal" | "ai">("normal");
+  const [activeTab, setActiveTab] = useState<"normal" |"ai">("normal");
   const [aiSeriesList, setAiSeriesList] = useState<AISeriesProject[]>([]);
   const [loadingAiSeries, setLoadingAiSeries] = useState(false);
 
@@ -105,9 +105,9 @@ export default function DashboardProjectSection({
               type="button"
               onClick={() => setActiveTab("normal")}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === "normal"
-                  ? "bg-[#3B82F6] text-white"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+                activeTab ==="normal"
+                  ?"bg-[#3B82F6] text-white"
+                  :"text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               }`}
             >
               <Folder className="w-3.5 h-3.5" />
@@ -115,9 +115,9 @@ export default function DashboardProjectSection({
               {!loading && (
                 <span
                   className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                    activeTab === "normal"
-                      ? "bg-white/20 text-white"
-                      : "bg-neutral-800 text-neutral-400"
+                    activeTab ==="normal"
+                      ?"bg-white/20 text-white"
+                      :"bg-neutral-800 text-neutral-400"
                   }`}
                 >
                   {projectList.length}
@@ -129,9 +129,9 @@ export default function DashboardProjectSection({
               type="button"
               onClick={() => setActiveTab("ai")}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === "ai"
-                  ? "bg-[#3B82F6] text-white"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+                activeTab ==="ai"
+                  ?"bg-[#3B82F6] text-white"
+                  :"text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
@@ -139,9 +139,9 @@ export default function DashboardProjectSection({
               {!loadingAiSeries && (
                 <span
                   className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                    activeTab === "ai"
-                      ? "bg-white/20 text-white"
-                      : "bg-neutral-800 text-neutral-400"
+                    activeTab ==="ai"
+                      ?"bg-white/20 text-white"
+                      :"bg-neutral-800 text-neutral-400"
                   }`}
                 >
                   {filteredAiSeries.length}
@@ -152,7 +152,7 @@ export default function DashboardProjectSection({
         </div>
       </div>
 
-      {activeTab === "ai" ? (
+      {activeTab ==="ai" ? (
         loadingAiSeries ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
             <ProjectCardSkeleton count={3} />
@@ -165,19 +165,19 @@ export default function DashboardProjectSection({
             <h3 className="text-lg font-bold text-white mb-2">No AI series yet</h3>
             <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">
               {searchQuery
-                ? `No AI series match "${searchQuery}".`
-                : "You haven't generated any AI series yet. Launch the AI Studio to construct one!"}
+                ?`No AI series match"${searchQuery}".`
+                :"You haven't generated any AI series yet. Launch the AI Studio to construct one!"}
             </p>
             <button
               onClick={() => {
                 const nav = (window as any).navigateTo;
-                if (typeof nav === "function") {
+                if (typeof nav ==="function") {
                   nav("/scraper");
                 } else {
-                  window.location.href = "/scraper";
+                  window.location.href ="/scraper";
                 }
               }}
-              className="px-6 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl font-bold text-sm transition-all cursor-pointer shadow-lg shadow-blue-500/25 inline-flex items-center gap-2"
+              className="px-6 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl font-bold text-sm transition-all cursor-pointer shadow-lg inline-flex items-center gap-2"
             >
               <Sparkles className="w-4 h-4 text-amber-300" />
               <span>Construct AI Series</span>
@@ -245,7 +245,7 @@ export default function DashboardProjectSection({
               onOpenCreativeSuite={onOpenCreativeSuite}
               onCopyLink={(e, projectItem) => {
                 e.stopPropagation();
-                const link = `${window.location.origin}/workspace?id=${projectItem.project_id}`;
+                const link =`${window.location.origin}/workspace?id=${projectItem.project_id}`;
                 navigator.clipboard.writeText(link);
               }}
               onDelete={(e, projectId) => onDelete(e, projectId)}

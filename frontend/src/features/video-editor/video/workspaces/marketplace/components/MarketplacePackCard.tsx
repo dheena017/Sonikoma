@@ -1,6 +1,6 @@
-import React from "react";
-import { Star, Download, ShoppingCart } from "lucide-react";
-import { MarketplacePack } from "../../../types/workspace.types";
+import React from"react";
+import { Star, Download, ShoppingCart } from"lucide-react";
+import { MarketplacePack } from"../../../types/workspace.types";
 
 interface MarketplacePackCardProps {
   pack: MarketplacePack;
@@ -11,7 +11,7 @@ export const MarketplacePackCard: React.FC<MarketplacePackCardProps> = ({
   pack,
   onPurchase,
 }) => {
-  const isFree = pack.price === "Free";
+  const isFree = pack.price ==="Free";
 
   return (
     <div className="rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 overflow-hidden cursor-pointer transition-all group shadow-sm">
@@ -28,8 +28,8 @@ export const MarketplacePackCard: React.FC<MarketplacePackCardProps> = ({
         <span
           className={`absolute top-2 right-2 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded ${
             isFree
-              ? "bg-green-500/80 text-white"
-              : "bg-[#3B82F6] text-white shadow-xs"
+              ?"bg-green-500/80 text-white"
+              :"bg-[#3B82F6] text-white shadow-xs"
           }`}
         >
           {pack.price}
@@ -47,10 +47,10 @@ export const MarketplacePackCard: React.FC<MarketplacePackCardProps> = ({
         </div>
         <button
           onClick={onPurchase}
-          className="px-2.5 py-1.5 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-all shrink-0 shadow-sm shadow-blue-500/25 active:scale-95"
+          className="px-2.5 py-1.5 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-all shrink-0 shadow-sm active:scale-95"
         >
           <ShoppingCart className="h-3 w-3" />
-          {isFree ? "Get Free" : "Buy"}
+          {isFree ?"Get Free" :"Buy"}
         </button>
       </div>
     </div>

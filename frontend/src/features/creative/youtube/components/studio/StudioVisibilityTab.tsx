@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   Globe,
   Link as LinkIcon,
@@ -6,7 +6,7 @@ import {
   Flame,
   Zap,
   ChevronLeft,
-} from "lucide-react";
+} from"lucide-react";
 
 export interface StudioVisibilityTabProps {
   privacy: string;
@@ -66,21 +66,21 @@ export default function StudioVisibilityTab({
         <div className="space-y-2 mt-3">
           {[
             {
-              id: "public",
-              label: "Public",
-              desc: "Everyone can watch your video",
+              id:"public",
+              label:"Public",
+              desc:"Everyone can watch your video",
               icon: Globe,
             },
             {
-              id: "unlisted",
-              label: "Unlisted",
-              desc: "Anyone with the video link can watch",
+              id:"unlisted",
+              label:"Unlisted",
+              desc:"Anyone with the video link can watch",
               icon: LinkIcon,
             },
             {
-              id: "private",
-              label: "Private",
-              desc: "Only you can watch",
+              id:"private",
+              label:"Private",
+              desc:"Only you can watch",
               icon: Lock,
             },
           ].map((item) => {
@@ -92,13 +92,13 @@ export default function StudioVisibilityTab({
                 onClick={() => setPrivacy(item.id)}
                 className={`flex items-center gap-4 p-3.5 rounded-xl border cursor-pointer transition-all ${
                   isSel
-                    ? "border-red-500/50 bg-red-950/20"
-                    : "border-neutral-800 bg-neutral-950/40 hover:border-neutral-700"
+                    ?"border-red-500/50 bg-red-950/20"
+                    :"border-neutral-800 bg-neutral-950/40 hover:border-neutral-700"
                 }`}
               >
                 <div
                   className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                    isSel ? "border-red-500" : "border-neutral-600"
+                    isSel ?"border-red-500" :"border-neutral-600"
                   }`}
                 >
                   {isSel && <div className="w-2 h-2 rounded-full bg-red-500" />}
@@ -106,13 +106,13 @@ export default function StudioVisibilityTab({
                 <div className="flex items-center gap-2 flex-1">
                   <Icon
                     className={`w-4 h-4 ${
-                      isSel ? "text-red-400" : "text-neutral-500"
+                      isSel ?"text-red-400" :"text-neutral-500"
                     }`}
                   />
                   <div>
                     <span
                       className={`text-xs font-bold font-sans ${
-                        isSel ? "text-white" : "text-neutral-300"
+                        isSel ?"text-white" :"text-neutral-300"
                       }`}
                     >
                       {item.label}
@@ -143,10 +143,10 @@ export default function StudioVisibilityTab({
             onClick={() => setIsScheduled(!isScheduled)}
             className={`w-10 h-5.5 flex items-center rounded-full px-0.5 cursor-pointer transition-all duration-300 shrink-0 ${
               isScheduled
-                ? "bg-red-600 justify-end"
-                : "bg-neutral-700 justify-start"
+                ?"bg-red-600 justify-end"
+                :"bg-neutral-700 justify-start"
             }`}
-            style={{ height: "22px", width: "40px" }}
+            style={{ height:"22px", width:"40px" }}
           >
             <div className="w-4 h-4 rounded-full bg-white shadow-sm" />
           </button>
@@ -196,15 +196,15 @@ export default function StudioVisibilityTab({
         <button
           onClick={() => setIsShort(!isShort)}
           className={`flex items-center rounded-full p-1 cursor-pointer transition-all duration-300 shrink-0 ${
-            isShort ? "bg-red-600" : "bg-neutral-700"
+            isShort ?"bg-red-600" :"bg-neutral-700"
           }`}
-          style={{ width: "44px", height: "24px" }}
+          style={{ width:"44px", height:"24px" }}
         >
           <div
             className={`bg-white rounded-full shadow-sm transition-transform duration-300 ${
-              isShort ? "translate-x-5" : "translate-x-0"
+              isShort ?"translate-x-5" :"translate-x-0"
             }`}
-            style={{ width: "16px", height: "16px" }}
+            style={{ width:"16px", height:"16px" }}
           />
         </button>
       </div>
@@ -221,10 +221,10 @@ export default function StudioVisibilityTab({
         <button
           onClick={onPublish}
           disabled={isPublishing || !activeVideoUrl || !title.trim()}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 via-red-500 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-black font-mono rounded-xl shadow-lg shadow-red-600/40 transition-all cursor-pointer active:scale-[0.98]"
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 via-red-500 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-black font-mono rounded-xl shadow-lg transition-all cursor-pointer active:scale-[0.98]"
         >
           <Zap className="w-4 h-4 fill-current" />
-          <span>{isPublishing ? "Publishing..." : "Publish"}</span>
+          <span>{isPublishing ?"Publishing..." :"Publish"}</span>
         </button>
       </div>
     </div>

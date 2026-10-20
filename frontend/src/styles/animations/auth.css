@@ -30,13 +30,6 @@
   ) !important;
 }
 
-.anime-card-glow {
-  position: relative;
-}
-
-.anime-card-glow::before {
-  display: none;
-}
 
 .anime-aura-bg {
   animation: anime-aura-pulse 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;

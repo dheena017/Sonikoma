@@ -1,112 +1,112 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Sparkles,
   UploadCloud,
   ChevronRight,
   Wand2,
   Image as ImageIcon,
-} from "lucide-react";
-import PlaylistSelector from "../PlaylistSelector";
-import YouTubeThumbnailModal from "../YouTubeThumbnailModal";
-import CyberSelect from "@/shared/ui/common/CyberSelect";
+} from"lucide-react";
+import PlaylistSelector from"../PlaylistSelector";
+import YouTubeThumbnailModal from"../YouTubeThumbnailModal";
+import CyberSelect from"@/shared/ui/common/CyberSelect";
 
 // Full YouTube category list (official IDs)
 const YOUTUBE_CATEGORIES = [
-  { id: "1", label: "Film & Animation" },
-  { id: "2", label: "Autos & Vehicles" },
-  { id: "10", label: "Music" },
-  { id: "15", label: "Pets & Animals" },
-  { id: "17", label: "Sports" },
-  { id: "18", label: "Short Movies" },
-  { id: "19", label: "Travel & Events" },
-  { id: "20", label: "Gaming" },
-  { id: "21", label: "Videoblogging" },
-  { id: "22", label: "People & Blogs" },
-  { id: "23", label: "Comedy" },
-  { id: "24", label: "Entertainment" },
-  { id: "25", label: "News & Politics" },
-  { id: "26", label: "Howto & Style" },
-  { id: "27", label: "Education" },
-  { id: "28", label: "Science & Technology" },
-  { id: "29", label: "Nonprofits & Activism" },
+  { id:"1", label:"Film & Animation" },
+  { id:"2", label:"Autos & Vehicles" },
+  { id:"10", label:"Music" },
+  { id:"15", label:"Pets & Animals" },
+  { id:"17", label:"Sports" },
+  { id:"18", label:"Short Movies" },
+  { id:"19", label:"Travel & Events" },
+  { id:"20", label:"Gaming" },
+  { id:"21", label:"Videoblogging" },
+  { id:"22", label:"People & Blogs" },
+  { id:"23", label:"Comedy" },
+  { id:"24", label:"Entertainment" },
+  { id:"25", label:"News & Politics" },
+  { id:"26", label:"Howto & Style" },
+  { id:"27", label:"Education" },
+  { id:"28", label:"Science & Technology" },
+  { id:"29", label:"Nonprofits & Activism" },
 ];
 
 // Full language list for YouTube
 const YOUTUBE_LANGUAGES = [
-  { code: "af", label: "Afrikaans" },
-  { code: "sq", label: "Albanian" },
-  { code: "ar", label: "Arabic" },
-  { code: "hy", label: "Armenian" },
-  { code: "az", label: "Azerbaijani" },
-  { code: "eu", label: "Basque" },
-  { code: "be", label: "Belarusian" },
-  { code: "bn", label: "Bengali" },
-  { code: "bs", label: "Bosnian" },
-  { code: "bg", label: "Bulgarian" },
-  { code: "ca", label: "Catalan" },
-  { code: "zh-Hans", label: "Chinese (Simplified)" },
-  { code: "zh-Hant", label: "Chinese (Traditional)" },
-  { code: "hr", label: "Croatian" },
-  { code: "cs", label: "Czech" },
-  { code: "da", label: "Danish" },
-  { code: "nl", label: "Dutch" },
-  { code: "en", label: "English" },
-  { code: "en-GB", label: "English (UK)" },
-  { code: "et", label: "Estonian" },
-  { code: "fil", label: "Filipino" },
-  { code: "fi", label: "Finnish" },
-  { code: "fr", label: "French" },
-  { code: "gl", label: "Galician" },
-  { code: "ka", label: "Georgian" },
-  { code: "de", label: "German" },
-  { code: "el", label: "Greek" },
-  { code: "gu", label: "Gujarati" },
-  { code: "iw", label: "Hebrew" },
-  { code: "hi", label: "Hindi" },
-  { code: "hu", label: "Hungarian" },
-  { code: "is", label: "Icelandic" },
-  { code: "id", label: "Indonesian" },
-  { code: "it", label: "Italian" },
-  { code: "ja", label: "Japanese" },
-  { code: "kn", label: "Kannada" },
-  { code: "kk", label: "Kazakh" },
-  { code: "km", label: "Khmer" },
-  { code: "ko", label: "Korean" },
-  { code: "lo", label: "Lao" },
-  { code: "lv", label: "Latvian" },
-  { code: "lt", label: "Lithuanian" },
-  { code: "mk", label: "Macedonian" },
-  { code: "ms", label: "Malay" },
-  { code: "ml", label: "Malayalam" },
-  { code: "mt", label: "Maltese" },
-  { code: "mr", label: "Marathi" },
-  { code: "mn", label: "Mongolian" },
-  { code: "ne", label: "Nepali" },
-  { code: "no", label: "Norwegian" },
-  { code: "fa", label: "Persian" },
-  { code: "pl", label: "Polish" },
-  { code: "pt", label: "Portuguese" },
-  { code: "pt-BR", label: "Portuguese (Brazil)" },
-  { code: "pa", label: "Punjabi" },
-  { code: "ro", label: "Romanian" },
-  { code: "ru", label: "Russian" },
-  { code: "sr", label: "Serbian" },
-  { code: "si", label: "Sinhala" },
-  { code: "sk", label: "Slovak" },
-  { code: "sl", label: "Slovenian" },
-  { code: "es", label: "Spanish" },
-  { code: "es-419", label: "Spanish (Latin America)" },
-  { code: "sw", label: "Swahili" },
-  { code: "sv", label: "Swedish" },
-  { code: "ta", label: "Tamil" },
-  { code: "te", label: "Telugu" },
-  { code: "th", label: "Thai" },
-  { code: "tr", label: "Turkish" },
-  { code: "uk", label: "Ukrainian" },
-  { code: "ur", label: "Urdu" },
-  { code: "uz", label: "Uzbek" },
-  { code: "vi", label: "Vietnamese" },
-  { code: "zu", label: "Zulu" },
+  { code:"af", label:"Afrikaans" },
+  { code:"sq", label:"Albanian" },
+  { code:"ar", label:"Arabic" },
+  { code:"hy", label:"Armenian" },
+  { code:"az", label:"Azerbaijani" },
+  { code:"eu", label:"Basque" },
+  { code:"be", label:"Belarusian" },
+  { code:"bn", label:"Bengali" },
+  { code:"bs", label:"Bosnian" },
+  { code:"bg", label:"Bulgarian" },
+  { code:"ca", label:"Catalan" },
+  { code:"zh-Hans", label:"Chinese (Simplified)" },
+  { code:"zh-Hant", label:"Chinese (Traditional)" },
+  { code:"hr", label:"Croatian" },
+  { code:"cs", label:"Czech" },
+  { code:"da", label:"Danish" },
+  { code:"nl", label:"Dutch" },
+  { code:"en", label:"English" },
+  { code:"en-GB", label:"English (UK)" },
+  { code:"et", label:"Estonian" },
+  { code:"fil", label:"Filipino" },
+  { code:"fi", label:"Finnish" },
+  { code:"fr", label:"French" },
+  { code:"gl", label:"Galician" },
+  { code:"ka", label:"Georgian" },
+  { code:"de", label:"German" },
+  { code:"el", label:"Greek" },
+  { code:"gu", label:"Gujarati" },
+  { code:"iw", label:"Hebrew" },
+  { code:"hi", label:"Hindi" },
+  { code:"hu", label:"Hungarian" },
+  { code:"is", label:"Icelandic" },
+  { code:"id", label:"Indonesian" },
+  { code:"it", label:"Italian" },
+  { code:"ja", label:"Japanese" },
+  { code:"kn", label:"Kannada" },
+  { code:"kk", label:"Kazakh" },
+  { code:"km", label:"Khmer" },
+  { code:"ko", label:"Korean" },
+  { code:"lo", label:"Lao" },
+  { code:"lv", label:"Latvian" },
+  { code:"lt", label:"Lithuanian" },
+  { code:"mk", label:"Macedonian" },
+  { code:"ms", label:"Malay" },
+  { code:"ml", label:"Malayalam" },
+  { code:"mt", label:"Maltese" },
+  { code:"mr", label:"Marathi" },
+  { code:"mn", label:"Mongolian" },
+  { code:"ne", label:"Nepali" },
+  { code:"no", label:"Norwegian" },
+  { code:"fa", label:"Persian" },
+  { code:"pl", label:"Polish" },
+  { code:"pt", label:"Portuguese" },
+  { code:"pt-BR", label:"Portuguese (Brazil)" },
+  { code:"pa", label:"Punjabi" },
+  { code:"ro", label:"Romanian" },
+  { code:"ru", label:"Russian" },
+  { code:"sr", label:"Serbian" },
+  { code:"si", label:"Sinhala" },
+  { code:"sk", label:"Slovak" },
+  { code:"sl", label:"Slovenian" },
+  { code:"es", label:"Spanish" },
+  { code:"es-419", label:"Spanish (Latin America)" },
+  { code:"sw", label:"Swahili" },
+  { code:"sv", label:"Swedish" },
+  { code:"ta", label:"Tamil" },
+  { code:"te", label:"Telugu" },
+  { code:"th", label:"Thai" },
+  { code:"tr", label:"Turkish" },
+  { code:"uk", label:"Ukrainian" },
+  { code:"ur", label:"Urdu" },
+  { code:"uz", label:"Uzbek" },
+  { code:"vi", label:"Vietnamese" },
+  { code:"zu", label:"Zulu" },
 ];
 
 export interface StudioDetailsTabProps {
@@ -205,10 +205,10 @@ export default function StudioDetailsTab({
         <button
           onClick={handleGenerateMetadata}
           disabled={isAiGenerating || isPublishing}
-          className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black font-mono shadow-lg shadow-red-600/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
+          className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black font-mono shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
         >
           <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-          <span>{isAiGenerating ? "Generating..." : "Auto-fill with AI"}</span>
+          <span>{isAiGenerating ?"Generating..." :"Auto-fill with AI"}</span>
         </button>
       </div>
 
@@ -228,7 +228,7 @@ export default function StudioDetailsTab({
         <div className="flex justify-end">
           <span
             className={`text-[10px] font-mono ${
-              title.length > 90 ? "text-amber-400" : "text-neutral-600"
+              title.length > 90 ?"text-amber-400" :"text-neutral-600"
             }`}
           >
             {title.length}/100
@@ -274,7 +274,7 @@ export default function StudioDetailsTab({
           </div>
           <span
             className={`text-[10px] font-mono ${
-              description.length > 4800 ? "text-amber-400" : "text-neutral-600"
+              description.length > 4800 ?"text-amber-400" :"text-neutral-600"
             }`}
           >
             {description.length}/5000
@@ -299,7 +299,7 @@ export default function StudioDetailsTab({
         </div>
 
         <p className="text-[11px] text-neutral-500 font-mono">
-          Upload a picture or generate a high-CTR visual with our AI Studio.{" "}
+          Upload a picture or generate a high-CTR visual with our AI Studio.{""}
           <span className="text-neutral-400">
             JPG or PNG recommended · 1280x720 (16:9) · Max 2MB
           </span>
@@ -411,7 +411,7 @@ export default function StudioDetailsTab({
             placeholder="Select language..."
             searchable
             options={[
-              { value: "", label: "Select language" },
+              { value:"", label:"Select language" },
               ...YOUTUBE_LANGUAGES.map((lang) => ({
                 value: lang.code,
                 label: lang.label,
@@ -445,7 +445,7 @@ export default function StudioDetailsTab({
                 type="radio"
                 name="audience"
                 value="no"
-                checked={madeForKids === "no"}
+                checked={madeForKids ==="no"}
                 onChange={() => setMadeForKids("no")}
                 className="accent-red-600 w-3.5 h-3.5"
               />
@@ -465,7 +465,7 @@ export default function StudioDetailsTab({
                 type="radio"
                 name="audience"
                 value="yes"
-                checked={madeForKids === "yes"}
+                checked={madeForKids ==="yes"}
                 onChange={() => setMadeForKids("yes")}
                 className="accent-red-600 w-3.5 h-3.5"
               />
@@ -486,7 +486,7 @@ export default function StudioDetailsTab({
       <div className="flex justify-end pt-4 border-t border-neutral-800">
         <button
           onClick={onNext}
-          className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold font-mono rounded-xl shadow-lg shadow-red-600/30 transition-all cursor-pointer"
+          className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold font-mono rounded-xl shadow-lg transition-all cursor-pointer"
         >
           <span>Next: Video elements</span>
           <ChevronRight className="w-4 h-4" />

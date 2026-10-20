@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import { createPortal } from "react-dom";
+import React, { useState, useEffect, useRef, useMemo } from"react";
+import { createPortal } from"react-dom";
 import {
   Search,
   Filter,
@@ -35,35 +35,35 @@ import {
   Tag,
   Plus,
   ThumbsUp,
-} from "lucide-react";
+} from"lucide-react";
 
-import { ChapterCard } from "./ChapterCard";
+import { ChapterCard } from"./ChapterCard";
 import {
   FavoritesManager,
   FavoriteSeries,
   FAVORITES_UPDATED_EVENT,
-} from "../utils/FavoritesManager";
-import { BatchThumbnailDownloader } from "./BatchThumbnailDownloader";
-import { ChapterReaderModal } from "./ChapterReaderModal";
-import { ChapterScraperEmptyState } from "./ChapterScraperEmptyState";
-import ScraperConnectionErrorCard from "./ScraperConnectionErrorCard";
-import type { NotificationType } from "@/features/platform/notifications";
-import { getSeriesEpisodes, separateComicUrl } from "@/features/platform/scraper/api/scraper";
-import type { Chapter } from "../types/ChapterTypes";
-import { makeSafeFilename } from "@/shared/utils/downloadNaming";
-import { getProxiedImageUrl, getSourceName } from "@/shared/utils/imageProxy";
-import { ChapterScraperSkeleton } from "@/features/platform/scraper/components/ChapterScraperSkeleton";
-import RouteLoadingFallback from "@/shared/ui/feedback/RouteLoadingFallback";
+} from"../utils/FavoritesManager";
+import { BatchThumbnailDownloader } from"./BatchThumbnailDownloader";
+import { ChapterReaderModal } from"./ChapterReaderModal";
+import { ChapterScraperEmptyState } from"./ChapterScraperEmptyState";
+import ScraperConnectionErrorCard from"./ScraperConnectionErrorCard";
+import type { NotificationType } from"@/features/platform/notifications";
+import { getSeriesEpisodes, separateComicUrl } from"@/features/platform/scraper/api/scraper";
+import type { Chapter } from"../types/ChapterTypes";
+import { makeSafeFilename } from"@/shared/utils/downloadNaming";
+import { getProxiedImageUrl, getSourceName } from"@/shared/utils/imageProxy";
+import { ChapterScraperSkeleton } from"@/features/platform/scraper/components/ChapterScraperSkeleton";
+import RouteLoadingFallback from"@/shared/ui/feedback/RouteLoadingFallback";
 
 // ── Likes Count Cleaner & Formatter ───────────────────────────────────────────
 function formatLikesCount(raw: string | number | undefined): string | null {
   if (!raw) return null;
   const str = String(raw).trim();
-  const cleaned = str.replace(/^likes?[\s:.-]*/i, "").replace(/[\s:.-]*likes?$/i, "").trim();
-  const numericVal = parseFloat(cleaned.replace(/,/g, ""));
+  const cleaned = str.replace(/^likes?[\s:.-]*/i,"").replace(/[\s:.-]*likes?$/i,"").trim();
+  const numericVal = parseFloat(cleaned.replace(/,/g,""));
   if (!isNaN(numericVal) && numericVal > 0) {
-    if (numericVal >= 1_000_000) return `${(numericVal / 1_000_000).toFixed(1)}M`;
-    if (numericVal >= 10_000) return `${(numericVal / 1000).toFixed(1)}K`;
+    if (numericVal >= 1_000_000) return`${(numericVal / 1_000_000).toFixed(1)}M`;
+    if (numericVal >= 10_000) return`${(numericVal / 1000).toFixed(1)}K`;
     return numericVal.toLocaleString();
   }
   return cleaned || str;
@@ -74,7 +74,7 @@ function formatLikesCount(raw: string | number | undefined): string | null {
 // single-episode viewer URLs, and incomplete links.
 function validateSeriesUrl(raw: string): { valid: boolean; error?: string } {
   const trimmed = raw.trim();
-  if (!trimmed) return { valid: false, error: "Please enter a comic series URL." };
+  if (!trimmed) return { valid: false, error:"Please enter a comic series URL." };
 
   // Accept pure numeric title_no (Webtoons Series ID)
   if (/^\d+$/.test(trimmed)) return { valid: true };
@@ -84,40 +84,40 @@ function validateSeriesUrl(raw: string): { valid: boolean; error?: string } {
     const formatted =
       trimmed.startsWith("http://") || trimmed.startsWith("https://")
         ? trimmed
-        : `https://${trimmed}`;
+        :`https://${trimmed}`;
     parsed = new URL(formatted);
   } catch {
-    return { valid: false, error: "Not a valid URL. Paste a full comic series link (e.g. https://www.webtoons.com/en/.../list?title_no=...)." };
+    return { valid: false, error:"Not a valid URL. Paste a full comic series link (e.g. https://www.webtoons.com/en/.../list?title_no=...)." };
   }
 
   const hostname = parsed.hostname.toLowerCase();
   if (!hostname.includes(".") || hostname.length < 4) {
-    return { valid: false, error: "Please enter a valid website URL." };
+    return { valid: false, error:"Please enter a valid website URL." };
   }
 
-  const segments = parsed.pathname.replace(/\/+$/, "").split("/").filter(Boolean);
+  const segments = parsed.pathname.replace(/\/+$/,"").split("/").filter(Boolean);
 
   // Reject bare homepage / root (no path segments)
   if (segments.length === 0) {
-    return { valid: false, error: `Incomplete URL for ${hostname}. Please paste a direct series listing URL.` };
+    return { valid: false, error:`Incomplete URL for ${hostname}. Please paste a direct series listing URL.` };
   }
 
   // ── Webtoons: accept /list?title_no=... (with optional &page=N)
   if (hostname.includes("webtoons.com") || hostname.includes("webtoon.com")) {
-    const isViewer = segments.some((s) => s.toLowerCase() === "viewer");
-    const isList = segments.some((s) => s.toLowerCase() === "list");
+    const isViewer = segments.some((s) => s.toLowerCase() ==="viewer");
+    const isList = segments.some((s) => s.toLowerCase() ==="list");
     const hasTitleNo = Boolean(parsed.searchParams.get("title_no"));
 
     if (isViewer) {
       return {
         valid: false,
-        error: "This is an episode viewer URL. The Chapter Scraper needs the series list URL (e.g. .../list?title_no=958).",
+        error:"This is an episode viewer URL. The Chapter Scraper needs the series list URL (e.g. .../list?title_no=958).",
       };
     }
     if (!isList || !hasTitleNo) {
       return {
         valid: false,
-        error: "Please paste a Webtoons series list URL: https://www.webtoons.com/en/{genre}/{series}/list?title_no=...",
+        error:"Please paste a Webtoons series list URL: https://www.webtoons.com/en/{genre}/{series}/list?title_no=...",
       };
     }
     return { valid: true };
@@ -125,23 +125,23 @@ function validateSeriesUrl(raw: string): { valid: boolean; error?: string } {
 
   // ── MangaDex: /title/{uuid} is the series page
   if (hostname.includes("mangadex.org")) {
-    const isChapter = segments.some((s) => s.toLowerCase() === "chapter");
-    const isTitle = segments.some((s) => s.toLowerCase() === "title");
+    const isChapter = segments.some((s) => s.toLowerCase() ==="chapter");
+    const isTitle = segments.some((s) => s.toLowerCase() ==="title");
     if (isChapter) {
-      return { valid: false, error: "This is a MangaDex chapter reader. Paste the series /title/ URL instead." };
+      return { valid: false, error:"This is a MangaDex chapter reader. Paste the series /title/ URL instead." };
     }
     if (!isTitle) {
-      return { valid: false, error: "Please paste a MangaDex series URL: https://mangadex.org/title/{uuid}." };
+      return { valid: false, error:"Please paste a MangaDex series URL: https://mangadex.org/title/{uuid}." };
     }
     return { valid: true };
   }
 
   // ── Bato.to: /series/ or /title/ is the series page
-  const batoDomains = ["bato.to", "mangatoto.com", "battwo.com", "batotoo.com", "batocomic.com"];
+  const batoDomains = ["bato.to","mangatoto.com","battwo.com","batotoo.com","batocomic.com"];
   if (batoDomains.some((d) => hostname.includes(d))) {
-    const isChapter = segments.some((s) => s.toLowerCase() === "chapter");
+    const isChapter = segments.some((s) => s.toLowerCase() ==="chapter");
     if (isChapter) {
-      return { valid: false, error: "This is a Bato.to chapter URL. Paste the series listing URL instead." };
+      return { valid: false, error:"This is a Bato.to chapter URL. Paste the series listing URL instead." };
     }
     return { valid: true };
   }
@@ -150,7 +150,7 @@ function validateSeriesUrl(raw: string): { valid: boolean; error?: string } {
   if (segments.length <= 1) {
     return {
       valid: false,
-      error: `Too short — looks like a homepage. Paste the full series catalog URL for ${hostname}.`,
+      error:`Too short — looks like a homepage. Paste the full series catalog URL for ${hostname}.`,
     };
   }
 
@@ -183,7 +183,7 @@ interface ChapterScraperProps {
 
 const parseLikes = (likesStr?: string): number => {
   if (!likesStr) return 0;
-  const clean = likesStr.replace(/,/g, "").trim().toUpperCase();
+  const clean = likesStr.replace(/,/g,"").trim().toUpperCase();
   const numPart = parseFloat(clean);
   if (isNaN(numPart)) return 0;
   if (clean.endsWith("K")) return numPart * 1000;
@@ -202,7 +202,7 @@ const parseWebtoonDate = (dateStr: string): Date | null => {
 };
 
 const createTempProjectId = (_slug?: string) => {
-  return `temp_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+  return`temp_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
 };
 
 export const ChapterScraper: React.FC<ChapterScraperProps> = ({
@@ -245,13 +245,11 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
 
   // Active View & Filters
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
-  const [sortBy, setSortBy] = useState<
-    "latest" | "oldest" | "rating" | "likes"
+  const [viewMode, setViewMode] = useState<"grid" |"list">("list");
+  const [sortBy, setSortBy] = useState<"latest" |"oldest" |"rating" |"likes"
   >("latest");
   const [searchQuery, setSearchQuery] = useState("");
-  const [readStatusFilter, setReadStatusFilter] = useState<
-    "all" | "unread" | "read"
+  const [readStatusFilter, setReadStatusFilter] = useState<"all" |"unread" |"read"
   >("all");
   const [bookmarksOnly, setBookmarksOnly] = useState(false);
   const [minRating, setMinRating] = useState<number>(0);
@@ -298,7 +296,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     const rated = chapters.filter(
       (c) => c.rating !== undefined && c.rating !== null && c.rating > 0
     );
-    if (rated.length === 0) return "9.6";
+    if (rated.length === 0) return"9.6";
     const sum = rated.reduce((acc, c) => acc + (c.rating || 0), 0);
     return (sum / rated.length).toFixed(1);
   }, [chapters]);
@@ -306,7 +304,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
   const isErrorSeries = useMemo(() => {
     if (error) return true;
     if (!seriesMetadata) return false;
-    const title = (seriesMetadata.title || "").toLowerCase();
+    const title = (seriesMetadata.title ||"").toLowerCase();
     return (
       title.includes("connect error") ||
       title.includes("error ::") ||
@@ -361,7 +359,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       !currentPath.startsWith("/scraper/editor") &&
       !currentPath.startsWith("/scraper/audio-settings")
     ) {
-      window.history.replaceState(null, "", "/chapter-scraper");
+      window.history.replaceState(null,"","/chapter-scraper");
     }
 
     // Only auto-scrape if a VALID URL is explicitly provided in query params (?url=...) or initialSeriesName prop
@@ -376,11 +374,11 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
         searchParams.get("title") || searchParams.get("series");
       if (queryTitle) {
         setSeriesMetadata({
-          title: queryTitle.replace(/\s*\|\s*.*$/, "").trim() || queryTitle,
-          author: "",
-          genre: "",
-          cover_image: "",
-          description: "",
+          title: queryTitle.replace(/\s*\|\s*.*$/,"").trim() || queryTitle,
+          author:"",
+          genre:"",
+          cover_image:"",
+          description:"",
           url: queryUrl,
         });
       }
@@ -406,11 +404,11 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
   useEffect(() => {
     let result = [...chapters];
 
-    if (sortBy === "oldest") {
+    if (sortBy ==="oldest") {
       result = result.reverse();
-    } else if (sortBy === "rating") {
+    } else if (sortBy ==="rating") {
       result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    } else if (sortBy === "likes") {
+    } else if (sortBy ==="likes") {
       result.sort((a, b) => parseLikes(b.likes) - parseLikes(a.likes));
     }
 
@@ -431,9 +429,9 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       result = result.filter((ch) => parseLikes(ch.likes) >= minLikes);
     }
 
-    if (readStatusFilter === "read") {
+    if (readStatusFilter ==="read") {
       result = result.filter((ch) => readUrls.includes(ch.url));
-    } else if (readStatusFilter === "unread") {
+    } else if (readStatusFilter ==="unread") {
       result = result.filter((ch) => !readUrls.includes(ch.url));
     }
 
@@ -467,7 +465,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
     if (!activeUrl && !activeTitleNo) {
       setError("Please enter a Comic, Manga, or Manhwa series URL.");
-      addNotification("Please enter a series URL", "error");
+      addNotification("Please enter a series URL","error");
       return;
     }
 
@@ -475,8 +473,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     if (activeUrl && activeUrl.trim() && !activeTitleNo) {
       const check = validateSeriesUrl(activeUrl.trim());
       if (!check.valid) {
-        setError(check.error || "Please enter a valid series URL.");
-        addNotification(check.error || "Invalid series URL", "error");
+        setError(check.error ||"Please enter a valid series URL.");
+        addNotification(check.error ||"Invalid series URL","error");
         return;
       }
     }
@@ -530,13 +528,13 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       if (result.success) {
         const rawChapters = result.chapters || [];
         const fallbackCover =
-          result.cover_image || result.series?.cover_image || "";
+          result.cover_image || result.series?.cover_image ||"";
         const normalizedChapters = rawChapters.map((ch: any, i: number) => ({
           ...ch,
           cover_image: ch.cover_image || fallbackCover,
           chapter_number: ch.chapter_number ?? ch.number ?? i + 1,
           number: String(ch.chapter_number ?? ch.number ?? i + 1),
-          title: ch.title || `Chapter ${ch.chapter_number ?? i + 1}`,
+          title: ch.title ||`Chapter ${ch.chapter_number ?? i + 1}`,
           url: ch.url,
           index: ch.index ?? i,
         }));
@@ -544,24 +542,24 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
         setChapters(normalizedChapters);
         const seriesData = result.series || result;
         const resolvedTitle =
-          seriesData.title || result.title || "Comic Series";
+          seriesData.title || result.title ||"Comic Series";
 
         setSeriesMetadata({
           title: resolvedTitle,
-          author: seriesData.author || "",
-          genre: seriesData.genre || "General",
-          platform: seriesData.platform || "comic",
+          author: seriesData.author ||"",
+          genre: seriesData.genre ||"General",
+          platform: seriesData.platform ||"comic",
           cover_image: seriesData.cover_image || fallbackCover,
-          description: seriesData.description || "",
+          description: seriesData.description ||"",
           url: seriesData.url || targetSeriesUrl || activeUrl,
         });
 
         // Add to recents
         if (result.title_no || activeUrl) {
           FavoritesManager.addRecent({
-            title_no: result.title_no || "comic",
+            title_no: result.title_no ||"comic",
             title: resolvedTitle,
-            genre: seriesData.genre || "General",
+            genre: seriesData.genre ||"General",
             cover_image: seriesData.cover_image || fallbackCover,
             timestamp: Date.now(),
             url: activeUrl || result.url || targetSeriesUrl,
@@ -573,17 +571,17 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
         }
 
         const totalFound = result.total_chapters ?? normalizedChapters.length;
-        const cacheNote = result.from_cache ? " (from cache)" : " (fresh)";
-        addNotification(`Found ${totalFound} chapters!${cacheNote}`, "success");
+        const cacheNote = result.from_cache ?" (from cache)" :" (fresh)";
+        addNotification(`Found ${totalFound} chapters!${cacheNote}`,"success");
       } else {
-        const errorMsg = result.error || "Failed to scrape chapters";
+        const errorMsg = result.error ||"Failed to scrape chapters";
         setError(errorMsg);
-        addNotification(errorMsg, "error");
+        addNotification(errorMsg,"error");
       }
     } catch (err: any) {
-      const errorMsg = err.message || "An error occurred while scraping";
+      const errorMsg = err.message ||"An error occurred while scraping";
       setError(errorMsg);
-      addNotification(errorMsg, "error");
+      addNotification(errorMsg,"error");
     } finally {
       setIsLoading(false);
       scrapeInFlightRef.current = false;
@@ -610,19 +608,19 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput
     );
 
-    if (typeof scrapeImages === "function") {
+    if (typeof scrapeImages ==="function") {
       try {
         setImportingChapterUrl(chapter.url);
         const ok = await scrapeImages(chapter.url, temporaryProjectId);
         if (ok) {
           localStorage.removeItem("auto_import_url");
-          const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+          const targetPath =`/scraper/editor?id=${temporaryProjectId}`;
 
           const nav = (window as any).navigateTo;
-          if (typeof nav === "function") {
+          if (typeof nav ==="function") {
             nav(targetPath);
           } else {
-            window.history.pushState({}, "", targetPath);
+            window.history.pushState({},"", targetPath);
             window.dispatchEvent(new Event("popstate"));
           }
         }
@@ -636,13 +634,13 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
     localStorage.setItem("auto_import_url", chapter.url);
 
-    const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+    const targetPath =`/scraper/editor?id=${temporaryProjectId}`;
 
     const nav = (window as any).navigateTo;
-    if (typeof nav === "function") {
+    if (typeof nav ==="function") {
       nav(targetPath);
     } else {
-      window.history.pushState({}, "", targetPath);
+      window.history.pushState({},"", targetPath);
       window.dispatchEvent(new Event("popstate"));
     }
   };
@@ -653,20 +651,18 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     if (isFavorite) {
       FavoritesManager.removeFavorite(key);
       setIsFavorite(false);
-      addNotification(`Removed from favorites`, "info");
+      addNotification(`Removed from favorites`,"info");
     } else {
       FavoritesManager.addFavorite({
-        title_no: titleNoInput || "comic",
+        title_no: titleNoInput ||"comic",
         title: seriesMetadata.title,
         genre: seriesMetadata.genre,
         cover_image: seriesMetadata.cover_image,
         timestamp: Date.now(),
-        url: urlInput || seriesMetadata.url || "",
+        url: urlInput || seriesMetadata.url ||"",
       });
       setIsFavorite(true);
-      addNotification(
-        `Added "${seriesMetadata.title}" to favorites`,
-        "success"
+      addNotification(`Added"${seriesMetadata.title}" to favorites`,"success"
       );
     }
   };
@@ -675,10 +671,10 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     const isBookmarked = FavoritesManager.isBookmarked(url);
     if (isBookmarked) {
       FavoritesManager.removeBookmark(url);
-      addNotification("Removed bookmark", "info");
+      addNotification("Removed bookmark","info");
     } else {
       FavoritesManager.addBookmark(url);
-      addNotification("Chapter bookmarked", "success");
+      addNotification("Chapter bookmarked","success");
     }
     setBookmarkedUrls(FavoritesManager.getBookmarks());
   };
@@ -709,15 +705,15 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput
     );
     localStorage.setItem("auto_import_batch", JSON.stringify(selected));
-    localStorage.setItem("auto_import_url", selected[0]?.url || "");
+    localStorage.setItem("auto_import_url", selected[0]?.url ||"");
 
-    const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+    const targetPath =`/scraper/editor?id=${temporaryProjectId}`;
 
     const nav = (window as any).navigateTo;
-    if (typeof nav === "function") {
+    if (typeof nav ==="function") {
       nav(targetPath);
     } else {
-      window.history.pushState({}, "", targetPath);
+      window.history.pushState({},"", targetPath);
       window.dispatchEvent(new Event("popstate"));
     }
   };
@@ -733,16 +729,16 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       2
     );
     const blob = new Blob([jsonContent], {
-      type: "application/json;charset=utf-8;",
+      type:"application/json;charset=utf-8;",
     });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    const safeSeries = makeSafeFilename(seriesMetadata?.title, "Comic_Series");
-    link.download = `${safeSeries}_full_metadata.json`;
+    const safeSeries = makeSafeFilename(seriesMetadata?.title,"Comic_Series");
+    link.download =`${safeSeries}_full_metadata.json`;
     link.click();
     URL.revokeObjectURL(url);
-    addNotification("Exported series metadata JSON", "success");
+    addNotification("Exported series metadata JSON","success");
   };
 
   return (
@@ -754,10 +750,10 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
             type="button"
             onClick={() => {
               const nav = (window as any).navigateTo;
-              if (typeof nav === "function") {
+              if (typeof nav ==="function") {
                 nav("/scraper");
               } else {
-                window.history.pushState({}, "", "/scraper");
+                window.history.pushState({},"","/scraper");
                 window.dispatchEvent(new Event("popstate"));
               }
             }}
@@ -791,10 +787,10 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               placeholder="Paste a series URL or Webtoons list URL (e.g. .../list?title_no=958)"
               className={`w-full rounded-2xl border ${
                 urlInput.trim() && !validateSeriesUrl(urlInput).valid
-                  ? "border-amber-500/50 focus:border-amber-500"
+                  ?"border-amber-500/50 focus:border-amber-500"
                   : urlInput.trim() && validateSeriesUrl(urlInput).valid
-                  ? "border-emerald-500/40 focus:border-emerald-500/60"
-                  : "border-neutral-800 focus:border-neutral-600"
+                  ?"border-emerald-500/40 focus:border-emerald-500/60"
+                  :"border-neutral-800 focus:border-neutral-600"
               } bg-neutral-955/90 py-3 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-700 font-mono transition-all`}
             />
           </div>
@@ -813,7 +809,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
             ) : (
               <Zap className="h-4 w-4 text-amber-300" />
             )}
-            <span>{isLoading ? "Crawling..." : "Fetch Chapters"}</span>
+            <span>{isLoading ?"Crawling..." :"Fetch Chapters"}</span>
           </button>
         </form>
       )}
@@ -852,8 +848,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
           errorMessage={
             error ||
             (seriesMetadata?.title?.toLowerCase().includes("connect error")
-              ? "The source server returned a connection error. The requested series could not be found or was blocked."
-              : "Unable to retrieve chapters for this series URL.")
+              ?"The source server returned a connection error. The requested series could not be found or was blocked."
+              :"Unable to retrieve chapters for this series URL.")
           }
           targetUrl={urlInput || titleNoInput || initialSeriesName}
           onRetry={(newUrl) => {
@@ -878,7 +874,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
             <div
               className="absolute inset-0 bg-cover bg-center opacity-25 blur-3xl scale-125 pointer-events-none"
               style={{
-                backgroundImage: `url(${getProxiedImageUrl(
+                backgroundImage:`url(${getProxiedImageUrl(
                   seriesMetadata.cover_image,
                   seriesMetadata.url
                 )})`,
@@ -910,7 +906,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-transparent text-[9px] font-extrabold font-mono text-[#60A5FA] uppercase tracking-wider">
                 {seriesMetadata.platform
                   ? seriesMetadata.platform.toUpperCase()
-                  : "WEBTOON"}
+                  :"WEBTOON"}
               </div>
             </div>
 
@@ -919,10 +915,10 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               <div className="space-y-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] text-xs font-bold font-mono">
-                    {seriesMetadata.genre || "Comic"}
+                    {seriesMetadata.genre ||"Comic"}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full bg-neutral-800 border border-transparent text-neutral-300 text-xs font-mono">
-                    By {seriesMetadata.author || "Unknown Author"}
+                    By {seriesMetadata.author ||"Unknown Author"}
                   </span>
                 </div>
 
@@ -996,7 +992,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   type="button"
                   onClick={() => {
                     const nav = (window as any).navigateTo;
-                    if (typeof nav === "function")
+                    if (typeof nav ==="function")
                       nav("/creative-suite");
                   }}
                   className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-neutral-700 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
@@ -1022,7 +1018,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 {chapters.length}
               </div>
               <div className="text-xs text-neutral-400 font-mono">
-                Total Chapters ({readChaptersCount} Ready ·{" "}
+                Total Chapters ({readChaptersCount} Ready ·{""}
                 {unreadChaptersCount} Draft)
               </div>
             </div>
@@ -1108,9 +1104,9 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   type="button"
                   onClick={() => setReadStatusFilter("all")}
                   className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                    readStatusFilter === "all"
-                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
+                    readStatusFilter ==="all"
+                      ?"bg-[#2563eb] text-white shadow-md"
+                      :"text-neutral-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
                   ALL
@@ -1119,9 +1115,9 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   type="button"
                   onClick={() => setReadStatusFilter("unread")}
                   className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                    readStatusFilter === "unread"
-                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
+                    readStatusFilter ==="unread"
+                      ?"bg-[#2563eb] text-white shadow-md"
+                      :"text-neutral-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
                   DRAFT
@@ -1130,9 +1126,9 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   type="button"
                   onClick={() => setReadStatusFilter("read")}
                   className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                    readStatusFilter === "read"
-                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
+                    readStatusFilter ==="read"
+                      ?"bg-[#2563eb] text-white shadow-md"
+                      :"text-neutral-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
                   READY
@@ -1162,9 +1158,9 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   type="button"
                   onClick={() => setViewMode("grid")}
                   className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                    viewMode === "grid"
-                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
+                    viewMode ==="grid"
+                      ?"bg-[#2563eb] text-white shadow-md"
+                      :"text-neutral-400 hover:text-white hover:bg-white/5"
                   }`}
                   title="Grid View"
                 >
@@ -1174,9 +1170,9 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   type="button"
                   onClick={() => setViewMode("list")}
                   className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                    viewMode === "list"
-                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
+                    viewMode ==="list"
+                      ?"bg-[#2563eb] text-white shadow-md"
+                      :"text-neutral-400 hover:text-white hover:bg-white/5"
                   }`}
                   title="List View"
                 >
@@ -1193,8 +1189,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 }}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer shadow-inner ${
                   isMultiSelectMode
-                    ? "bg-[#2563eb] border-blue-400 text-white shadow-md shadow-blue-600/30"
-                    : "bg-[#0c0e14] border-[#1e2332] hover:border-neutral-600 text-neutral-300 hover:text-white hover:bg-white/5"
+                    ?"bg-[#2563eb] border-blue-400 text-white shadow-md"
+                    :"bg-[#0c0e14] border-[#1e2332] hover:border-neutral-600 text-neutral-300 hover:text-white hover:bg-white/5"
                 }`}
               >
                 <SlidersHorizontal size={13} />
@@ -1213,12 +1209,12 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   className="text-[#38bdf8] hover:text-white font-bold underline cursor-pointer"
                 >
                   {selectedUrls.length === filteredChapters.length
-                    ? "Deselect All"
-                    : "Select All"}
+                    ?"Deselect All"
+                    :"Select All"}
                 </button>
                 <span className="text-neutral-400">
-                  Selected{" "}
-                  <strong className="text-white">{selectedUrls.length}</strong>{" "}
+                  Selected{""}
+                  <strong className="text-white">{selectedUrls.length}</strong>{""}
                   of {filteredChapters.length} chapters
                 </span>
               </div>
@@ -1228,7 +1224,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   type="button"
                   disabled={selectedUrls.length === 0}
                   onClick={handleBatchScrape}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] disabled:opacity-50 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-md shadow-blue-600/30"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] disabled:opacity-50 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-md"
                 >
                   <Zap size={13} />
                   <span>Import Batch ({selectedUrls.length})</span>
@@ -1247,7 +1243,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
             for (let i = Math.max(1, safePage - delta); i <= Math.min(totalPages, safePage + delta); i++) pageNumbers.push(i);
             return (
               <>
-          {viewMode === "grid" ? (
+          {viewMode ==="grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
               {pagedChapters.map((chapter) => (
                 <ChapterCard
@@ -1269,7 +1265,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
             <div className="rounded-2xl overflow-hidden border border-[#181a24] bg-[#090b10] shadow-2xl">
               {/* Table header */}
               <div className="grid grid-cols-[4.5rem_5.5rem_1fr_8.5rem_8rem_16rem] items-center px-4 py-3.5 bg-[#0e1017] border-b border-[#181a24] sticky top-0 z-10 text-[11px] font-mono font-bold tracking-widest text-neutral-400 uppercase select-none">
-                <span className="text-center">{isMultiSelectMode ? "Select" : "#"}</span>
+                <span className="text-center">{isMultiSelectMode ?"Select" :"#"}</span>
                 <span className="text-center">Cover</span>
                 <span className="pl-3">Chapter Title</span>
                 <span className="text-center">Release Date</span>
@@ -1280,19 +1276,19 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               {/* Rows */}
               <div className="divide-y divide-[#141620]">
                 {pagedChapters.map((chapter, idx) => {
-                  const rawNum = (chapter.number || "").trim();
-                  const cleanNum = rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim() || String(idx + 1);
-                  const rawTitle = (chapter.title || "")
-                    .replace(/^(?:episode|ep|chapter|ch)[\s._-]*\d+\s*[-:\u2013\u2014]?\s*/i, "")
-                    .replace(/^[-:\u2013\u2014\s]+|[-:\u2013\u2014\s]+$/g, "")
+                  const rawNum = (chapter.number ||"").trim();
+                  const cleanNum = rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i,"").trim() || String(idx + 1);
+                  const rawTitle = (chapter.title ||"")
+                    .replace(/^(?:episode|ep|chapter|ch)[\s._-]*\d+\s*[-:\u2013\u2014]?\s*/i,"")
+                    .replace(/^[-:\u2013\u2014\s]+|[-:\u2013\u2014\s]+$/g,"")
                     .trim();
                   const titleIsSameAsNum = !rawTitle ||
                     rawTitle.toLowerCase() === cleanNum.toLowerCase() ||
-                    rawTitle.toLowerCase() === `chapter ${cleanNum}`.toLowerCase();
+                    rawTitle.toLowerCase() ===`chapter ${cleanNum}`.toLowerCase();
                   const isChapterRead = readUrls.includes(chapter.url);
                   const isChapterBookmarked = bookmarkedUrls.includes(chapter.url);
                   const isChapterSelected = selectedUrls.includes(chapter.url);
-                  const displayTitle = !titleIsSameAsNum && rawTitle ? rawTitle : `Chapter ${cleanNum}`;
+                  const displayTitle = !titleIsSameAsNum && rawTitle ? rawTitle :`Chapter ${cleanNum}`;
                   const formattedLikes = formatLikesCount(chapter.likes);
 
                   return (
@@ -1301,10 +1297,10 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                       onClick={() => !importingChapterUrl && handleChapterClick(chapter)}
                       className={`grid grid-cols-[4.5rem_5.5rem_1fr_8.5rem_8rem_16rem] items-center px-4 py-3 cursor-pointer transition-colors duration-150 group relative border-b border-[#141620] last:border-b-0 ${
                         importingChapterUrl === chapter.url
-                          ? "bg-[#2563eb]/20 border-l-2 border-l-[#2563eb]"
+                          ?"bg-[#2563eb]/20 border-l-2 border-l-[#2563eb]"
                           : isChapterSelected
-                          ? "bg-[#2563eb]/10 border-l-2 border-l-[#2563eb]"
-                          : "bg-[#090b10] hover:bg-[#0f121b]"
+                          ?"bg-[#2563eb]/10 border-l-2 border-l-[#2563eb]"
+                          :"bg-[#090b10] hover:bg-[#0f121b]"
                       }`}
                     >
                       {/* Multiselect / Episode Badge */}
@@ -1321,10 +1317,10 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                         <div className="flex items-center justify-center">
                           <span className={`px-2.5 py-1 rounded-lg border font-mono text-[11px] font-bold transition-colors ${
                             isChapterRead
-                              ? "bg-[#10121a] border-neutral-800 text-neutral-500"
-                              : "bg-[#13151f] border-[#1e2230] text-neutral-300 group-hover:border-[#2563eb]/50 group-hover:text-white"
+                              ?"bg-[#10121a] border-neutral-800 text-neutral-500"
+                              :"bg-[#13151f] border-[#1e2230] text-neutral-300 group-hover:border-[#2563eb]/50 group-hover:text-white"
                           }`}>
-                            #{cleanNum.padStart(2, "0")}
+                            #{cleanNum.padStart(2,"0")}
                           </span>
                         </div>
                       )}
@@ -1336,7 +1332,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                             src={getProxiedImageUrl(chapter.cover_image || seriesMetadata?.cover_image, chapter.url)}
                             alt=""
                             className="w-full h-full object-cover"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                            onError={(e) => { (e.target as HTMLImageElement).style.display ="none"; }}
                           />
                         </div>
                       </div>
@@ -1346,8 +1342,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                         <div className="flex items-center gap-2">
                           <p className={`text-sm font-bold truncate transition-colors ${
                             isChapterRead
-                              ? "text-neutral-500"
-                              : "text-white group-hover:text-[#60A5FA]"
+                              ?"text-neutral-500"
+                              :"text-white group-hover:text-[#60A5FA]"
                           }`}>
                             {displayTitle}
                           </p>
@@ -1373,7 +1369,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                       {/* Date */}
                       <div className="flex items-center justify-center gap-1.5 text-xs font-mono text-neutral-400">
                         <Calendar size={12} className="text-neutral-500 shrink-0" />
-                        <span>{chapter.date || "—"}</span>
+                        <span>{chapter.date ||"—"}</span>
                       </div>
 
                       {/* Rating / Popularity */}
@@ -1413,9 +1409,9 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                             handleBookmarkToggle(chapter.url);
                           }}
                           className="p-2 rounded-xl bg-[#13151f] hover:bg-[#1c1f2e] text-neutral-400 hover:text-amber-400 border border-[#1e2230] transition-all cursor-pointer"
-                          title={isChapterBookmarked ? "Remove Bookmark" : "Bookmark Chapter"}
+                          title={isChapterBookmarked ?"Remove Bookmark" :"Bookmark Chapter"}
                         >
-                          <Bookmark size={13} className={isChapterBookmarked ? "text-amber-400 fill-current" : ""} />
+                          <Bookmark size={13} className={isChapterBookmarked ?"text-amber-400 fill-current" :""} />
                         </button>
                         <button
                           type="button"
@@ -1424,7 +1420,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                             e.stopPropagation();
                             handleChapterClick(chapter);
                           }}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-mono font-bold text-xs transition-all shadow-md shadow-blue-600/30 cursor-pointer active:scale-95 whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-mono font-bold text-xs transition-all shadow-md cursor-pointer active:scale-95 whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
                           title="Import Chapter Images"
                         >
                           {importingChapterUrl === chapter.url ? (
@@ -1473,8 +1469,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                     onClick={() => setCurrentPage(p)}
                     className={`px-2.5 py-1 rounded-lg text-[11px] font-bold font-mono border transition-all cursor-pointer ${
                       p === safePage
-                        ? "bg-[#3B82F6] border-[#3B82F6] text-white shadow-md shadow-blue-900/30"
-                        : "border-[#2A2A36] bg-[#111116] text-neutral-400 hover:text-white hover:bg-[#1E1E2A]"
+                        ?"bg-[#3B82F6] border-[#3B82F6] text-white shadow-md"
+                        :"border-[#2A2A36] bg-[#111116] text-neutral-400 hover:text-white hover:bg-[#1E1E2A]"
                     }`}
                   >
                     {p}
@@ -1566,10 +1562,10 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               type="button"
               onClick={() => {
                 const nav = (window as any).navigateTo;
-                if (typeof nav === "function") {
+                if (typeof nav ==="function") {
                   nav("/scraper");
                 } else {
-                  window.history.pushState({}, "", "/scraper");
+                  window.history.pushState({},"","/scraper");
                   window.dispatchEvent(new Event("popstate"));
                 }
               }}

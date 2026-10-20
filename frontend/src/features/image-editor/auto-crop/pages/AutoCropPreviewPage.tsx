@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import { createPortal } from "react-dom";
+import React, { useEffect, useState, useCallback, useRef } from"react";
+import { createPortal } from"react-dom";
 import {
   ArrowLeft,
   Check,
@@ -32,15 +32,15 @@ import {
   Minus,
   X,
   Zap,
-} from "lucide-react";
-import * as api from "@/shared/api";
-import { getProxiedImageUrl } from "@/shared/utils";
-import { DetectTypeResponse, ReadingFlow } from "@/features/image-editor/canvas/api/crop";
-import { AutoCropPreviewPageProps, PreviewItem } from "../types";
-import { AutoCropSlicesTab } from "../components/AutoCropSlicesTab";
-import { AutoCropCompareTab } from "../components/AutoCropCompareTab";
-import { AutoCropTuningTab } from "../components/AutoCropTuningTab";
-import { AutoCropBigScreenModal } from "../components/AutoCropBigScreenModal";
+} from"lucide-react";
+import * as api from"@/shared/api";
+import { getProxiedImageUrl } from"@/shared/utils";
+import { DetectTypeResponse, ReadingFlow } from"@/features/image-editor/canvas/api/crop";
+import { AutoCropPreviewPageProps, PreviewItem } from"../types";
+import { AutoCropSlicesTab } from"../components/AutoCropSlicesTab";
+import { AutoCropCompareTab } from"../components/AutoCropCompareTab";
+import { AutoCropTuningTab } from"../components/AutoCropTuningTab";
+import { AutoCropBigScreenModal } from"../components/AutoCropBigScreenModal";
 
 // Re-export for external consumers
 export type { AutoCropPreviewPageProps, PreviewItem };
@@ -53,7 +53,7 @@ function AutoCropFullLoadingSkeleton({ count = 1 }: { count?: number }) {
       <div className="flex flex-col items-center justify-center text-center space-y-3 max-w-lg mx-auto">
         <div className="relative">
           <div className="absolute -inset-2.5 bg-gradient-to-r from-emerald-500/30 via-teal-500/20 to-sky-500/30 rounded-full blur-lg animate-pulse" />
-          <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-neutral-900 border border-emerald-500/40 flex items-center justify-center shadow-xl shadow-emerald-500/20">
+          <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-neutral-900 border border-emerald-500/40 flex items-center justify-center shadow-xl">
             <Loader2 className="h-6 w-6 sm:h-7 sm:w-7 animate-spin text-emerald-400" />
             <Scissors className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-300 absolute inset-0 m-auto animate-pulse" />
           </div>
@@ -70,7 +70,7 @@ function AutoCropFullLoadingSkeleton({ count = 1 }: { count?: number }) {
           </div>
           <p className="text-xs text-neutral-400 max-w-sm mx-auto leading-relaxed">
             Scanning gutter seams, bounding dialog bubbles, and generating
-            precision cuts for {count} source image{count > 1 ? "s" : ""}.
+            precision cuts for {count} source image{count > 1 ?"s" :""}.
           </p>
         </div>
 
@@ -123,7 +123,7 @@ function AutoCropFullLoadingSkeleton({ count = 1 }: { count?: number }) {
               <div
                 key={k}
                 className="rounded-xl bg-neutral-900/70 border border-neutral-800/60 p-1.5 flex flex-col justify-between aspect-[3/4] animate-pulse"
-                style={{ animationDelay: `${k * 100}ms` }}
+                style={{ animationDelay:`${k * 100}ms` }}
               >
                 <div className="h-1.5 w-6 bg-neutral-800 rounded" />
                 <div className="w-5 h-5 rounded-full bg-neutral-800/50 mx-auto" />
@@ -146,9 +146,9 @@ export default function AutoCropPreviewPage({
   addNotification,
   sensitivity: initialSensitivity = 45,
   padding: initialPadding = 6,
-  backgroundColorMode: initialBgMode = "auto",
+  backgroundColorMode: initialBgMode ="auto",
   autoSplitTallStrips: initialAutoSplit = true,
-  aspectRatioLock: initialAspectRatio = "free",
+  aspectRatioLock: initialAspectRatio ="free",
   minPanelHeightPx: initialMinHeight = 60,
   overlapMergeThreshold = 10,
   isApplying = false,
@@ -166,15 +166,14 @@ export default function AutoCropPreviewPage({
   const [inspectModalUrl, setInspectModalUrl] = useState<string | null>(null);
 
   // View & UX Controls
-  const [activeTab, setActiveTab] = useState<"slices" | "compare" | "tuning">(
-    "slices"
+  const [activeTab, setActiveTab] = useState<"slices" |"compare" |"tuning">("slices"
   );
-  const [viewMode, setViewMode] = useState<"grid" | "reel">("grid");
+  const [viewMode, setViewMode] = useState<"grid" |"reel">("grid");
   const [showCutLines, setShowCutLines] = useState(true);
   const [showLayoutDropdown, setShowLayoutDropdown] = useState(false);
 
   // Live adjustment controls state
-  const [engineMode, setEngineMode] = useState<"opencv" | "ai">("opencv");
+  const [engineMode, setEngineMode] = useState<"opencv" |"ai">("opencv");
   const [sensitivity, setSensitivity] = useState(initialSensitivity);
   const [padding, setPadding] = useState(initialPadding);
   const [backgroundColorMode, setBackgroundColorMode] = useState(initialBgMode);
@@ -195,34 +194,30 @@ export default function AutoCropPreviewPage({
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // ── PRESETS ─────────────────────────────────────────────────────────────
-  const applyPreset = (preset: "webtoon" | "manga" | "shorts") => {
-    if (preset === "webtoon") {
+  const applyPreset = (preset:"webtoon" |"manga" |"shorts") => {
+    if (preset ==="webtoon") {
       setSensitivity(55);
       setPadding(4);
       setAutoSplitTallStrips(true);
       setAspectRatioLock("free");
       setBackgroundColorMode("auto");
-      addNotification?.(
-        "Applied Webtoon Strip preset (Vertical cuts & auto-split)",
-        "info"
+      addNotification?.("Applied Webtoon Strip preset (Vertical cuts & auto-split)","info"
       );
-    } else if (preset === "manga") {
+    } else if (preset ==="manga") {
       setSensitivity(40);
       setPadding(8);
       setAutoSplitTallStrips(false);
       setAspectRatioLock("free");
       setBackgroundColorMode("white");
-      addNotification?.(
-        "Applied Manga Page preset (White gutters & framed panels)",
-        "info"
+      addNotification?.("Applied Manga Page preset (White gutters & framed panels)","info"
       );
-    } else if (preset === "shorts") {
+    } else if (preset ==="shorts") {
       setSensitivity(50);
       setPadding(6);
       setAutoSplitTallStrips(true);
       setAspectRatioLock("9:16");
       setBackgroundColorMode("auto");
-      addNotification?.("Applied 9:16 Vertical Video preset", "info");
+      addNotification?.("Applied 9:16 Vertical Video preset","info");
     }
   };
 
@@ -232,7 +227,7 @@ export default function AutoCropPreviewPage({
     async (
       url: string,
       currentOptions: {
-        engineMode?: "opencv" | "ai";
+        engineMode?:"opencv" |"ai";
         sensitivity: number;
         padding: number;
         backgroundColorMode: string;
@@ -248,7 +243,7 @@ export default function AutoCropPreviewPage({
       let typeInfo: DetectTypeResponse | null = null;
       let panelUrls: string[] = [];
       let detectedPanels: api.PanelBoundingBoxInput[] = [];
-      let status: "success" | "error" = "success";
+      let status:"success" |"error" ="success";
       let errorMessage: string | undefined = undefined;
       let errorDetails: string | undefined = undefined;
 
@@ -266,30 +261,30 @@ export default function AutoCropPreviewPage({
             typeInfoCacheRef.current.set(url, res);
           }
         } catch (err: any) {
-          if (err.name === "AbortError") throw err;
+          if (err.name ==="AbortError") throw err;
           console.warn("[AutoCropPreview] detectPanelCropType warning:", err);
         }
       }
 
       const isTallStrip =
-        typeInfo?.crop_type === "long_panels" ||
-        typeInfo?.crop_type === "four_koma" ||
+        typeInfo?.crop_type ==="long_panels" ||
+        typeInfo?.crop_type ==="four_koma" ||
         (typeInfo?.aspect_ratio ?? 0) >= 2.0;
 
       try {
         // ── ENGINE 1: GEMINI SMART AI VISION (ZERO HARDCODED CUTS) ──
-        if (currentOptions.engineMode === "ai") {
+        if (currentOptions.engineMode ==="ai") {
           try {
             const aiRes = await api.aiSmartCrop(
               fetcher,
               {
                 url,
-                strategy: "ai",
+                strategy:"ai",
                 aspectRatio: currentOptions.aspectRatioLock,
                 sensitivity: currentOptions.sensitivity,
                 paddingPx: currentOptions.padding,
                 backgroundColorMode:
-                  currentOptions.backgroundColorMode || "auto",
+                  currentOptions.backgroundColorMode ||"auto",
               },
               reqOptions
             );
@@ -313,8 +308,8 @@ export default function AutoCropPreviewPage({
                   url,
                   panels: detectedPanels,
                   bleed_guard_px: currentOptions.padding,
-                  background_mode: currentOptions.backgroundColorMode || "auto",
-                  output_format: "webp",
+                  background_mode: currentOptions.backgroundColorMode ||"auto",
+                  output_format:"webp",
                   quality: 90,
                 },
                 reqOptions
@@ -325,9 +320,8 @@ export default function AutoCropPreviewPage({
                 .map((slice) => slice.url);
             }
           } catch (aiErr: any) {
-            if (aiErr.name === "AbortError") throw aiErr;
-            console.warn(
-              "[AutoCropPreview] AI Smart Crop fallback to OpenCV:",
+            if (aiErr.name ==="AbortError") throw aiErr;
+            console.warn("[AutoCropPreview] AI Smart Crop fallback to OpenCV:",
               aiErr
             );
           }
@@ -341,7 +335,7 @@ export default function AutoCropPreviewPage({
               {
                 url,
                 sensitivity: currentOptions.sensitivity,
-                background_mode: currentOptions.backgroundColorMode || "auto",
+                background_mode: currentOptions.backgroundColorMode ||"auto",
                 min_panel_height: currentOptions.minPanelHeightPx,
                 overlap_merge_threshold: overlapMergeThreshold,
                 auto_split: currentOptions.autoSplitTallStrips,
@@ -363,8 +357,8 @@ export default function AutoCropPreviewPage({
                   url,
                   panels: detectedPanels,
                   bleed_guard_px: currentOptions.padding,
-                  background_mode: currentOptions.backgroundColorMode || "auto",
-                  output_format: "webp",
+                  background_mode: currentOptions.backgroundColorMode ||"auto",
+                  output_format:"webp",
                   quality: 90,
                 },
                 reqOptions
@@ -374,10 +368,9 @@ export default function AutoCropPreviewPage({
                 .sort((a, b) => a.index - b.index)
                 .map((slice) => slice.url);
             } else if (detected && !detected.success) {
-              status = "error";
+              status ="error";
               errorMessage =
-                detected.message ||
-                "Detection algorithm returned no valid comic panels.";
+                detected.message ||"Detection algorithm returned no valid comic panels.";
             }
           } else {
             const detected = await api.detectSmallPanels(
@@ -386,9 +379,9 @@ export default function AutoCropPreviewPage({
                 url,
                 aspect_ratio:
                   currentOptions.aspectRatioLock &&
-                  currentOptions.aspectRatioLock !== "free"
+                  currentOptions.aspectRatioLock !=="free"
                     ? currentOptions.aspectRatioLock
-                    : "free",
+                    :"free",
                 auto_trim: true,
                 snap_to_frame: true,
                 merge_speech_bubbles: true,
@@ -406,8 +399,8 @@ export default function AutoCropPreviewPage({
                   url,
                   panels: detected.panels,
                   bleed_guard_px: currentOptions.padding,
-                  background_mode: currentOptions.backgroundColorMode || "auto",
-                  output_format: "webp",
+                  background_mode: currentOptions.backgroundColorMode ||"auto",
+                  output_format:"webp",
                   quality: 90,
                 },
                 reqOptions
@@ -425,15 +418,15 @@ export default function AutoCropPreviewPage({
                   crop_bottom: margins.crop_bottom || 0,
                   crop_left: margins.crop_left || 0,
                   crop_right: margins.crop_right || 0,
-                  unit: margins.unit === "percent" ? "percent" : "pixels",
+                  unit: margins.unit ==="percent" ?"percent" :"pixels",
                   aspect_ratio:
                     currentOptions.aspectRatioLock &&
-                    currentOptions.aspectRatioLock !== "free"
+                    currentOptions.aspectRatioLock !=="free"
                       ? (currentOptions.aspectRatioLock as any)
-                      : "free",
+                      :"free",
                   auto_trim: true,
                   padding_px: currentOptions.padding,
-                  output_format: "webp",
+                  output_format:"webp",
                   quality: 90,
                 },
                 reqOptions
@@ -445,10 +438,10 @@ export default function AutoCropPreviewPage({
           }
         }
       } catch (cropErr: any) {
-        if (cropErr.name === "AbortError") throw cropErr;
+        if (cropErr.name ==="AbortError") throw cropErr;
         console.warn("[AutoCropPreview] crop error:", cropErr);
-        status = "error";
-        errorMessage = cropErr?.message || "Failed to process panel detection.";
+        status ="error";
+        errorMessage = cropErr?.message ||"Failed to process panel detection.";
         errorDetails = cropErr?.stack || String(cropErr);
       }
 
@@ -479,7 +472,7 @@ export default function AutoCropPreviewPage({
         typeInfo,
         layout:
           typeInfo?.type_label ||
-          (isTallStrip ? "Tall Webtoon Strip" : "Manga Page"),
+          (isTallStrip ?"Tall Webtoon Strip" :"Manga Page"),
         readingFlow: typeInfo?.reading_flow,
         dimensions: typeInfo
           ? { width: typeInfo.width, height: typeInfo.height }
@@ -558,10 +551,9 @@ export default function AutoCropPreviewPage({
         setPreviews(results);
         processedTargetsKeyRef.current = listToProcess.join("|||");
       } catch (error: any) {
-        if (error.name !== "AbortError") {
+        if (error.name !=="AbortError") {
           addNotification?.(
-            error?.message || "Could not generate auto-crop preview.",
-            "error"
+            error?.message ||"Could not generate auto-crop preview.","error"
           );
         }
       } finally {
@@ -594,7 +586,7 @@ export default function AutoCropPreviewPage({
       const next = [...prev];
       next[idx] = {
         ...next[idx],
-        status: "loading",
+        status:"loading",
         errorMessage: undefined,
         errorDetails: undefined,
       };
@@ -622,34 +614,30 @@ export default function AutoCropPreviewPage({
         next[idx] = updated;
         return next;
       });
-      addNotification?.(`Image #${idx + 1} re-analyzed successfully!`, "info");
+      addNotification?.(`Image #${idx + 1} re-analyzed successfully!`,"info");
     } catch (err: any) {
       setPreviews((prev) => {
         const next = [...prev];
         next[idx] = {
           ...next[idx],
-          status: "error",
-          errorMessage: err.message || "Retry failed. Could not process image.",
+          status:"error",
+          errorMessage: err.message ||"Retry failed. Could not process image.",
         };
         return next;
       });
-      addNotification?.(
-        `Retry for image #${idx + 1} failed: ${err.message || "Unknown error"}`,
-        "error"
+      addNotification?.(`Retry for image #${idx + 1} failed: ${err.message ||"Unknown error"}`,"error"
       );
     }
   };
 
   const handleRetryAllFailed = async () => {
     const failedIndices = previews
-      .map((p, i) => (p.status === "error" ? i : -1))
+      .map((p, i) => (p.status ==="error" ? i : -1))
       .filter((i) => i !== -1);
 
     if (failedIndices.length === 0) return;
 
-    addNotification?.(
-      `Retrying ${failedIndices.length} failed image(s)...`,
-      "info"
+    addNotification?.(`Retrying ${failedIndices.length} failed image(s)...`,"info"
     );
     await Promise.all(failedIndices.map((idx) => handleRetrySingle(idx)));
   };
@@ -660,15 +648,15 @@ export default function AutoCropPreviewPage({
       setActiveIndex(Math.max(0, previews.length - 2));
     }
     setSelectedPanelIndex(null);
-    addNotification?.(`Image #${idx + 1} excluded from auto-crop.`, "info");
+    addNotification?.(`Image #${idx + 1} excluded from auto-crop.`,"info");
   };
 
   const handleExcludeAllFailed = () => {
-    const errorCount = previews.filter((p) => p.status === "error").length;
-    setPreviews((prev) => prev.filter((p) => p.status !== "error"));
+    const errorCount = previews.filter((p) => p.status ==="error").length;
+    setPreviews((prev) => prev.filter((p) => p.status !=="error"));
     setActiveIndex(0);
     setSelectedPanelIndex(null);
-    addNotification?.(`Excluded ${errorCount} failed image(s).`, "info");
+    addNotification?.(`Excluded ${errorCount} failed image(s).`,"info");
   };
 
   const handleUseDefaultFallback = (idx: number, splitCount = 4) => {
@@ -693,16 +681,14 @@ export default function AutoCropPreviewPage({
       next[idx] = {
         ...next[idx],
         boxes: fallbackBoxes,
-        status: "success",
+        status:"success",
         errorMessage: undefined,
       };
       return next;
     });
 
     void handleRecropWithCustomBoxes(idx, fallbackBoxes);
-    addNotification?.(
-      `Applied ${splitCount}-panel manual slice fallback.`,
-      "info"
+    addNotification?.(`Applied ${splitCount}-panel manual slice fallback.`,"info"
     );
   };
 
@@ -725,8 +711,8 @@ export default function AutoCropPreviewPage({
           url: targetPreview.sourceUrl,
           panels: targetBoxes,
           bleed_guard_px: padding,
-          background_mode: backgroundColorMode || "auto",
-          output_format: "webp",
+          background_mode: backgroundColorMode ||"auto",
+          output_format:"webp",
           quality: 90,
         });
 
@@ -740,23 +726,19 @@ export default function AutoCropPreviewPage({
               ...next[previewIdx],
               panelUrls: newUrls,
               boxes: targetBoxes,
-              status: "success",
+              status:"success",
               errorMessage: undefined,
             };
             return next;
           });
-          addNotification?.(
-            `Applied ${newUrls.length} customized panel cuts!`,
-            "info"
+          addNotification?.(`Applied ${newUrls.length} customized panel cuts!`,"info"
           );
         }
       } catch (err: any) {
         console.error("Failed to recrop with custom boxes:", err);
-        addNotification?.(
-          `Failed to slice with custom boxes: ${
-            err.message || "Unknown error"
-          }`,
-          "error"
+        addNotification?.(`Failed to slice with custom boxes: ${
+            err.message ||"Unknown error"
+          }`,"error"
         );
       } finally {
         setIsReCropping(false);
@@ -835,7 +817,7 @@ export default function AutoCropPreviewPage({
   const handleDeletePanel = (previewIdx: number, boxIdx: number) => {
     const item = previews[previewIdx];
     if (!item?.boxes || item.boxes.length <= 1) {
-      addNotification?.("Cannot delete the only remaining panel.", "warning");
+      addNotification?.("Cannot delete the only remaining panel.","warning");
       return;
     }
     const updated = item.boxes.filter((_, i) => i !== boxIdx);
@@ -845,7 +827,7 @@ export default function AutoCropPreviewPage({
       return next;
     });
     setSelectedPanelIndex(null);
-    addNotification?.(`Panel #${boxIdx + 1} removed.`, "info");
+    addNotification?.(`Panel #${boxIdx + 1} removed.`,"info");
   };
 
   const handleNudgePanel = (
@@ -872,7 +854,7 @@ export default function AutoCropPreviewPage({
     if (!item) return;
 
     const currentBoxes = item.boxes || [];
-    const updated = [...currentBoxes, { ...newBox, id: `box_${Date.now()}` }];
+    const updated = [...currentBoxes, { ...newBox, id:`box_${Date.now()}` }];
     updated.sort((a, b) => (a.y ?? 0) - (b.y ?? 0));
 
     setPreviews((prev) => {
@@ -887,9 +869,7 @@ export default function AutoCropPreviewPage({
     if (newIdx !== -1) {
       setSelectedPanelIndex(newIdx);
     }
-    addNotification?.(
-      `Added panel box (${newBox.width}×${newBox.height}px).`,
-      "info"
+    addNotification?.(`Added panel box (${newBox.width}×${newBox.height}px).`,"info"
     );
   };
 
@@ -908,12 +888,12 @@ export default function AutoCropPreviewPage({
       if (!splitDone && roundY > boxTop + 25 && roundY < boxBottom - 25) {
         updated.push({
           ...box,
-          id: `${box.id ?? 1}_a`,
+          id:`${box.id ?? 1}_a`,
           height: roundY - boxTop,
         });
         updated.push({
           ...box,
-          id: `${box.id ?? 1}_b`,
+          id:`${box.id ?? 1}_b`,
           y: roundY,
           height: boxBottom - roundY,
         });
@@ -929,7 +909,7 @@ export default function AutoCropPreviewPage({
         next[previewIdx] = { ...next[previewIdx], boxes: updated };
         return next;
       });
-      addNotification?.("Added new cut line! Re-slicing panels...", "info");
+      addNotification?.("Added new cut line! Re-slicing panels...","info");
       void handleRecropWithCustomBoxes(previewIdx, updated);
     }
   };
@@ -959,9 +939,7 @@ export default function AutoCropPreviewPage({
       next[previewIdx] = { ...next[previewIdx], boxes: updated };
       return next;
     });
-    addNotification?.(
-      "Cut line removed and panels merged. Re-slicing...",
-      "info"
+    addNotification?.("Cut line removed and panels merged. Re-slicing...","info"
     );
     void handleRecropWithCustomBoxes(previewIdx, updated);
   };
@@ -978,12 +956,12 @@ export default function AutoCropPreviewPage({
       if (i === sliceIdx) {
         updated.push({
           ...targetBox,
-          id: `${targetBox.id ?? sliceIdx}_1`,
+          id:`${targetBox.id ?? sliceIdx}_1`,
           height: halfH,
         });
         updated.push({
           ...targetBox,
-          id: `${targetBox.id ?? sliceIdx}_2`,
+          id:`${targetBox.id ?? sliceIdx}_2`,
           y: (targetBox.y ?? 0) + halfH,
           height: (targetBox.height ?? 100) - halfH,
         });
@@ -998,9 +976,7 @@ export default function AutoCropPreviewPage({
       return next;
     });
 
-    addNotification?.(
-      `Split panel #${sliceIdx + 1} into two equal slices.`,
-      "info"
+    addNotification?.(`Split panel #${sliceIdx + 1} into two equal slices.`,"info"
     );
     void handleRecropWithCustomBoxes(previewIdx, updated);
   };
@@ -1021,18 +997,18 @@ export default function AutoCropPreviewPage({
       return next;
     });
     setSelectedPanelIndex(null);
-    addNotification?.(`Panel slice #${sliceIdx + 1} excluded.`, "info");
+    addNotification?.(`Panel slice #${sliceIdx + 1} excluded.`,"info");
   };
 
   const handleMoveSlice = (
     previewIdx: number,
     fromIdx: number,
-    direction: "left" | "right"
+    direction:"left" |"right"
   ) => {
     setPreviews((prev) => {
       const next = [...prev];
       const item = { ...next[previewIdx] };
-      const toIdx = direction === "left" ? fromIdx - 1 : fromIdx + 1;
+      const toIdx = direction ==="left" ? fromIdx - 1 : fromIdx + 1;
       if (toIdx < 0 || toIdx >= item.panelUrls.length) return prev;
 
       const updatedUrls = [...item.panelUrls];
@@ -1052,7 +1028,7 @@ export default function AutoCropPreviewPage({
       next[previewIdx] = item;
       return next;
     });
-    setSelectedPanelIndex(direction === "left" ? fromIdx - 1 : fromIdx + 1);
+    setSelectedPanelIndex(direction ==="left" ? fromIdx - 1 : fromIdx + 1);
   };
 
   const handleDuplicateSlice = (previewIdx: number, sliceIdx: number) => {
@@ -1067,7 +1043,7 @@ export default function AutoCropPreviewPage({
         const updatedBoxes = [...item.boxes];
         updatedBoxes.splice(sliceIdx + 1, 0, {
           ...item.boxes[sliceIdx],
-          id: `${item.boxes[sliceIdx].id ?? sliceIdx}_copy`,
+          id:`${item.boxes[sliceIdx].id ?? sliceIdx}_copy`,
         });
         item.boxes = updatedBoxes;
       }
@@ -1075,7 +1051,7 @@ export default function AutoCropPreviewPage({
       next[previewIdx] = item;
       return next;
     });
-    addNotification?.(`Panel slice #${sliceIdx + 1} duplicated.`, "info");
+    addNotification?.(`Panel slice #${sliceIdx + 1} duplicated.`,"info");
   };
 
   const handleResetSlices = (previewIdx: number) => {
@@ -1092,7 +1068,7 @@ export default function AutoCropPreviewPage({
       return next;
     });
     setSelectedPanelIndex(null);
-    addNotification?.("Panel slices restored to original detection.", "info");
+    addNotification?.("Panel slices restored to original detection.","info");
   };
 
   const handleConfirmAction = async () => {
@@ -1118,8 +1094,8 @@ export default function AutoCropPreviewPage({
               url: p.sourceUrl,
               panels: p.boxes,
               bleed_guard_px: padding,
-              background_mode: backgroundColorMode || "auto",
-              output_format: "webp",
+              background_mode: backgroundColorMode ||"auto",
+              output_format:"webp",
               quality: 90,
             });
             if (cropped?.slices && cropped.slices.length > 0) {
@@ -1136,9 +1112,7 @@ export default function AutoCropPreviewPage({
       onConfirm(confirmedMap);
     } catch (err: any) {
       console.error("Error during final crop confirmation:", err);
-      addNotification?.(
-        `Error finalizing crops: ${err.message || "Unknown error"}`,
-        "error"
+      addNotification?.(`Error finalizing crops: ${err.message ||"Unknown error"}`,"error"
       );
     } finally {
       setIsSubmitting(false);
@@ -1150,15 +1124,14 @@ export default function AutoCropPreviewPage({
     (acc, p) => acc + (p.panelUrls?.length || 0),
     0
   );
-  const errorCount = previews.filter((p) => p.status === "error").length;
+  const errorCount = previews.filter((p) => p.status ==="error").length;
   const hasErrors = errorCount > 0;
 
   const containerClasses = isModal
-    ? "fixed inset-0 z-[99999] w-screen h-screen overflow-hidden bg-[#050508] text-white animate-in fade-in duration-200"
-    : "w-full h-screen min-h-screen flex flex-col overflow-hidden bg-[#050508] text-white";
+    ?"fixed inset-0 z-[99999] w-screen h-screen overflow-hidden bg-[#050508] text-white animate-in fade-in duration-200"
+    :"w-full h-screen min-h-screen flex flex-col overflow-hidden bg-[#050508] text-white";
 
-  const cardClasses =
-    "w-full h-full flex flex-col overflow-hidden bg-[#09090D] text-white relative z-10";
+  const cardClasses ="w-full h-full flex flex-col overflow-hidden bg-[#09090D] text-white relative z-10";
 
   const modalContent = (
     <div className={containerClasses} data-modal="true">
@@ -1187,20 +1160,20 @@ export default function AutoCropPreviewPage({
                 <button
                   type="button"
                   onClick={() => {
-                    if (engineMode !== "opencv") {
+                    if (engineMode !=="opencv") {
                       setEngineMode("opencv");
                       const updated = {
                         ...optionsRef.current,
-                        engineMode: "opencv" as const,
+                        engineMode:"opencv" as const,
                       };
                       optionsRef.current = updated;
                       void runPreview(undefined, updated);
                     }
                   }}
                   className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-all flex items-center gap-1 !cursor-pointer ${
-                    engineMode === "opencv"
-                      ? "bg-emerald-500 text-black shadow-sm font-bold"
-                      : "text-neutral-400 hover:text-white"
+                    engineMode ==="opencv"
+                      ?"bg-emerald-500 text-black shadow-sm font-bold"
+                      :"text-neutral-400 hover:text-white"
                   }`}
                   title="OpenCV Fast Gutter Engine (Local)"
                 >
@@ -1210,20 +1183,20 @@ export default function AutoCropPreviewPage({
                 <button
                   type="button"
                   onClick={() => {
-                    if (engineMode !== "ai") {
+                    if (engineMode !=="ai") {
                       setEngineMode("ai");
                       const updated = {
                         ...optionsRef.current,
-                        engineMode: "ai" as const,
+                        engineMode:"ai" as const,
                       };
                       optionsRef.current = updated;
                       void runPreview(undefined, updated);
                     }
                   }}
                   className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-all flex items-center gap-1 !cursor-pointer ${
-                    engineMode === "ai"
-                      ? "bg-sky-500 text-black shadow-sm font-bold"
-                      : "text-neutral-400 hover:text-white"
+                    engineMode ==="ai"
+                      ?"bg-sky-500 text-black shadow-sm font-bold"
+                      :"text-neutral-400 hover:text-white"
                   }`}
                   title="Gemini AI Multimodal Vision Crop"
                 >
@@ -1241,9 +1214,9 @@ export default function AutoCropPreviewPage({
                 type="button"
                 onClick={() => setActiveTab("slices")}
                 className={`py-1 px-2 sm:px-2.5 rounded-md transition-all flex items-center justify-center gap-1 sm:gap-1.5 !cursor-pointer active:scale-95 ${
-                  activeTab === "slices"
-                    ? "bg-emerald-500 text-black font-bold shadow-md shadow-emerald-500/20"
-                    : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+                  activeTab ==="slices"
+                    ?"bg-emerald-500 text-black font-bold shadow-md"
+                    :"text-neutral-400 hover:text-white hover:bg-neutral-800/60"
                 }`}
               >
                 <Layers className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
@@ -1254,9 +1227,9 @@ export default function AutoCropPreviewPage({
                 type="button"
                 onClick={() => setActiveTab("compare")}
                 className={`py-1 px-2 sm:px-2.5 rounded-md transition-all flex items-center justify-center gap-1 sm:gap-1.5 !cursor-pointer active:scale-95 ${
-                  activeTab === "compare"
-                    ? "bg-emerald-500 text-black font-bold shadow-md shadow-emerald-500/20"
-                    : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+                  activeTab ==="compare"
+                    ?"bg-emerald-500 text-black font-bold shadow-md"
+                    :"text-neutral-400 hover:text-white hover:bg-neutral-800/60"
                 }`}
               >
                 <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
@@ -1267,9 +1240,9 @@ export default function AutoCropPreviewPage({
                 type="button"
                 onClick={() => setActiveTab("tuning")}
                 className={`py-1 px-2 sm:px-2.5 rounded-md transition-all flex items-center justify-center gap-1 sm:gap-1.5 !cursor-pointer active:scale-95 ${
-                  activeTab === "tuning"
-                    ? "bg-emerald-500 text-black font-bold shadow-md shadow-emerald-500/20"
-                    : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+                  activeTab ==="tuning"
+                    ?"bg-emerald-500 text-black font-bold shadow-md"
+                    :"text-neutral-400 hover:text-white hover:bg-neutral-800/60"
                 }`}
               >
                 <Sliders className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
@@ -1340,11 +1313,11 @@ export default function AutoCropPreviewPage({
                               Reading Flow:
                             </span>
                             <span className="text-sky-300 font-semibold text-right">
-                              {activePreview.readingFlow === "top_to_bottom"
-                                ? "Top-to-Bottom (Webtoon)"
-                                : activePreview.readingFlow === "right_to_left"
-                                ? "Right-to-Left (Manga)"
-                                : "Left-to-Right (Comic)"}
+                              {activePreview.readingFlow ==="top_to_bottom"
+                                ?"Top-to-Bottom (Webtoon)"
+                                : activePreview.readingFlow ==="right_to_left"
+                                ?"Right-to-Left (Manga)"
+                                :"Left-to-Right (Comic)"}
                             </span>
                           </div>
 
@@ -1354,13 +1327,13 @@ export default function AutoCropPreviewPage({
                                 Dimensions:
                               </span>
                               <span className="text-neutral-200 text-right font-medium">
-                                {activePreview.dimensions.width} ×{" "}
+                                {activePreview.dimensions.width} ×{""}
                                 {activePreview.dimensions.height}px
                                 {activePreview.aspectRatio
-                                  ? ` (${activePreview.aspectRatio.toFixed(
+                                  ?` (${activePreview.aspectRatio.toFixed(
                                       2
                                     )}:1)`
-                                  : ""}
+                                  :""}
                               </span>
                             </div>
                           )}
@@ -1403,7 +1376,7 @@ export default function AutoCropPreviewPage({
                           <button
                             type="button"
                             onClick={() => setShowLayoutDropdown(false)}
-                            className="w-full py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold flex items-center justify-center gap-1.5 transition-all !cursor-pointer active:scale-95 shadow-md shadow-emerald-500/20"
+                            className="w-full py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold flex items-center justify-center gap-1.5 transition-all !cursor-pointer active:scale-95 shadow-md"
                           >
                             <span>Done</span>
                           </button>
@@ -1435,8 +1408,8 @@ export default function AutoCropPreviewPage({
               <RefreshCw
                 className={`h-3.5 w-3.5 ${
                   isPreviewing
-                    ? "animate-spin text-emerald-400"
-                    : "text-neutral-400"
+                    ?"animate-spin text-emerald-400"
+                    :"text-neutral-400"
                 }`}
               />
               <span className="hidden sm:inline">Re-analyze</span>
@@ -1447,9 +1420,9 @@ export default function AutoCropPreviewPage({
         {/* ── MAIN BODY CONTENT ── */}
         <div
           className={`flex-1 min-h-0 ${
-            activeTab === "compare"
-              ? "overflow-hidden flex flex-col h-full p-0"
-              : "overflow-y-auto p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6"
+            activeTab ==="compare"
+              ?"overflow-hidden flex flex-col h-full p-0"
+              :"overflow-y-auto p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6"
           }`}
         >
           {targets.length === 0 ? (
@@ -1515,8 +1488,8 @@ export default function AutoCropPreviewPage({
                   <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
                     {previews.map((item, index) => {
                       const isSel = activeIndex === index;
-                      const isItemError = item.status === "error";
-                      const isItemLoading = item.status === "loading";
+                      const isItemError = item.status ==="error";
+                      const isItemLoading = item.status ==="loading";
 
                       return (
                         <button
@@ -1528,12 +1501,12 @@ export default function AutoCropPreviewPage({
                           }}
                           className={`relative w-20 sm:w-24 h-24 sm:h-28 shrink-0 rounded-2xl overflow-hidden border-2 transition-all group flex flex-col bg-neutral-950 text-left !cursor-pointer active:scale-95 shadow-sm ${
                             isItemError
-                              ? "border-rose-500 ring-2 ring-rose-500/30"
+                              ?"border-rose-500 ring-2 ring-rose-500/30"
                               : isItemLoading
-                              ? "border-emerald-500/40 ring-2 ring-emerald-500/20 bg-neutral-900 animate-pulse"
+                              ?"border-emerald-500/40 ring-2 ring-emerald-500/20 bg-neutral-900 animate-pulse"
                               : isSel
-                              ? "border-emerald-400 ring-2 ring-emerald-500/40 shadow-xl shadow-emerald-500/20 bg-emerald-950/20 scale-[1.02]"
-                              : "border-neutral-800 hover:border-neutral-700 opacity-80 hover:opacity-100"
+                              ?"border-emerald-400 ring-2 ring-emerald-500/40 shadow-xl  bg-emerald-950/20 scale-[1.02]"
+                              :"border-neutral-800 hover:border-neutral-700 opacity-80 hover:opacity-100"
                           }`}
                         >
                           {isItemLoading ? (
@@ -1554,10 +1527,10 @@ export default function AutoCropPreviewPage({
                           <div
                             className={`p-1.5 text-[10px] font-mono flex items-center justify-between mt-auto border-t ${
                               isItemError
-                                ? "bg-rose-950/90 text-rose-300 border-rose-900/60"
+                                ?"bg-rose-950/90 text-rose-300 border-rose-900/60"
                                 : isSel
-                                ? "bg-emerald-950/90 text-emerald-200 border-emerald-900/60 font-bold"
-                                : "bg-neutral-900/90 text-neutral-400 border-neutral-800"
+                                ?"bg-emerald-950/90 text-emerald-200 border-emerald-900/60 font-bold"
+                                :"bg-neutral-900/90 text-neutral-400 border-neutral-800"
                             }`}
                           >
                             <span>#{index + 1}</span>
@@ -1593,7 +1566,7 @@ export default function AutoCropPreviewPage({
 
               {/* ACTIVE PREVIEW CONTENT */}
               {activePreview ? (
-                activePreview.status === "loading" ? (
+                activePreview.status ==="loading" ? (
                   <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 p-8 text-center flex flex-col items-center justify-center gap-4 min-h-[360px] animate-in fade-in">
                     <div className="relative">
                       <div className="absolute -inset-3 bg-emerald-500/20 rounded-full blur-lg animate-pulse" />
@@ -1610,7 +1583,7 @@ export default function AutoCropPreviewPage({
                       </p>
                     </div>
                   </div>
-                ) : activePreview.status === "error" ? (
+                ) : activePreview.status ==="error" ? (
                   <div className="rounded-3xl border border-rose-500/40 bg-rose-950/20 p-6 sm:p-8 space-y-5 text-left shadow-2xl animate-in fade-in duration-150">
                     <div className="flex items-start gap-3.5">
                       <div className="p-2.5 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 shrink-0">
@@ -1622,8 +1595,7 @@ export default function AutoCropPreviewPage({
                           {activeIndex + 1}
                         </h3>
                         <p className="text-xs sm:text-sm text-rose-300/90 leading-relaxed">
-                          {activePreview.errorMessage ||
-                            "The automated vision detector could not identify clear seams or gutter lines for this image."}
+                          {activePreview.errorMessage ||"The automated vision detector could not identify clear seams or gutter lines for this image."}
                         </p>
                         {activePreview.errorDetails && (
                           <details className="text-[11px] text-neutral-400 mt-2 bg-black/40 p-2.5 rounded-xl border border-neutral-800/80">
@@ -1643,7 +1615,7 @@ export default function AutoCropPreviewPage({
                       <button
                         type="button"
                         onClick={() => handleRetrySingle(activeIndex)}
-                        className="p-3 rounded-2xl bg-emerald-500 text-black font-bold text-xs hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/15 active:scale-95 !cursor-pointer"
+                        className="p-3 rounded-2xl bg-emerald-500 text-black font-bold text-xs hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95 !cursor-pointer"
                       >
                         <RefreshCw className="h-4 w-4" />
                         <span>Retry Auto-Detection</span>
@@ -1671,13 +1643,13 @@ export default function AutoCropPreviewPage({
                 ) : (
                   <div
                     className={`flex-1 min-h-0 ${
-                      activeTab === "compare"
-                        ? "flex flex-col h-full"
-                        : "space-y-4 sm:space-y-5"
+                      activeTab ==="compare"
+                        ?"flex flex-col h-full"
+                        :"space-y-4 sm:space-y-5"
                     }`}
                   >
                     {/* ── TAB 1: SLICES (CROP CARD VIEW) ── */}
-                    {activeTab === "slices" && (
+                    {activeTab ==="slices" && (
                       <AutoCropSlicesTab
                         panelUrls={activePreview.panelUrls}
                         boxes={activePreview.boxes}
@@ -1705,7 +1677,7 @@ export default function AutoCropPreviewPage({
                     )}
 
                     {/* ── TAB 2: COMPARE (CROP EDIT CARD VIEW) ── */}
-                    {activeTab === "compare" && (
+                    {activeTab ==="compare" && (
                       <AutoCropCompareTab
                         imageUrl={activePreview.sourceUrl}
                         boxes={activePreview.boxes || []}
@@ -1750,7 +1722,7 @@ export default function AutoCropPreviewPage({
                     )}
 
                     {/* ── TAB 3: TUNING (TUNING PARAMETERS CARD VIEW) ── */}
-                    {activeTab === "tuning" && (
+                    {activeTab ==="tuning" && (
                       <AutoCropTuningTab
                         engineMode={engineMode}
                         onEngineModeChange={(mode) => {
@@ -1808,10 +1780,10 @@ export default function AutoCropPreviewPage({
           <div className="text-[11px] sm:text-xs text-neutral-400 flex items-center gap-2 w-full md:w-auto shrink-0">
             <Info className="h-4 w-4 text-emerald-400 shrink-0" />
             <span className="truncate">
-              Ready to import{" "}
+              Ready to import{""}
               <strong className="text-emerald-300 font-bold">
                 {totalPanelsDetected} panels
-              </strong>{" "}
+              </strong>{""}
               directly into project.
             </span>
           </div>
@@ -2191,14 +2163,14 @@ export default function AutoCropPreviewPage({
                     type="button"
                     onClick={() => handleRetrySingle(activeIndex)}
                     disabled={
-                      isReCropping || activePreview.status === "loading"
+                      isReCropping || activePreview.status ==="loading"
                     }
                     className="px-2.5 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/90 text-neutral-300 hover:text-white hover:bg-neutral-800 text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors !cursor-pointer active:scale-95"
                     title="Re-run AI Panel Detection on this image"
                   >
                     <RefreshCw
                       className={`h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-400 ${
-                        isReCropping ? "animate-spin" : ""
+                        isReCropping ?"animate-spin" :""
                       }`}
                     />
                     <span className="hidden sm:inline">Re-detect</span>
@@ -2229,7 +2201,7 @@ export default function AutoCropPreviewPage({
                 isReCropping ||
                 totalPanelsDetected === 0
               }
-              className="px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs sm:text-sm font-bold disabled:opacity-40 disabled:hover:bg-emerald-500 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 transition-all !cursor-pointer text-center active:scale-95"
+              className="px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs sm:text-sm font-bold disabled:opacity-40 disabled:hover:bg-emerald-500 flex items-center justify-center gap-2 shadow-lg transition-all !cursor-pointer text-center active:scale-95"
             >
               {isApplying || isSubmitting ? (
                 <>
@@ -2284,7 +2256,7 @@ export default function AutoCropPreviewPage({
     </div>
   );
 
-  if (isModal && typeof document !== "undefined") {
+  if (isModal && typeof document !=="undefined") {
     return createPortal(modalContent, document.body);
   }
   return modalContent;

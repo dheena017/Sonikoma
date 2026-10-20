@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef } from"react";
 import {
   Volume2,
   VolumeX,
@@ -9,9 +9,9 @@ import {
   Sparkles,
   Plus,
   Mic,
-} from "lucide-react";
-import { getProxiedImageUrl } from "@/shared/utils";
-import { GeneratedPanel } from "@/shared/types";
+} from"lucide-react";
+import { getProxiedImageUrl } from"@/shared/utils";
+import { GeneratedPanel } from"@/shared/types";
 
 interface StoryboardAudioViewProps {
   panels: GeneratedPanel[];
@@ -23,20 +23,9 @@ interface StoryboardAudioViewProps {
   onTriggerFeedback?: (msg: string) => void;
 }
 
-const COMMON_SFX = [
-  "💥 Boom",
-  "⚡ Whoosh",
-  "🚪 Clunk",
-  "🗡️ Slash",
-  "💨 Wind",
-  "👣 Steps",
+const COMMON_SFX = ["💥 Boom","⚡ Whoosh","🚪 Clunk","🗡️ Slash","💨 Wind","👣 Steps",
 ];
-const COMMON_BGM = [
-  "Dramatic Battle",
-  "Suspense Tension",
-  "Eerie Ambient",
-  "Heroic Rise",
-  "Calm Melancholy",
+const COMMON_BGM = ["Dramatic Battle","Suspense Tension","Eerie Ambient","Heroic Rise","Calm Melancholy",
 ];
 
 export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
@@ -56,7 +45,7 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
       audioRef.current.pause();
       audioRef.current = null;
     }
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+    if (typeof window !=="undefined" &&"speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
     setPlayingIdx(null);
@@ -83,7 +72,7 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
       (panel as any).voice_url;
 
     const textToSpeak =
-      panel.speech_text || panel.narrative || (panel as any).dialogue || "";
+      panel.speech_text || panel.narrative || (panel as any).dialogue ||"";
 
     if (audioUrl) {
       const audio = new Audio(audioUrl);
@@ -102,14 +91,13 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
     } else if (textToSpeak) {
       speakFallback(textToSpeak, index);
     } else {
-      onTriggerFeedback?.(
-        `Panel #${index + 1} has no dialogue or audio to play`
+      onTriggerFeedback?.(`Panel #${index + 1} has no dialogue or audio to play`
       );
     }
   };
 
   const speakFallback = (text: string, index: number) => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window && text) {
+    if (typeof window !=="undefined" &&"speechSynthesis" in window && text) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.0;
@@ -146,7 +134,7 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
 
       {panels.map((panel, index) => {
         const isSelected = selectedIndices.includes(index);
-        const imgUrl = panel.image_url || (panel as any).imageUrl || "";
+        const imgUrl = panel.image_url || (panel as any).imageUrl ||"";
         const displayUrl = getProxiedImageUrl(imgUrl);
         const audioUrl =
           panel.audio_url ||
@@ -154,11 +142,11 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
           panel.narrative_audio_url ||
           (panel as any).voice_url;
         const text =
-          panel.speech_text || panel.narrative || (panel as any).dialogue || "";
+          panel.speech_text || panel.narrative || (panel as any).dialogue ||"";
         const hasAudio = !!audioUrl || !!text;
         const isPlaying = playingIdx === index;
-        const currentSfx = panel.sfx || "";
-        const currentBgm = panel.bgm_track || "";
+        const currentSfx = panel.sfx ||"";
+        const currentBgm = panel.bgm_track ||"";
 
         return (
           <div
@@ -166,8 +154,8 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
             onClick={(e) => onSelect(index, e)}
             className={`p-3 rounded-2xl border transition-all flex flex-col gap-2.5 cursor-pointer ${
               isSelected
-                ? "border-emerald-500 bg-emerald-950/25 ring-2 ring-emerald-500/50 shadow-md"
-                : "border-white/10 bg-[#121212] hover:border-emerald-500/40"
+                ?"border-emerald-500 bg-emerald-950/25 ring-2 ring-emerald-500/50 shadow-md"
+                :"border-white/10 bg-[#121212] hover:border-emerald-500/40"
             }`}
           >
             {/* Top row: Thumbnail + Voice Player */}
@@ -204,7 +192,7 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
                     )}
                   </div>
                   <p className="text-[8px] font-mono text-neutral-300 truncate max-w-[150px] italic">
-                    {text ? `"${text}"` : "No dialogue attached"}
+                    {text ?`"${text}"` :"No dialogue attached"}
                   </p>
                 </div>
               </div>
@@ -216,8 +204,8 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
                   onClick={(e) => handlePlayAudio(index, panel, e)}
                   className={`px-2.5 py-1 rounded-xl text-[9px] font-mono font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer ${
                     isPlaying
-                      ? "bg-[#2A2A2A] text-white animate-pulse "
-                      : "bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300"
+                      ?"bg-[#2A2A2A] text-white animate-pulse"
+                      :"bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300"
                   }`}
                 >
                   {isPlaying ? (
@@ -225,7 +213,7 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
                   ) : (
                     <Play className="h-3 w-3 fill-emerald-300" />
                   )}
-                  <span>{isPlaying ? "Playing..." : "Play Audio"}</span>
+                  <span>{isPlaying ?"Playing..." :"Play Audio"}</span>
                 </button>
               ) : (
                 <button
@@ -234,7 +222,7 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
                     e.stopPropagation();
                     onTriggerVoiceGen(index);
                   }}
-                  className="px-2.5 py-1 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-[#60A5FA]/40 text-white text-[9px] font-mono font-bold flex items-center gap-1 transition-all shadow-sm shadow-blue-500/25 cursor-pointer active:scale-95"
+                  className="px-2.5 py-1 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-[#60A5FA]/40 text-white text-[9px] font-mono font-bold flex items-center gap-1 transition-all shadow-sm cursor-pointer active:scale-95"
                 >
                   <Sparkles className="h-2.5 w-2.5" />
                   <span>Gen Voice</span>
@@ -255,18 +243,18 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const next = isSfxActive ? "" : sfx;
+                      const next = isSfxActive ?"" : sfx;
                       onUpdateSfx(index, next);
                       onTriggerFeedback?.(
                         next
-                          ? `Attached ${sfx} to Panel #${index + 1}`
-                          : `Removed SFX`
+                          ?`Attached ${sfx} to Panel #${index + 1}`
+                          :`Removed SFX`
                       );
                     }}
                     className={`px-2 py-0.5 rounded-lg text-[8px] font-mono whitespace-nowrap transition-all border cursor-pointer ${
                       isSfxActive
-                        ? "bg-amber-600/40 border-amber-500 text-amber-200 font-bold"
-                        : "bg-black/40 border-white/5 text-neutral-400 hover:text-white"
+                        ?"bg-amber-600/40 border-amber-500 text-amber-200 font-bold"
+                        :"bg-black/40 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
                     {sfx}

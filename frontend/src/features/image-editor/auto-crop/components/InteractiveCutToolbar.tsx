@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   Box,
   MousePointer,
@@ -16,9 +16,9 @@ import {
   Maximize2,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
-import * as api from "@/shared/api";
-import { ToolMode, ThemeConfigItem } from "./InteractiveCutOverlay.types";
+} from"lucide-react";
+import * as api from"@/shared/api";
+import { ToolMode, ThemeConfigItem } from"./InteractiveCutOverlay.types";
 
 export interface InteractiveCutToolbarProps {
   toolMode: ToolMode;
@@ -77,9 +77,9 @@ export const InteractiveCutToolbar: React.FC<InteractiveCutToolbarProps> = ({
           type="button"
           onClick={() => setToolMode("box")}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all !cursor-pointer ${
-            toolMode === "box"
-              ? "bg-emerald-500 text-black font-bold shadow-md shadow-emerald-500/20"
-              : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+            toolMode ==="box"
+              ?"bg-emerald-500 text-black font-bold shadow-md"
+              :"text-neutral-400 hover:text-white hover:bg-neutral-800/60"
           }`}
           title="Draw rectangle or click to add a panel bounding box"
         >
@@ -91,9 +91,9 @@ export const InteractiveCutToolbar: React.FC<InteractiveCutToolbarProps> = ({
           type="button"
           onClick={() => setToolMode("select")}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all !cursor-pointer ${
-            toolMode === "select"
-              ? "bg-emerald-500 text-black font-bold shadow-md shadow-emerald-500/20"
-              : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+            toolMode ==="select"
+              ?"bg-emerald-500 text-black font-bold shadow-md"
+              :"text-neutral-400 hover:text-white hover:bg-neutral-800/60"
           }`}
           title="Select, move, and 4-side resize panels"
         >
@@ -118,9 +118,7 @@ export const InteractiveCutToolbar: React.FC<InteractiveCutToolbarProps> = ({
             <button
               type="button"
               onClick={() => {
-                const targetNum = prompt(
-                  `Jump to panel number (1 - ${boxes.length}):`,
-                  `${(selectedPanelIndex ?? 0) + 1}`
+                const targetNum = prompt(`Jump to panel number (1 - ${boxes.length}):`,`${(selectedPanelIndex ?? 0) + 1}`
                 );
                 if (targetNum) {
                   const num = parseInt(targetNum.trim(), 10);
@@ -136,7 +134,7 @@ export const InteractiveCutToolbar: React.FC<InteractiveCutToolbarProps> = ({
                 #
                 {selectedPanelIndex !== null && selectedPanelIndex >= 0
                   ? selectedPanelIndex + 1
-                  : "—"}
+                  :"—"}
               </span>
               <span className="text-neutral-500 font-normal">
                 /{boxes.length}
@@ -172,8 +170,8 @@ export const InteractiveCutToolbar: React.FC<InteractiveCutToolbarProps> = ({
             disabled={isReCropping}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all !cursor-pointer shadow-md active:scale-95 ${
               isReCropping
-                ? "bg-neutral-800 text-neutral-400 border border-neutral-700 cursor-not-allowed"
-                : "bg-emerald-500/15 hover:bg-emerald-500 text-emerald-300 hover:text-black border border-emerald-500/40"
+                ?"bg-neutral-800 text-neutral-400 border border-neutral-700 cursor-not-allowed"
+                :"bg-emerald-500/15 hover:bg-emerald-500 text-emerald-300 hover:text-black border border-emerald-500/40"
             }`}
             title="Re-slice panel thumbnails with current box positions"
           >
@@ -198,10 +196,10 @@ export const InteractiveCutToolbar: React.FC<InteractiveCutToolbarProps> = ({
             onClick={onToggleCutLines}
             className={`p-2 rounded-xl text-xs border transition-colors flex items-center justify-center !cursor-pointer ${
               showCutLines
-                ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-                : "bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-white"
+                ?"bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+                :"bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-white"
             }`}
-            title={showCutLines ? "Hide Panel Boxes" : "Show Panel Boxes"}
+            title={showCutLines ?"Hide Panel Boxes" :"Show Panel Boxes"}
           >
             {showCutLines ? (
               <Eye className="h-3.5 w-3.5" />
@@ -217,8 +215,8 @@ export const InteractiveCutToolbar: React.FC<InteractiveCutToolbarProps> = ({
           onClick={onToggleMinimap}
           className={`p-2 rounded-xl text-xs border transition-colors flex items-center justify-center !cursor-pointer ${
             showMinimap
-              ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-              : "bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-white"
+              ?"bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+              :"bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-white"
           }`}
           title="Toggle Strip Minimap Radar (M)"
         >
@@ -231,8 +229,8 @@ export const InteractiveCutToolbar: React.FC<InteractiveCutToolbarProps> = ({
           onClick={onToggleSettingsMenu}
           className={`p-2 rounded-xl border text-xs flex items-center justify-center transition-all !cursor-pointer shadow-sm ${
             showSettingsMenu
-              ? "bg-emerald-500/20 text-emerald-300 border-emerald-500 shadow-emerald-500/20"
-              : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:bg-neutral-800 hover:text-white"
+              ?"bg-emerald-500/20 text-emerald-300 border-emerald-500"
+              :"bg-neutral-900 text-neutral-400 border-neutral-800 hover:bg-neutral-800 hover:text-white"
           }`}
           title="Overlay Display Customization"
         >

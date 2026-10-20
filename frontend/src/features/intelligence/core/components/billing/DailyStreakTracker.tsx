@@ -1,5 +1,5 @@
-import React from "react";
-import { Gift, CheckCircle2, Ticket, Sparkles } from "lucide-react";
+import React from"react";
+import { Gift, CheckCircle2, Ticket, Sparkles } from"lucide-react";
 
 export interface DailyStreakTrackerProps {
   hasClaimedToday: boolean;
@@ -9,13 +9,13 @@ export interface DailyStreakTrackerProps {
 }
 
 const STREAK_REWARDS = [
-  { day: 1, reward: 50, label: "+50 Credits" },
-  { day: 2, reward: 60, label: "+60 Credits" },
-  { day: 3, reward: 75, label: "+75 Credits" },
-  { day: 4, reward: 90, label: "+90 Credits" },
-  { day: 5, reward: 110, label: "+110 Credits" },
-  { day: 6, reward: 130, label: "+130 Credits" },
-  { day: 7, reward: 150, label: "+150 Mega", special: true },
+  { day: 1, reward: 50, label:"+50 Credits" },
+  { day: 2, reward: 60, label:"+60 Credits" },
+  { day: 3, reward: 75, label:"+75 Credits" },
+  { day: 4, reward: 90, label:"+90 Credits" },
+  { day: 5, reward: 110, label:"+110 Credits" },
+  { day: 6, reward: 130, label:"+130 Credits" },
+  { day: 7, reward: 150, label:"+150 Mega", special: true },
 ];
 
 export const DailyStreakTracker: React.FC<DailyStreakTrackerProps> = ({
@@ -44,7 +44,7 @@ export const DailyStreakTracker: React.FC<DailyStreakTrackerProps> = ({
             Current Streak:
           </span>
           <span className="text-xs font-black text-amber-400 font-mono">
-            {streakDays} {streakDays === 1 ? "Day" : "Days"}
+            {streakDays} {streakDays === 1 ?"Day" :"Days"}
           </span>
         </div>
       </div>
@@ -63,10 +63,10 @@ export const DailyStreakTracker: React.FC<DailyStreakTrackerProps> = ({
               onClick={onClaimClick}
               className={`p-3 rounded-2xl border text-center transition-all flex flex-col items-center justify-between gap-2 relative min-h-[105px] select-none ${
                 isClaimed
-                  ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-400/80 opacity-80"
+                  ?"bg-emerald-500/5 border-emerald-500/20 text-emerald-400/80 opacity-80"
                   : isActive
-                  ? "bg-amber-500/10 border-amber-500/50 text-amber-400 cursor-pointer animate-pulse shadow-md shadow-amber-900/10"
-                  : "bg-[#09090b]/40 border-white/5 text-neutral-600"
+                  ?"bg-amber-500/10 border-amber-500/50 text-amber-400 cursor-pointer animate-pulse shadow-md"
+                  :"bg-[#09090b]/40 border-white/5 text-neutral-600"
               }`}
             >
               <span className="text-[9px] font-extrabold uppercase font-mono tracking-wider">
@@ -80,14 +80,14 @@ export const DailyStreakTracker: React.FC<DailyStreakTrackerProps> = ({
                   <Ticket
                     className={`w-5.5 h-5.5 ${
                       isActive
-                        ? "text-amber-400 animate-bounce"
-                        : "text-neutral-600"
+                        ?"text-amber-400 animate-bounce"
+                        :"text-neutral-600"
                     }`}
                   />
                 ) : (
                   <Gift
                     className={`w-4.5 h-4.5 ${
-                      isActive ? "text-amber-400" : "text-neutral-600"
+                      isActive ?"text-amber-400" :"text-neutral-600"
                     }`}
                   />
                 )}
@@ -114,14 +114,14 @@ export const DailyStreakTracker: React.FC<DailyStreakTrackerProps> = ({
           onClick={onClaimClick}
           className={`py-2 px-5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 border transition-all cursor-pointer ${
             hasClaimedToday
-              ? "bg-neutral-900 border-white/5 text-neutral-500 cursor-not-allowed opacity-60"
-              : "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 border-amber-500/30 text-neutral-950 active:scale-95 shadow-md shadow-amber-950/30"
+              ?"bg-neutral-900 border-white/5 text-neutral-500 cursor-not-allowed opacity-60"
+              :"bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 border-amber-500/30 text-neutral-950 active:scale-95 shadow-md"
           }`}
         >
           <Gift className="w-4 h-4" />
           {hasClaimedToday
-            ? "Claimed for today"
-            : `Claim Day ${streakDays} Reward`}
+            ?"Claimed for today"
+            :`Claim Day ${streakDays} Reward`}
         </button>
       </div>
 

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { ExternalLink, FolderOpen, LayoutDashboard } from "lucide-react";
-import TooltipPortal from "@/shared/ui/common/TooltipPortal";
-import { WorkspaceId } from "../types/workspace.types";
+import React, { useState } from"react";
+import { ExternalLink, FolderOpen, LayoutDashboard } from"lucide-react";
+import TooltipPortal from"@/shared/ui/common/TooltipPortal";
+import { WorkspaceId } from"../types/workspace.types";
 import {
   getGroupedWorkspaces,
   WorkspaceConfig,
-} from "../registry/workspaceRegistry";
+} from"../registry/workspaceRegistry";
 
 const SidebarItem: React.FC<{
   item: WorkspaceConfig;
@@ -27,8 +27,8 @@ const SidebarItem: React.FC<{
       <div
         className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${
           isActive
-            ? "h-6 bg-[#3B82F6] opacity-100 "
-            : "h-0 bg-transparent opacity-0"
+            ?"h-6 bg-[#3B82F6] opacity-100"
+            :"h-0 bg-transparent opacity-0"
         }`}
       />
 
@@ -42,15 +42,15 @@ const SidebarItem: React.FC<{
         <div
           className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 cursor-pointer ${
             isActive
-              ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white shadow-lg shadow-blue-500/25 scale-105"
-              : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
+              ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white shadow-lg  scale-105"
+              :"bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
           }`}
         >
           <Icon
             className={`w-[18px] h-[18px] transition-colors duration-200 ${
               isActive
-                ? "text-white"
-                : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                ?"text-white"
+                :"text-[#9CA3AF] group-hover:text-[#3B82F6]"
             }`}
           />
         </div>
@@ -92,8 +92,8 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ? "0.6rem" : "0.2rem",
-                marginBottom: "0.4rem",
+                marginTop: groupIdx > 0 ?"0.6rem" :"0.2rem",
+                marginBottom:"0.4rem",
               }}
             >
               {groupIdx > 0 && (
@@ -118,7 +118,7 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
         <div className="w-full flex flex-col items-center pb-1">
           <div
             className="w-full flex flex-col items-center"
-            style={{ marginTop: "0.6rem", marginBottom: "0.4rem" }}
+            style={{ marginTop:"0.6rem", marginBottom:"0.4rem" }}
           >
             <div className="w-6 h-[1px] bg-[#2F2F2F] rounded-full mb-1.5" />
             <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#9CA3AF] select-none text-center w-full px-1">
@@ -127,11 +127,11 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
           </div>
           {[
             {
-              label: "Main Dashboard",
+              label:"Main Dashboard",
               icon: LayoutDashboard,
-              path: "/dashboard",
+              path:"/dashboard",
             },
-            { label: "Projects Gallery", icon: FolderOpen, path: "/projects" },
+            { label:"Projects Gallery", icon: FolderOpen, path:"/projects" },
           ].map((item) => {
             const Icon = item.icon;
             return (
@@ -166,7 +166,7 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
             }}
             onMouseLeave={() => setReturnHover(false)}
             aria-label="Return to Creative Suite"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-lg shadow-blue-500/25 flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-lg flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90"
           >
             <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
           </button>

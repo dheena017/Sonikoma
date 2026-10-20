@@ -1,5 +1,5 @@
-import React from "react";
-import { Sparkles, Check } from "lucide-react";
+import React from"react";
+import { Sparkles, Check } from"lucide-react";
 
 interface CharacterPoseCardProps {
   pose: {
@@ -27,11 +27,11 @@ export const CharacterPoseCard: React.FC<CharacterPoseCardProps> = ({
   return (
     <div
       onClick={handleApply}
-      className="p-3 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 flex items-center justify-between cursor-pointer transition-all duration-200 group shadow-sm "
+      className="p-3 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 flex items-center justify-between cursor-pointer transition-all duration-200 group shadow-sm"
     >
       <div className="flex items-center gap-2.5 min-w-0">
         <div className="w-8 h-8 rounded-xl bg-[#2A2A2A] border border-[#2F2F2F] flex items-center justify-center text-sm shrink-0 group-hover:scale-105 transition-transform">
-          {pose.icon || "🧍"}
+          {pose.icon ||"🧍"}
         </div>
         <div className="min-w-0">
           <h5 className="text-xs font-bold text-white group-hover:text-[#3B82F6] transition-colors truncate">
@@ -53,8 +53,8 @@ export const CharacterPoseCard: React.FC<CharacterPoseCardProps> = ({
           type="button"
           className={`h-7 px-2.5 rounded-lg text-[10px] font-bold font-mono flex items-center gap-1 transition-all ${
             applied
-              ? "bg-emerald-600 text-white"
-              : "bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-xs shadow-blue-500/25 cursor-pointer active:scale-95"
+              ?"bg-emerald-600 text-white"
+              :"bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-xs  cursor-pointer active:scale-95"
           }`}
         >
           {applied ? (

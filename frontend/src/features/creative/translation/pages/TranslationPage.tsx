@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
+import React, { useState, useRef, useEffect } from"react";
+import { createPortal } from"react-dom";
 import {
   Sparkles,
   BookOpenText,
@@ -9,13 +9,13 @@ import {
   Maximize2,
   X,
   Image,
-} from "lucide-react";
-import { GeneratedPanel } from "@/shared/types";
-import { cleanDialogueDisplay } from "@/shared/utils";
+} from"lucide-react";
+import { GeneratedPanel } from"@/shared/types";
+import { cleanDialogueDisplay } from"@/shared/utils";
 
-import TranslationTool from "@/features/creative/translation/components/TranslationTool";
+import TranslationTool from"@/features/creative/translation/components/TranslationTool";
 
-import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
+import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
 
 interface TranslationPageProps {
   panels?: GeneratedPanel[];
@@ -51,18 +51,18 @@ export const TranslationPage = React.memo(
     useEffect(() => {
       if (!previewPanel) return;
       const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === "Escape") setPreviewPanel(null);
+        if (e.key ==="Escape") setPreviewPanel(null);
       };
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
     }, [previewPanel]);
 
-    const scrollFilmstrip = (direction: "left" | "right") => {
+    const scrollFilmstrip = (direction:"left" |"right") => {
       if (filmstripRef.current) {
-        const scrollAmount = direction === "left" ? -240 : 240;
+        const scrollAmount = direction ==="left" ? -240 : 240;
         filmstripRef.current.scrollBy({
           left: scrollAmount,
-          behavior: "smooth",
+          behavior:"smooth",
         });
       }
     };
@@ -83,7 +83,7 @@ export const TranslationPage = React.memo(
     const activePanel = safePanels[selectedIdx] || ({} as GeneratedPanel);
 
     const handleUpdateDialogue = (val: string) => {
-      if (typeof setPanels === "function") {
+      if (typeof setPanels ==="function") {
         setPanels((prev) =>
           (prev || []).map((p, idx) =>
             idx === selectedIdx ? { ...p, speech_text: val } : p
@@ -93,7 +93,7 @@ export const TranslationPage = React.memo(
     };
 
     const handleUpdateNarrative = (val: string) => {
-      if (typeof setPanels === "function") {
+      if (typeof setPanels ==="function") {
         setPanels((prev) =>
           (prev || []).map((p, idx) =>
             idx === selectedIdx ? { ...p, visual_description: val } : p
@@ -111,7 +111,7 @@ export const TranslationPage = React.memo(
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#2F2F2F] pb-6">
             <div className="space-y-2 max-w-2xl text-left">
               <h1 className="text-3xl sm:text-4xl font-black text-[#E5E5E5] tracking-tight leading-tight">
-                Translation{" "}
+                Translation{""}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
                   Studio
                 </span>
@@ -199,13 +199,13 @@ export const TranslationPage = React.memo(
                         onClick={() => setSelectedIdx(idx)}
                         className={`relative flex-shrink-0 w-28 sm:w-32 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-black/80 flex flex-col p-1.5 ${
                           isSel
-                            ? "border-2 border-[#3B82F6] bg-[#3B82F6]/10 shadow-lg shadow-[#3B82F6]/25 ring-2 ring-[#3B82F6]/30 scale-[1.02]"
-                            : "border-neutral-800 opacity-70 hover:opacity-100 hover:border-neutral-600 hover:scale-[1.01]"
+                            ?"border-2 border-[#3B82F6] bg-[#3B82F6]/10 shadow-lg  ring-2 ring-[#3B82F6]/30 scale-[1.02]"
+                            :"border-neutral-800 opacity-70 hover:opacity-100 hover:border-neutral-600 hover:scale-[1.01]"
                         }`}
                       >
                         {/* Frame Header */}
                         <div className="flex items-center justify-between pb-1 px-0.5 text-[10px] font-mono">
-                          <span className={isSel ? "text-[#60A5FA] font-bold" : "text-neutral-400"}>
+                          <span className={isSel ?"text-[#60A5FA] font-bold" :"text-neutral-400"}>
                             Frame #{idx + 1}
                           </span>
                           {isSel && (
@@ -231,7 +231,7 @@ export const TranslationPage = React.memo(
 
                         {/* Dialogue Preview Snippet */}
                         <div className="pt-1.5 px-0.5 text-[9px] font-mono text-neutral-400 truncate text-left w-full">
-                          {speech ? `"${speech}"` : <span className="italic opacity-50">No dialogue</span>}
+                          {speech ?`"${speech}"` : <span className="italic opacity-50">No dialogue</span>}
                         </div>
                       </button>
                     );
@@ -324,8 +324,7 @@ export const TranslationPage = React.memo(
                     </div>
                     {cleanDialogueDisplay(activePanel?.speech_text).speech ? (
                       <p className="text-neutral-200 line-clamp-2 leading-relaxed">
-                        <strong className="text-white font-mono text-[11px] mr-1.5">Dialogue:</strong>
-                        "{cleanDialogueDisplay(activePanel?.speech_text).speech}"
+                        <strong className="text-white font-mono text-[11px] mr-1.5">Dialogue:</strong>"{cleanDialogueDisplay(activePanel?.speech_text).speech}"
                       </p>
                     ) : (
                       <p className="text-neutral-500 italic text-[11px]">No dialogue recorded for this panel.</p>
@@ -347,7 +346,7 @@ export const TranslationPage = React.memo(
                         ACTIVE WORKFLOW
                       </p>
                       <h4 className="text-base font-bold text-white mt-0.5 flex items-center gap-2">
-                        <BookOpenText className="w-4 h-4 text-[#3B82F6]" />{" "}
+                        <BookOpenText className="w-4 h-4 text-[#3B82F6]" />{""}
                         Translation & Localization Studio
                       </h4>
                       <p className="mt-0.5 text-xs text-neutral-400 font-mono">
@@ -405,7 +404,7 @@ export const TranslationPage = React.memo(
                     PANEL #{safePanels.indexOf(previewPanel) + 1} — FULL PREVIEW
                   </p>
                   <p className="text-[10px] text-neutral-500 font-mono line-clamp-1">
-                    {previewPanel.visual_description || previewPanel.speech_text || "No description"}
+                    {previewPanel.visual_description || previewPanel.speech_text ||"No description"}
                   </p>
                 </div>
               </div>
@@ -431,7 +430,7 @@ export const TranslationPage = React.memo(
             {/* Footer */}
             <div className="px-5 py-3 border-t border-neutral-800 bg-[#141414] shrink-0 flex items-center justify-between gap-3">
               <p className="text-[10px] font-mono text-neutral-400 line-clamp-2 flex-1">
-                {previewPanel.visual_description || previewPanel.speech_text || ""}
+                {previewPanel.visual_description || previewPanel.speech_text ||""}
               </p>
               <button
                 type="button"

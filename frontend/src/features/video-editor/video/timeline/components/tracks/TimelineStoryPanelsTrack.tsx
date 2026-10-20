@@ -1,8 +1,8 @@
 // ─── TimelineStoryPanelsTrack (V1 Video / Story Panels Track) ─────────────────
 // Canonical location: timeline/components/tracks/TimelineStoryPanelsTrack.tsx
 
-import React, { useState, useMemo } from "react";
-import TrackLabel from "../TrackLabel";
+import React, { useState, useMemo } from"react";
+import TrackLabel from"../TrackLabel";
 import {
   ImagePlus,
   Image as ImageIcon,
@@ -10,15 +10,15 @@ import {
   MoreHorizontal,
   GripVertical,
   Plus,
-} from "lucide-react";
-import { Keyframe } from "../../types";
-import ClipTrimHandles from "../ClipTrimHandles";
-import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
+} from"lucide-react";
+import { Keyframe } from"../../types";
+import ClipTrimHandles from"../ClipTrimHandles";
+import { getProxiedImageUrl } from"@/shared/utils/imageProxy";
 import {
   STORY_PANEL_LANE_HEIGHT,
   assignLanes,
   trackInnerHeight,
-} from "./timelineLanes";
+} from"./timelineLanes";
 
 export interface PanelTiming {
   index: number;
@@ -83,7 +83,7 @@ export const TimelineStoryPanelsTrack: React.FC<
 }) => {
   const [resizingInfo, setResizingInfo] = useState<{
     idx: number;
-    side: "left" | "right";
+    side:"left" |"right";
     initialDuration: number;
     deltaSecs: number;
   } | null>(null);
@@ -112,8 +112,8 @@ export const TimelineStoryPanelsTrack: React.FC<
     e.preventDefault();
     const startX = e.clientX;
     let hasMoved = false;
-    document.body.style.cursor = "grabbing";
-    document.body.style.userSelect = "none";
+    document.body.style.cursor ="grabbing";
+    document.body.style.userSelect ="none";
     setMovingInfo({ key, idx, baseLeftPx, widthPx, deltaPx: 0 });
 
     const onMouseMove = (mv: MouseEvent) => {
@@ -132,8 +132,8 @@ export const TimelineStoryPanelsTrack: React.FC<
       }
       // Snap back — story panels are always contiguous (positioned by panelTimings)
       setMovingInfo(null);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
+      document.body.style.cursor ="";
+      document.body.style.userSelect ="";
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
@@ -145,7 +145,7 @@ export const TimelineStoryPanelsTrack: React.FC<
   const handleResizeStart = (
     e: React.MouseEvent,
     idx: number,
-    side: "left" | "right",
+    side:"left" |"right",
     currentDuration: number,
     currentLeftPx: number
   ) => {
@@ -154,15 +154,15 @@ export const TimelineStoryPanelsTrack: React.FC<
     const startX = e.clientX;
     const initialDuration = currentDuration;
     let latestDuration = currentDuration;
-    const key = `v1-${idx}`;
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
+    const key =`v1-${idx}`;
+    document.body.style.cursor ="col-resize";
+    document.body.style.userSelect ="none";
     setResizingInfo({ idx, side, initialDuration, deltaSecs: 0 });
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
       const deltaSecs =
-        side === "right" ? deltaX / pxPerSec : -deltaX / pxPerSec;
+        side ==="right" ? deltaX / pxPerSec : -deltaX / pxPerSec;
       const nextDuration = Math.max(
         0.5,
         Math.min(60, initialDuration + deltaSecs)
@@ -181,8 +181,8 @@ export const TimelineStoryPanelsTrack: React.FC<
     const onMouseUp = () => {
       onDurationChange?.(key, latestDuration);
       setResizingInfo(null);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
+      document.body.style.cursor ="";
+      document.body.style.userSelect ="";
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
@@ -196,14 +196,14 @@ export const TimelineStoryPanelsTrack: React.FC<
 
   const clipLanes = useMemo(() => {
     const allClips = panels.map((panel: any, i: number) => {
-      const k = `v1-${i}`;
+      const k =`v1-${i}`;
       const t = panelTimings?.[i];
       const dur = t?.duration ?? panel.duration ?? 0;
       const baseLeft = (t?.startTime ?? i * dur) * pxPerSec;
       const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
       const isResizingThis = resizingInfo?.idx === i;
       const resizeLeftDelta =
-        isResizingThis && resizingInfo?.side === "left"
+        isResizingThis && resizingInfo?.side ==="left"
           ? (dur - resizingInfo.initialDuration) * pxPerSec
           : 0;
 
@@ -233,7 +233,7 @@ export const TimelineStoryPanelsTrack: React.FC<
   return (
     <div
       className="border-b border-white/10 bg-[#18181B] flex items-center"
-      style={{ height: `${Math.max(64, outerHeightPx)}px` }}
+      style={{ height:`${Math.max(64, outerHeightPx)}px` }}
     >
       <TrackLabel
         id="V1"
@@ -251,7 +251,7 @@ export const TimelineStoryPanelsTrack: React.FC<
       <div
         className="flex-1 relative"
         style={{
-          height: `${Math.max(56, innerHeightPx) + keyframeRowHeight}px`,
+          height:`${Math.max(56, innerHeightPx) + keyframeRowHeight}px`,
         }}
       >
         {panels.length === 0 ? (
@@ -290,13 +290,12 @@ export const TimelineStoryPanelsTrack: React.FC<
                 panel.thumbnail ||
                 panel.preview_url ||
                 panel.media_url ||
-                panel.src ||
-                "";
+                panel.src ||"";
               const imgUrl = rawUrl ? getProxiedImageUrl(rawUrl) : undefined;
 
               const isSelected =
-                selectedClip === `v1-${idx}` || currentPanelIndex === idx;
-              const key = `v1-${idx}`;
+                selectedClip ===`v1-${idx}` || currentPanelIndex === idx;
+              const key =`v1-${idx}`;
               const isResizing = resizingInfo?.idx === idx;
 
               const baseLeftPx = timing.startTime * pxPerSec;
@@ -314,7 +313,7 @@ export const TimelineStoryPanelsTrack: React.FC<
               let displayLeftPx = baseLeftPx;
               let displayWidthPx = activeDur * pxPerSec;
 
-              if (isResizing && resizingInfo && resizingInfo.side === "left") {
+              if (isResizing && resizingInfo && resizingInfo.side ==="left") {
                 const durDelta = resizingInfo.deltaSecs * pxPerSec;
                 displayLeftPx = Math.max(0, baseLeftPx - durDelta);
               }
@@ -337,25 +336,25 @@ export const TimelineStoryPanelsTrack: React.FC<
                   onContextMenu={(e) => onContextMenu(e, key, idx)}
                   className={`group absolute rounded-md border select-none overflow-hidden z-10 ${
                     isMoving
-                      ? "cursor-grabbing  z-40 border-[#2F2F2F]"
+                      ?"cursor-grabbing  z-40 border-[#2F2F2F]"
                       : isResizing
-                      ? "cursor-col-resize  z-30"
+                      ?"cursor-col-resize  z-30"
                       : isSelected
-                      ? "cursor-grab border-[#60A5FA]/90  z-20"
-                      : "cursor-grab border-[#3B82F6]/25 hover:border-neutral-700 z-10"
+                      ?"cursor-grab border-[#60A5FA]/90  z-20"
+                      :"cursor-grab border-[#3B82F6]/25 hover:border-neutral-700 z-10"
                   }`}
                   style={{
-                    left: `${finalLeftPx}px`,
-                    width: `${displayWidthPx}px`,
-                    top: `${clipTop}px`,
-                    height: `${clipHeight}px`,
+                    left:`${finalLeftPx}px`,
+                    width:`${displayWidthPx}px`,
+                    top:`${clipTop}px`,
+                    height:`${clipHeight}px`,
                     cursor: isMoving
-                      ? "grabbing"
+                      ?"grabbing"
                       : isResizing
-                      ? "col-resize"
-                      : "grab",
-                    backgroundColor: "#18181B",
-                    transition: "none",
+                      ?"col-resize"
+                      :"grab",
+                    backgroundColor:"#18181B",
+                    transition:"none",
                   }}
                 >
                   {/* Thumbnail background */}
@@ -383,7 +382,7 @@ export const TimelineStoryPanelsTrack: React.FC<
                       {idx + 1}
                     </span>
                     <span className="text-[8px] font-mono text-white/90 truncate max-w-[50px] font-semibold drop-shadow-sm">
-                      {panel.title || `Panel ${idx + 1}`}
+                      {panel.title ||`Panel ${idx + 1}`}
                     </span>
                   </div>
 
@@ -395,29 +394,29 @@ export const TimelineStoryPanelsTrack: React.FC<
                   {/* Live Duration Badge & Three-Dots Menu */}
                   <div
                     className="absolute top-1 right-1.5 flex items-center gap-1 z-20 pointer-events-auto"
-                    style={{ cursor: "inherit" }}
+                    style={{ cursor:"inherit" }}
                   >
                     {/* Live Drag Delta Display */}
                     {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
                       <span className="text-[7.5px] font-mono font-bold text-white bg-[#3B82F6] px-1.5 py-0.5 rounded border border-[#60A5FA]/40 shadow-xs animate-pulse">
                         {movingInfo.deltaPx > 0
-                          ? `+${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`
-                          : `${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`}
+                          ?`+${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`
+                          :`${(movingInfo.deltaPx / pxPerSec).toFixed(1)}s`}
                       </span>
                     )}
 
                     {isResizing && resizingInfo.deltaSecs !== 0 && (
                       <span className="text-[7px] font-mono font-bold text-white bg-[#3B82F6] px-1 py-0.2 rounded-sm border border-[#60A5FA]/40 shadow-xs animate-pulse">
                         {resizingInfo.deltaSecs > 0
-                          ? `+${resizingInfo.deltaSecs.toFixed(1)}s`
-                          : `${resizingInfo.deltaSecs.toFixed(1)}s`}
+                          ?`+${resizingInfo.deltaSecs.toFixed(1)}s`
+                          :`${resizingInfo.deltaSecs.toFixed(1)}s`}
                       </span>
                     )}
                     <span
                       className={`text-[7px] font-mono px-1 rounded-sm transition-colors ${
                         isResizing
-                          ? "bg-[#3B82F6] text-white font-bold shadow-md shadow-blue-500/25"
-                          : "bg-black/80 text-neutral-300"
+                          ?"bg-[#3B82F6] text-white font-bold shadow-md"
+                          :"bg-black/80 text-neutral-300"
                       }`}
                     >
                       {activeDur.toFixed(1)}s
@@ -456,7 +455,7 @@ export const TimelineStoryPanelsTrack: React.FC<
             {keyframesVisible && (
               <div className="absolute inset-x-0 bottom-0 h-6 border-t border-white/10 bg-black/20">
                 {panels.map((panel: any, idx: number) => {
-                  const key = `v1-${idx}`;
+                  const key =`v1-${idx}`;
                   const timing = panelTimings[idx];
                   const duration = timing?.duration ?? panel.duration ?? 1;
                   const left = (timing?.startTime ?? idx * duration) * pxPerSec;
@@ -470,7 +469,7 @@ export const TimelineStoryPanelsTrack: React.FC<
                         onClick={() => onAddKeyframe?.(key, duration / 2)}
                         className="absolute bottom-1 flex h-4 w-4 items-center justify-center rounded text-neutral-500 hover:bg-white/10 hover:text-white cursor-pointer"
                         style={{
-                          left: `${left + Math.max(2, width / 2 - 8)}px`,
+                          left:`${left + Math.max(2, width / 2 - 8)}px`,
                         }}
                         title={`Add keyframe to panel ${idx + 1}`}
                       >
@@ -486,11 +485,11 @@ export const TimelineStoryPanelsTrack: React.FC<
                           }
                           className={`absolute bottom-1 h-3 w-3 rotate-45 border cursor-pointer ${
                             selectedKeyframeId === keyframe.id
-                              ? "border-[#60A5FA] bg-[#3B82F6]"
-                              : "border-neutral-400 bg-neutral-700 hover:border-white"
+                              ?"border-[#60A5FA] bg-[#3B82F6]"
+                              :"border-neutral-400 bg-neutral-700 hover:border-white"
                           }`}
                           style={{
-                            left: `${left + keyframe.time * pxPerSec - 6}px`,
+                            left:`${left + keyframe.time * pxPerSec - 6}px`,
                           }}
                           title={`${keyframe.property} keyframe (${keyframe.easing})`}
                         />

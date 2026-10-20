@@ -1,5 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from "react";
-import { AlertTriangle, RefreshCcw, Home, ArrowLeft } from "lucide-react";
+import React, { Component, ErrorInfo, ReactNode } from"react";
+import { AlertTriangle, RefreshCcw, Home, ArrowLeft } from"lucide-react";
 
 interface Props {
   children?: ReactNode;
@@ -32,7 +32,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   private handleReset = () => {
     this.setState({ hasError: false, error: null });
-    window.location.href = "/";
+    window.location.href ="/";
   };
 
   private handleReload = () => {
@@ -44,16 +44,16 @@ class ErrorBoundary extends Component<Props, State> {
     if (window.history.length > 1) {
       window.history.back();
     } else {
-      window.location.href = "/";
+      window.location.href ="/";
     }
   };
 
   public render() {
     if (this.state.hasError) {
-      const stack = this.state.error?.stack || this.errorInfo?.componentStack || "";
+      const stack = this.state.error?.stack || this.errorInfo?.componentStack ||"";
       return (
         <div className="min-h-screen bg-[#070709] flex items-center justify-center p-6 text-neutral-100 font-sans">
-          <div className="max-w-2xl w-full bg-neutral-900 border border-rose-500/20 rounded-[32px] p-8 sm:p-10 text-center shadow-2xl shadow-rose-950/20 animate-in fade-in zoom-in duration-300">
+          <div className="max-w-2xl w-full bg-neutral-900 border border-rose-500/20 rounded-[32px] p-8 sm:p-10 text-center shadow-2xl animate-in fade-in zoom-in duration-300">
             <div className="w-20 h-20 bg-rose-500/10 border border-rose-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8">
               <AlertTriangle className="w-10 h-10 text-rose-500" />
             </div>
@@ -102,7 +102,7 @@ class ErrorBoundary extends Component<Props, State> {
               </button>
               <button
                 onClick={this.handleReset}
-                className="btn-primary flex items-center justify-center gap-1.5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-lg shadow-[#3B82F6]/20"
+                className="btn-primary flex items-center justify-center gap-1.5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-lg"
                 title="Return to Dashboard Home"
               >
                 <Home className="w-4 h-4" />
@@ -111,7 +111,7 @@ class ErrorBoundary extends Component<Props, State> {
             </div>
 
             <p className="mt-8 text-[10px] text-neutral-600 font-mono uppercase tracking-tighter">
-              Session ID:{" "}
+              Session ID:{""}
               {Math.random().toString(36).substring(7).toUpperCase()} • Error
               Boundary v1.0
             </p>

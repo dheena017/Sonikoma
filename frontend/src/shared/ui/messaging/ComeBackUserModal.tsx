@@ -63,8 +63,6 @@ export function ComeBackUserModal({
 
       {/* Main Modal Card */}
       <div className="relative w-full max-w-lg bg-neutral-950/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
-        {/* Top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 blur-[1px] z-30" />
 
         {/* Visual Header Banner */}
         <div className="relative h-36 sm:h-40 w-full overflow-hidden shrink-0 border-b border-white/10 select-none">

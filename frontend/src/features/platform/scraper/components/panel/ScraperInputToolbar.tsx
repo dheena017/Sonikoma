@@ -1,5 +1,5 @@
-import React from "react";
-import { createPortal } from "react-dom";
+import React from"react";
+import { createPortal } from"react-dom";
 import {
   Book,
   Loader2,
@@ -10,14 +10,14 @@ import {
   Copy,
   Trash2,
   AlertTriangle,
-} from "lucide-react";
-import { FavoritesManager } from "@/features/platform/scraper/chapter-scraper/utils/FavoritesManager";
+} from"lucide-react";
+import { FavoritesManager } from"@/features/platform/scraper/chapter-scraper/utils/FavoritesManager";
 import {
   separateComicUrl,
   type SeparateUrlResult,
-} from "@/features/platform/scraper/api/scraper";
-import { Tooltip } from "@/shared/ui/common/TooltipPortal";
-import { validateChapterUrl } from "@/shared/utils";
+} from"@/features/platform/scraper/api/scraper";
+import { Tooltip } from"@/shared/ui/common/TooltipPortal";
+import { validateChapterUrl } from"@/shared/utils";
 
 export interface ScraperInputToolbarProps {
   targetUrl: string;
@@ -39,30 +39,23 @@ export interface ScraperInputToolbarProps {
 
 function formatSeriesDisplay(url: string, rawTitle?: string) {
   if (rawTitle && rawTitle !== url && !rawTitle.startsWith("http")) {
-    return { title: rawTitle, subtitle: "Saved Series", domain: "" };
+    return { title: rawTitle, subtitle:"Saved Series", domain:"" };
   }
   try {
     const parsed = new URL(url);
-    const domain = parsed.hostname.replace(/^www\./, "");
+    const domain = parsed.hostname.replace(/^www\./,"");
     const segments = parsed.pathname.split("/").filter(Boolean);
     const contentSegments = segments.filter(
       (s) =>
-        ![
-          "en",
-          "viewer",
-          "read",
-          "manga",
-          "series",
-          "comic",
-          "chapter",
+        !["en","viewer","read","manga","series","comic","chapter",
         ].includes(s.toLowerCase())
     );
-    let title = "";
-    let chapter = "";
+    let title ="";
+    let chapter ="";
     for (const seg of contentSegments) {
       if (/^(ep|ch|chapter|episode)[-_]?\d+/i.test(seg)) {
         chapter = seg
-          .replace(/[-_]+/g, " ")
+          .replace(/[-_]+/g,"")
           .replace(/\b\w/g, (c) => c.toUpperCase());
       } else if (
         !title &&
@@ -72,22 +65,22 @@ function formatSeriesDisplay(url: string, rawTitle?: string) {
         )
       ) {
         title = seg
-          .replace(/[-_]+/g, " ")
+          .replace(/[-_]+/g,"")
           .replace(/\b\w/g, (c) => c.toUpperCase());
       }
     }
     if (!title && contentSegments.length > 0) {
       title = contentSegments[0]
-        .replace(/[-_]+/g, " ")
+        .replace(/[-_]+/g,"")
         .replace(/\b\w/g, (c) => c.toUpperCase());
     }
     const displayTitle = title || domain;
-    const displaySubtitle = [domain, chapter, "Saved Series"]
+    const displaySubtitle = [domain, chapter,"Saved Series"]
       .filter(Boolean)
-      .join(" • ");
+      .join(" •");
     return { title: displayTitle, subtitle: displaySubtitle, domain };
   } catch {
-    return { title: url, subtitle: "Saved Series", domain: "" };
+    return { title: url, subtitle:"Saved Series", domain:"" };
   }
 }
 
@@ -143,7 +136,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
           // Auto-populate series title if not already populated
           if (result.title_slug && setSeriesTitle) {
             const formattedTitle = result.title_slug
-              .replace(/[-_]+/g, " ")
+              .replace(/[-_]+/g,"")
               .replace(/\b\w/g, (c) => c.toUpperCase());
             setSeriesTitle(formattedTitle);
           }
@@ -156,15 +149,14 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
           // Auto-populate chapter title
           if (result.chapter_slug && setChapterTitle) {
             const formattedCh = result.chapter_slug
-              .replace(/[-_]+/g, " ")
+              .replace(/[-_]+/g,"")
               .replace(/\b\w/g, (c) => c.toUpperCase());
             setChapterTitle(formattedCh);
           }
         }
       } catch (err) {
         if (isMounted) {
-          console.debug(
-            "[ScraperInputToolbar] URL separation background fetch:",
+          console.debug("[ScraperInputToolbar] URL separation background fetch:",
             err
           );
         }
@@ -196,7 +188,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
       let suggestionsData = uniqueUrls.map((url) => ({
         url: url,
         title: url,
-        genre: "general",
+        genre:"general",
       }));
 
       if (targetUrl && targetUrl.trim()) {
@@ -229,7 +221,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const pasted = e.clipboardData?.getData("text") || "";
+    const pasted = e.clipboardData?.getData("text") ||"";
     const url = pasted.trim();
     if (url) {
       if (url !== targetUrl && resetWorkspace) {
@@ -249,11 +241,9 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     if (!trimmed) return;
     const validation = validateChapterUrl(trimmed);
     if (!validation.valid) {
-      if (typeof (window as any).alertAsync === "function") {
+      if (typeof (window as any).alertAsync ==="function") {
         (window as any).alertAsync(
-          validation.error || "Please enter a valid chapter viewer URL.",
-          "Incomplete URL",
-          "amber"
+          validation.error ||"Please enter a valid chapter viewer URL.","Incomplete URL","amber"
         );
       }
       return;
@@ -274,12 +264,12 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         (destinationUrl.startsWith("http://") ||
           destinationUrl.startsWith("https://"));
       const targetPath = isValidWebUrl
-        ? `/chapter-scraper?url=${encodeURIComponent(destinationUrl)}`
-        : "/chapter-scraper";
-      if (typeof nav === "function") {
+        ?`/chapter-scraper?url=${encodeURIComponent(destinationUrl)}`
+        :"/chapter-scraper";
+      if (typeof nav ==="function") {
         nav(targetPath);
       } else {
-        window.history.pushState({}, "", targetPath);
+        window.history.pushState({},"", targetPath);
         window.dispatchEvent(new Event("popstate"));
       }
     }
@@ -308,19 +298,19 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
           }}
           onPaste={handlePaste}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !isProcessing && targetUrl.trim()) {
+            if (e.key ==="Enter" && !isProcessing && targetUrl.trim()) {
               handleImportClick();
             }
           }}
           placeholder="Paste any Manhwa, Manga, Webtoon, or Webcomic chapter URL..."
           className={`w-full bg-[#0c0e14] border ${
             hasValidationError
-              ? "border-amber-500/50 focus:border-amber-500"
+              ?"border-amber-500/50 focus:border-amber-500"
               : isValid
-              ? "border-emerald-500/40 focus:border-emerald-500/60"
-              : "border-[#1e2332] hover:border-neutral-600 focus:border-[#2563eb]"
+              ?"border-emerald-500/40 focus:border-emerald-500/60"
+              :"border-[#1e2332] hover:border-neutral-600 focus:border-[#2563eb]"
           } focus:ring-1 ${
-            hasValidationError ? "focus:ring-amber-500/20" : "focus:ring-[#2563eb]/25"
+            hasValidationError ?"focus:ring-amber-500/20" :"focus:ring-[#2563eb]/25"
           } rounded-2xl px-5 py-4 text-sm text-[#E5E5E5] outline-none placeholder:text-neutral-500 shadow-inner transition-colors font-mono`}
         />
 
@@ -439,10 +429,10 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
           <Tooltip
             text={
               isSeriesCatalog
-                ? "Series catalog detected — use 'Import Chapter Scraper' to browse chapters"
+                ?"Series catalog detected — use 'Import Chapter Scraper' to browse chapters"
                 : hasValidationError
-                ? urlValidation?.error || "Please enter a valid chapter viewer link"
-                : "Extract and import panel images directly from this chapter URL"
+                ? urlValidation?.error ||"Please enter a valid chapter viewer link"
+                :"Extract and import panel images directly from this chapter URL"
             }
             placement="top"
             offset={8}
@@ -454,8 +444,8 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               disabled={isScraping || !targetUrl.trim() || hasValidationError || isSeriesCatalog}
               className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold active:scale-95 transition-all font-mono ${
                 !isSeriesCatalog
-                  ? "bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-lg shadow-blue-600/30 border border-blue-400/30 disabled:opacity-35 disabled:pointer-events-none cursor-pointer"
-                  : "bg-[#13151f] text-neutral-400 border border-[#1e2230] opacity-40 pointer-events-none"
+                  ?"bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-lg  border border-blue-400/30 disabled:opacity-35 disabled:pointer-events-none cursor-pointer"
+                  :"bg-[#13151f] text-neutral-400 border border-[#1e2230] opacity-40 pointer-events-none"
               }`}
               aria-label="Import Chapter Images"
             >
@@ -485,14 +475,14 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               disabled={isScraping}
               className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold active:scale-95 transition-all font-mono group cursor-pointer ${
                 isSeriesCatalog
-                  ? "bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-lg shadow-blue-600/30 border border-blue-400/30 ring-2 ring-blue-500/30"
-                  : "bg-[#13151f] hover:bg-[#181d2a] hover:border-[#2563eb]/50 text-neutral-200 hover:text-white border border-[#1e2230] shadow-md disabled:opacity-35 disabled:pointer-events-none"
+                  ?"bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-lg  border border-blue-400/30 ring-2 ring-blue-500/30"
+                  :"bg-[#13151f] hover:bg-[#181d2a] hover:border-[#2563eb]/50 text-neutral-200 hover:text-white border border-[#1e2230] shadow-md disabled:opacity-35 disabled:pointer-events-none"
               }`}
               aria-label="Import Chapter Scraper"
             >
               <Zap
                 className={`h-4 w-4 transition-transform group-hover:scale-110 ${
-                  isSeriesCatalog ? "text-white" : "text-[#38bdf8]"
+                  isSeriesCatalog ?"text-white" :"text-[#38bdf8]"
                 }`}
               />
               <span>Import Chapter Scraper</span>
@@ -503,7 +493,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
 
       {/* Options Menu Portal (Unclipped by any parent overflow) */}
       {menuAnchor &&
-        typeof document !== "undefined" &&
+        typeof document !=="undefined" &&
         createPortal(
           <div
             className="fixed inset-0 z-[99999]"
@@ -515,10 +505,10 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             <div
               onClick={(e) => e.stopPropagation()}
               style={{
-                position: "fixed",
+                position:"fixed",
                 top:
                   menuAnchor.rect.bottom + 8 + 84 >
-                  (typeof window !== "undefined" ? window.innerHeight : 1000)
+                  (typeof window !=="undefined" ? window.innerHeight : 1000)
                     ? Math.max(8, menuAnchor.rect.top - 84)
                     : menuAnchor.rect.bottom + 6,
                 left: Math.max(12, menuAnchor.rect.right - 144),

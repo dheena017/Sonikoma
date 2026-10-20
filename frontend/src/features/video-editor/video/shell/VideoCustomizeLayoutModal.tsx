@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { X, RotateCcw, Check, LayoutGrid } from "lucide-react";
+import React, { useState, useEffect } from"react";
+import { X, RotateCcw, Check, LayoutGrid } from"lucide-react";
 
 export interface VideoLayoutConfig {
   leftSidebar: boolean;
@@ -7,8 +7,8 @@ export interface VideoLayoutConfig {
   timeline: boolean;
   mediaBin: boolean;
   previewCanvas: boolean;
-  timelinePosition: "bottom" | "top";
-  inspectorPosition: "right" | "left";
+  timelinePosition:"bottom" |"top";
+  inspectorPosition:"right" |"left";
 }
 
 export const defaultVideoLayoutConfig: VideoLayoutConfig = {
@@ -17,11 +17,11 @@ export const defaultVideoLayoutConfig: VideoLayoutConfig = {
   timeline: true,
   mediaBin: true,
   previewCanvas: true,
-  timelinePosition: "bottom",
-  inspectorPosition: "right",
+  timelinePosition:"bottom",
+  inspectorPosition:"right",
 };
 
-const STORAGE_KEY = "sonikoma_video_editor_layout_config";
+const STORAGE_KEY ="sonikoma_video_editor_layout_config";
 
 export function loadVideoLayoutConfig(): VideoLayoutConfig {
   try {
@@ -84,16 +84,16 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
   };
 
   const toggleField = (field: keyof VideoLayoutConfig) => {
-    if (typeof localConfig[field] === "boolean") {
+    if (typeof localConfig[field] ==="boolean") {
       updateConfig((prev) => ({ ...prev, [field]: !prev[field] }));
     }
   };
 
-  const setTimelinePosition = (pos: "bottom" | "top") => {
+  const setTimelinePosition = (pos:"bottom" |"top") => {
     updateConfig((prev) => ({ ...prev, timelinePosition: pos }));
   };
 
-  const setInspectorPosition = (pos: "right" | "left") => {
+  const setInspectorPosition = (pos:"right" |"left") => {
     updateConfig((prev) => ({ ...prev, inspectorPosition: pos }));
   };
 
@@ -112,8 +112,8 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
       onClick={() => toggleField(field)}
       className={`flex items-center justify-between px-4 py-2.5 rounded-xl border border-transparent cursor-pointer transition-all group ${
         highlight
-          ? "hover:bg-[#3B82F6]/15 hover:border-neutral-700"
-          : "hover:bg-neutral-800/60 hover:border-neutral-700/50"
+          ?"hover:bg-[#3B82F6]/15 hover:border-neutral-700"
+          :"hover:bg-neutral-800/60 hover:border-neutral-700/50"
       }`}
     >
       <div className="flex items-center gap-3">
@@ -198,15 +198,15 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
               Timeline Position
             </p>
             <div className="grid grid-cols-2 gap-2 px-2">
-              {(["bottom", "top"] as const).map((pos) => (
+              {(["bottom","top"] as const).map((pos) => (
                 <button
                   key={pos}
                   type="button"
                   onClick={() => setTimelinePosition(pos)}
                   className={`flex items-center justify-between px-4 py-2 rounded-xl border text-xs font-medium capitalize transition-all ${
                     localConfig.timelinePosition === pos
-                      ? "bg-[#2A2A2A] border-[#3B82F6]/60 text-white "
-                      : "bg-neutral-800/40 border-neutral-700/60 text-neutral-400 hover:text-white"
+                      ?"bg-[#2A2A2A] border-[#3B82F6]/60 text-white"
+                      :"bg-neutral-800/40 border-neutral-700/60 text-neutral-400 hover:text-white"
                   }`}
                 >
                   <span>{pos}</span>
@@ -223,15 +223,15 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
               Property Inspector Position
             </p>
             <div className="grid grid-cols-2 gap-2 px-2">
-              {(["right", "left"] as const).map((pos) => (
+              {(["right","left"] as const).map((pos) => (
                 <button
                   key={pos}
                   type="button"
                   onClick={() => setInspectorPosition(pos)}
                   className={`flex items-center justify-between px-4 py-2 rounded-xl border text-xs font-medium capitalize transition-all ${
                     localConfig.inspectorPosition === pos
-                      ? "bg-[#2A2A2A] border-[#3B82F6]/60 text-white "
-                      : "bg-neutral-800/40 border-neutral-700/60 text-neutral-400 hover:text-white"
+                      ?"bg-[#2A2A2A] border-[#3B82F6]/60 text-white"
+                      :"bg-neutral-800/40 border-neutral-700/60 text-neutral-400 hover:text-white"
                   }`}
                 >
                   <span>{pos}</span>
@@ -247,7 +247,7 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
         <div className="flex items-center justify-end gap-3 px-6 py-3 border-t border-neutral-700/70 bg-[#18181B]">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-semibold text-xs transition-all shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
+            className="px-5 py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-semibold text-xs transition-all shadow-md active:scale-95 cursor-pointer"
           >
             Done
           </button>

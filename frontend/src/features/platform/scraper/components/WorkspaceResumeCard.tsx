@@ -1,6 +1,6 @@
-import React, { useMemo, useRef, useState } from "react";
-import { History, ArrowRight, Play, Pause, Download } from "lucide-react";
-import { resolveDownloadNaming } from "@/shared/utils/downloadNaming";
+import React, { useMemo, useRef, useState } from"react";
+import { History, ArrowRight, Play, Pause, Download } from"lucide-react";
+import { resolveDownloadNaming } from"@/shared/utils/downloadNaming";
 
 interface MatchingProjectSummary {
   project_id: string;
@@ -54,7 +54,7 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
       seriesTitle: matchingProject.title,
       targetUrl: matchingProject.url || matchingProject.video_url || undefined,
     });
-    return `${formattedPrefix}_Master.mp4`;
+    return`${formattedPrefix}_Master.mp4`;
   }, [matchingProject.title, matchingProject.url, matchingProject.video_url]);
 
   return (
@@ -92,7 +92,7 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
               </h3>
             </div>
             <p className="text-xs text-[#3B82F6] font-medium max-w-sm">
-              Pick up exactly where you left off with{" "}
+              Pick up exactly where you left off with{""}
               <span className="text-[#60A5FA] font-bold">"{title}"</span>. Your
               assets and timeline are ready.
             </p>
@@ -104,17 +104,15 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
             if (!matchingProject.project_id) return;
             const jobId = matchingProject.job_id;
             if (matchingProject.series_slug && matchingProject.chapter_slug) {
-              navigateTo?.(
-                `/scraper/editor/series/${
+              navigateTo?.(`/scraper/editor/series/${
                   matchingProject.series_slug
                 }/chapters/${matchingProject.chapter_slug}${
-                  jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""
+                  jobId ?`?job_id=${encodeURIComponent(jobId)}` :""
                 }`
               );
             } else {
-              navigateTo?.(
-                `/scraper/editor?project_id=${matchingProject.project_id}${
-                  jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
+              navigateTo?.(`/scraper/editor?project_id=${matchingProject.project_id}${
+                  jobId ?`&job_id=${encodeURIComponent(jobId)}` :""
                 }`
               );
             }
@@ -132,7 +130,7 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
               <button
                 onClick={toggleVideoPlay}
                 className="h-8 w-8 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 hover:bg-emerald-500/35 text-emerald-400 cursor-pointer"
-                title={isVideoPlaying ? "Pause Video" : "Play Video"}
+                title={isVideoPlaying ?"Pause Video" :"Play Video"}
               >
                 {isVideoPlaying ? (
                   <Pause className="h-4 w-4 text-emerald-400 fill-emerald-400" />
@@ -145,7 +143,7 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
                   Final Production Master Video
                 </h3>
                 <p className="text-[10px] text-neutral-400 font-mono">
-                  The latest compiled video for "{title}" is ready.
+                  The latest compiled video for"{title}" is ready.
                 </p>
               </div>
             </div>
@@ -178,7 +176,7 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
                     Chapter
                   </span>
                   <p className="text-xs font-semibold text-neutral-300 line-clamp-1">
-                    {matchingProject.episode || "N/A"}
+                    {matchingProject.episode ||"N/A"}
                   </p>
                 </div>
               </div>
@@ -220,14 +218,14 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
                   </span>
                   <p className="text-xs font-medium text-neutral-350">
                     {matchingProject.panels_count ||
-                      matchingProject.imported_assets_count}{" "}
+                      matchingProject.imported_assets_count}{""}
                     panels compiled
                     {matchingProject.imported_assets_count &&
                     matchingProject.panels_count &&
                     matchingProject.panels_count !==
                       matchingProject.imported_assets_count
-                      ? ` (${matchingProject.imported_assets_count} imported assets)`
-                      : ""}
+                      ?` (${matchingProject.imported_assets_count} imported assets)`
+                      :""}
                   </p>
                 </div>
               )}
@@ -252,17 +250,15 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
                   download={downloadName}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer select-none border border-emerald-500/30 shadow-lg shadow-emerald-950/20 font-sans active:scale-95 text-center"
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer select-none border border-emerald-500/30 shadow-lg font-sans active:scale-95 text-center"
                 >
                   <Download className="h-4 w-4" /> Download Video File
                 </a>
 
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(videoUrl || "");
-                    addNotification?.(
-                      "Video link copied to clipboard!",
-                      "success"
+                    navigator.clipboard.writeText(videoUrl ||"");
+                    addNotification?.("Video link copied to clipboard!","success"
                     );
                   }}
                   className="w-full bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-white font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-neutral-800 active:scale-95 text-center"

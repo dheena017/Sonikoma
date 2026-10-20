@@ -1,70 +1,70 @@
-import React, { useState, useEffect } from "react";
-import { Layers } from "lucide-react";
-import { AIModelCardData } from "../components/AIModelCard";
+import React, { useState, useEffect } from"react";
+import { Layers } from"lucide-react";
+import { AIModelCardData } from"../components/AIModelCard";
 import {
   PROVIDER_GROUPS,
   PROVIDER_FULL_SPECS,
   ProviderFullSpec,
-} from "../data/providerSpecs";
-import ProviderHeroBanner from "../components/rate_limits/ProviderHeroBanner";
-import ProviderTierMetrics from "../components/rate_limits/ProviderTierMetrics";
-import ProviderInteractiveLimits from "../components/rate_limits/ProviderInteractiveLimits";
+} from"../data/providerSpecs";
+import ProviderHeroBanner from"../components/rate_limits/ProviderHeroBanner";
+import ProviderTierMetrics from"../components/rate_limits/ProviderTierMetrics";
+import ProviderInteractiveLimits from"../components/rate_limits/ProviderInteractiveLimits";
 
 interface AIRateLimitsPageProps {
   addNotification?: (msg: string, type?: string) => void;
 }
 
 const ALL_PROVIDER_SPEC: ProviderFullSpec = {
-  id: "all",
-  name: "All Providers",
-  group: "foundation",
+  id:"all",
+  name:"All Providers",
+  group:"foundation",
   icon: Layers,
-  badge: "All AI Engines",
-  color: "from-blue-600 to-indigo-600",
-  borderHover: "hover:border-neutral-700",
-  docsUrl: "#",
-  resetInfo: "Resets every minute / daily at 00:00 UTC",
+  badge:"All AI Engines",
+  color:"from-blue-600 to-indigo-600",
+  borderHover:"hover:border-neutral-700",
+  docsUrl:"#",
+  resetInfo:"Resets every minute / daily at 00:00 UTC",
   priorityFeature: {
-    title: "Priority Speed Queue",
-    description: "Fast-track processing for high-volume jobs",
-    toggleLabel: "Priority Mode",
-    activeText: "Fast Priority Active",
-    standardText: "Standard Queue",
+    title:"Priority Speed Queue",
+    description:"Fast-track processing for high-volume jobs",
+    toggleLabel:"Priority Mode",
+    activeText:"Fast Priority Active",
+    standardText:"Standard Queue",
   },
   batchFeature: {
-    title: "Batch Processing",
-    discount: "50% Savings",
-    highlight: "Non-Urgent Tasks",
-    subtext: "Process multiple chapters in the background at half cost",
+    title:"Batch Processing",
+    discount:"50% Savings",
+    highlight:"Non-Urgent Tasks",
+    subtext:"Process multiple chapters in the background at half cost",
   },
   tiers: [
     {
-      id: "free",
-      label: "Free Plan",
-      qualification: "Default sandbox",
-      spend10Min: "$0",
-      billingCap: "Free Rate Limits",
+      id:"free",
+      label:"Free Plan",
+      qualification:"Default sandbox",
+      spend10Min:"$0",
+      billingCap:"Free Rate Limits",
     },
     {
-      id: "tier1",
-      label: "Creator (Tier 1)",
-      qualification: "Active account",
-      spend10Min: "$50",
-      billingCap: "Standard Paid Limits",
+      id:"tier1",
+      label:"Creator (Tier 1)",
+      qualification:"Active account",
+      spend10Min:"$50",
+      billingCap:"Standard Paid Limits",
     },
     {
-      id: "tier2",
-      label: "Pro (Tier 2)",
-      qualification: "Verified creator",
-      spend10Min: "$500",
-      billingCap: "High Concurrency",
+      id:"tier2",
+      label:"Pro (Tier 2)",
+      qualification:"Verified creator",
+      spend10Min:"$500",
+      billingCap:"High Concurrency",
     },
     {
-      id: "tier3",
-      label: "Studio (Tier 3)",
-      qualification: "Studio tier",
-      spend10Min: "$5,000",
-      billingCap: "Unlimited / Custom",
+      id:"tier3",
+      label:"Studio (Tier 3)",
+      qualification:"Studio tier",
+      spend10Min:"$5,000",
+      billingCap:"Unlimited / Custom",
     },
   ],
 };
@@ -103,7 +103,7 @@ export default function AIRateLimitsPage({
   }, []);
 
   const currentProviderSpec: ProviderFullSpec =
-    selectedProviderId === "all"
+    selectedProviderId ==="all"
       ? ALL_PROVIDER_SPEC
       : PROVIDER_FULL_SPECS.find((p) => p.id === selectedProviderId) ||
         PROVIDER_FULL_SPECS[0];
@@ -121,63 +121,61 @@ export default function AIRateLimitsPage({
   const handleSyncLiveQuotas = async () => {
     setIsRefreshing(true);
     try {
-      const res = await fetch("/api/v1/ai/models/sync", { method: "POST" });
+      const res = await fetch("/api/v1/ai/models/sync", { method:"POST" });
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
           if (Array.isArray(data.models_breakdown)) {
             setModels(data.models_breakdown);
           }
-          addNotification?.(
-            `Refreshed live rate limits for ${currentProviderSpec.name}!`,
-            "success"
+          addNotification?.(`Refreshed live rate limits for ${currentProviderSpec.name}!`,"success"
           );
         }
       }
     } catch {
-      addNotification?.("Could not refresh live rate limits.", "error");
+      addNotification?.("Could not refresh live rate limits.","error");
     } finally {
       setIsRefreshing(false);
     }
   };
 
   const isMatchProvider = (m: AIModelCardData, providerId: string) => {
-    if (providerId === "all") return true;
-    const p = (m.provider || "").toLowerCase();
-    const id = (m.id || "").toLowerCase();
+    if (providerId ==="all") return true;
+    const p = (m.provider ||"").toLowerCase();
+    const id = (m.id ||"").toLowerCase();
     const target = providerId.toLowerCase();
 
-    if (target === "gemini" || target === "google") {
+    if (target ==="gemini" || target ==="google") {
       return (
-        p === "gemini" ||
-        p === "google" ||
+        p ==="gemini" ||
+        p ==="google" ||
         id.includes("gemini") ||
         id.includes("imagen")
       );
     }
-    if (target === "openai") {
+    if (target ==="openai") {
       return (
-        p === "openai" ||
+        p ==="openai" ||
         id.includes("gpt") ||
         id.includes("o1") ||
         id.includes("o3") ||
         id.includes("dall")
       );
     }
-    if (target === "anthropic") {
-      return p === "anthropic" || id.includes("claude");
+    if (target ==="anthropic") {
+      return p ==="anthropic" || id.includes("claude");
     }
-    if (target === "groq") {
-      return p === "groq" || id.includes("groq");
+    if (target ==="groq") {
+      return p ==="groq" || id.includes("groq");
     }
-    if (target === "deepseek") {
-      return p === "deepseek" || id.includes("deepseek");
+    if (target ==="deepseek") {
+      return p ==="deepseek" || id.includes("deepseek");
     }
-    if (target === "elevenlabs") {
-      return p === "elevenlabs" || id.includes("eleven");
+    if (target ==="elevenlabs") {
+      return p ==="elevenlabs" || id.includes("eleven");
     }
-    if (target === "deepl") {
-      return p === "deepl";
+    if (target ==="deepl") {
+      return p ==="deepl";
     }
     return p === target;
   };
@@ -185,7 +183,7 @@ export default function AIRateLimitsPage({
   const allSpecsList = [ALL_PROVIDER_SPEC, ...PROVIDER_FULL_SPECS];
 
   const visibleProviders =
-    selectedGroupFilter === "all"
+    selectedGroupFilter ==="all"
       ? allSpecsList
       : PROVIDER_FULL_SPECS.filter((p) => p.group === selectedGroupFilter);
 
@@ -228,8 +226,8 @@ export default function AIRateLimitsPage({
                   onClick={() => setSelectedGroupFilter(grp.id)}
                   className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold whitespace-nowrap transition-all cursor-pointer ${
                     selectedGroupFilter === grp.id
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "bg-[#0E0E0E] text-neutral-400 hover:text-neutral-200 border border-[#2F2F2F]"
+                      ?"bg-blue-600 text-white shadow-sm"
+                      :"bg-[#0E0E0E] text-neutral-400 hover:text-neutral-200 border border-[#2F2F2F]"
                   }`}
                 >
                   {grp.label}
@@ -244,7 +242,7 @@ export default function AIRateLimitsPage({
               const Icon = tab.icon;
               const isSelected = selectedProviderId === tab.id;
               const modelCount =
-                tab.id === "all"
+                tab.id ==="all"
                   ? models.length
                   : models.filter((m) => isMatchProvider(m, tab.id)).length;
 
@@ -254,8 +252,8 @@ export default function AIRateLimitsPage({
                   onClick={() => setSelectedProviderId(tab.id)}
                   className={`p-3.5 rounded-xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between hover:-translate-y-0.5 ${
                     isSelected
-                      ? "bg-[#141414] border-blue-500 shadow-md shadow-blue-500/10"
-                      : "bg-[#141414] border-[#2F2F2F] hover:border-neutral-500 hover:bg-[#181818]"
+                      ?"bg-[#141414] border-blue-500 shadow-md"
+                      :"bg-[#141414] border-[#2F2F2F] hover:border-neutral-500 hover:bg-[#181818]"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-1 mb-2.5">
@@ -263,7 +261,7 @@ export default function AIRateLimitsPage({
                       <Icon className="w-3.5 h-3.5" />
                     </div>
                     <span className="text-[10px] font-mono text-neutral-400 bg-[#0E0E0E] px-2 py-0.5 rounded border border-[#2F2F2F]">
-                      {modelCount} {modelCount === 1 ? "model" : "models"}
+                      {modelCount} {modelCount === 1 ?"model" :"models"}
                     </span>
                   </div>
 

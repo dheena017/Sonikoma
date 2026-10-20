@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from"react";
 import {
   Video,
   X,
@@ -14,15 +14,15 @@ import {
   Navigation,
   RotateCcw,
   PlusCircle,
-} from "lucide-react";
+} from"lucide-react";
 import YouTubeChannelSelector, {
   YouTubeChannel,
-} from "./YouTubeChannelSelector";
-import YouTubeOfficialLogo from "./YouTubeOfficialLogo";
-import YouTubeChannelHeader from "./YouTubeChannelHeader";
-import YouTubeSeoOptimizer from "./YouTubeSeoOptimizer";
-import YouTubeVideoGrid from "./YouTubeVideoGrid";
-import CyberSelect from "@/shared/ui/common/CyberSelect";
+} from"./YouTubeChannelSelector";
+import YouTubeOfficialLogo from"./YouTubeOfficialLogo";
+import YouTubeChannelHeader from"./YouTubeChannelHeader";
+import YouTubeSeoOptimizer from"./YouTubeSeoOptimizer";
+import YouTubeVideoGrid from"./YouTubeVideoGrid";
+import CyberSelect from"@/shared/ui/common/CyberSelect";
 
 interface PublishMonitorProps {
   activeVideoUrl: string | null;
@@ -101,8 +101,7 @@ export default function PublishMonitor({
   const [textPosition, setTextPosition] = useState(75);
   const [textAngle, setTextAngle] = useState(-5);
   const [outlineSize, setOutlineSize] = useState(2);
-  const [fontFamily, setFontFamily] = useState(
-    "Impact, Arial Black, sans-serif"
+  const [fontFamily, setFontFamily] = useState("Impact, Arial Black, sans-serif"
   );
   const [useBackgroundBox, setUseBackgroundBox] = useState(false);
   const [backgroundBoxColor, setBackgroundBoxColor] =
@@ -126,7 +125,7 @@ export default function PublishMonitor({
   useEffect(() => {
     if (title) {
       const saved = JSON.parse(
-        localStorage.getItem(`project_thumbnails_${title}`) || "[]"
+        localStorage.getItem(`project_thumbnails_${title}`) ||"[]"
       );
       setProjectThumbnails(saved);
     }
@@ -134,30 +133,25 @@ export default function PublishMonitor({
 
   // Generate clickbait slogans based on title
   const handleGenerateSlogans = () => {
-    const defaultSlogans = [
-      "OVERPOWERED!",
-      "LEVEL UP!",
-      "SECRET S-RANK!",
-      "REBORN!",
-      "S-RANK RECAP!",
+    const defaultSlogans = ["OVERPOWERED!","LEVEL UP!","SECRET S-RANK!","REBORN!","S-RANK RECAP!",
     ];
     if (!title.trim()) {
       setSuggestedSlogans(defaultSlogans.slice(0, 3));
       return;
     }
     const words = title
-      .split(" ")
-      .map((w) => w.toUpperCase().replace(/[^A-Z]/g, ""));
+      .split("")
+      .map((w) => w.toUpperCase().replace(/[^A-Z]/g,""));
     const keywords = words.filter(
       (w) =>
         w.length > 3 &&
-        !["WITH", "THAT", "THIS", "SOME", "RECAP", "CHAPTER"].includes(w)
+        !["WITH","THAT","THIS","SOME","RECAP","CHAPTER"].includes(w)
     );
 
     const suggested = [
-      keywords.length > 0 ? `${keywords[0]}!` : "OVERPOWERED!",
-      keywords.length > 1 ? `${keywords[0]} ${keywords[1]}!` : "LEVEL UP!",
-      keywords.length > 0 ? `SECRET ${keywords[0]}!` : "SECRET S-RANK!",
+      keywords.length > 0 ?`${keywords[0]}!` :"OVERPOWERED!",
+      keywords.length > 1 ?`${keywords[0]} ${keywords[1]}!` :"LEVEL UP!",
+      keywords.length > 0 ?`SECRET ${keywords[0]}!` :"SECRET S-RANK!",
     ];
     setSuggestedSlogans(suggested);
   };
@@ -167,10 +161,9 @@ export default function PublishMonitor({
       try {
         const token =
           localStorage.getItem("sonikoma_token") ||
-          localStorage.getItem("token") ||
-          "";
+          localStorage.getItem("token") ||"";
         const res = await fetch("/api/v1/export/youtube/active-channel", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization:`Bearer ${token}` },
         });
         if (res.ok) {
           const data = await res.json();
@@ -193,8 +186,7 @@ export default function PublishMonitor({
     };
     window.addEventListener("youtube_channel_changed", handleChannelChanged);
     return () => {
-      window.removeEventListener(
-        "youtube_channel_changed",
+      window.removeEventListener("youtube_channel_changed",
         handleChannelChanged
       );
     };
@@ -208,7 +200,7 @@ export default function PublishMonitor({
 
   const isTooLongForShort = isShort && videoDuration && videoDuration > 60;
   const isWrongRatioForShort =
-    isShort && videoAspectRatio && videoAspectRatio !== "9:16";
+    isShort && videoAspectRatio && videoAspectRatio !=="9:16";
 
   return (
     <div className="bg-neutral-950/40 backdrop-blur-md border border-neutral-900 rounded-2xl p-5 space-y-4 animate-fade-in transition-all duration-300 hover:border-neutral-800/80">
@@ -288,8 +280,8 @@ export default function PublishMonitor({
             className="relative aspect-video rounded-2xl bg-black overflow-hidden border border-neutral-900 group transition-all duration-300 shadow-md"
             style={{
               border:
-                frameColor !== "none"
-                  ? `${frameWidth}px solid ${frameColor}`
+                frameColor !=="none"
+                  ?`${frameWidth}px solid ${frameColor}`
                   : undefined,
             }}
           >
@@ -299,7 +291,7 @@ export default function PublishMonitor({
               alt="Custom Thumbnail"
               className="w-full h-full object-cover"
               style={{
-                filter: `saturate(${saturationFilter}%) brightness(${brightnessFilter}%)`,
+                filter:`saturate(${saturationFilter}%) brightness(${brightnessFilter}%)`,
               }}
             />
 
@@ -308,24 +300,24 @@ export default function PublishMonitor({
               <div
                 className="absolute inset-x-4 pointer-events-none select-none text-center font-black uppercase italic tracking-wider transition-all duration-150 z-20"
                 style={{
-                  top: `${textPosition}%`,
-                  transform: `translateY(-50%) rotate(${textAngle}deg)`,
+                  top:`${textPosition}%`,
+                  transform:`translateY(-50%) rotate(${textAngle}deg)`,
                   color: textColor,
-                  fontSize: `${fontSize}px`,
+                  fontSize:`${fontSize}px`,
                   fontFamily: fontFamily,
-                  lineHeight: "1.1",
-                  textShadow: `-${outlineSize}px -${outlineSize}px 0 #000, ${outlineSize}px -${outlineSize}px 0 #000, -${outlineSize}px ${outlineSize}px 0 #000, ${outlineSize}px ${outlineSize}px 0 #000, 0 4px 10px rgba(0,0,0,0.95)`,
+                  lineHeight:"1.1",
+                  textShadow:`-${outlineSize}px -${outlineSize}px 0 #000, ${outlineSize}px -${outlineSize}px 0 #000, -${outlineSize}px ${outlineSize}px 0 #000, ${outlineSize}px ${outlineSize}px 0 #000, 0 4px 10px rgba(0,0,0,0.95)`,
                   ...(useBackgroundBox
                     ? {
                         backgroundColor: backgroundBoxColor,
-                        padding: "6px 12px",
-                        borderRadius: "6px",
-                        display: "inline-block",
-                        boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
-                        left: "50%",
-                        transform: `translate(-50%, -50%) rotate(${textAngle}deg)`,
-                        width: "auto",
-                        maxWidth: "90%",
+                        padding:"6px 12px",
+                        borderRadius:"6px",
+                        display:"inline-block",
+                        boxShadow:"0 4px 10px rgba(0,0,0,0.5)",
+                        left:"50%",
+                        transform:`translate(-50%, -50%) rotate(${textAngle}deg)`,
+                        width:"auto",
+                        maxWidth:"90%",
                       }
                     : {}),
                 }}
@@ -339,11 +331,11 @@ export default function PublishMonitor({
               <div
                 className="absolute pointer-events-none select-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.8)] z-10"
                 style={{
-                  left: `${arrowLeft}%`,
-                  top: `${arrowTop}%`,
-                  width: `${arrowSize}px`,
-                  height: `${arrowSize}px`,
-                  transform: `translate(-50%, -50%) rotate(${arrowAngle}deg)`,
+                  left:`${arrowLeft}%`,
+                  top:`${arrowTop}%`,
+                  width:`${arrowSize}px`,
+                  height:`${arrowSize}px`,
+                  transform:`translate(-50%, -50%) rotate(${arrowAngle}deg)`,
                 }}
               >
                 {/* Custom Curved Clickbait Red Arrow SVG */}
@@ -404,8 +396,8 @@ export default function PublishMonitor({
                   onClick={() => onThumbnailSelect?.(url)}
                   className={`relative min-w-[120px] aspect-video bg-neutral-950 rounded-xl border overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-95 ${
                     thumbnailPreviewUrl === url
-                      ? "border-[#3B82F6] ring-1 ring-[#3B82F6]/50"
-                      : "border-neutral-900 hover:border-neutral-700"
+                      ?"border-[#3B82F6] ring-1 ring-[#3B82F6]/50"
+                      :"border-neutral-900 hover:border-neutral-700"
                   }`}
                 >
                   <img
@@ -454,8 +446,8 @@ export default function PublishMonitor({
                     onClick={() => setClickbaitText(s)}
                     className={`px-2 py-0.5 rounded text-[9.5px] font-bold border cursor-pointer transition-all duration-200 ${
                       clickbaitText === s
-                        ? "bg-[#2A2A2A] border-[#3B82F6] text-[#60A5FA]"
-                        : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:bg-neutral-800"
+                        ?"bg-[#2A2A2A] border-[#3B82F6] text-[#60A5FA]"
+                        :"bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:bg-neutral-800"
                     }`}
                   >
                     {s}
@@ -491,8 +483,8 @@ export default function PublishMonitor({
                 }}
                 className={`flex-1 py-1 rounded-lg border text-center transition-colors duration-250 cursor-pointer ${
                   showStyleControls
-                    ? "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
-                    : "bg-neutral-900/40 border-neutral-855"
+                    ?"bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
+                    :"bg-neutral-900/40 border-neutral-855"
                 }`}
               >
                 Slogan Style
@@ -504,8 +496,8 @@ export default function PublishMonitor({
                 }}
                 className={`flex-1 py-1 rounded-lg border text-center transition-colors duration-250 cursor-pointer ${
                   showFilterControls
-                    ? "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
-                    : "bg-neutral-900/40 border-neutral-855"
+                    ?"bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
+                    :"bg-neutral-900/40 border-neutral-855"
                 }`}
               >
                 Arrow & Filters
@@ -589,20 +581,20 @@ export default function PublishMonitor({
                     size="sm"
                     options={[
                       {
-                        value: "Impact, Arial Black, sans-serif",
-                        label: "Impact (YouTube Classic)",
+                        value:"Impact, Arial Black, sans-serif",
+                        label:"Impact (YouTube Classic)",
                       },
                       {
-                        value: "'Montserrat', sans-serif font-black",
-                        label: "Montserrat Black",
+                        value:"'Montserrat', sans-serif font-black",
+                        label:"Montserrat Black",
                       },
                       {
-                        value: "'Bungee', sans-serif",
-                        label: "Bungee Bold",
+                        value:"'Bungee', sans-serif",
+                        label:"Bungee Bold",
                       },
                       {
-                        value: "'Comic Sans MS', cursive",
-                        label: "Comic Meme Style",
+                        value:"'Comic Sans MS', cursive",
+                        label:"Comic Meme Style",
                       },
                     ]}
                   />
@@ -612,21 +604,15 @@ export default function PublishMonitor({
                   <div className="flex gap-2 items-center">
                     <span className="text-neutral-500 font-bold">COLOR:</span>
                     <div className="flex gap-1">
-                      {[
-                        "#FFFF00",
-                        "#FFFFFF",
-                        "#FF0000",
-                        "#00FF00",
-                        "#3B82F6",
-                        "#3B82F6",
+                      {["#FFFF00","#FFFFFF","#FF0000","#00FF00","#3B82F6","#3B82F6",
                       ].map((c) => (
                         <button
                           key={c}
                           onClick={() => setTextColor(c)}
                           className={`h-3.5 w-3.5 rounded-full border cursor-pointer transition-transform hover:scale-110 ${
                             textColor === c
-                              ? "border-white ring-1 ring-[#3B82F6]/50"
-                              : "border-neutral-900"
+                              ?"border-white ring-1 ring-[#3B82F6]/50"
+                              :"border-neutral-900"
                           }`}
                           style={{ backgroundColor: c }}
                         />
@@ -640,32 +626,29 @@ export default function PublishMonitor({
                       onClick={() => setUseBackgroundBox(!useBackgroundBox)}
                       className={`px-2 py-0.5 rounded text-[8.5px] font-bold border cursor-pointer transition-colors ${
                         useBackgroundBox
-                          ? "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
-                          : "bg-neutral-900 border-neutral-850"
+                          ?"bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
+                          :"bg-neutral-900 border-neutral-850"
                       }`}
                     >
-                      {useBackgroundBox ? "ON" : "OFF"}
+                      {useBackgroundBox ?"ON" :"OFF"}
                     </button>
 
                     {useBackgroundBox && (
                       <div className="flex gap-1 pl-1.5 border-l border-neutral-900">
-                        {[
-                          "rgba(0,0,0,0.85)",
-                          "rgba(255,0,0,0.85)",
-                          "rgba(0,0,0,0.4)",
+                        {["rgba(0,0,0,0.85)","rgba(255,0,0,0.85)","rgba(0,0,0,0.4)",
                         ].map((c) => (
                           <button
                             key={c}
                             onClick={() => setBackgroundBoxColor(c)}
                             className={`h-3 w-3 rounded border cursor-pointer ${
                               backgroundBoxColor === c
-                                ? "border-white ring-1 ring-[#3B82F6]/50"
-                                : "border-neutral-900"
+                                ?"border-white ring-1 ring-[#3B82F6]/50"
+                                :"border-neutral-900"
                             }`}
                             style={{
                               backgroundColor: c.includes("255")
-                                ? "red"
-                                : "black",
+                                ?"red"
+                                :"black",
                             }}
                           />
                         ))}
@@ -725,32 +708,32 @@ export default function PublishMonitor({
                       BORDER:
                     </span>
                     <div className="flex gap-1">
-                      {["none", "#FF0000", "#FFFF00", "#3B82F6", "#00FF00"].map(
+                      {["none","#FF0000","#FFFF00","#3B82F6","#00FF00"].map(
                         (c) => (
                           <button
                             key={c}
                             onClick={() => setFrameColor(c)}
                             className={`h-3.5 w-3.5 rounded border cursor-pointer ${
                               frameColor === c
-                                ? "border-white ring-1 ring-[#3B82F6]/50"
-                                : "border-neutral-900"
+                                ?"border-white ring-1 ring-[#3B82F6]/50"
+                                :"border-neutral-900"
                             } ${
-                              c === "none"
-                                ? "bg-neutral-950 text-[9px] flex items-center justify-center font-bold text-neutral-500"
-                                : ""
+                              c ==="none"
+                                ?"bg-neutral-950 text-[9px] flex items-center justify-center font-bold text-neutral-500"
+                                :""
                             }`}
                             style={{
-                              backgroundColor: c !== "none" ? c : undefined,
+                              backgroundColor: c !=="none" ? c : undefined,
                             }}
                           >
-                            {c === "none" ? "X" : ""}
+                            {c ==="none" ?"X" :""}
                           </button>
                         )
                       )}
                     </div>
                   </div>
 
-                  {frameColor !== "none" && (
+                  {frameColor !=="none" && (
                     <div className="flex gap-1.5 items-center font-mono text-[9.5px]">
                       <span className="text-neutral-500 font-bold">WIDTH:</span>
                       <select
@@ -779,11 +762,11 @@ export default function PublishMonitor({
                       onClick={() => setShowArrow(!showArrow)}
                       className={`px-2 py-0.5 rounded-md text-[8.5px] font-bold border cursor-pointer transition-colors ${
                         showArrow
-                          ? "bg-[#2A2A2A] border-[#2F2F2F] text-[#3B82F6]"
-                          : "bg-neutral-900 border-neutral-850"
+                          ?"bg-[#2A2A2A] border-[#2F2F2F] text-[#3B82F6]"
+                          :"bg-neutral-900 border-neutral-850"
                       }`}
                     >
-                      {showArrow ? "ON" : "OFF"}
+                      {showArrow ?"ON" :"OFF"}
                     </button>
                   </div>
 
@@ -878,7 +861,7 @@ export default function PublishMonitor({
       </div>
 
       {/* Scheduling publishing inputs (visible if Unlisted or Private) */}
-      {(privacy === "unlisted" || privacy === "private") && (
+      {(privacy ==="unlisted" || privacy ==="private") && (
         <div className="p-3.5 bg-neutral-950/20 backdrop-blur-sm border border-neutral-900 rounded-2xl space-y-3 animate-slide-down">
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-neutral-200 font-bold font-mono text-[10.5px]">
@@ -888,12 +871,12 @@ export default function PublishMonitor({
             <button
               onClick={() => setIsScheduled(!isScheduled)}
               className={`w-10 h-5 flex items-center rounded-full p-0.5 cursor-pointer transition-all duration-300 shrink-0 ${
-                isScheduled ? "bg-[#2A2A2A]" : "bg-neutral-800"
+                isScheduled ?"bg-[#2A2A2A]" :"bg-neutral-800"
               }`}
             >
               <div
                 className={`bg-white w-4 h-4 rounded-full shadow transform transition-transform duration-300 ${
-                  isScheduled ? "translate-x-5" : "translate-x-0"
+                  isScheduled ?"translate-x-5" :"translate-x-0"
                 }`}
               />
             </button>
@@ -935,7 +918,7 @@ export default function PublishMonitor({
           <div className="flex items-center justify-between border-b border-neutral-900/60 pb-1.5">
             <span className="text-neutral-500 font-bold">Source Mode:</span>
             <span className="font-bold text-neutral-300">
-              {selectedFile ? "Local File Upload" : "Workspace Compiled Video"}
+              {selectedFile ?"Local File Upload" :"Workspace Compiled Video"}
             </span>
           </div>
           <div className="flex items-center justify-between border-b border-neutral-900/60 pb-1.5">
@@ -944,8 +927,8 @@ export default function PublishMonitor({
             </span>
             <span className="font-bold text-neutral-300">
               {videoDuration
-                ? `${videoDuration.toFixed(1)}s`
-                : "Calculating..."}
+                ?`${videoDuration.toFixed(1)}s`
+                :"Calculating..."}
             </span>
           </div>
           <div className="flex items-center justify-between border-b border-neutral-900/60 pb-1.5">
@@ -953,7 +936,7 @@ export default function PublishMonitor({
               Layout Aspect Ratio:
             </span>
             <span className="font-bold text-neutral-300">
-              {videoAspectRatio || "Detecting..."}
+              {videoAspectRatio ||"Detecting..."}
             </span>
           </div>
           <div className="flex items-center justify-between">
@@ -961,11 +944,11 @@ export default function PublishMonitor({
             <span
               className={`font-bold px-2 py-0.5 rounded-md text-[9.5px] ${
                 isShort
-                  ? "bg-red-955 text-red-400 border border-red-900/30"
-                  : "bg-[#2A2A2A] text-[#3B82F6] border border-[#2F2F2F]"
+                  ?"bg-red-955 text-red-400 border border-red-900/30"
+                  :"bg-[#2A2A2A] text-[#3B82F6] border border-[#2F2F2F]"
               }`}
             >
-              {isShort ? "SHORTS" : "REGULAR VIDEO"}
+              {isShort ?"SHORTS" :"REGULAR VIDEO"}
             </span>
           </div>
         </div>
@@ -984,7 +967,7 @@ export default function PublishMonitor({
               <ul className="list-disc pl-4.5 text-[9.5px] text-neutral-450 leading-relaxed space-y-0.5 font-mono">
                 {isTooLongForShort && (
                   <li>
-                    YouTube Shorts must be under 60 seconds (Current:{" "}
+                    YouTube Shorts must be under 60 seconds (Current:{""}
                     {videoDuration?.toFixed(1)}s).
                   </li>
                 )}
@@ -1011,15 +994,15 @@ export default function PublishMonitor({
             )}
           </div>
           {publishLogs.map((log, idx) => {
-            let logColor = "text-neutral-400";
-            if (log.startsWith("❌")) logColor = "text-red-400 font-bold";
+            let logColor ="text-neutral-400";
+            if (log.startsWith("❌")) logColor ="text-red-400 font-bold";
             else if (log.startsWith("🎉") || log.startsWith("[4/4]"))
-              logColor = "text-emerald-400 font-semibold";
-            else if (log.startsWith("[AI]")) logColor = "text-[#3B82F6]";
-            else if (log.startsWith("[File]")) logColor = "text-blue-400";
+              logColor ="text-emerald-400 font-semibold";
+            else if (log.startsWith("[AI]")) logColor ="text-[#3B82F6]";
+            else if (log.startsWith("[File]")) logColor ="text-blue-400";
             else if (log.startsWith("[Thumbnail]"))
-              logColor = "text-teal-400 font-medium";
-            else if (log.startsWith("[Chapters]")) logColor = "text-orange-400";
+              logColor ="text-teal-400 font-medium";
+            else if (log.startsWith("[Chapters]")) logColor ="text-orange-400";
             return (
               <div key={idx} className={`${logColor} leading-relaxed`}>
                 {log}
@@ -1041,7 +1024,7 @@ export default function PublishMonitor({
               />
             ) : (
               <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center font-bold text-white text-[10px] shrink-0">
-                {selectedChannel.title ? selectedChannel.title.charAt(0) : "Y"}
+                {selectedChannel.title ? selectedChannel.title.charAt(0) :"Y"}
               </div>
             )}
             <div className="truncate text-xs">
@@ -1082,8 +1065,8 @@ export default function PublishMonitor({
             !activeVideoUrl ||
             !title.trim() ||
             isTooLongForShort === true
-              ? "bg-neutral-900 border-neutral-850 text-neutral-500 cursor-not-allowed opacity-60"
-              : "bg-[#FF0000] hover:bg-[#E60000] border-[#FF0000]/50 shadow-lg shadow-red-950/20 cursor-pointer active:scale-98"
+              ?"bg-neutral-900 border-neutral-850 text-neutral-500 cursor-not-allowed opacity-60"
+              :"bg-[#FF0000] hover:bg-[#E60000] border-[#FF0000]/50 shadow-lg  cursor-pointer active:scale-98"
           }`}
         >
           {isPublishing ? (

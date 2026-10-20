@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from"react";
 import {
   Users,
   Eye,
@@ -24,8 +24,8 @@ import {
   CheckCircle2,
   ListMusic,
   TrendingDown,
-} from "lucide-react";
-import UploadHistory from "./UploadHistory";
+} from"lucide-react";
+import UploadHistory from"./UploadHistory";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -87,26 +87,26 @@ interface YouTubeAnalyticsDashboardProps {
 
 const parseNum = (s?: string | number): number => {
   if (s == null) return 0;
-  return parseInt(String(s).replace(/,/g, "")) || 0;
+  return parseInt(String(s).replace(/,/g,"")) || 0;
 };
 
 const fmtNum = (n: number): string => {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  if (n >= 1_000_000) return`${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return`${(n / 1_000).toFixed(1)}K`;
   return n.toLocaleString();
 };
 
 const timeAgo = (iso?: string): string => {
-  if (!iso) return "";
+  if (!iso) return"";
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return "Just now";
-  if (diff < 3600) return `${Math.round(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.round(diff / 3600)}h ago`;
-  if (diff < 2592000) return `${Math.round(diff / 86400)}d ago`;
+  if (diff < 60) return"Just now";
+  if (diff < 3600) return`${Math.round(diff / 60)}m ago`;
+  if (diff < 86400) return`${Math.round(diff / 3600)}h ago`;
+  if (diff < 2592000) return`${Math.round(diff / 86400)}d ago`;
   return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+    month:"short",
+    day:"numeric",
+    year:"numeric",
   });
 };
 
@@ -125,7 +125,7 @@ const StatCard = ({
   value: string | number;
   sub?: string;
   color: string;
-  trend?: "up" | "down" | null;
+  trend?:"up" |"down" | null;
 }) => (
   <div className="relative overflow-hidden p-4 bg-neutral-900/80 border border-neutral-800/80 rounded-2xl flex items-center gap-3 hover:border-neutral-700/80 transition-all duration-200 group">
     <div
@@ -147,30 +147,16 @@ const StatCard = ({
     {trend && (
       <div
         className={`shrink-0 ${
-          trend === "up" ? "text-emerald-400" : "text-red-400"
+          trend ==="up" ?"text-emerald-400" :"text-red-400"
         }`}
       >
-        {trend === "up" ? (
+        {trend ==="up" ? (
           <TrendingUp className="w-4 h-4" />
         ) : (
           <TrendingDown className="w-4 h-4" />
         )}
       </div>
     )}
-    {/* Subtle gradient glow in corner */}
-    <div
-      className={`absolute -bottom-4 -right-4 w-16 h-16 rounded-full blur-2xl opacity-10 ${
-        color.includes("red")
-          ? "bg-red-500"
-          : color.includes("sky")
-          ? "bg-sky-500"
-          : color.includes("purple")
-          ? "bg-[#2A2A2A]"
-          : color.includes("emerald")
-          ? "bg-emerald-500"
-          : "bg-amber-500"
-      }`}
-    />
   </div>
 );
 
@@ -178,7 +164,7 @@ const MiniBar = ({ pct, color }: { pct: number; color: string }) => (
   <div className="flex-1 h-1.5 bg-neutral-800 rounded-full overflow-hidden">
     <div
       className={`h-full ${color} rounded-full transition-all duration-700`}
-      style={{ width: `${Math.max(pct, 2)}%` }}
+      style={{ width:`${Math.max(pct, 2)}%` }}
     />
   </div>
 );
@@ -193,16 +179,14 @@ export default function YouTubeAnalyticsDashboard({
   const [quota, setQuota] = useState<QuotaTelemetry | null>(null);
   const [playlists, setPlaylists] = useState<PlaylistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "videos" | "playlists" | "engagement"
+  const [activeTab, setActiveTab] = useState<"overview" |"videos" |"playlists" |"engagement"
   >("overview");
 
   const getHeaders = () => {
     const token =
       localStorage.getItem("sonikoma_token") ||
-      localStorage.getItem("token") ||
-      "";
-    return { Authorization: `Bearer ${token}` };
+      localStorage.getItem("token") ||"";
+    return { Authorization:`Bearer ${token}` };
   };
 
   const fetchData = useCallback(async () => {
@@ -246,7 +230,7 @@ export default function YouTubeAnalyticsDashboard({
 
   const isConnected = Boolean(
     channel?.title &&
-      channel?.title !== "YouTube Not Connected" &&
+      channel?.title !=="YouTube Not Connected" &&
       !channel?.title.includes("Not Connected")
   );
 
@@ -261,7 +245,7 @@ export default function YouTubeAnalyticsDashboard({
   const engagementRate =
     totalViews > 0
       ? (((totalLikes + totalComments) / totalViews) * 100).toFixed(2)
-      : "0.00";
+      :"0.00";
 
   const topVideos = [...videos]
     .sort((a, b) => parseNum(b.view_count) - parseNum(a.view_count))
@@ -281,9 +265,9 @@ export default function YouTubeAnalyticsDashboard({
     .slice(0, 5);
 
   const privacyCounts = {
-    public: videos.filter((v) => v.privacy_status === "public").length,
-    unlisted: videos.filter((v) => v.privacy_status === "unlisted").length,
-    private: videos.filter((v) => v.privacy_status === "private").length,
+    public: videos.filter((v) => v.privacy_status ==="public").length,
+    unlisted: videos.filter((v) => v.privacy_status ==="unlisted").length,
+    private: videos.filter((v) => v.privacy_status ==="private").length,
   };
 
   const quotaUsedPct = quota?.daily_limit
@@ -291,18 +275,18 @@ export default function YouTubeAnalyticsDashboard({
     : 0;
   const quotaColor =
     quotaUsedPct > 80
-      ? "text-red-400"
+      ?"text-red-400"
       : quotaUsedPct > 50
-      ? "text-amber-400"
-      : "text-emerald-400";
+      ?"text-amber-400"
+      :"text-emerald-400";
 
   // ── Tab definitions ─────────────────────────────────────────────────────
 
   const TABS = [
-    { id: "overview", label: "Overview", icon: BarChart3 },
-    { id: "videos", label: "Videos", icon: Play },
-    { id: "playlists", label: "Playlists", icon: ListMusic },
-    { id: "engagement", label: "Engagement", icon: TrendingUp },
+    { id:"overview", label:"Overview", icon: BarChart3 },
+    { id:"videos", label:"Videos", icon: Play },
+    { id:"playlists", label:"Playlists", icon: ListMusic },
+    { id:"engagement", label:"Engagement", icon: TrendingUp },
   ] as const;
 
   return (
@@ -316,8 +300,8 @@ export default function YouTubeAnalyticsDashboard({
               onClick={() => setActiveTab(id as typeof activeTab)}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[11px] font-bold font-mono transition-all cursor-pointer ${
                 activeTab === id
-                  ? "bg-red-600 text-white shadow-lg shadow-red-600/30"
-                  : "text-neutral-400 hover:text-neutral-200"
+                  ?"bg-red-600 text-white shadow-lg"
+                  :"text-neutral-400 hover:text-neutral-200"
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -337,7 +321,7 @@ export default function YouTubeAnalyticsDashboard({
           className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-xl text-xs font-mono text-neutral-400 hover:text-white hover:border-neutral-700 transition-all cursor-pointer"
         >
           <RefreshCw
-            className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`}
+            className={`w-3.5 h-3.5 ${isLoading ?"animate-spin" :""}`}
           />
           Refresh
         </button>
@@ -358,7 +342,7 @@ export default function YouTubeAnalyticsDashboard({
       ) : (
         <>
           {/* ══ OVERVIEW TAB ══ */}
-          {activeTab === "overview" && (
+          {activeTab ==="overview" && (
             <div className="space-y-5">
               {/* KPI Grid */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -368,14 +352,14 @@ export default function YouTubeAnalyticsDashboard({
                   value={
                     isConnected &&
                     channel?.subscriber_count &&
-                    channel.subscriber_count !== "--"
+                    channel.subscriber_count !=="--"
                       ? fmtNum(parseNum(channel.subscriber_count))
-                      : "--"
+                      :"--"
                   }
                   sub={
                     isConnected
-                      ? channel?.custom_url || "Channel subscribers"
-                      : "Not connected"
+                      ? channel?.custom_url ||"Channel subscribers"
+                      :"Not connected"
                   }
                   color="bg-red-950/50 border-red-900/40"
                 />
@@ -385,13 +369,13 @@ export default function YouTubeAnalyticsDashboard({
                   value={
                     isConnected &&
                     channel?.view_count &&
-                    channel.view_count !== "--"
+                    channel.view_count !=="--"
                       ? fmtNum(parseNum(channel.view_count))
                       : totalViews > 0
                       ? fmtNum(totalViews)
-                      : "--"
+                      :"--"
                   }
-                  sub={isConnected ? "All-time channel views" : "Not connected"}
+                  sub={isConnected ?"All-time channel views" :"Not connected"}
                   color="bg-sky-950/50 border-sky-900/40"
                 />
                 <StatCard
@@ -400,26 +384,26 @@ export default function YouTubeAnalyticsDashboard({
                   value={
                     isConnected &&
                     channel?.video_count &&
-                    channel.video_count !== "--"
+                    channel.video_count !=="--"
                       ? channel.video_count
                       : videos.length > 0
                       ? String(videos.length)
-                      : "--"
+                      :"--"
                   }
                   sub={
                     videos.length > 0
-                      ? `${privacyCounts.public} public · ${privacyCounts.unlisted} unlisted`
+                      ?`${privacyCounts.public} public · ${privacyCounts.unlisted} unlisted`
                       : isConnected
-                      ? "0 public · 0 unlisted"
-                      : "Not connected"
+                      ?"0 public · 0 unlisted"
+                      :"Not connected"
                   }
                   color="bg-[#2A2A2A] border-[#2F2F2F]"
                 />
                 <StatCard
                   icon={<TrendingUp className="w-4 h-4 text-emerald-400" />}
                   label="Avg Views"
-                  value={avgViews > 0 ? fmtNum(avgViews) : "--"}
-                  sub={avgViews > 0 ? "Per video average" : "Not connected"}
+                  value={avgViews > 0 ? fmtNum(avgViews) :"--"}
+                  sub={avgViews > 0 ?"Per video average" :"Not connected"}
                   color="bg-emerald-950/50 border-emerald-900/40"
                 />
               </div>
@@ -459,11 +443,11 @@ export default function YouTubeAnalyticsDashboard({
                           maxViews > 0 ? (viewN / maxViews) * 100 : 0;
                         const medal =
                           idx === 0
-                            ? "🥇"
+                            ?"🥇"
                             : idx === 1
-                            ? "🥈"
+                            ?"🥈"
                             : idx === 2
-                            ? "🥉"
+                            ?"🥉"
                             : null;
                         return (
                           <a
@@ -530,28 +514,28 @@ export default function YouTubeAnalyticsDashboard({
                       <span
                         className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
                           quotaUsedPct > 80
-                            ? "bg-red-950/60 border border-red-900/40 text-red-400"
+                            ?"bg-red-950/60 border border-red-900/40 text-red-400"
                             : quotaUsedPct > 50
-                            ? "bg-amber-950/60 border border-amber-900/40 text-amber-400"
-                            : "bg-emerald-950/60 border border-emerald-900/40 text-emerald-400"
+                            ?"bg-amber-950/60 border border-amber-900/40 text-amber-400"
+                            :"bg-emerald-950/60 border border-emerald-900/40 text-emerald-400"
                         }`}
                       >
-                        {quota?.health_status || "Healthy"}
+                        {quota?.health_status ||"Healthy"}
                       </span>
                     </div>
                     <div className="space-y-1.5 text-xs font-mono">
                       {[
                         {
-                          label: "Daily Limit",
+                          label:"Daily Limit",
                           val: (quota?.daily_limit || 10000).toLocaleString(),
                         },
                         {
-                          label: "Used Today",
+                          label:"Used Today",
                           val: String(quota?.used_today || 0),
                           cls: quotaColor,
                         },
                         {
-                          label: "Remaining",
+                          label:"Remaining",
                           val: (
                             (quota?.daily_limit || 10000) -
                             (quota?.used_today || 0)
@@ -564,7 +548,7 @@ export default function YouTubeAnalyticsDashboard({
                         >
                           <span className="text-neutral-500">{label}</span>
                           <span
-                            className={`font-bold ${cls || "text-neutral-200"}`}
+                            className={`font-bold ${cls ||"text-neutral-200"}`}
                           >
                             {val}
                           </span>
@@ -575,12 +559,12 @@ export default function YouTubeAnalyticsDashboard({
                       <div
                         className={`h-full rounded-full transition-all duration-700 ${
                           quotaUsedPct > 80
-                            ? "bg-gradient-to-r from-red-600 to-red-400"
+                            ?"bg-gradient-to-r from-red-600 to-red-400"
                             : quotaUsedPct > 50
-                            ? "bg-gradient-to-r from-amber-600 to-amber-400"
-                            : "bg-gradient-to-r from-emerald-700 to-emerald-400"
+                            ?"bg-gradient-to-r from-amber-600 to-amber-400"
+                            :"bg-gradient-to-r from-emerald-700 to-emerald-400"
                         }`}
-                        style={{ width: `${Math.max(quotaUsedPct, 2)}%` }}
+                        style={{ width:`${Math.max(quotaUsedPct, 2)}%` }}
                       />
                     </div>
                     <p className={`text-[10px] font-mono ${quotaColor}`}>
@@ -605,27 +589,27 @@ export default function YouTubeAnalyticsDashboard({
                       </h3>
                       {[
                         {
-                          key: "public",
+                          key:"public",
                           icon: Globe,
-                          label: "Public",
-                          color: "bg-emerald-600",
-                          textColor: "text-emerald-400",
+                          label:"Public",
+                          color:"bg-emerald-600",
+                          textColor:"text-emerald-400",
                           count: privacyCounts.public,
                         },
                         {
-                          key: "unlisted",
+                          key:"unlisted",
                           icon: LinkIcon,
-                          label: "Unlisted",
-                          color: "bg-amber-600",
-                          textColor: "text-amber-400",
+                          label:"Unlisted",
+                          color:"bg-amber-600",
+                          textColor:"text-amber-400",
                           count: privacyCounts.unlisted,
                         },
                         {
-                          key: "private",
+                          key:"private",
                           icon: Lock,
-                          label: "Private",
-                          color: "bg-neutral-600",
-                          textColor: "text-neutral-400",
+                          label:"Private",
+                          color:"bg-neutral-600",
+                          textColor:"text-neutral-400",
                           count: privacyCounts.private,
                         },
                       ].map(
@@ -664,7 +648,7 @@ export default function YouTubeAnalyticsDashboard({
                     <h3 className="text-xs font-black text-white font-mono uppercase tracking-wider flex items-center gap-2">
                       <CheckCircle2
                         className={`w-3.5 h-3.5 ${
-                          isConnected ? "text-emerald-400" : "text-neutral-500"
+                          isConnected ?"text-emerald-400" :"text-neutral-500"
                         }`}
                       />
                       Channel Info
@@ -680,21 +664,21 @@ export default function YouTubeAnalyticsDashboard({
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-[#2A2A2A] flex items-center justify-center font-bold text-white text-xs font-sans uppercase shrink-0">
                           {isConnected && channel?.title
                             ? channel.title.charAt(0)
-                            : "Y"}
+                            :"Y"}
                         </div>
                       )}
                       <div className="min-w-0">
                         <p className="text-sm font-black text-white truncate">
                           {isConnected
                             ? channel?.title
-                            : "YouTube Not Connected"}
+                            :"YouTube Not Connected"}
                         </p>
                         <p className="text-[10px] font-mono text-neutral-500 truncate">
                           {isConnected && channel?.custom_url
                             ? channel.custom_url.startsWith("@")
                               ? channel.custom_url
-                              : `@${channel.custom_url.replace("@", "")}`
-                            : "Connect YouTube account to load live stats"}
+                              :`@${channel.custom_url.replace("@","")}`
+                            :"Connect YouTube account to load live stats"}
                         </p>
                         {isConnected && channel?.country && (
                           <p className="text-[10px] font-mono text-neutral-600">
@@ -740,11 +724,11 @@ export default function YouTubeAnalyticsDashboard({
                             </span>
                             <span
                               className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${
-                                vid.privacy_status === "public"
-                                  ? "bg-emerald-950/50 text-emerald-400"
-                                  : vid.privacy_status === "unlisted"
-                                  ? "bg-amber-950/50 text-amber-400"
-                                  : "bg-neutral-800 text-neutral-500"
+                                vid.privacy_status ==="public"
+                                  ?"bg-emerald-950/50 text-emerald-400"
+                                  : vid.privacy_status ==="unlisted"
+                                  ?"bg-amber-950/50 text-amber-400"
+                                  :"bg-neutral-800 text-neutral-500"
                               }`}
                             >
                               {vid.privacy_status}
@@ -766,7 +750,7 @@ export default function YouTubeAnalyticsDashboard({
           )}
 
           {/* ══ VIDEOS TAB ══ */}
-          {activeTab === "videos" && (
+          {activeTab ==="videos" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-mono text-neutral-400">
@@ -781,8 +765,8 @@ export default function YouTubeAnalyticsDashboard({
                   </h4>
                   <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
                     {isConnected
-                      ? "No videos have been uploaded or tracked for this channel yet."
-                      : "Connect your YouTube account to view video performance metrics."}
+                      ?"No videos have been uploaded or tracked for this channel yet."
+                      :"Connect your YouTube account to view video performance metrics."}
                   </p>
                 </div>
               ) : (
@@ -820,11 +804,11 @@ export default function YouTubeAnalyticsDashboard({
                           </span>
                           <span
                             className={`px-1.5 py-0.5 rounded text-[9px] ${
-                              vid.privacy_status === "public"
-                                ? "bg-emerald-950/50 text-emerald-400"
-                                : vid.privacy_status === "unlisted"
-                                ? "bg-amber-950/50 text-amber-400"
-                                : "bg-neutral-800 text-neutral-500"
+                              vid.privacy_status ==="public"
+                                ?"bg-emerald-950/50 text-emerald-400"
+                                : vid.privacy_status ==="unlisted"
+                                ?"bg-amber-950/50 text-amber-400"
+                                :"bg-neutral-800 text-neutral-500"
                             }`}
                           >
                             {vid.privacy_status}
@@ -844,17 +828,17 @@ export default function YouTubeAnalyticsDashboard({
                                       v) *
                                     100
                                   ).toFixed(1)
-                                : "0";
+                                :"0";
                             const engN = parseFloat(eng);
                             return (
                               <>
                                 <span
                                   className={`text-[10px] font-mono font-bold ${
                                     engN >= 5
-                                      ? "text-emerald-400"
+                                      ?"text-emerald-400"
                                       : engN >= 2
-                                      ? "text-amber-400"
-                                      : "text-neutral-500"
+                                      ?"text-amber-400"
+                                      :"text-neutral-500"
                                   }`}
                                 >
                                   {eng}%
@@ -883,7 +867,7 @@ export default function YouTubeAnalyticsDashboard({
           )}
 
           {/* ══ PLAYLISTS TAB ══ */}
-          {activeTab === "playlists" && (
+          {activeTab ==="playlists" && (
             <div className="space-y-4">
               <p className="text-xs font-mono text-neutral-400">
                 {playlists.length} playlists on your channel
@@ -896,8 +880,8 @@ export default function YouTubeAnalyticsDashboard({
                   </h4>
                   <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
                     {isConnected
-                      ? "No playlists are currently associated with your YouTube channel."
-                      : "Connect your YouTube account to view your playlist analytics."}
+                      ?"No playlists are currently associated with your YouTube channel."
+                      :"Connect your YouTube account to view your playlist analytics."}
                   </p>
                 </div>
               ) : (
@@ -923,15 +907,15 @@ export default function YouTubeAnalyticsDashboard({
                           {pl.title}
                         </p>
                         <div className="flex items-center gap-2 text-[10px] font-mono text-neutral-500">
-                          <span>{pl.item_count ?? "?"} videos</span>
+                          <span>{pl.item_count ??"?"} videos</span>
                           {pl.privacy && (
                             <span
                               className={`px-1.5 py-0.5 rounded text-[9px] ${
-                                pl.privacy === "public"
-                                  ? "bg-emerald-950/50 text-emerald-400"
-                                  : pl.privacy === "unlisted"
-                                  ? "bg-amber-950/50 text-amber-400"
-                                  : "bg-neutral-800 text-neutral-500"
+                                pl.privacy ==="public"
+                                  ?"bg-emerald-950/50 text-emerald-400"
+                                  : pl.privacy ==="unlisted"
+                                  ?"bg-amber-950/50 text-amber-400"
+                                  :"bg-neutral-800 text-neutral-500"
                               }`}
                             >
                               {pl.privacy}
@@ -955,32 +939,32 @@ export default function YouTubeAnalyticsDashboard({
           )}
 
           {/* ══ ENGAGEMENT TAB ══ */}
-          {activeTab === "engagement" && (
+          {activeTab ==="engagement" && (
             <div className="space-y-5">
               {/* Engagement summary */}
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                 <StatCard
                   icon={<ThumbsUp className="w-4 h-4 text-rose-400" />}
                   label="Total Likes"
-                  value={totalLikes > 0 ? fmtNum(totalLikes) : "--"}
-                  sub={isConnected ? "Across all videos" : "Not connected"}
+                  value={totalLikes > 0 ? fmtNum(totalLikes) :"--"}
+                  sub={isConnected ?"Across all videos" :"Not connected"}
                   color="bg-rose-950/50 border-rose-900/40"
                 />
                 <StatCard
                   icon={<MessageCircle className="w-4 h-4 text-blue-400" />}
                   label="Total Comments"
-                  value={totalComments > 0 ? fmtNum(totalComments) : "--"}
-                  sub={isConnected ? "Across all videos" : "Not connected"}
+                  value={totalComments > 0 ? fmtNum(totalComments) :"--"}
+                  sub={isConnected ?"Across all videos" :"Not connected"}
                   color="bg-blue-950/50 border-blue-900/40"
                 />
                 <StatCard
                   icon={<Flame className="w-4 h-4 text-orange-400" />}
                   label="Engagement Rate"
-                  value={totalViews > 0 ? `${engagementRate}%` : "--"}
+                  value={totalViews > 0 ?`${engagementRate}%` :"--"}
                   sub={
                     totalViews > 0
-                      ? "(Likes + Comments) / Views"
-                      : "Not connected"
+                      ?"(Likes + Comments) / Views"
+                      :"Not connected"
                   }
                   color="bg-orange-950/50 border-orange-900/40"
                 />
@@ -1143,23 +1127,23 @@ export default function YouTubeAnalyticsDashboard({
                               <div
                                 className={`h-full rounded-full ${
                                   vid.er >= 5
-                                    ? "bg-emerald-500"
+                                    ?"bg-emerald-500"
                                     : vid.er >= 2
-                                    ? "bg-amber-500"
-                                    : "bg-neutral-600"
+                                    ?"bg-amber-500"
+                                    :"bg-neutral-600"
                                 }`}
                                 style={{
-                                  width: `${Math.min(vid.er * 10, 100)}%`,
+                                  width:`${Math.min(vid.er * 10, 100)}%`,
                                 }}
                               />
                             </div>
                             <span
                               className={`text-[10px] font-mono font-bold w-10 text-right ${
                                 vid.er >= 5
-                                  ? "text-emerald-400"
+                                  ?"text-emerald-400"
                                   : vid.er >= 2
-                                  ? "text-amber-400"
-                                  : "text-neutral-500"
+                                  ?"text-amber-400"
+                                  :"text-neutral-500"
                               }`}
                             >
                               {vid.er.toFixed(1)}%

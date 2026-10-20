@@ -1,5 +1,5 @@
-import React from "react";
-import { Sparkles, RefreshCw } from "lucide-react";
+import React from"react";
+import { Sparkles, RefreshCw } from"lucide-react";
 
 interface StoryboardBulkOpsProps {
   bulkDuration: number;
@@ -136,10 +136,10 @@ export default function StoryboardBulkOps({
           onClick={handleBatchMagicMotion}
           className={`w-full py-2 rounded text-[10px] font-mono font-bold flex items-center justify-center gap-1.5 border transition-colors duration-75 cursor-pointer h-7 [touch-action:manipulation] ${
             isBatchMagicProcessing
-              ? "bg-neutral-900 text-neutral-400 border-neutral-800 cursor-not-allowed"
+              ?"bg-neutral-900 text-neutral-400 border-neutral-800 cursor-not-allowed"
               : selectedCount > 0
-              ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border-blue-400/40 shadow-md shadow-blue-950/40 font-bold"
-              : "bg-neutral-900/40 text-neutral-500 border-neutral-800/40 cursor-not-allowed"
+              ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white border-blue-400/40 shadow-md  font-bold"
+              :"bg-neutral-900/40 text-neutral-500 border-neutral-800/40 cursor-not-allowed"
           }`}
         >
           {isBatchMagicProcessing ? (

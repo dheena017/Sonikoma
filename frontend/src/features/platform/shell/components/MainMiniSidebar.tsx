@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Menu,
   LayoutDashboard,
@@ -20,12 +20,12 @@ import {
   Image,
   User,
   ExternalLink,
-} from "lucide-react";
-import TooltipPortal from "@/shared/ui/common/TooltipPortal";
+} from"lucide-react";
+import TooltipPortal from"@/shared/ui/common/TooltipPortal";
 import {
   getHumanEditorPath,
   getImageEditorPath,
-} from "@/shared/utils/workspaceNavigation";
+} from"@/shared/utils/workspaceNavigation";
 
 interface MiniSidebarProps {
   currentPath: string;
@@ -47,7 +47,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   onToggleSidebar,
 }) => {
   const isDashboardOverview =
-    currentPath === "/" || currentPath === "/dashboard";
+    currentPath ==="/" || currentPath ==="/dashboard";
   const isWorkspace = currentPath.startsWith("/scraper");
   const isProjects = currentPath.startsWith("/projects");
   const isAutoCrop = currentPath.startsWith("/auto-crop");
@@ -55,20 +55,20 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     currentPath.startsWith("/editor") ||
     currentPath.startsWith("/scraper/editor");
   const isImageEditorPath =
-    currentPath === "/image-editor" ||
-    currentPath === "/image-editor/" ||
+    currentPath ==="/image-editor" ||
+    currentPath ==="/image-editor/" ||
     currentPath.startsWith("/image-editor/") ||
     currentPath.includes("/image-editor");
   const isVideoEditorPath =
-    currentPath === "/video-editor" ||
-    currentPath === "/video-editor/" ||
+    currentPath ==="/video-editor" ||
+    currentPath ==="/video-editor/" ||
     currentPath.startsWith("/video-editor/");
 
   const isShortcuts = currentPath.startsWith("/shortcuts");
   const isAdminPath = currentPath.startsWith("/admin");
   const isProEditorPage =
-    currentPath === "/editor" ||
-    currentPath === "/editor/" ||
+    currentPath ==="/editor" ||
+    currentPath ==="/editor/" ||
     currentPath.startsWith("/editor/") ||
     currentPath.startsWith("/scraper/editor");
 
@@ -88,13 +88,13 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   };
 
   const isAdmin = React.useMemo(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !=="undefined") {
       if (localStorage.getItem("sonikoma_admin_token")) return true;
       try {
         const savedUserStr = localStorage.getItem("sonikoma_user");
         if (savedUserStr) {
           const u = JSON.parse(savedUserStr);
-          if (u?.creator_role === "admin" || u?.role === "admin") return true;
+          if (u?.creator_role ==="admin" || u?.role ==="admin") return true;
         }
       } catch (e) {}
     }
@@ -103,61 +103,61 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 
   const groups = [
     {
-      group: "Main",
+      group:"Main",
       items: [
         {
-          label: "Dashboard",
+          label:"Dashboard",
           icon: LayoutDashboard,
           active: isDashboardOverview,
-          path: "/dashboard",
+          path:"/dashboard",
           onClick: () => navigateTo("/dashboard"),
         },
         {
-          label: "Projects & Series",
+          label:"Projects & Series",
           icon: FolderOpen,
           active: isProjects,
-          path: "/projects",
+          path:"/projects",
           onClick: () => navigateTo("/projects"),
         },
         {
-          label: "Webtoon Scraper",
+          label:"Webtoon Scraper",
           icon: Layout,
           active: isWorkspace,
-          path: "/scraper",
+          path:"/scraper",
           onClick: handleNavigateToWorkspace,
         },
       ],
     },
     {
-      group: "Studios",
+      group:"Studios",
       items: [
         {
-          label: "Creative Suite",
+          label:"Creative Suite",
           icon: Sparkles,
           active:
-            currentPath === "/creative-suite" ||
+            currentPath ==="/creative-suite" ||
             currentPath.startsWith("/creative-suite/") ||
             (currentPath.startsWith("/ai-") &&
               !currentPath.startsWith("/ai-core")) ||
-            currentPath === "/translation" ||
-            currentPath === "/panel-assistant" ||
-            currentPath === "/youtube",
-          path: "/creative-suite",
+            currentPath ==="/translation" ||
+            currentPath ==="/panel-assistant" ||
+            currentPath ==="/youtube",
+          path:"/creative-suite",
           onClick: () => navigateTo("/creative-suite"),
         },
         {
-          label: "AI Core & Multi-Engine",
+          label:"AI Core & Multi-Engine",
           icon: Brain,
           active:
-            currentPath === "/ai-core" || currentPath.startsWith("/ai-core/"),
-          path: "/ai-core",
+            currentPath ==="/ai-core" || currentPath.startsWith("/ai-core/"),
+          path:"/ai-core",
           onClick: () => navigateTo("/ai-core"),
         },
         {
-          label: "Image Editor",
+          label:"Image Editor",
           icon: Image,
           active: isImageEditorPath,
-          path: "/image-editor",
+          path:"/image-editor",
           onClick: () =>
             navigateTo(
               getImageEditorPath({
@@ -168,19 +168,19 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             ),
         },
         {
-          label: "Video Editor",
+          label:"Video Editor",
           icon: Film,
           active: isVideoEditorPath,
-          path: "/video-editor",
+          path:"/video-editor",
           onClick: () => navigateTo("/video-editor"),
         },
         ...(isAdmin
           ? [
               {
-                label: "Admin",
+                label:"Admin",
                 icon: Shield,
                 active: isAdminPath,
-                path: "/admin",
+                path:"/admin",
                 onClick: () => navigateTo("/admin"),
               },
             ]
@@ -188,28 +188,28 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       ],
     },
     {
-      group: "Account & Alerts",
+      group:"Account & Alerts",
       items: [
         {
-          label: "Notifications",
+          label:"Notifications",
           icon: Bell,
-          active: currentPath === "/notifications",
-          path: "/notifications",
+          active: currentPath ==="/notifications",
+          path:"/notifications",
           onClick: () => navigateTo("/notifications"),
           badge: notificationsCount > 0 ? notificationsCount : undefined,
         },
         {
-          label: "Shortcuts",
+          label:"Shortcuts",
           icon: Keyboard,
           active: isShortcuts,
-          path: "/shortcuts",
+          path:"/shortcuts",
           onClick: () => navigateTo("/shortcuts"),
         },
         {
-          label: "Profile",
+          label:"Profile",
           icon: User,
-          active: currentPath === "/profile",
-          path: "/profile",
+          active: currentPath ==="/profile",
+          path:"/profile",
           onClick: () => navigateTo("/profile"),
         },
       ],
@@ -236,8 +236,8 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         <div
           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
             item.active
-              ? "h-5 bg-[#3B82F6]  opacity-100"
-              : "h-0 bg-transparent opacity-0"
+              ?"h-5 bg-[#3B82F6]  opacity-100"
+              :"h-0 bg-transparent opacity-0"
           }`}
         />
 
@@ -251,15 +251,15 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               item.active
-                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
-                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 "
+                ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
+                :"bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700"
             }`}
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${
                 item.active
-                  ? "text-white"
-                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                  ?"text-white"
+                  :"text-[#9CA3AF] group-hover:text-[#3B82F6]"
               }`}
             />
           </div>
@@ -290,8 +290,8 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ? "0.6rem" : "0.2rem",
-                marginBottom: "0.4rem",
+                marginTop: groupIdx > 0 ?"0.6rem" :"0.2rem",
+                marginBottom:"0.4rem",
               }}
             >
               {groupIdx > 0 && (
@@ -320,7 +320,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             }}
             onMouseLeave={() => setCreativeHover(false)}
             aria-label="Creative Suite"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg shadow-blue-500/25 active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center group"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center group"
           >
             <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
           </button>

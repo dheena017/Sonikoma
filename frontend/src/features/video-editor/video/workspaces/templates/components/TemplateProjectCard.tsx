@@ -1,6 +1,6 @@
-import React from "react";
-import { Star, Play } from "lucide-react";
-import { TemplateProject } from "../../../types/workspace.types";
+import React from"react";
+import { Star, Play } from"lucide-react";
+import { TemplateProject } from"../../../types/workspace.types";
 
 interface TemplateProjectCardProps {
   template: TemplateProject;
@@ -36,7 +36,7 @@ export const TemplateProjectCard: React.FC<TemplateProjectCardProps> = ({
           </span>
           <button
             onClick={onApply}
-            className="px-3 py-1.5 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[10px] font-mono font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-sm shadow-blue-500/25 active:scale-95"
+            className="px-3 py-1.5 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[10px] font-mono font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-sm active:scale-95"
           >
             <Play className="h-3 w-3" /> Use Template
           </button>

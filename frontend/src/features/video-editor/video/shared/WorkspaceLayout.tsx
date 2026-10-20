@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Search,
   Filter,
@@ -11,7 +11,7 @@ import {
   Sparkles,
   ChevronRight,
   ChevronLeft,
-} from "lucide-react";
+} from"lucide-react";
 
 interface WorkspaceLayoutProps {
   children: React.ReactNode;
@@ -21,7 +21,7 @@ interface WorkspaceLayoutProps {
 // ── Root Layout Container ───────────────────────────────────────────────────
 export const WorkspaceLayoutRoot: React.FC<WorkspaceLayoutProps> = ({
   children,
-  className = "",
+  className ="",
 }) => {
   return (
     <div
@@ -52,7 +52,7 @@ export const WorkspaceLayoutHeader: React.FC<HeaderProps> = ({
   return (
     <div className="px-3.5 py-2.5 border-b border-[#2F2F2F] bg-neutral-950/70 backdrop-blur-md flex items-center justify-between shrink-0 shadow-sm">
       <div className="flex items-center gap-2">
-        <span className="h-2 w-2 rounded-full bg-[#3B82F6] " />
+        <span className="h-2 w-2 rounded-full bg-[#3B82F6]" />
         <h2 className="text-xs font-black text-white uppercase tracking-wider font-mono">
           {title}
         </h2>
@@ -62,14 +62,14 @@ export const WorkspaceLayoutHeader: React.FC<HeaderProps> = ({
             setIsStarred(next);
             if (onToggleFavorite) onToggleFavorite(next);
           }}
-          title={isStarred ? "Remove from Favorites" : "Add to Favorites"}
+          title={isStarred ?"Remove from Favorites" :"Add to Favorites"}
           className="p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
         >
           <Star
             className={`h-3.5 w-3.5 transition-all ${
               isStarred
-                ? "text-amber-400 fill-amber-400 "
-                : "text-neutral-500 hover:text-amber-300"
+                ?"text-amber-400 fill-amber-400"
+                :"text-neutral-500 hover:text-amber-300"
             }`}
           />
         </button>
@@ -78,7 +78,7 @@ export const WorkspaceLayoutHeader: React.FC<HeaderProps> = ({
         {onToggleExpand && (
           <button
             onClick={onToggleExpand}
-            title={isExpanded ? "Collapse panel" : "Expand panel"}
+            title={isExpanded ?"Collapse panel" :"Expand panel"}
             className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <Maximize2 className="h-3.5 w-3.5" />
@@ -134,10 +134,10 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
     }
   }, [tabs]);
 
-  const scrollTabs = (direction: "left" | "right") => {
+  const scrollTabs = (direction:"left" |"right") => {
     if (tabsRef.current) {
-      const amount = direction === "left" ? -140 : 140;
-      tabsRef.current.scrollBy({ left: amount, behavior: "smooth" });
+      const amount = direction ==="left" ? -140 : 140;
+      tabsRef.current.scrollBy({ left: amount, behavior:"smooth" });
     }
   };
 
@@ -168,8 +168,8 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
               onClick={() => onSelectTab(tab)}
               className={`relative px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 flex items-center gap-1.5 ${
                 isActive
-                  ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/60 shadow-sm shadow-blue-500/25"
-                  : "bg-neutral-900/60 text-neutral-300 border border-neutral-800/80 hover:text-white hover:bg-white/10 hover:border-neutral-700"
+                  ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/60 shadow-sm"
+                  :"bg-neutral-900/60 text-neutral-300 border border-neutral-800/80 hover:text-white hover:bg-white/10 hover:border-neutral-700"
               }`}
             >
               {isActive && (
@@ -188,7 +188,7 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
           title="Scroll right"
           className="shrink-0 h-6 w-6 rounded-full bg-neutral-900/90 border border-[#3B82F6]/40 text-[#60A5FA] hover:text-white hover:bg-[#3B82F6] hover:border-neutral-700 hover: transition-all cursor-pointer flex items-center justify-center active:scale-90 shadow-md"
         >
-          <ChevronRight className="h-3.5 w-3.5 " />
+          <ChevronRight className="h-3.5 w-3.5" />
         </button>
       )}
     </div>
@@ -206,9 +206,9 @@ interface SearchProps {
 export const WorkspaceLayoutSearch: React.FC<SearchProps> = ({
   value,
   onChange,
-  placeholder = "Search assets...",
+  placeholder ="Search assets...",
   onFilterClick,
-  className = "",
+  className ="",
 }) => {
   return (
     <div
@@ -248,7 +248,7 @@ export const WorkspaceLayoutPromptBox: React.FC<PromptBoxProps> = ({
   value,
   onChange,
   onSubmit,
-  placeholder = "Describe prompt...",
+  placeholder ="Describe prompt...",
 }) => {
   return (
     <div className="p-3 bg-gradient-to-br from-[#1E1E1E] to-black/40 border-b border-[#2F2F2F] flex flex-col gap-2 shrink-0">
@@ -261,7 +261,7 @@ export const WorkspaceLayoutPromptBox: React.FC<PromptBoxProps> = ({
       />
       <button
         onClick={onSubmit}
-        className="w-full py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-mono font-bold border border-[#60A5FA]/40 shadow-md shadow-blue-500/25 transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
+        className="w-full py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-mono font-bold border border-[#60A5FA]/40 shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
       >
         <Sparkles className="h-3.5 w-3.5 text-white" />
         <span>Generate AI Output</span>
@@ -283,7 +283,7 @@ export const WorkspaceLayoutContent: React.FC<{
 
 // ── Footer Block ─────────────────────────────────────────────────────────────
 export const WorkspaceLayoutFooter: React.FC<{ text?: string }> = ({
-  text = "Powered by Sonikoma Comic Studio Engine",
+  text ="Powered by Sonikoma Comic Studio Engine",
 }) => {
   return (
     <div className="p-2 border-t border-[#2F2F2F] bg-neutral-950/80 text-center text-[9px] text-neutral-500 shrink-0 font-mono tracking-wide">

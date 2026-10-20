@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from"react";
 import {
   Users,
   Video,
@@ -27,9 +27,9 @@ import {
   Check,
   Film,
   Plus,
-} from "lucide-react";
-import RouteLoadingFallback from "@/shared/ui/feedback/RouteLoadingFallback";
-import YouTubeOfficialLogo from "./YouTubeOfficialLogo";
+} from"lucide-react";
+import RouteLoadingFallback from"@/shared/ui/feedback/RouteLoadingFallback";
+import YouTubeOfficialLogo from"./YouTubeOfficialLogo";
 
 export interface YouTubeVideoItem {
   id: string;
@@ -69,19 +69,22 @@ interface YouTubeChannelHomeProps {
   onWatchVideo: (videoId: string, video: YouTubeVideoItem) => void;
   onViewComments: (videoId: string) => void;
   onNavigateTab?: (tab: string) => void;
+  onOpenChannelModal?: () => void;
+  isConnected?: boolean;
 }
 
 export default function YouTubeChannelHome({
   onWatchVideo,
   onViewComments,
   onNavigateTab,
+  onOpenChannelModal,
+  isConnected = false,
 }: YouTubeChannelHomeProps) {
   const [videos, setVideos] = useState<YouTubeVideoItem[]>([]);
   const [channel, setChannel] = useState<ChannelData | null>(null);
   const [playlists, setPlaylists] = useState<PlaylistSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState<
-    "all" | "popular" | "shorts" | "playlists"
+  const [activeFilter, setActiveFilter] = useState<"all" |"popular" |"shorts" |"playlists"
   >("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [bannerError, setBannerError] = useState(false);
@@ -93,9 +96,8 @@ export default function YouTubeChannelHome({
     try {
       const token =
         localStorage.getItem("sonikoma_token") ||
-        localStorage.getItem("token") ||
-        "";
-      const headers = { Authorization: `Bearer ${token}` };
+        localStorage.getItem("token") ||"";
+      const headers = { Authorization:`Bearer ${token}` };
       const cacheBust = Date.now();
 
       const [videosRes, channelRes, playlistsRes] = await Promise.all([
@@ -147,10 +149,10 @@ export default function YouTubeChannelHome({
   // Top performing videos (only videos with real views > 0)
   const topVideos = useMemo(() => {
     return [...videos]
-      .filter((v) => (parseInt(v.view_count?.replace(/,/g, "") || "0") || 0) > 0)
+      .filter((v) => (parseInt(v.view_count?.replace(/,/g,"") ||"0") || 0) > 0)
       .sort((a, b) => {
-        const av = parseInt(a.view_count?.replace(/,/g, "") || "0") || 0;
-        const bv = parseInt(b.view_count?.replace(/,/g, "") || "0") || 0;
+        const av = parseInt(a.view_count?.replace(/,/g,"") ||"0") || 0;
+        const bv = parseInt(b.view_count?.replace(/,/g,"") ||"0") || 0;
         return bv - av;
       })
       .slice(0, 4);
@@ -162,11 +164,11 @@ export default function YouTubeChannelHome({
   }, [videos]);
 
   const formatDate = (iso?: string) => {
-    if (!iso) return "";
+    if (!iso) return"";
     return new Date(iso).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+      year:"numeric",
+      month:"short",
+      day:"numeric",
     });
   };
 
@@ -179,6 +181,25 @@ export default function YouTubeChannelHome({
 
   return (
     <div className="space-y-8 animate-fade-in">
+      {/* ── 0. UNCONNECTED NOTIFICATION BANNER ── */}
+      {!isConnected && (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-200 font-mono">
+          <div className="flex items-center gap-2.5">
+            <Youtube className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>YouTube channel not connected. Connect your channel to synchronize videos, view telemetry, and publish content.</span>
+          </div>
+          {onOpenChannelModal && (
+            <button
+              type="button"
+              onClick={onOpenChannelModal}
+              className="px-4 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition-all cursor-pointer whitespace-nowrap self-start sm:self-auto"
+            >
+              Connect Channel
+            </button>
+          )}
+        </div>
+      )}
+
       {/* ── 1. CHANNEL HERO BANNER & PROFILE CARD ── */}
       <div className="relative w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-neutral-950">
 
@@ -223,7 +244,7 @@ export default function YouTubeChannelHome({
               <div className="relative shrink-0">
                 <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-br from-red-600 via-rose-700 to-[#2A2A2A] border-4 border-neutral-950 ring-2 ring-white/10 flex items-center justify-center shrink-0 shadow-2xl">
                   <span className="text-3xl sm:text-4xl font-black text-white font-sans uppercase">
-                    {channel?.title ? channel.title.charAt(0) : "Y"}
+                    {channel?.title ? channel.title.charAt(0) :"Y"}
                   </span>
                 </div>
               </div>
@@ -232,7 +253,7 @@ export default function YouTubeChannelHome({
             <div className="flex-1 min-w-0 space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-xl sm:text-3xl font-black text-white font-sans tracking-tight truncate">
-                  {channel?.title || "YouTube Channel"}
+                  {channel?.title ||"YouTube Channel"}
                 </h1>
                 {channel?.id && (
                   <span title="Verified Creator" className="flex items-center">
@@ -272,21 +293,32 @@ export default function YouTubeChannelHome({
 
           {/* Quick Header Actions */}
           <div className="flex items-center gap-2.5 shrink-0 self-start lg:self-end flex-wrap">
-            <a
-              href={
-                channel?.custom_url
-                  ? `https://youtube.com/${channel.custom_url}`
-                  : channel?.id
-                  ? `https://youtube.com/channel/${channel.id}`
-                  : "https://youtube.com"
-              }
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 px-4 py-2.5 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 rounded-xl text-xs font-bold font-mono text-neutral-200 hover:text-white transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95"
-            >
-              <ExternalLink className="w-3.5 h-3.5 text-neutral-400" />
-              <span>Open on YouTube</span>
-            </a>
+            {!isConnected && onOpenChannelModal ? (
+              <button
+                type="button"
+                onClick={onOpenChannelModal}
+                className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold font-mono text-xs rounded-xl shadow-md transition-all cursor-pointer active:scale-95"
+              >
+                <Youtube className="w-3.5 h-3.5 fill-white" />
+                <span>Connect Channel</span>
+              </button>
+            ) : (
+              <a
+                href={
+                  channel?.custom_url
+                    ?`https://youtube.com/${channel.custom_url}`
+                    : channel?.id
+                    ?`https://youtube.com/channel/${channel.id}`
+                    :"https://youtube.com"
+                }
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 px-4 py-2.5 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 rounded-xl text-xs font-bold font-mono text-neutral-200 hover:text-white transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-neutral-400" />
+                <span>Open on YouTube</span>
+              </a>
+            )}
             <button
               type="button"
               onClick={(e) => {
@@ -300,7 +332,7 @@ export default function YouTubeChannelHome({
             >
               <RefreshCw
                 className={`w-4 h-4 ${
-                  isLoading ? "animate-spin text-red-400" : ""
+                  isLoading ?"animate-spin text-red-400" :""
                 }`}
               />
             </button>
@@ -349,7 +381,7 @@ export default function YouTubeChannelHome({
             onClick={() => onNavigateTab("analytics")}
             className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-sky-950/40 to-neutral-900/80 hover:from-sky-900/40 hover:to-neutral-850 border border-sky-500/30 hover:border-sky-500/60 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
           >
-            <div className="p-2.5 rounded-xl bg-sky-600 text-white shadow-md shadow-sky-600/30 shrink-0 group-hover:scale-105 transition-transform">
+            <div className="p-2.5 rounded-xl bg-sky-600 text-white shadow-md shrink-0 group-hover:scale-105 transition-transform">
               <BarChart3 className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -366,7 +398,7 @@ export default function YouTubeChannelHome({
             onClick={() => onNavigateTab("title-optimizer")}
             className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-amber-950/40 to-neutral-900/80 hover:from-amber-900/40 hover:to-neutral-850 border border-amber-500/30 hover:border-amber-500/60 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
           >
-            <div className="p-2.5 rounded-xl bg-amber-600 text-white shadow-md shadow-amber-600/30 shrink-0 group-hover:scale-105 transition-transform">
+            <div className="p-2.5 rounded-xl bg-amber-600 text-white shadow-md shrink-0 group-hover:scale-105 transition-transform">
               <Sparkles className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -384,10 +416,10 @@ export default function YouTubeChannelHome({
       {/* ── 3. CONTENT FILTER PILLS ── */}
       <div className="flex items-center gap-1 p-1 bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl w-fit">
         {[
-          { id: "all", label: "All Content", icon: Film },
-          { id: "popular", label: "Top Watched", icon: Flame },
-          { id: "shorts", label: "Shorts", icon: Zap },
-          { id: "playlists", label: "Playlists", icon: ListMusic },
+          { id:"all", label:"All Content", icon: Film },
+          { id:"popular", label:"Top Watched", icon: Flame },
+          { id:"shorts", label:"Shorts", icon: Zap },
+          { id:"playlists", label:"Playlists", icon: ListMusic },
         ].map((tab) => {
           const Icon = tab.icon;
           const isSel = activeFilter === tab.id;
@@ -397,8 +429,8 @@ export default function YouTubeChannelHome({
               onClick={() => setActiveFilter(tab.id as any)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold font-sans transition-all cursor-pointer whitespace-nowrap select-none ${
                 isSel
-                  ? "bg-red-600 text-white shadow-sm border border-red-500/50"
-                  : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-white/[0.04] border border-transparent"
+                  ?"bg-red-600 text-white shadow-sm border border-red-500/50"
+                  :"text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-white/[0.04] border border-transparent"
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -414,7 +446,7 @@ export default function YouTubeChannelHome({
         <>
           {/* ── 4. LATEST UPLOAD (REAL DATA) ── */}
           {latestVideo &&
-            (activeFilter === "all" || (activeFilter === "shorts" && isShortVideo(latestVideo))) && (
+            (activeFilter ==="all" || (activeFilter ==="shorts" && isShortVideo(latestVideo))) && (
               <div className="relative rounded-2xl bg-[#141414] border border-[#2F2F2F] p-5 sm:p-6 shadow-xl overflow-hidden">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
@@ -422,7 +454,7 @@ export default function YouTubeChannelHome({
                       Latest Upload
                     </span>
                     <span className="px-2.5 py-1 rounded-lg bg-[#1E1E1E] border border-[#2F2F2F] text-xs font-medium font-sans text-[#9CA3AF]">
-                      {isShortVideo(latestVideo) ? "Shorts" : "Video"}
+                      {isShortVideo(latestVideo) ?"Shorts" :"Video"}
                     </span>
                   </div>
                   <span className="text-xs text-[#9CA3AF] font-sans">
@@ -440,14 +472,13 @@ export default function YouTubeChannelHome({
                   >
                     <img
                       src={
-                        latestVideo.thumbnail ||
-                        `https://i.ytimg.com/vi/${latestVideo.id}/hqdefault.jpg`
+                        latestVideo.thumbnail ||`https://i.ytimg.com/vi/${latestVideo.id}/hqdefault.jpg`
                       }
                       alt={latestVideo.title}
                       onError={(e) => {
                         (
                           e.currentTarget as HTMLImageElement
-                        ).src = `https://i.ytimg.com/vi/${latestVideo.id}/hqdefault.jpg`;
+                        ).src =`https://i.ytimg.com/vi/${latestVideo.id}/hqdefault.jpg`;
                       }}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
@@ -479,15 +510,15 @@ export default function YouTubeChannelHome({
                     {/* Real Telemetry Badges */}
                     <div className="flex items-center gap-2.5 flex-wrap text-xs font-sans">
                       <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#1E1E1E] border border-[#2F2F2F] text-[#60A5FA] font-medium">
-                        <Eye className="w-3.5 h-3.5 text-[#3B82F6]" />{" "}
+                        <Eye className="w-3.5 h-3.5 text-[#3B82F6]" />{""}
                         {latestVideo.view_count} views
                       </span>
                       <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#1E1E1E] border border-[#2F2F2F] text-[#34D399] font-medium">
-                        <ThumbsUp className="w-3.5 h-3.5 text-[#10B981]" />{" "}
+                        <ThumbsUp className="w-3.5 h-3.5 text-[#10B981]" />{""}
                         {latestVideo.like_count} likes
                       </span>
                       <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF]">
-                        <Calendar className="w-3.5 h-3.5 text-[#6B7280]" />{" "}
+                        <Calendar className="w-3.5 h-3.5 text-[#6B7280]" />{""}
                         {formatDate(latestVideo.published_at)}
                       </span>
                     </div>
@@ -532,7 +563,7 @@ export default function YouTubeChannelHome({
             )}
 
           {/* ── 5. TOP WATCHED VIDEOS (ONLY REAL ENGAGED VIDEOS) ── */}
-          {activeFilter === "popular" && (
+          {activeFilter ==="popular" && (
             topVideos.length > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
@@ -559,14 +590,13 @@ export default function YouTubeChannelHome({
                       <div className="relative aspect-video bg-black overflow-hidden">
                         <img
                           src={
-                            vid.thumbnail ||
-                            `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`
+                            vid.thumbnail ||`https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`
                           }
                           alt={vid.title}
                           onError={(e) => {
                             (
                               e.currentTarget as HTMLImageElement
-                            ).src = `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
+                            ).src =`https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
                           }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
@@ -610,7 +640,7 @@ export default function YouTubeChannelHome({
           )}
 
           {/* ── 6. PLAYLISTS & SERIES SHELF ── */}
-          {(activeFilter === "all" || activeFilter === "playlists") &&
+          {(activeFilter ==="all" || activeFilter ==="playlists") &&
             (playlists.length > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -673,14 +703,14 @@ export default function YouTubeChannelHome({
                           {pl.title}
                         </h4>
                         <p className="text-[10px] font-sans text-[#9CA3AF] capitalize">
-                          {pl.privacy || "public"} playlist
+                          {pl.privacy ||"public"} playlist
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-            ) : activeFilter === "playlists" ? (
+            ) : activeFilter ==="playlists" ? (
               <div className="p-12 text-center border border-[#2F2F2F] rounded-2xl bg-[#141414] space-y-3">
                 <ListMusic className="w-10 h-10 text-[#6B7280] mx-auto" />
                 <h4 className="text-sm font-semibold text-[#E5E5E5] font-sans">
@@ -702,7 +732,7 @@ export default function YouTubeChannelHome({
             ) : null)}
 
           {/* ── 7. SHORTS SHELF ── */}
-          {(activeFilter === "all" || activeFilter === "shorts") &&
+          {(activeFilter ==="all" || activeFilter ==="shorts") &&
             (shorts.length > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -740,14 +770,13 @@ export default function YouTubeChannelHome({
                     >
                       <img
                         src={
-                          short.thumbnail ||
-                          `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`
+                          short.thumbnail ||`https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`
                         }
                         alt={short.title}
                         onError={(e) => {
                           (
                             e.currentTarget as HTMLImageElement
-                          ).src = `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`;
+                          ).src =`https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`;
                         }}
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -757,15 +786,15 @@ export default function YouTubeChannelHome({
                           {short.title}
                         </h4>
                         <p className="text-[10px] text-[#9CA3AF] font-sans flex items-center gap-1">
-                          <Eye className="w-3 h-3 text-[#60A5FA]" />{" "}
-                          {short.view_count || "0"} views
+                          <Eye className="w-3 h-3 text-[#60A5FA]" />{""}
+                          {short.view_count ||"0"} views
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-            ) : activeFilter === "shorts" ? (
+            ) : activeFilter ==="shorts" ? (
               <div className="p-12 text-center border border-[#2F2F2F] rounded-2xl bg-[#141414] space-y-3">
                 <Zap className="w-10 h-10 text-[#6B7280] mx-auto" />
                 <h4 className="text-sm font-semibold text-[#E5E5E5] font-sans">
@@ -778,7 +807,7 @@ export default function YouTubeChannelHome({
             ) : null)}
 
           {/* ── 8. RECENT UPLOADS GRID ── */}
-          {activeFilter === "all" && remainingVideos.length > 0 && (
+          {activeFilter ==="all" && remainingVideos.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -818,14 +847,13 @@ export default function YouTubeChannelHome({
                     >
                       <img
                         src={
-                          vid.thumbnail ||
-                          `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`
+                          vid.thumbnail ||`https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`
                         }
                         alt={vid.title}
                         onError={(e) => {
                           (
                             e.currentTarget as HTMLImageElement
-                          ).src = `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
+                          ).src =`https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
                         }}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -848,17 +876,17 @@ export default function YouTubeChannelHome({
                       </p>
                       <div className="flex items-center justify-between text-[11px] text-[#9CA3AF] font-sans pt-3 border-t border-[#2F2F2F] mt-auto">
                         <span className="flex items-center gap-1 font-medium text-[#60A5FA]">
-                          <Eye className="w-3 h-3" /> {vid.view_count || "0"}
+                          <Eye className="w-3 h-3" /> {vid.view_count ||"0"}
                         </span>
                         <span className="flex items-center gap-1 font-medium text-[#34D399]">
-                          <ThumbsUp className="w-3 h-3" /> {vid.like_count || "0"}
+                          <ThumbsUp className="w-3 h-3" /> {vid.like_count ||"0"}
                         </span>
                         <button
                           onClick={() => onViewComments(vid.id)}
                           className="flex items-center gap-1 hover:text-[#E5E5E5] transition-colors cursor-pointer"
                         >
-                          <MessageSquare className="w-3 h-3 text-[#3B82F6]" />{" "}
-                          {vid.comment_count || "0"}
+                          <MessageSquare className="w-3 h-3 text-[#3B82F6]" />{""}
+                          {vid.comment_count ||"0"}
                         </button>
                       </div>
                     </div>

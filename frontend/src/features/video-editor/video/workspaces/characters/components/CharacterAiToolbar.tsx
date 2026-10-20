@@ -1,5 +1,5 @@
-import React from "react";
-import { Wand2, Smile, Activity, Volume2 } from "lucide-react";
+import React from"react";
+import { Wand2, Smile, Activity, Volume2 } from"lucide-react";
 
 interface CharacterAiToolbarProps {
   onTriggerFeedback: (msg: string) => void;
@@ -18,13 +18,13 @@ export const CharacterAiToolbar: React.FC<CharacterAiToolbarProps> = ({
           onClick={() =>
             onTriggerFeedback("AI generating new facial expression...")
           }
-          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs shadow-blue-500/25 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-95"
         >
           <Smile className="h-2.5 w-2.5" /> Gen Expression
         </button>
         <button
           onClick={() => onTriggerFeedback("AI synthesizing action pose...")}
-          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs shadow-blue-500/25 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-95"
         >
           <Activity className="h-2.5 w-2.5" /> Gen Pose
         </button>
@@ -32,7 +32,7 @@ export const CharacterAiToolbar: React.FC<CharacterAiToolbarProps> = ({
           onClick={() =>
             onTriggerFeedback("AI generating character voice line...")
           }
-          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs shadow-blue-500/25 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-95"
         >
           <Volume2 className="h-2.5 w-2.5" /> Gen Voice
         </button>

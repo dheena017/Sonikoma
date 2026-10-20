@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Menu,
   LayoutGrid,
@@ -13,8 +13,8 @@ import {
   Zap,
   Cpu,
   TrendingUp,
-} from "lucide-react";
-import TooltipPortal from "@/shared/ui/common/TooltipPortal";
+} from"lucide-react";
+import TooltipPortal from"@/shared/ui/common/TooltipPortal";
 
 interface AICoreMiniSidebarProps {
   currentPath: string;
@@ -29,70 +29,70 @@ const AICoreMiniSidebarInner: React.FC<AICoreMiniSidebarProps> = ({
 }) => {
   const groups = [
     {
-      name: "Studio",
+      name:"Studio",
       items: [
         {
-          id: "overview",
-          label: "AI Command Center",
+          id:"overview",
+          label:"AI Command Center",
           icon: LayoutGrid,
-          path: "/ai-core",
+          path:"/ai-core",
         },
         {
-          id: "models",
-          label: "Model Matrix",
+          id:"models",
+          label:"Model Matrix",
           icon: Cpu,
-          path: "/ai-core/models",
+          path:"/ai-core/models",
         },
       ],
     },
     {
-      name: "Engines",
+      name:"Engines",
       items: [
         {
-          id: "api_keys",
-          label: "API Keys & Providers",
+          id:"api_keys",
+          label:"API Keys & Providers",
           icon: Key,
-          path: "/ai-core/api-keys",
+          path:"/ai-core/api-keys",
         },
         {
-          id: "rate_limits",
-          label: "Rate Limits & Quotas",
+          id:"rate_limits",
+          label:"Rate Limits & Quotas",
           icon: ShieldCheck,
-          path: "/ai-core/rate-limits",
+          path:"/ai-core/rate-limits",
         },
       ],
     },
     {
-      name: "Usage",
+      name:"Usage",
       items: [
         {
-          id: "usage",
-          label: "AI Token Analytics",
+          id:"usage",
+          label:"AI Token Analytics",
           icon: TrendingUp,
-          path: "/ai-core/analytics",
+          path:"/ai-core/analytics",
         },
         {
-          id: "wallet",
-          label: "Billing & Credits",
+          id:"wallet",
+          label:"Billing & Credits",
           icon: CreditCard,
-          path: "/ai-core/billing",
+          path:"/ai-core/billing",
         },
       ],
     },
   ];
 
   const isActive = (path: string) => {
-    if (path === "/ai-core") {
+    if (path ==="/ai-core") {
       return (
-        currentPath === "/ai-core" ||
-        currentPath === "/ai-core/" ||
-        currentPath === "/ai-core/overview"
+        currentPath ==="/ai-core" ||
+        currentPath ==="/ai-core/" ||
+        currentPath ==="/ai-core/overview"
       );
     }
     return (
       currentPath === path ||
-      currentPath.startsWith(path + "?") ||
-      currentPath.startsWith(path + "/")
+      currentPath.startsWith(path +"?") ||
+      currentPath.startsWith(path +"/")
     );
   };
 
@@ -113,8 +113,8 @@ const AICoreMiniSidebarInner: React.FC<AICoreMiniSidebarProps> = ({
         <div
           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
             active
-              ? "h-5 bg-[#3B82F6]  opacity-100"
-              : "h-0 bg-transparent opacity-0"
+              ?"h-5 bg-[#3B82F6]  opacity-100"
+              :"h-0 bg-transparent opacity-0"
           }`}
         />
 
@@ -128,15 +128,15 @@ const AICoreMiniSidebarInner: React.FC<AICoreMiniSidebarProps> = ({
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               active
-                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
-                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
+                ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
+                :"bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
             }`}
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${
                 active
-                  ? "text-white"
-                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                  ?"text-white"
+                  :"text-[#9CA3AF] group-hover:text-[#3B82F6]"
               }`}
             />
           </div>
@@ -164,8 +164,8 @@ const AICoreMiniSidebarInner: React.FC<AICoreMiniSidebarProps> = ({
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ? "0.6rem" : "0.2rem",
-                marginBottom: "0.4rem",
+                marginTop: groupIdx > 0 ?"0.6rem" :"0.2rem",
+                marginBottom:"0.4rem",
               }}
             >
               {groupIdx > 0 && (
@@ -194,7 +194,7 @@ const AICoreMiniSidebarInner: React.FC<AICoreMiniSidebarProps> = ({
             }}
             onMouseLeave={() => setReturnHover(false)}
             aria-label="Creative Suite"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg shadow-blue-500/25 active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
           >
             <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
           </button>

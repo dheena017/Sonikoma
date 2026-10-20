@@ -1,4 +1,4 @@
-import React from "react";
+import React from"react";
 import {
   Save,
   PanelLeft,
@@ -20,18 +20,18 @@ import {
   CircleDashed,
   ChevronDown,
   Filter,
-} from "lucide-react";
-import EditorHeaderFrame from "@/features/workspace/shell/components/EditorHeaderFrame";
+} from"lucide-react";
+import EditorHeaderFrame from"@/features/workspace/shell/components/EditorHeaderFrame";
 import ImportedAssetsFilterBar, {
   AssetFilterStatus,
   AssetSortOrder,
-} from "./ImportedAssetsFilterBar";
+} from"./ImportedAssetsFilterBar";
 
 export interface ImportedAssetsHeaderProps {
   scrapedImagesLength: number;
   selectedScrapedLength: number;
-  viewLayout: "scroll" | "grid";
-  setViewLayout: (layout: "scroll" | "grid") => void;
+  viewLayout:"scroll" |"grid";
+  setViewLayout: (layout:"scroll" |"grid") => void;
   handleSelectAllToggle: () => void;
   handleClearAll: () => void;
   handleSelectOdd?: () => void;
@@ -57,8 +57,8 @@ export interface ImportedAssetsHeaderProps {
   setSearchQuery?: (q: string) => void;
   filterStatus?: AssetFilterStatus;
   setFilterStatus?: (status: AssetFilterStatus) => void;
-  sortOrder?: "asc" | "desc";
-  setSortOrder?: (order: "asc" | "desc") => void;
+  sortOrder?:"asc" |"desc";
+  setSortOrder?: (order:"asc" |"desc") => void;
   filteredCount?: number;
   inStoryboardCount?: number;
 }
@@ -89,11 +89,11 @@ export default function ImportedAssetsHeader({
   isEpisodeCollapsed,
   setIsEpisodeCollapsed,
   hasMultipleEpisodes = false,
-  searchQuery = "",
+  searchQuery ="",
   setSearchQuery,
-  filterStatus = "all",
+  filterStatus ="all",
   setFilterStatus,
-  sortOrder = "asc",
+  sortOrder ="asc",
   setSortOrder,
   filteredCount,
   inStoryboardCount = 0,
@@ -149,7 +149,7 @@ export default function ImportedAssetsHeader({
             onClick={handleSelectAllToggle}
             className="px-2.5 py-1 rounded-lg hover:bg-neutral-800 text-neutral-300 hover:text-white transition-colors cursor-pointer font-bold"
           >
-            {isAllSelected ? "Deselect All" : "All"}
+            {isAllSelected ?"Deselect All" :"All"}
           </button>
           {handleSelectOdd && (
             <button
@@ -186,12 +186,12 @@ export default function ImportedAssetsHeader({
             <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#3B82F6]" />
             <span>
               {isBatchCropping && batchProgress
-                ? `Cropping ${batchProgress.current}/${batchProgress.total}`
+                ?`Cropping ${batchProgress.current}/${batchProgress.total}`
                 : isCleaningBubbles && cleanProgress
-                ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
+                ?`Cleaning ${cleanProgress.current}/${cleanProgress.total}`
                 : isBatchMerging
-                ? "Stitching..."
-                : "Processing..."}
+                ?"Stitching..."
+                :"Processing..."}
             </span>
           </div>
         )}
@@ -206,7 +206,7 @@ export default function ImportedAssetsHeader({
             type="button"
             onClick={handleAddToStoryboard}
             disabled={isBusy}
-            className="relative overflow-hidden h-8 px-4 rounded-xl font-black text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border border-[#60A5FA]/40 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:to-indigo-500 text-white cursor-pointer  active:scale-95 disabled:opacity-50"
+            className="relative overflow-hidden h-8 px-4 rounded-xl font-black text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border border-[#60A5FA]/40 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:to-indigo-500 text-white cursor-pointer active:scale-95 disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />
             <span>+ Add to Storyboard ({selectedScrapedLength})</span>
@@ -301,7 +301,7 @@ export default function ImportedAssetsHeader({
   // ──────────────────────────────────────────────────────────────────────────
   const titleBlock = (
     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 shadow-md shadow-indigo-500/25 flex items-center justify-center shrink-0">
+      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 shadow-md flex items-center justify-center shrink-0">
         <Images className="h-4 w-4 text-white" />
       </div>
       <div className="min-w-0">
@@ -312,20 +312,20 @@ export default function ImportedAssetsHeader({
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-[10px] font-bold text-indigo-300 font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
             {filteredCount !== undefined
-              ? `${filteredCount} / ${scrapedImagesLength}`
-              : scrapedImagesLength}{" "}
-            {scrapedImagesLength === 1 ? "Asset" : "Assets"}
+              ?`${filteredCount} / ${scrapedImagesLength}`
+              : scrapedImagesLength}{""}
+            {scrapedImagesLength === 1 ?"Asset" :"Assets"}
           </span>
-          {viewLayout === "scroll" && scrapedImagesLength > 1 && (
+          {viewLayout ==="scroll" && scrapedImagesLength > 1 && (
             <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-900/90 border border-indigo-500/30 text-[10px] text-indigo-200 font-mono shadow-sm">
               <span className="flex items-center justify-center w-3.5 h-3.5 rounded bg-indigo-500/20 text-indigo-300 text-[9px] font-bold">
                 ⇧
               </span>
               <span>
-                Hold{" "}
+                Hold{""}
                 <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-white font-bold text-[9px] leading-none">
                   Shift
-                </kbd>{" "}
+                </kbd>{""}
                 + Scroll to move horizontally
               </span>
             </span>
@@ -340,11 +340,11 @@ export default function ImportedAssetsHeader({
 
   const centerBlock = (
     <ImportedAssetsFilterBar
-      searchQuery={searchQuery || ""}
+      searchQuery={searchQuery ||""}
       setSearchQuery={setSearchQuery || (() => {})}
-      filterStatus={(filterStatus as AssetFilterStatus) || "all"}
+      filterStatus={(filterStatus as AssetFilterStatus) ||"all"}
       setFilterStatus={(setFilterStatus as any) || (() => {})}
-      sortOrder={sortOrder || "asc"}
+      sortOrder={sortOrder ||"asc"}
       setSortOrder={setSortOrder || (() => {})}
       viewLayout={viewLayout}
       setViewLayout={setViewLayout}
@@ -374,7 +374,7 @@ export default function ImportedAssetsHeader({
         <button
           type="button"
           onClick={handleSelectAllToggle}
-          title={isAllSelected ? "Deselect all assets" : "Select all assets"}
+          title={isAllSelected ?"Deselect all assets" :"Select all assets"}
           className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-neutral-700 text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm"
         >
           <CheckSquare className="w-3.5 h-3.5 text-neutral-400" />
@@ -401,13 +401,13 @@ export default function ImportedAssetsHeader({
           onClick={() => setIsEpisodeCollapsed(!isEpisodeCollapsed)}
           title={
             isEpisodeCollapsed
-              ? "Show Episode Navigator"
-              : "Hide Episode Navigator"
+              ?"Show Episode Navigator"
+              :"Hide Episode Navigator"
           }
           className={`h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
             isEpisodeCollapsed
-              ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-blue-300 hover:border-blue-500/30"
-              : "bg-blue-600/20 border-blue-500/30 text-blue-300 hover:bg-blue-600/30"
+              ?"bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-blue-300 hover:border-blue-500/30"
+              :"bg-blue-600/20 border-blue-500/30 text-blue-300 hover:bg-blue-600/30"
           }`}
         >
           {isEpisodeCollapsed ? (
@@ -428,7 +428,7 @@ export default function ImportedAssetsHeader({
         <button
           type="button"
           onClick={handleSaveAssets}
-          className="relative overflow-hidden h-8 px-3.5 rounded-xl font-black text-[11px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white cursor-pointer shadow-md shadow-blue-500/25 active:scale-95"
+          className="relative overflow-hidden h-8 px-3.5 rounded-xl font-black text-[11px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white cursor-pointer shadow-md active:scale-95"
         >
           <Save className="w-3.5 h-3.5 text-white" />
           <span className="hidden sm:inline">Save</span>

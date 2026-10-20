@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { createPortal } from "react-dom";
+import React, { useEffect } from"react";
+import { createPortal } from"react-dom";
 import {
   X,
   Youtube,
@@ -18,9 +18,9 @@ import {
   Play,
   ArrowRight,
   RotateCw,
-} from "lucide-react";
-import { AgentRunResponse } from "../types";
-import YouTubeOfficialLogo from "@/features/creative/youtube/components/YouTubeOfficialLogo";
+} from"lucide-react";
+import { AgentRunResponse } from"../types";
+import YouTubeOfficialLogo from"@/features/creative/youtube/components/YouTubeOfficialLogo";
 
 interface AgentHistoryModalProps {
   isOpen: boolean;
@@ -43,13 +43,13 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
     if (!isOpen) return;
     onRefresh?.();
     const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow ="hidden";
     const container = document.getElementById("main-scroll-container");
-    const prevContainerOverflow = container ? container.style.overflow : "";
-    if (container) container.style.overflow = "hidden";
+    const prevContainerOverflow = container ? container.style.overflow :"";
+    if (container) container.style.overflow ="hidden";
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key ==="Escape") onClose();
     };
     window.addEventListener("keydown", handleKeyDown);
 
@@ -65,7 +65,7 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
   const getSourceDomain = (url?: string) => {
     if (!url) return null;
     try {
-      const hostname = new URL(url).hostname.replace(/^www\./, "");
+      const hostname = new URL(url).hostname.replace(/^www\./,"");
       return hostname;
     } catch {
       return null;
@@ -74,70 +74,70 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
 
   const getStatusBadge = (status: string, progress: number) => {
     switch (status) {
-      case "completed":
+      case"completed":
         return {
-          label: "Completed",
-          color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+          label:"Completed",
+          color:"bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
           icon: <CheckCircle2 className="w-3 h-3 text-emerald-400" />,
         };
-      case "failed":
+      case"failed":
         return {
-          label: "Failed",
-          color: "bg-rose-500/10 text-rose-400 border-rose-500/30",
+          label:"Failed",
+          color:"bg-rose-500/10 text-rose-400 border-rose-500/30",
           icon: <AlertCircle className="w-3 h-3 text-rose-400" />,
         };
-      case "stopped":
+      case"stopped":
         return {
-          label: "Stopped",
-          color: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+          label:"Stopped",
+          color:"bg-amber-500/10 text-amber-400 border-amber-500/30",
           icon: <AlertCircle className="w-3 h-3 text-amber-400" />,
         };
-      case "awaiting_review":
+      case"awaiting_review":
         return {
-          label: "Awaiting Review",
-          color: "bg-purple-500/10 text-purple-400 border-purple-500/30",
+          label:"Awaiting Review",
+          color:"bg-purple-500/10 text-purple-400 border-purple-500/30",
           icon: <Clock className="w-3 h-3 text-purple-400" />,
         };
-      case "scraping":
+      case"scraping":
         return {
-          label: `Scraping (${progress}%)`,
-          color: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+          label:`Scraping (${progress}%)`,
+          color:"bg-blue-500/10 text-blue-400 border-blue-500/30",
           icon: <Loader2 className="w-3 h-3 text-blue-400 animate-spin" />,
         };
-      case "processing_images":
+      case"processing_images":
         return {
-          label: `Auto-Cropping (${progress}%)`,
-          color: "bg-indigo-500/10 text-indigo-400 border-indigo-500/30",
+          label:`Auto-Cropping (${progress}%)`,
+          color:"bg-indigo-500/10 text-indigo-400 border-indigo-500/30",
           icon: <Loader2 className="w-3 h-3 text-indigo-400 animate-spin" />,
         };
-      case "generating_narrative":
+      case"generating_narrative":
         return {
-          label: `AI Scripting (${progress}%)`,
-          color: "bg-violet-500/10 text-violet-400 border-violet-500/30",
+          label:`AI Scripting (${progress}%)`,
+          color:"bg-violet-500/10 text-violet-400 border-violet-500/30",
           icon: <Loader2 className="w-3 h-3 text-violet-400 animate-spin" />,
         };
-      case "synthesizing_audio":
+      case"synthesizing_audio":
         return {
-          label: `Voiceover TTS (${progress}%)`,
-          color: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
+          label:`Voiceover TTS (${progress}%)`,
+          color:"bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
           icon: <Loader2 className="w-3 h-3 text-cyan-400 animate-spin" />,
         };
-      case "rendering_video":
+      case"rendering_video":
         return {
-          label: `Rendering MP4 (${progress}%)`,
-          color: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+          label:`Rendering MP4 (${progress}%)`,
+          color:"bg-amber-500/10 text-amber-400 border-amber-500/30",
           icon: <Loader2 className="w-3 h-3 text-amber-400 animate-spin" />,
         };
-      case "publishing_youtube":
+      case"publishing_youtube":
         return {
-          label: `Publishing YouTube (${progress}%)`,
-          color: "bg-red-500/10 text-red-400 border-red-500/30",
+          label:`Publishing YouTube (${progress}%)`,
+          color:"bg-red-500/10 text-red-400 border-red-500/30",
           icon: <YouTubeOfficialLogo className="w-3.5 h-2.5" />,
         };
       default:
         return {
           label: status,
-          color: "bg-neutral-800 text-neutral-300 border-neutral-700",
+          color:"bg-neutral-800 text-neutral-300 border-neutral-700",
           icon: <Loader2 className="w-3 h-3 animate-spin" />,
         };
     }
@@ -156,8 +156,6 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
 
       {/* Modal Container */}
       <div className="relative w-full max-w-3xl bg-neutral-950/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col max-h-[88vh]">
-        {/* Glow Accent Line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-500 blur-[1px]" />
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4.5 border-b border-neutral-800/80 shrink-0 bg-neutral-900/40">
@@ -184,7 +182,7 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
                 title="Refresh history"
                 aria-label="Refresh history"
               >
-                <RotateCw className={`h-4 w-4 ${isLoading ? "animate-spin text-blue-400" : ""}`} />
+                <RotateCw className={`h-4 w-4 ${isLoading ?"animate-spin text-blue-400" :""}`} />
               </button>
             )}
             <button
@@ -218,16 +216,16 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
                   disabled={isLoading}
                   className="mt-2 px-3.5 py-1.5 rounded-xl text-xs font-medium bg-neutral-900 hover:bg-neutral-800 border border-white/10 text-neutral-300 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50"
                 >
-                  <RotateCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-blue-400" : ""}`} />
+                  <RotateCw className={`w-3.5 h-3.5 ${isLoading ?"animate-spin text-blue-400" :""}`} />
                   <span>Refresh Records</span>
                 </button>
               )}
             </div>
           ) : (
             history.map((run) => {
-              const isDone = run.status === "completed";
-              const isFailed = run.status === "failed";
-              const isActive = !isDone && !isFailed && run.status !== "awaiting_review";
+              const isDone = run.status ==="completed";
+              const isFailed = run.status ==="failed";
+              const isActive = !isDone && !isFailed && run.status !=="awaiting_review";
               const statusBadge = getStatusBadge(run.status, run.progress);
 
               const previewThumb =
@@ -237,15 +235,14 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
 
               const sourceDomain = getSourceDomain(run.source_url);
               const panelCount = run.panels?.length || run.raw_images_count || 0;
-              const isShorts = run.video_format === "shorts";
+              const isShorts = run.video_format ==="shorts";
 
               const displayTitle =
                 run.scraped_title ||
                 (run.series_title
-                  ? `${run.series_title}${run.chapter_title ? ` - ${run.chapter_title}` : ""}`
+                  ?`${run.series_title}${run.chapter_title ?` - ${run.chapter_title}` :""}`
                   : null) ||
-                run.youtube_metadata?.title ||
-                "Webtoon Episode Recap";
+                run.youtube_metadata?.title ||"Webtoon Episode Recap";
 
               return (
                 <div
@@ -261,7 +258,7 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
                         onError={(e) => {
-                          (e.target as HTMLElement).style.display = "none";
+                          (e.target as HTMLElement).style.display ="none";
                         }}
                       />
                     ) : (
@@ -311,10 +308,10 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
                         <span className="text-[11px] text-neutral-400 font-mono flex items-center gap-1">
                           <Calendar className="w-3 h-3 text-neutral-500" />
                           {new Date(run.created_at * 1000).toLocaleDateString(undefined, {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
+                            month:"short",
+                            day:"numeric",
+                            hour:"2-digit",
+                            minute:"2-digit",
                           })}
                         </span>
 
@@ -349,14 +346,14 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
                       <div className="space-y-1 py-1">
                         <div className="flex justify-between text-[10px] font-mono text-neutral-400">
                           <span className="truncate max-w-[260px] text-blue-400">
-                            {run.current_action || "Processing episode pipeline..."}
+                            {run.current_action ||"Processing episode pipeline..."}
                           </span>
                           <span className="font-bold text-white">{run.progress}%</span>
                         </div>
                         <div className="h-1.5 w-full bg-neutral-800 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300 rounded-full"
-                            style={{ width: `${run.progress}%` }}
+                            style={{ width:`${run.progress}%` }}
                           />
                         </div>
                       </div>
@@ -432,7 +429,7 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
                           onSelectRun(run);
                           onClose();
                         }}
-                        className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-blue-500/20 cursor-pointer active:scale-95 ml-auto"
+                        className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-1.5 transition-all shadow-md cursor-pointer active:scale-95 ml-auto"
                       >
                         <span>View Details</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -448,7 +445,7 @@ export const AgentHistoryModal: React.FC<AgentHistoryModalProps> = ({
         {/* Footer */}
         <div className="px-6 py-4 bg-neutral-900/60 border-t border-neutral-800/80 flex items-center justify-between shrink-0">
           <span className="text-xs text-neutral-400 font-mono">
-            {history.length} {history.length === 1 ? "pipeline recorded" : "pipelines recorded"}
+            {history.length} {history.length === 1 ?"pipeline recorded" :"pipelines recorded"}
           </span>
           <button
             type="button"

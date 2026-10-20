@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Layers,
   Volume2,
@@ -7,9 +7,9 @@ import {
   AlertCircle,
   Eye,
   X,
-} from "lucide-react";
-import { GeneratedPanel } from "@/shared/types";
-import * as api from "@/shared/api";
+} from"lucide-react";
+import { GeneratedPanel } from"@/shared/types";
+import * as api from"@/shared/api";
 
 interface LayerSeparationPanelProps {
   activeStoryboardPanel: GeneratedPanel | null;
@@ -32,7 +32,7 @@ export default function LayerSeparationPanel({
   const handleDebugYolo = async () => {
     if (!activeStoryboardPanel?.image_url) return;
     setIsDebuggingYolo(true);
-    addNotification("Running YOLO debug detection...", "info");
+    addNotification("Running YOLO debug detection...","info");
     try {
       if (debugImageUrl) {
         URL.revokeObjectURL(debugImageUrl);
@@ -43,12 +43,10 @@ export default function LayerSeparationPanel({
         activeStoryboardPanel.image_url
       );
       setDebugImageUrl(url);
-      addNotification("YOLO detections rendered successfully!", "success");
+      addNotification("YOLO detections rendered successfully!","success");
     } catch (err: any) {
       console.error("[Debug YOLO] Error:", err);
-      addNotification(
-        `Failed to render YOLO detections: ${err.message}`,
-        "error"
+      addNotification(`Failed to render YOLO detections: ${err.message}`,"error"
       );
     } finally {
       setIsDebuggingYolo(false);
@@ -64,14 +62,12 @@ export default function LayerSeparationPanel({
 
   const handleSeparateLayers = async () => {
     if (!activeStoryboardPanel?.id) {
-      addNotification(
-        "No active panel selected for layer separation.",
-        "warning"
+      addNotification("No active panel selected for layer separation.","warning"
       );
       return;
     }
     setIsProcessingLayers(true);
-    addNotification("Starting AI layer separation...", "info");
+    addNotification("Starting AI layer separation...","info");
 
     try {
       const data = await api.processLayers(
@@ -98,13 +94,13 @@ export default function LayerSeparationPanel({
               : p
           )
         );
-        addNotification("Layers separated and saved successfully!", "success");
+        addNotification("Layers separated and saved successfully!","success");
       } else {
-        throw new Error(data.detail || "Layer separation failed");
+        throw new Error(data.detail ||"Layer separation failed");
       }
     } catch (err: any) {
       console.error("[Layer Separation] Error:", err);
-      addNotification(`Failed to separate layers: ${err.message}`, "error");
+      addNotification(`Failed to separate layers: ${err.message}`,"error");
     } finally {
       setIsProcessingLayers(false);
     }
@@ -112,15 +108,13 @@ export default function LayerSeparationPanel({
 
   const handleAlignDialogue = async () => {
     if (!activeStoryboardPanel?.audio_url) {
-      addNotification(
-        "Generate or set an audio file for this panel first.",
-        "warning"
+      addNotification("Generate or set an audio file for this panel first.","warning"
       );
       return;
     }
 
     setIsAligning(true);
-    addNotification("Aligning speech text with audio track...", "info");
+    addNotification("Aligning speech text with audio track...","info");
 
     const ocr_texts = activeStoryboardPanel.speech_text
       ? activeStoryboardPanel.speech_text
@@ -157,16 +151,14 @@ export default function LayerSeparationPanel({
               : p
           )
         );
-        addNotification(
-          "Dialogue alignment sync mapped successfully!",
-          "success"
+        addNotification("Dialogue alignment sync mapped successfully!","success"
         );
       } else {
-        throw new Error(data.detail || "Dialogue alignment failed");
+        throw new Error(data.detail ||"Dialogue alignment failed");
       }
     } catch (err: any) {
       console.error("[Dialogue Alignment] Error:", err);
-      addNotification(`Failed to align dialogue: ${err.message}`, "error");
+      addNotification(`Failed to align dialogue: ${err.message}`,"error");
     } finally {
       setIsAligning(false);
     }
@@ -209,10 +201,10 @@ export default function LayerSeparationPanel({
           disabled={isProcessingLayers}
           className={`w-full py-2.5 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
             isProcessingLayers
-              ? "bg-[#2A2A2A] text-[#3B82F6] border-[#2F2F2F] cursor-not-allowed"
+              ?"bg-[#2A2A2A] text-[#3B82F6] border-[#2F2F2F] cursor-not-allowed"
               : hasLayers
-              ? "bg-[#2A2A2A] text-[#60A5FA] border-[#2F2F2F] hover:bg-[#2A2A2A]"
-              : "bg-[#2A2A2A] hover:bg-[#333333] text-white border-[#3B82F6]/20 shadow-md shadow-black/50"
+              ?"bg-[#2A2A2A] text-[#60A5FA] border-[#2F2F2F] hover:bg-[#2A2A2A]"
+              :"bg-[#2A2A2A] hover:bg-[#333333] text-white border-[#3B82F6]/20 shadow-md shadow-black/50"
           }`}
         >
           {isProcessingLayers ? (
@@ -221,7 +213,7 @@ export default function LayerSeparationPanel({
             <Layers className="h-3.5 w-3.5" />
           )}
           <span>
-            {hasLayers ? "Re-Run Layer Separation" : "Run AI Layer Separation"}
+            {hasLayers ?"Re-Run Layer Separation" :"Run AI Layer Separation"}
           </span>
         </button>
 
@@ -231,10 +223,10 @@ export default function LayerSeparationPanel({
           disabled={isAligning}
           className={`w-full py-2.5 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
             isAligning
-              ? "bg-emerald-900/10 text-emerald-400 border-emerald-800/20 cursor-not-allowed"
+              ?"bg-emerald-900/10 text-emerald-400 border-emerald-800/20 cursor-not-allowed"
               : hasSyncMap
-              ? "bg-emerald-950/40 text-emerald-300 border-emerald-850 hover:bg-emerald-900/30"
-              : "bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500/20 shadow-md shadow-emerald-900/20"
+              ?"bg-emerald-950/40 text-emerald-300 border-emerald-850 hover:bg-emerald-900/30"
+              :"bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500/20 shadow-md"
           }`}
         >
           {isAligning ? (
@@ -243,7 +235,7 @@ export default function LayerSeparationPanel({
             <Volume2 className="h-3.5 w-3.5" />
           )}
           <span>
-            {hasSyncMap ? "Re-Align Dialogue Sync" : "Align Dialogue Sync"}
+            {hasSyncMap ?"Re-Align Dialogue Sync" :"Align Dialogue Sync"}
           </span>
         </button>
         {/* Debug YOLO Trigger */}
@@ -252,8 +244,8 @@ export default function LayerSeparationPanel({
           disabled={isDebuggingYolo}
           className={`w-full py-2.5 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
             isDebuggingYolo
-              ? "bg-[#2A2A2A] text-[#3B82F6] border-[#2F2F2F] cursor-not-allowed"
-              : "bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border-white/10"
+              ?"bg-[#2A2A2A] text-[#3B82F6] border-[#2F2F2F] cursor-not-allowed"
+              :"bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border-white/10"
           }`}
         >
           {isDebuggingYolo ? (
@@ -290,7 +282,7 @@ export default function LayerSeparationPanel({
                   >
                     {activeStoryboardPanel?.layers?.background_url
                       ?.split("/")
-                      .pop() || "bg.png"}
+                      .pop() ||"bg.png"}
                   </a>
                 </div>
                 <div className="truncate">
@@ -303,7 +295,7 @@ export default function LayerSeparationPanel({
                   >
                     {activeStoryboardPanel?.layers?.character_url
                       ?.split("/")
-                      .pop() || "char.png"}
+                      .pop() ||"char.png"}
                   </a>
                 </div>
                 <div className="truncate">
@@ -316,7 +308,7 @@ export default function LayerSeparationPanel({
                   >
                     {activeStoryboardPanel?.layers?.text_url
                       ?.split("/")
-                      .pop() || "text.png"}
+                      .pop() ||"text.png"}
                   </a>
                 </div>
               </div>
@@ -334,14 +326,14 @@ export default function LayerSeparationPanel({
                 <div>
                   <span className="text-neutral-450">Synced Bubbles: </span>
                   <span className="text-emerald-400">
-                    {activeStoryboardPanel?.syncMap?.dialogue_map?.length || 0}{" "}
+                    {activeStoryboardPanel?.syncMap?.dialogue_map?.length || 0}{""}
                     detected
                   </span>
                 </div>
                 <div>
                   <span className="text-neutral-450">RMS Peaks: </span>
                   <span className="text-emerald-400">
-                    {activeStoryboardPanel?.syncMap?.audio_peaks?.length || 0}{" "}
+                    {activeStoryboardPanel?.syncMap?.audio_peaks?.length || 0}{""}
                     frames
                   </span>
                 </div>
@@ -356,7 +348,7 @@ export default function LayerSeparationPanel({
         <div className="bg-amber-950/20 border border-amber-850/40 rounded-xl p-3 flex items-start gap-2 text-amber-400 text-[9px] font-sans">
           <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           <p className="leading-relaxed">
-            Generate panel speech audio in the <strong>Timeline</strong> or{" "}
+            Generate panel speech audio in the <strong>Timeline</strong> or{""}
             <strong>Adjust</strong> tabs to enable full word-level dialogue sync
             alignment.
           </p>

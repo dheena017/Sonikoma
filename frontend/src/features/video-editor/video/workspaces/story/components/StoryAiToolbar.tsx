@@ -1,5 +1,5 @@
-import React from "react";
-import { Wand2, Sparkles, MessageSquare, FastForward } from "lucide-react";
+import React from"react";
+import { Wand2, Sparkles, MessageSquare, FastForward } from"lucide-react";
 
 interface StoryAiToolbarProps {
   onTriggerFeedback: (msg: string) => void;
@@ -18,19 +18,19 @@ export const StoryAiToolbar: React.FC<StoryAiToolbarProps> = ({
           onClick={() =>
             onTriggerFeedback("AI generating new scene breakdown...")
           }
-          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs shadow-blue-500/25 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-95"
         >
           <Sparkles className="h-2.5 w-2.5" /> Gen Scene
         </button>
         <button
           onClick={() => onTriggerFeedback("AI writing dialogue for scene...")}
-          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs shadow-blue-500/25 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-95"
         >
           <MessageSquare className="h-2.5 w-2.5" /> Gen Dialogue
         </button>
         <button
           onClick={() => onTriggerFeedback("AI continuing story plotline...")}
-          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs shadow-blue-500/25 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-95"
         >
           <FastForward className="h-2.5 w-2.5" /> Continue Story
         </button>

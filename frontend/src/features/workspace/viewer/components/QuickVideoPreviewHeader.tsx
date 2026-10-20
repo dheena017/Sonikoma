@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   Sparkles,
   Video,
@@ -7,14 +7,14 @@ import {
   Sliders,
   ChevronDown,
   Download,
-} from "lucide-react";
-import EditorHeaderFrame from "@/features/workspace/shell/components/EditorHeaderFrame";
-import MetadataPanel from "@/shared/ui/video/MetadataPanel";
-import AdvancedSettings from "@/shared/ui/video/AdvancedSettings";
+} from"lucide-react";
+import EditorHeaderFrame from"@/features/workspace/shell/components/EditorHeaderFrame";
+import MetadataPanel from"@/shared/ui/video/MetadataPanel";
+import AdvancedSettings from"@/shared/ui/video/AdvancedSettings";
 
 export interface QuickVideoPreviewHeaderProps {
-  monitorTab: "timeline" | "video";
-  setMonitorTab: (tab: "timeline" | "video") => void;
+  monitorTab:"timeline" |"video";
+  setMonitorTab: (tab:"timeline" |"video") => void;
   panelsCount: number;
   activePanelIndex: number;
   onSave?: () => void;
@@ -51,8 +51,8 @@ export const QuickVideoPreviewHeader: React.FC<
   onExport,
   isRendering = false,
   onClose,
-  musicTheme = "orchestral_battle",
-  voiceActor = "en-US-GuyNeural",
+  musicTheme ="orchestral_battle",
+  voiceActor ="en-US-GuyNeural",
   videoUrl = null,
   seriesTitle,
   chapterNumber,
@@ -66,7 +66,7 @@ export const QuickVideoPreviewHeader: React.FC<
 
   const titleBlock = (
     <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
-      <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 shadow-md shadow-blue-500/25 flex items-center justify-center shrink-0 transition-all cursor-pointer">
+      <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 shadow-md flex items-center justify-center shrink-0 transition-all cursor-pointer">
         <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
       </div>
       <div className="min-w-0">
@@ -93,9 +93,9 @@ export const QuickVideoPreviewHeader: React.FC<
         type="button"
         onClick={() => setMonitorTab("timeline")}
         className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
-          monitorTab === "timeline"
-            ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md shadow-blue-500/25 border border-blue-400/40"
-            : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent"
+          monitorTab ==="timeline"
+            ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md  border border-blue-400/40"
+            :"text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent"
         }`}
       >
         <Layers className="h-3.5 w-3.5 shrink-0" />
@@ -104,9 +104,9 @@ export const QuickVideoPreviewHeader: React.FC<
         {panelsCount > 0 && (
           <span
             className={`text-[9px] font-mono px-1.5 py-0.2 rounded ${
-              monitorTab === "timeline"
-                ? "bg-black/30 text-white font-bold"
-                : "bg-black/40 text-[#60A5FA]"
+              monitorTab ==="timeline"
+                ?"bg-black/30 text-white font-bold"
+                :"bg-black/40 text-[#60A5FA]"
             }`}
           >
             {panelsCount}p
@@ -118,9 +118,9 @@ export const QuickVideoPreviewHeader: React.FC<
         type="button"
         onClick={() => setMonitorTab("video")}
         className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
-          monitorTab === "video"
-            ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md shadow-blue-500/25 border border-blue-400/40"
-            : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent"
+          monitorTab ==="video"
+            ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md  border border-blue-400/40"
+            :"text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent"
         }`}
       >
         <Video className="h-3.5 w-3.5 shrink-0" />
@@ -128,9 +128,9 @@ export const QuickVideoPreviewHeader: React.FC<
         <span className="md:hidden">Final</span>
         <span
           className={`hidden sm:inline text-[8px] font-mono px-1 py-0.2 rounded border uppercase ${
-            monitorTab === "video"
-              ? "bg-black/30 border-blue-400/40 text-white"
-              : "bg-[#2A2A2A] border-neutral-800 text-[#60A5FA]"
+            monitorTab ==="video"
+              ?"bg-black/30 border-blue-400/40 text-white"
+              :"bg-[#2A2A2A] border-neutral-800 text-[#60A5FA]"
           }`}
         >
           MP4
@@ -147,8 +147,8 @@ export const QuickVideoPreviewHeader: React.FC<
           onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
           className={`h-8 px-2.5 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap ${
             showAdvancedSettings
-              ? "bg-[#2A2A2A] border-[#3B82F6] text-[#3B82F6]"
-              : "bg-neutral-900/90 hover:bg-neutral-800 border-transparent text-neutral-300 hover:text-white"
+              ?"bg-[#2A2A2A] border-[#3B82F6] text-[#3B82F6]"
+              :"bg-neutral-900/90 hover:bg-neutral-800 border-transparent text-neutral-300 hover:text-white"
           }`}
           title="Render and Vision Settings"
         >
@@ -156,7 +156,7 @@ export const QuickVideoPreviewHeader: React.FC<
           <span className="hidden sm:inline">Settings</span>
           <ChevronDown
             className={`h-3 w-3 transition-transform ${
-              showAdvancedSettings ? "rotate-180" : ""
+              showAdvancedSettings ?"rotate-180" :""
             }`}
           />
         </button>
@@ -181,24 +181,24 @@ export const QuickVideoPreviewHeader: React.FC<
           type="button"
           onClick={finalExport}
           disabled={isRendering}
-          className="h-8 px-2.5 sm:px-3.5 rounded-xl border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-blue-500/25 active:scale-95 disabled:opacity-50 shrink-0 whitespace-nowrap"
+          className="h-8 px-2.5 sm:px-3.5 rounded-xl border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95 disabled:opacity-50 shrink-0 whitespace-nowrap"
           title="Export and render final video"
         >
           <Video className="h-3.5 w-3.5 text-white shrink-0" />
           <span className="hidden md:inline">
-            {isRendering ? "Rendering..." : "Export Video"}
+            {isRendering ?"Rendering..." :"Export Video"}
           </span>
-          <span className="md:hidden">{isRendering ? "..." : "Export"}</span>
+          <span className="md:hidden">{isRendering ?"..." :"Export"}</span>
         </button>
       )}
 
       {videoUrl && (
         <a
           href={videoUrl}
-          download={seriesTitle ? `${seriesTitle.replace(/[^a-zA-Z0-9_-]/g, "_")}_video.mp4` : "video.mp4"}
+          download={seriesTitle ?`${seriesTitle.replace(/[^a-zA-Z0-9_-]/g,"_")}_video.mp4` :"video.mp4"}
           target="_blank"
           rel="noopener noreferrer"
-          className="h-8 px-2.5 sm:px-3.5 rounded-xl border border-emerald-500/40 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-emerald-500/25 active:scale-95 shrink-0 whitespace-nowrap"
+          className="h-8 px-2.5 sm:px-3.5 rounded-xl border border-emerald-500/40 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95 shrink-0 whitespace-nowrap"
           title="Download compiled MP4 video to your computer"
         >
           <Download className="h-3.5 w-3.5 text-white shrink-0" />

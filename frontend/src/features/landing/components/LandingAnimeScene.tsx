@@ -38,12 +38,6 @@ export function LandingAnimeScene({
         draggable={false}
       />
 
-      {/* 2. Soft Ambient Aurora Beams */}
-      <div className="anime-hero-aurora">
-        <div className="anime-aurora-beam beam-1" />
-        <div className="anime-aurora-beam beam-2" />
-      </div>
-
       {/* 3. Subtle Ambient Vignette & Readability Gradient */}
       <div className="anime-hero-vignette" />
       <div className="anime-hero-readability" />

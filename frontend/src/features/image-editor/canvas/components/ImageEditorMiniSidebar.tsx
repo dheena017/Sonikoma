@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from"react";
 import {
   useImageEditorStore,
   ImageTool,
-} from "@/features/image-editor/canvas/hooks/useImageEditorState";
+} from"@/features/image-editor/canvas/hooks/useImageEditorState";
 import {
   Menu,
   Layers,
@@ -13,9 +13,9 @@ import {
   Link2,
   ArrowLeft,
   ExternalLink,
-} from "lucide-react";
-import TooltipPortal from "@/shared/ui/common/TooltipPortal";
-import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
+} from"lucide-react";
+import TooltipPortal from"@/shared/ui/common/TooltipPortal";
+import { resolveWorkspaceReturnPath } from"@/shared/utils/workspaceNavigation";
 
 interface ImageEditorMiniSidebarProps {
   onOpenToolsPanel?: () => void;
@@ -67,41 +67,41 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
 
   const groups = [
     {
-      name: "Tools",
+      name:"Tools",
       items: [
         {
-          id: "adjust",
-          label: "Color & Filters",
+          id:"adjust",
+          label:"Color & Filters",
           icon: Sparkles,
         },
         {
-          id: "edit",
-          label: "Transform & Bounds",
+          id:"edit",
+          label:"Transform & Bounds",
           icon: Settings2,
         },
         {
-          id: "draw",
-          label: "Retouch & Brush",
+          id:"draw",
+          label:"Retouch & Brush",
           icon: Brush,
         },
         {
-          id: "slice",
-          label: "Horizontal Cutter",
+          id:"slice",
+          label:"Horizontal Cutter",
           icon: Scissors,
         },
         {
-          id: "merge",
-          label: "Merge Panels",
+          id:"merge",
+          label:"Merge Panels",
           icon: Link2,
         },
       ],
     },
     {
-      name: "AI Core",
+      name:"AI Core",
       items: [
         {
-          id: "separate",
-          label: "AI Layer Separation",
+          id:"separate",
+          label:"AI Layer Separation",
           icon: Layers,
         },
       ],
@@ -119,8 +119,8 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
         {/* Left edge active indicator bar */}
         <div
           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${active
-              ? "h-5 bg-[#3B82F6] opacity-100"
-              : "h-0 bg-transparent opacity-0"
+              ?"h-5 bg-[#3B82F6] opacity-100"
+              :"h-0 bg-transparent opacity-0"
             }`}
         />
 
@@ -139,14 +139,14 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
         >
           <div
             className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${active
-                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white"
-                : "bg-[#1E1E1E] border border-[#2F2F2F] text-neutral-400 group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
+                ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white"
+                :"bg-[#1E1E1E] border border-[#2F2F2F] text-neutral-400 group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
               }`}
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${active
-                  ? "text-white"
-                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                  ?"text-white"
+                  :"text-[#9CA3AF] group-hover:text-[#3B82F6]"
                 }`}
             />
           </div>
@@ -176,8 +176,8 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ? "0.6rem" : "0.2rem",
-                marginBottom: "0.4rem",
+                marginTop: groupIdx > 0 ?"0.6rem" :"0.2rem",
+                marginBottom:"0.4rem",
               }}
             >
               {groupIdx > 0 && (
@@ -205,7 +205,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
           }}
           onMouseLeave={() => setReturnHover(false)}
           aria-label="Return to Storyboard"
-          className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-lg shadow-blue-500/25 flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90"
+          className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-lg flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90"
         >
           <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
         </button>
