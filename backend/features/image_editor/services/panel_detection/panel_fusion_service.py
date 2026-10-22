@@ -193,14 +193,14 @@ def fuse_panels_and_bubbles(
             panel_bubbles.append(bubble)
             unassigned_bubbles.remove(bubble)
 
-            # Expand panel boundary to enclose bubble, capped by neighbour edges
-            max_exp_y = max(10, int(ph * 0.15))
-            max_exp_x = max(10, int(pw * 0.10))
+            # Expand panel boundary to fully enclose speech bubble with safe padding
+            bubble_pad_y = max(4, int(bubble.height * 0.05))
+            bubble_pad_x = max(4, int(bubble.width * 0.05))
 
-            new_x1 = max(0,       max(px - max_exp_x,      min(px,      bubble.x)))
-            new_y1 = max(prev_y2, max(py - max_exp_y,      min(py,      bubble.y)))           # capped by prev panel
-            new_x2 = min(img_w,   min(px + pw + max_exp_x, max(px + pw, bubble.x + bubble.width)))
-            new_y2 = min(next_y1, min(py + ph + max_exp_y, max(py + ph, bubble.y + bubble.height)))  # capped by next panel
+            new_x1 = max(0,       min(px, bubble.x - bubble_pad_x))
+            new_y1 = max(prev_y2, min(py, bubble.y - bubble_pad_y))           # capped by prev panel
+            new_x2 = min(img_w,   max(px + pw, bubble.x + bubble.width + bubble_pad_x))
+            new_y2 = min(next_y1, max(py + ph, bubble.y + bubble.height + bubble_pad_y))  # capped by next panel
 
             px, py = new_x1, new_y1
             pw, ph = max(1, new_x2 - new_x1), max(1, new_y2 - new_y1)
@@ -249,9 +249,8 @@ def fuse_panels_and_bubbles(
     fused_panels.sort(key=lambda p: (p.y, p.x))
 
     # ── STRICT NON-OVERLAP ENFORCEMENT ───────────────────────────────────────
-    # Safety-net: clip residual vertical overlaps at a 60/40 midpoint split.
-    # Primary prevention is the neighbour-bounded expansion above and the
-    # pre-fusion clip in detect_long_panels_service.
+    # Safety-net: clip residual vertical overlaps between panels in the same vertical column.
+    # Protect side-by-side panels and avoid severing panel borders.
     for i in range(len(fused_panels) - 1):
         cur = fused_panels[i]
         nxt = fused_panels[i + 1]
@@ -259,11 +258,18 @@ def fuse_panels_and_bubbles(
         if cur_y2 <= nxt.y:
             continue
 
+        # Verify that panels actually share horizontal column space before clipping vertically
+        cur_x2 = cur.x + cur.w
+        nxt_x2 = nxt.x + nxt.w
+        x_overlap = min(cur_x2, nxt_x2) - max(cur.x, nxt.x)
+        if x_overlap <= max(15, int(img_w * 0.05)):
+            continue
+
         overlap_px = cur_y2 - nxt.y
-        trim_cur   = max(1, int(overlap_px * 0.60))
-        new_h_cur  = max(10, cur.h - trim_cur)
-        boundary   = cur.y + new_h_cur
-        new_h_nxt  = max(10, nxt.h - (boundary - nxt.y))
+        boundary   = (cur_y2 + nxt.y) // 2
+        new_h_cur  = max(10, boundary - cur.y)
+        nxt_orig_y2 = nxt.y + nxt.h
+        new_h_nxt  = max(10, nxt_orig_y2 - boundary)
 
         logger.debug(
             "[Panel Fusion] Non-overlap clip: panel %d y2 %d→%d, panel %d y1 %d→%d (overlap=%dpx)",

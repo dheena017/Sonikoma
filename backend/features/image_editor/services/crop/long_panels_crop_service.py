@@ -41,14 +41,14 @@ os.makedirs(MEDIA_DIR, exist_ok=True)
 
 def _apply_color_distance_autotrim(
     img: Image.Image,
-    tolerance: int = 22,
-    safety_padding: int = 1
+    tolerance: int = 18,
+    safety_padding: int = 8
 ) -> Tuple[Image.Image, Tuple[int, int, int, int], bool]:
     """
     Trims solid/scanned borders (e.g. white/black/neutral margins) from an image.
     Uses independent 4-edge gutter variance detection and Euclidean color distance
     from outer gutter strips to eliminate extra whitespace around panels without
-    clipping bleed panels or speech bubble strokes.
+    clipping bleed panels, character artwork, or speech bubble strokes.
     """
     w, h = img.size
     if h < 25 or w < 25:
@@ -71,13 +71,22 @@ def _apply_color_distance_autotrim(
         left_std = float(np.std(left_strip))
         right_std = float(np.std(right_strip))
 
-        # Threshold for considering an edge strip a uniform background gutter
-        max_edge_std = 25.0
+        # Check for ink stroke transitions in outer strips
+        top_strokes = int(np.sum(np.abs(np.diff(top_strip.astype(float), axis=1)) > 15.0))
+        bot_strokes = int(np.sum(np.abs(np.diff(bot_strip.astype(float), axis=1)) > 15.0))
+        left_strokes = int(np.sum(np.abs(np.diff(left_strip.astype(float), axis=0)) > 15.0))
+        right_strokes = int(np.sum(np.abs(np.diff(right_strip.astype(float), axis=0)) > 15.0))
 
-        top_is_gutter = top_std < max_edge_std
-        bot_is_gutter = bot_std < max_edge_std
-        left_is_gutter = left_std < max_edge_std
-        right_is_gutter = right_std < max_edge_std
+        # Stricter threshold for considering an edge strip a uniform background gutter:
+        # A true gutter strip has low standard deviation AND virtually zero ink strokes.
+        max_edge_std = 12.0
+        max_edge_strokes_x = max(1, int(w * 0.01))
+        max_edge_strokes_y = max(1, int(h * 0.01))
+
+        top_is_gutter = (top_std < max_edge_std) and (top_strokes <= max_edge_strokes_x)
+        bot_is_gutter = (bot_std < max_edge_std) and (bot_strokes <= max_edge_strokes_x)
+        left_is_gutter = (left_std < max_edge_std) and (left_strokes <= max_edge_strokes_y)
+        right_is_gutter = (right_std < max_edge_std) and (right_strokes <= max_edge_strokes_y)
 
         # If none of the edges are uniform gutters, no trimming needed
         if not (top_is_gutter or bot_is_gutter or left_is_gutter or right_is_gutter):
@@ -109,14 +118,21 @@ def _apply_color_distance_autotrim(
         ymin_all, ymax_all = np.where(rows)[0][[0, -1]]
         xmin_all, xmax_all = np.where(cols)[0][[0, -1]]
 
-        # Only trim along edges that were actually identified as gutters
-        t_y1 = max(0, int(ymin_all) - safety_padding) if top_is_gutter else 0
-        t_y2 = min(h, int(ymax_all) + 1 + safety_padding) if bot_is_gutter else h
-        t_x1 = max(0, int(xmin_all) - safety_padding) if left_is_gutter else 0
-        t_x2 = min(w, int(xmax_all) + 1 + safety_padding) if right_is_gutter else w
+        # Adaptive safety padding: never shave tightly against character hair or bubbles
+        safe_pad = max(safety_padding, max(8, int(min(w, h) * 0.015)))
+
+        # Maximum trim guard: never shave off more than 12% of dimension on any single edge
+        # to avoid eating into intentional whitespace around characters or scenes
+        max_trim_y = max(8, int(h * 0.12))
+        max_trim_x = max(8, int(w * 0.12))
+
+        t_y1 = min(max_trim_y, max(0, int(ymin_all) - safe_pad)) if top_is_gutter else 0
+        t_y2 = max(h - max_trim_y, min(h, int(ymax_all) + 1 + safe_pad)) if bot_is_gutter else h
+        t_x1 = min(max_trim_x, max(0, int(xmin_all) - safe_pad)) if left_is_gutter else 0
+        t_x2 = max(w - max_trim_x, min(w, int(xmax_all) + 1 + safe_pad)) if right_is_gutter else w
 
         # Ensure reasonable bounds
-        if (t_x2 - t_x1 >= 15) and (t_y2 - t_y1 >= 15):
+        if (t_x2 - t_x1 >= 25) and (t_y2 - t_y1 >= 25):
             # Only trim if there are actually extra borders (> 1px on any side)
             if t_x1 > 0 or t_y1 > 0 or t_x2 < w or t_y2 < h:
                 trimmed = img.crop((t_x1, t_y1, t_x2, t_y2))
@@ -195,8 +211,8 @@ def _encode_slice_worker(args: Tuple) -> Optional[CroppedSliceItem]:
         h = int(box_dict.get("height") or box_dict.get("h") or cropped_img.height)
         panel_id = box_dict.get("panel_id") or str(box_dict.get("id") or f"panel_{order_idx + 1}")
 
-        # Auto-trim solid background borders (white/off-white margins) to eliminate extra whitespace
-        trimmed_img, trim_box, was_trimmed = _apply_color_distance_autotrim(cropped_img, tolerance=22)
+        # Auto-trim solid background borders (white/off-white margins) with safe padding
+        trimmed_img, trim_box, was_trimmed = _apply_color_distance_autotrim(cropped_img, tolerance=18, safety_padding=8)
         if was_trimmed:
             cropped_img = trimmed_img
             t_x1, t_y1, t_x2, t_y2 = trim_box

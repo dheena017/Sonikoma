@@ -794,39 +794,61 @@ async def facade_analyze_batch(
     except Exception:
         pass
 
+    CHUNK_SIZE = 8
     batch_items = []
     overall_scene_summary = ""
     single_call_success = False
 
-    logger.info(f"[AI Analysis] Executing single unified batch vision analysis for {len(panels)} panels (Model: {model or 'default'})...")
-    try:
-        raw_text = await skill.execute(
-            model=model,
-            image_bytes=img_buffers,
-            user_keys=user_keys or {},
-            panel_count=len(panels),
-            tone_hint=tone_hint,
-            narrative_length_hint=narrative_length_hint,
-            story_context_section=formatted_context
-        )
-        parsed_json = robust_parse_json(raw_text) if isinstance(raw_text, str) else raw_text
-        if isinstance(parsed_json, dict) and "panels" in parsed_json and len(parsed_json.get("panels", [])) > 0:
-            raw_items = parsed_json.get("panels", [])
-            items_by_idx = {it.get("panel_index"): it for it in raw_items if isinstance(it, dict) and isinstance(it.get("panel_index"), int)}
-            for idx in range(len(panels)):
-                item = items_by_idx.get(idx + 1) or (raw_items[idx] if idx < len(raw_items) else {})
-                if not isinstance(item, dict):
-                    item = {}
-                batch_items.append(item)
-            overall_scene_summary = parsed_json.get("overall_scene_summary", "")
+    async def _analyze_chunk(chunk_buffers, chunk_panels, chunk_idx, total_chunks):
+        c_len = len(chunk_panels)
+        chunk_context = f"{formatted_context}\nBatch {chunk_idx + 1} of {total_chunks} (Panels {chunk_idx * CHUNK_SIZE + 1} to {chunk_idx * CHUNK_SIZE + c_len})."
+        try:
+            raw_text = await skill.execute(
+                model=model,
+                image_bytes=chunk_buffers,
+                user_keys=user_keys or {},
+                panel_count=c_len,
+                tone_hint=tone_hint,
+                narrative_length_hint=narrative_length_hint,
+                story_context_section=chunk_context
+            )
+            parsed_json = robust_parse_json(raw_text) if isinstance(raw_text, str) else raw_text
+            items = []
+            if isinstance(parsed_json, dict) and "panels" in parsed_json:
+                raw_items = parsed_json.get("panels", [])
+                items_by_idx = {it.get("panel_index"): it for it in raw_items if isinstance(it, dict) and isinstance(it.get("panel_index"), int)}
+                for idx in range(c_len):
+                    item = items_by_idx.get(idx + 1) or (raw_items[idx] if idx < len(raw_items) else {})
+                    items.append(item if isinstance(item, dict) else {})
+            while len(items) < c_len:
+                items.append({})
+            return items, (parsed_json.get("overall_scene_summary", "") if isinstance(parsed_json, dict) else "")
+        except Exception as err:
+            logger.warning(f"[AI Analysis] Chunk {chunk_idx + 1}/{total_chunks} failed: {err}")
+            return [{} for _ in range(c_len)], ""
 
-            if len(batch_items) == len(panels):
-                single_call_success = True
-                logger.info(f"[AI Analysis] Single unified batch analysis succeeded for all {len(panels)} panels in 1 API call.")
-            else:
-                logger.warning(f"[AI Analysis] Single batch returned {len(batch_items)} items for {len(panels)} panels.")
-    except Exception as single_err:
-        logger.warning(f"[AI Analysis] Single batch vision execution failed: {single_err}.")
+    if len(panels) <= CHUNK_SIZE:
+        logger.info(f"[AI Analysis] Executing batch vision analysis for {len(panels)} panels (Model: {model or 'default'})...")
+        items, summary = await _analyze_chunk(img_buffers, panels, 0, 1)
+        batch_items = items
+        overall_scene_summary = summary
+        single_call_success = any(bool(it) for it in items)
+    else:
+        num_chunks = int(np.ceil(len(panels) / float(CHUNK_SIZE)))
+        logger.info(f"[AI Analysis] Dividing {len(panels)} panels into {num_chunks} chunks of {CHUNK_SIZE} for parallel vision analysis (Model: {model or 'default'})...")
+        chunk_tasks = []
+        for c_idx in range(num_chunks):
+            s_idx = c_idx * CHUNK_SIZE
+            e_idx = min(len(panels), s_idx + CHUNK_SIZE)
+            chunk_tasks.append(
+                _analyze_chunk(img_buffers[s_idx:e_idx], panels[s_idx:e_idx], c_idx, num_chunks)
+            )
+        chunk_results = await asyncio.gather(*chunk_tasks)
+        for c_items, c_summary in chunk_results:
+            batch_items.extend(c_items)
+            if c_summary and not overall_scene_summary:
+                overall_scene_summary = c_summary
+        single_call_success = any(bool(it) for it in batch_items)
 
     if not single_call_success:
         if batch_items and len(batch_items) > 0:
@@ -834,7 +856,7 @@ async def facade_analyze_batch(
             while len(batch_items) < len(panels):
                 batch_items.append({})
         else:
-            logger.warning(f"[AI Analysis] Single batch vision returned no items; initializing default structures for {len(panels)} panels (NO 1-by-1 API fallback).")
+            logger.warning(f"[AI Analysis] Batch vision returned no items; initializing default structures for {len(panels)} panels.")
             batch_items = [{} for _ in range(len(panels))]
 
     # 3. Assemble results and update rolling memory

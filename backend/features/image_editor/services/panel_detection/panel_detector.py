@@ -126,8 +126,12 @@ def _detect_vertical_subgutters(
         bg_col_counts = np.sum(slice_gray < threshold_val, axis=0)
     col_bg_ratios = bg_col_counts / float(max(1, sh))
 
-    # Column gutter requires near-complete top-to-bottom gutter whitespace
-    is_col_gutter = (col_bg_ratios >= 0.88) & (col_stds < 5.0)
+    col_diff_y = np.abs(np.diff(slice_gray.astype(float), axis=0)) if sh > 1 else np.zeros((1, sw))
+    col_strokes = np.sum(col_diff_y > 18.0, axis=0)
+
+    # Column gutter requires consistent background and minimal ink stroke transitions
+    # (relaxed std to 14.0 and bg_ratio to 0.75 for scan noise / slight gradients)
+    is_col_gutter = ((col_bg_ratios >= 0.75) | (col_stds < 14.0)) & (col_strokes <= max(2, int(sh * 0.025)))
     is_col_content = ~is_col_gutter
 
     sub_cols: List[Tuple[int, int]] = []
@@ -193,14 +197,12 @@ def _classify_content_rows(
     content_rows = (center_bg_ratio < 0.92) | (center_stds > 1.5) | (center_text_strokes >= 1)
 
     if ocr_boxes:
-        bubble_pad = max(15, min(60, int(slice_h * 0.05)))
+        bubble_pad = max(20, min(80, int(slice_h * 0.08)))
         for box in ocr_boxes:
             bx = int(box.get("x", 0))
             by = int(box.get("y", 0))
             bw_b = int(box.get("w", 0))
             bh_b = int(box.get("h", 0))
-            if bh_b >= int(slice_h * 0.85):
-                continue
             if not (bx + bw_b < col_x1 or bx > col_x2):
                 by1_rel = max(0, by - start_y - bubble_pad)
                 by2_rel = min(slice_h, (by + bh_b) - start_y + bubble_pad)
@@ -307,19 +309,20 @@ def detect_vertical_strip_panels(
         0.15 * mad_score
     )
 
-    # Lowered from 0.40 → 0.33 (standard) / 0.28 (high_sensitivity) so narrow
-    # gutters between dense panels are no longer missed.
-    sep_threshold = 0.28 if high_sensitivity else 0.33
-    max_stroke_count = max(2, int(w_center * 0.015))
+    # Lowered from 0.33/0.28 → 0.25/0.20 so narrow, tinted, or gradient gutters
+    # between dense comic panels are no longer merged into one panel.
+    sep_threshold = 0.20 if high_sensitivity else 0.25
+    max_stroke_count = max(4, int(w_center * 0.025))
     is_gutter_row = (
         (stroke_counts <= max_stroke_count) &
-        ((separator_score >= sep_threshold) | (bg_ratio >= 0.35) | (row_stds <= gutter_std_thresh * 2.2)) &
-        (edge_density <= 0.18)
+        ((separator_score >= sep_threshold) | (bg_ratio >= 0.30) | (row_stds <= gutter_std_thresh * 2.5)) &
+        (edge_density <= 0.20)
     )
     is_content_row = ~is_gutter_row
 
     if ocr_boxes:
-        bubble_pad = max(4, int(w * 0.02))
+        # Generous padding around speech bubbles and text boxes
+        bubble_pad = max(14, int(w * 0.035))
         max_ocr_h = int(w * 1.25)
         sorted_ocr = sorted(ocr_boxes, key=lambda b: int(b.get("y", 0)))
         for idx, box in enumerate(sorted_ocr):
@@ -334,7 +337,7 @@ def detect_vertical_strip_panels(
             if idx + 1 < len(sorted_ocr):
                 nxt_box = sorted_ocr[idx + 1]
                 gap_between = int(nxt_box.get("y", 0)) - (int(box.get("y", 0)) + bh_b)
-                max_bridge_gap = max(6, int(w * 0.03))
+                max_bridge_gap = max(10, int(w * 0.04))
                 if 0 <= gap_between <= max_bridge_gap:
                     bridge_start = max(0, int(box.get("y", 0)))
                     bridge_end = min(h, int(nxt_box.get("y", 0)) + int(nxt_box.get("h", 0)))
@@ -348,9 +351,8 @@ def detect_vertical_strip_panels(
     
     in_gutter = False
     g_start = 0
-    # Lowered from w*0.015 to w*0.008 (minimum 3px) so very thin gutters
-    # common in dense manga grids or webtoons are not silently discarded.
-    min_gutter_h = max(3, int(w * 0.008))
+    # Minimum 2px gutter height to detect narrow panel dividers
+    min_gutter_h = max(2, int(w * 0.005))
 
     for i in range(h):
         if is_gutter_row[i] and not in_gutter:
@@ -363,7 +365,7 @@ def detect_vertical_strip_panels(
             if gh >= min_gutter_h:
                 avg_bg_ratio = float(np.mean(bg_ratio[g_start:g_end]))
                 avg_std = float(np.mean(row_stds[g_start:g_end]))
-                if (avg_bg_ratio >= effective_gutter_bg_ratio or avg_std <= gutter_std_thresh * 2.0):
+                if (avg_bg_ratio >= (effective_gutter_bg_ratio - 0.12) or avg_std <= gutter_std_thresh * 2.5 or gh >= max(6, int(w * 0.012))):
                     cut_y = (g_start + g_end) // 2
                     cut_points.append(cut_y)
                     gutter_heights.append(gh)
@@ -374,11 +376,26 @@ def detect_vertical_strip_panels(
         if gh >= min_gutter_h:
             avg_bg_ratio = float(np.mean(bg_ratio[g_start:g_end]))
             avg_std = float(np.mean(row_stds[g_start:g_end]))
-            if (avg_bg_ratio >= effective_gutter_bg_ratio or avg_std <= gutter_std_thresh * 2.0):
+            if (avg_bg_ratio >= (effective_gutter_bg_ratio - 0.12) or avg_std <= gutter_std_thresh * 2.5 or gh >= max(6, int(w * 0.012))):
                 cut_y = (g_start + g_end) // 2
                 cut_points.append(cut_y)
                 gutter_heights.append(gh)
                 gutter_ranges_list.append((g_start, g_end))
+
+    # ABSOLUTE SAFETY SHIELD: Discard any cut point that lands inside or adjacent to a speech bubble
+    if ocr_boxes and cut_points:
+        safe_cut_points = []
+        for cp in cut_points:
+            inside_any_bubble = False
+            for b in ocr_boxes:
+                by1 = max(0, int(b.get("y", 0)) - 10)
+                by2 = min(h, int(b.get("y", 0) + b.get("h", 0)) + 10)
+                if by1 <= cp <= by2:
+                    inside_any_bubble = True
+                    break
+            if not inside_any_bubble:
+                safe_cut_points.append(cp)
+        cut_points = safe_cut_points
 
     raw_cuts = [0] + cut_points + [h]
     merged_cuts: List[int] = [0]
@@ -410,7 +427,7 @@ def detect_vertical_strip_panels(
         slice_gray = gray_arr[start_y:end_y, :]
 
         col_ranges = [(0, w)]
-        if enable_column_split and w >= 300 and slice_h < int(w * 1.2):
+        if enable_column_split and w >= 300 and slice_h < int(w * 3.5):
             col_ranges = _detect_vertical_subgutters(slice_gray, is_white_bg, threshold_val, med_bg_val)
 
         for col_x1, col_x2 in col_ranges:
@@ -659,7 +676,7 @@ def _subdivide_continuous_tall_art_panel(
     Scans continuous artwork scenes for natural visual scene transitions.
     Avoids hardcoded mathematical grid cuts and strictly protects speech bubbles and character artwork.
     """
-    min_split_h = max(60, int(bw * 1.1))
+    min_split_h = max(100, int(bw * 2.5))
     if bh <= min_split_h:
         return [{"x": 0, "y": 0, "w": bw, "h": bh}]
 
@@ -701,7 +718,7 @@ def _subdivide_continuous_tall_art_panel(
     artwork_mask = (row_stds > 22.0) | (row_stroke_density > 0.05)
     forbidden_mask = forbidden_mask | artwork_mask
 
-    min_subpanel_h = max(40, int(bw * 0.50))
+    min_subpanel_h = max(150, int(bw * 0.90))
     cut_y_list = [0]
 
     curr_y = 0
@@ -720,8 +737,8 @@ def _subdivide_continuous_tall_art_panel(
 
         best_y = min(valid_rows, key=lambda y: (row_stds[y] * 0.6) + (row_stroke_density[y] * 100.0) - (0.2 * row_border_strength[y]))
 
-        has_flat_gutter = row_stds[best_y] <= 18.0 and row_stroke_density[best_y] <= 0.03
-        has_clear_border = row_border_strength[best_y] >= 8.0 and row_stds[best_y] <= 22.0
+        has_flat_gutter = row_stds[best_y] <= 14.0 and row_stroke_density[best_y] <= 0.02
+        has_clear_border = row_border_strength[best_y] >= 10.0 and row_stds[best_y] <= 18.0
 
         if has_flat_gutter or has_clear_border:
             cut_y_list.append(best_y)

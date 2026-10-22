@@ -518,10 +518,8 @@ class AutonomousAgentWorkflow:
                 except Exception as crop_err:
                     self.log("auto_crop", f"Batch crop notice: {crop_err}", level="warning")
 
+            # If max_panels is not explicitly specified, use all extracted panel images
             max_panels = self.request.max_panels
-            if not max_panels and self.request.video_format == "shorts":
-                # YouTube Shorts strictly require videos under 60 seconds (8 panels @ ~4s each = ~32s)
-                max_panels = 8
 
             if cropped_slices:
                 slices_to_use = cropped_slices[:max_panels] if (max_panels and max_panels > 0) else cropped_slices
@@ -572,26 +570,16 @@ class AutonomousAgentWorkflow:
                 for p in self.state.panels
             ]
             try:
-                # Chunk panels in batches of up to 10 for high-performance and reliable AI vision analysis
-                CHUNK_SIZE = 10
-                chunks = [
-                    panel_dict_list[i : i + CHUNK_SIZE]
-                    for i in range(0, len(panel_dict_list), CHUNK_SIZE)
-                ]
-                all_analyze_results = []
-                for chunk_idx, chunk in enumerate(chunks):
-                    try:
-                        chunk_res = await facade_analyze_batch(
-                            panels=chunk,
-                            voice=self.request.voice,
-                            narration_style="dramatic_recap",
-                            story_context=f"Title: {title}. Script Language: {self.request.language}. Part {chunk_idx + 1} of {len(chunks)}.",
-                            generate_audio=False,
-                        )
-                        if chunk_res and chunk_res.get("results"):
-                            all_analyze_results.extend(chunk_res["results"])
-                    except Exception as chunk_err:
-                        logger.warning(f"[Agent AI Analyze] Chunk {chunk_idx + 1} notice: {chunk_err}")
+                # Delegate to facade_analyze_batch which concurrently chunks (up to 8 panels per chunk)
+                # and analyzes all panels in parallel via asyncio.gather
+                batch_res = await facade_analyze_batch(
+                    panels=panel_dict_list,
+                    voice=self.request.voice,
+                    narration_style="dramatic_recap",
+                    story_context=f"Title: {title}. Script Language: {self.request.language}.",
+                    generate_audio=False,
+                )
+                all_analyze_results = batch_res.get("results", []) if batch_res else []
 
                 results_map = {r.get("id"): r for r in all_analyze_results}
                 for idx, p in enumerate(self.state.panels):

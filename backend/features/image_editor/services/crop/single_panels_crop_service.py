@@ -40,7 +40,7 @@ def _apply_color_distance_autotrim(img: Image.Image, tolerance: int = 15) -> Tup
     try:
         rgb = np.array(img.convert("RGB"))
         h, w, _ = rgb.shape
-        if h < 20 or w < 20:
+        if h < 25 or w < 25:
             return img, False
 
         # Sample corner background color
@@ -60,10 +60,21 @@ def _apply_color_distance_autotrim(img: Image.Image, tolerance: int = 15) -> Tup
         ymin, ymax = np.where(rows)[0][[0, -1]]
         xmin, xmax = np.where(cols)[0][[0, -1]]
 
+        # Adaptive safety padding (never shave right against character/text)
+        safe_pad = max(8, int(min(w, h) * 0.015))
+        max_trim_y = max(8, int(h * 0.12))
+        max_trim_x = max(8, int(w * 0.12))
+
+        t_y1 = min(max_trim_y, max(0, int(ymin) - safe_pad))
+        t_y2 = max(h - max_trim_y, min(h, int(ymax + 1) + safe_pad))
+        t_x1 = min(max_trim_x, max(0, int(xmin) - safe_pad))
+        t_x2 = max(w - max_trim_x, min(w, int(xmax + 1) + safe_pad))
+
         # Ensure reasonable bounds
-        if (xmax - xmin >= 10) and (ymax - ymin >= 10):
-            trimmed = img.crop((int(xmin), int(ymin), int(xmax + 1), int(ymax + 1)))
-            return trimmed, True
+        if (t_x2 - t_x1 >= 25) and (t_y2 - t_y1 >= 25):
+            if t_x1 > 0 or t_y1 > 0 or t_x2 < w or t_y2 < h:
+                trimmed = img.crop((t_x1, t_y1, t_x2, t_y2))
+                return trimmed, True
 
     except Exception as err:
         logger.warning(f"[SinglePanelsCrop] Auto-trim failed, using untrimmed: {err}")
