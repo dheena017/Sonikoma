@@ -4,7 +4,6 @@ backend/features/auth/login.py
 Authentication login routes:
 - /token: OAuth2 Form and JSON password login with cookie injection
 - /login: Email & password authentication endpoint
-- GET /token: Verify active bearer token and return user context
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -92,42 +91,6 @@ async def login_for_access_token_endpoint(
         path="/"
     )
     return response
-
-
-@router.get("/token", summary="Verify active authentication token")
-async def verify_token_endpoint(request: Request):
-    auth_header = request.headers.get("authorization", "")
-    token = None
-    if auth_header.startswith("Bearer "):
-        token = auth_header[7:].strip()
-
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing Authorization token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    user = auth_service.authenticate_token(token)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return {
-        "success": True,
-        "valid": True,
-        "user_id": user["user_id"],
-        "user": {
-            "user_id": user["user_id"],
-            "email": user["email"],
-            "full_name": user.get("full_name"),
-            "avatar_url": user.get("avatar_url"),
-            "creator_role": user.get("creator_role", "creator"),
-        }
-    }
 
 
 @router.post("/login", summary="Authenticate user email and password")

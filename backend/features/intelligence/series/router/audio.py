@@ -150,8 +150,8 @@ async def audition_voice_preview(req: AuditionVoiceRequest):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Voice preview failed: {str(e)}")
 
 
-@router.get("/available-voices")
 @router.get("/{series_id}/dubbing/available-voices")
 async def list_available_voices(series_id: Optional[str] = None):
     """List recommended free Edge-TTS neural voices for anime, comic, and manhwa dubbing."""
     return VOICE_LIST
+

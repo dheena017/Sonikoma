@@ -6,7 +6,7 @@ Aggregates authentication, account creation, password management, and OAuth2:
 - login:      /token, /login (form & JSON credentials)
 - register:   /register (new creator onboarding)
 - password:   /forgot-password, /password (credential updates)
-- oauth:      /google/login, /google/callback, /google/session
+- oauth:      /google/login, /google/callback
 ─────────────────────────────────────────────────────────────────────────────
 """
 

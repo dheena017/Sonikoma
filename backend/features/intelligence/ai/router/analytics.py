@@ -817,14 +817,6 @@ async def get_ai_usage_summary(
     return await _execute_ai_analytics_summary(timeframe, current_user)
 
 
-@router.get("/analytics/summary", summary="Get real aggregated AI token consumption, latency, and tool metrics")
-async def get_ai_analytics_summary(
-    timeframe: Optional[str] = Query("24h"),
-    current_user: Optional[dict] = Depends(get_optional_current_user)
-):
-    return await _execute_ai_analytics_summary(timeframe, current_user)
-
-
 async def _execute_usage_metrics(
     time_range: Optional[str] = "24h",
     model: Optional[str] = None,
@@ -883,15 +875,6 @@ async def _execute_usage_metrics(
 
 @router.get("/usage/metrics", summary="Get bucketed timeseries metrics for analytics graphs")
 async def get_usage_metrics(
-    time_range: Optional[str] = Query("24h"),
-    model: Optional[str] = Query(None),
-    current_user: Optional[dict] = Depends(get_optional_current_user)
-):
-    return await _execute_usage_metrics(time_range, model, current_user)
-
-
-@router.get("/analytics/metrics", summary="Get bucketed timeseries metrics for analytics graphs")
-async def get_analytics_metrics(
     time_range: Optional[str] = Query("24h"),
     model: Optional[str] = Query(None),
     current_user: Optional[dict] = Depends(get_optional_current_user)
@@ -1214,11 +1197,6 @@ async def _execute_simulate_model_routing(payload: dict) -> dict:
 
 @router.post("/routing/simulate", summary="Simulate dynamic cascade dispatch for a task")
 async def simulate_routing_post(payload: dict, current_user: Optional[dict] = Depends(get_optional_current_user)):
-    return await _execute_simulate_model_routing(payload)
-
-
-@router.post("/models/routing/simulate", summary="Simulate dynamic cascade dispatch for a task")
-async def simulate_model_routing_post(payload: dict, current_user: Optional[dict] = Depends(get_optional_current_user)):
     return await _execute_simulate_model_routing(payload)
 
 

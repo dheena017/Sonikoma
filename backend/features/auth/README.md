@@ -36,14 +36,12 @@ backend/features/auth/
 | Method | Endpoint | Summary | Auth Required | Request Model | Response Model | Status Codes |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/auth/token` | Obtain bearer token (OAuth2 form or JSON) | No | `OAuth2PasswordRequestForm` / JSON | `Token` | 200, 400, 401 |
-| `GET` | `/api/v1/auth/token` | Verify active bearer token | Bearer JWT | None | User profile | 200, 401 |
 | `POST` | `/api/v1/auth/login` | User login with email/password | No | `UserLogin` | `Token` | 200, 401, 403 |
 | `POST` | `/api/v1/auth/register` | Register new user account | No | `UserRegister` | `Token` | 201, 400, 500 |
 | `POST` | `/api/v1/auth/forgot-password` | Request password reset token | No | `ForgotPasswordRequest` | Standard message | 200 |
 | `PUT` | `/api/v1/auth/password` | Update account password | Bearer JWT | `PasswordUpdate` | Standard message | 200, 400 |
 | `GET` | `/api/v1/auth/google/login` | Initiate Google OAuth2 flow | No | None | Redirect (302) | 302 |
 | `GET` | `/api/v1/auth/google/callback` | OAuth2 callback handler | No | Query `code`, `state` | Cookie + Redirect | 302 |
-| `GET` | `/api/v1/auth/google/session` | Validate OAuth cookie session | Cookie | None | `Token` JSON | 200, 401 |
 
 ---
 

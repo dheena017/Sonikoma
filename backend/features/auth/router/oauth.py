@@ -372,37 +372,3 @@ async def google_callback(
         logger.error(f"[Google Auth] Callback processing error: {e}")
         raise HTTPException(status_code=500, detail=f"Google Callback processing failed: {e}")
 
-
-@router.get("/session", summary="Exchange the OAuth HttpOnly cookie for a JSON access token")
-async def google_session(request: Request):
-    """
-    Called by the frontend immediately after the Google OAuth redirect lands.
-    The browser automatically sends the HttpOnly 'access_token' cookie that
-    the /callback endpoint set.  This endpoint validates it and returns the
-    token + basic user profile in JSON so the frontend can store the token in
-    localStorage and proceed as a normal authenticated session.
-    """
-    from features.auth.service import auth_service
-    from fastapi.responses import JSONResponse
-
-    cookie_token = request.cookies.get("access_token")
-    if not cookie_token:
-        raise HTTPException(status_code=401, detail="No OAuth session cookie found. Please log in again.")
-
-    user = auth_service.authenticate_token(cookie_token)
-    if user is None:
-        raise HTTPException(status_code=401, detail="OAuth session cookie is invalid or expired.")
-
-    return JSONResponse({
-        "success": True,
-        "access_token": cookie_token,
-        "token_type": "bearer",
-        "user": {
-            "user_id": user.get("user_id"),
-            "email": user.get("email"),
-            "full_name": user.get("full_name") or user.get("username"),
-            "avatar_url": user.get("avatar_url"),
-            "creator_role": user.get("creator_role", "creator"),
-        },
-    })
-

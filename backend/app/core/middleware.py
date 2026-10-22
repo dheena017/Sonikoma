@@ -77,7 +77,6 @@ PUBLIC_ROUTE_SET = {
     "/api/v1/auth/forgot-password",
     "/api/v1/auth/google/login",
     "/api/v1/auth/google/callback",
-    "/api/v1/auth/google/session",
     "/api/v1/export/youtube/oauth/callback",
     "/api/v1/landing/overview",
     "/api/v1/landing/showcase",

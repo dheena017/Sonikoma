@@ -58,9 +58,7 @@ from features.profile.router import profile_router
 from features.admin.router import admin_router
 
 api_router.include_router(landing_router,        prefix="/api/v1")
-api_router.include_router(profile_router,        prefix="/api/v1/profile")
 api_router.include_router(profile_router,        prefix="/api/v1/auth")
-api_router.include_router(admin_router,          prefix="/api/v1")
 api_router.include_router(admin_router,          prefix="/api/v1/auth")
 
 class NoCacheStaticFiles(StaticFiles):
