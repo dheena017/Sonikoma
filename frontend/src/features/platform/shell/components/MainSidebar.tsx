@@ -9,7 +9,7 @@ import {
   Sparkles,
   X,
   LayoutDashboard,
-  Layout,
+  Globe,
   ChevronDown,
   ChevronUp,
   FileText,
@@ -26,10 +26,7 @@ import {
 } from"lucide-react";
 
 import { useThemeMode } from"@/shared/hooks/useThemeMode";
-import {
-  getHumanEditorPath,
-  getImageEditorPath,
-} from"@/shared/utils/workspaceNavigation";
+import { getImageEditorPath } from "@/shared/utils/workspaceNavigation";
 import { GeneratedPanel } from"@/shared/types";
 import { Notification } from"@/features/platform/notifications";
 import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
@@ -191,7 +188,11 @@ const SidebarInner = ({
   const chapterPathMatch = currentPath.match(
     /\/series\/[^\/]+\/chapters\/([^\/]+)/
   );
-  const isWorkspace = currentPath ==="/scraper";
+  const isScraper =
+    currentPath === "/scraper" ||
+    currentPath === "/scraper/" ||
+    (currentPath.startsWith("/scraper") &&
+      !currentPath.startsWith("/scraper/editor"));
   const isDashboardOverview = currentPath ==="/dashboard";
   const isAdminDashboardPath =
     currentPath ==="/admin" ||
@@ -253,20 +254,6 @@ const SidebarInner = ({
     onClose(); // Close mobile drawer when navigating
   };
 
-  const handleNavigateToWorkspace = () => {
-    const activeProjId = activeProjectId || projectId;
-    const activeSeriesSlug =
-      localStorage.getItem("active_series_slug") || seriesSlug;
-    const activeChapterSlug =
-      localStorage.getItem("active_chapter_slug") || chapterSlug;
-
-    const path = getHumanEditorPath({
-      projectId: activeProjId,
-      seriesSlug: activeSeriesSlug,
-      chapterSlug: activeChapterSlug,
-    });
-    navigateTo(path);
-  };
 
   const handleNavigateToDashboardOverview = () => {
     navigateTo("/dashboard");
@@ -295,11 +282,11 @@ const SidebarInner = ({
           enabled: true,
         },
         {
-          label:"Workspace",
-          icon: Layout,
-          active: isWorkspace,
-          path:"/scraper",
-          onClick: handleNavigateToWorkspace,
+          label: "Scraper",
+          icon: Globe,
+          active: isScraper,
+          path: "/scraper",
+          onClick: () => navigateTo("/scraper"),
           enabled: true,
         },
       ],
