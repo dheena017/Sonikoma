@@ -29,7 +29,7 @@ for p in [BACKEND_DIR, APP_DIR, PROJECT_ROOT]:
 
 from app.core.config import API_VERSION, IS_PRODUCTION, BACKEND_PORT
 from app.core.logging import ColoredFormatter, setup_logging, logger
-from app.core.logging.filters import EndpointFilter
+from app.core.logging.filters import EndpointFilter, DeduplicationFilter
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CLI ENTRYPOINT (Supervisor Process)
@@ -52,6 +52,9 @@ if __name__ == "__main__":
             "endpoint_filter": {
                 "()": EndpointFilter,
             },
+            "dedup_filter": {
+                "()": DeduplicationFilter,
+            },
         },
         "formatters": {
             "default": {
@@ -72,7 +75,7 @@ if __name__ == "__main__":
                 "class": "logging.StreamHandler",
                 "formatter": "default",
                 "stream": "ext://sys.stdout",
-                "filters": ["endpoint_filter"],
+                "filters": ["endpoint_filter", "dedup_filter"],
             },
             "file": {
                 "class": "logging.handlers.RotatingFileHandler",
@@ -81,7 +84,7 @@ if __name__ == "__main__":
                 "maxBytes": 10 * 1024 * 1024,
                 "backupCount": 5,
                 "encoding": "utf-8",
-                "filters": ["endpoint_filter"],
+                "filters": ["endpoint_filter", "dedup_filter"],
             },
         },
         "root": {
@@ -106,7 +109,7 @@ if __name__ == "__main__":
             },
             "uvicorn.access": {
                 "handlers": ["default", "file"],
-                "level": log_level_name.upper(),
+                "level": "WARNING",
                 "propagate": False,
             },
             "PIL": {

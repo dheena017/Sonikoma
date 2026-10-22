@@ -32,7 +32,7 @@ async def list_ai_series(
     """List all AI Generated Series in Sonikoma with optional format filtering."""
     format_str = format_type.value if format_type else None
     projects = ai_series_repo.list_projects(format_filter=format_str, limit=limit, offset=offset)
-    logger.info(f"[Projects] Listed {len(projects)} series projects (format: {format_str or 'all'}).")
+    logger.debug(f"[Projects] Listed {len(projects)} series projects (format: {format_str or 'all'}).")
     return projects
 
 

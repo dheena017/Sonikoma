@@ -77,7 +77,7 @@ async def get_projects_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     try:
-        logger.info(
+        logger.debug(
             f"[Database] Fetching project histories for user "
             f"{current_user['user_id']} from local SQLite..."
         )
@@ -107,7 +107,7 @@ async def get_projects_endpoint(
                 proj["cover_image"] = wrap_proxy_url(proj["cover_image"])
             elif proj.get("first_panel_image"):
                 proj["cover_image"] = wrap_proxy_url(proj["first_panel_image"])
-        logger.info(f"[Database] Retrieved {len(paginated)} of {total} projects.")
+        logger.debug(f"[Database] Retrieved {len(paginated)} of {total} projects.")
         return {"success": True, "total": total, "projects": paginated}
     except Exception as e:
         logger.error(f"Failed to fetch projects: {e}", exc_info=True)

@@ -13,7 +13,12 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.core.logging import logger, set_current_request_id, set_current_user_id
+from app.core.logging import (
+    logger,
+    set_current_request_id,
+    set_current_user_id,
+    get_global_endpoint_filter,
+)
 from app.core.config import APP_URL, BACKEND_PORT, FRONTEND_PORT, NODE_ENV, API_VERSION
 from app.core.dependencies.auth import get_current_user
 
@@ -249,8 +254,14 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-Process-Time"] = f"{elapsed_ms}ms"
     response.headers["X-API-Version"]  = API_VERSION
 
-    # Avoid logging high-frequency image proxy/cached & SSE polling endpoint spam
-    if not any(p in request.url.path for p in ["/system/logs", "/system/metrics", "/system/health", "/health", "/metrics", "/credits", "/proxy/image", "/images/cached"]):
+    status = response.status_code
+    endpoint_filter = get_global_endpoint_filter()
+    is_silenced = endpoint_filter._is_silenced_path(request.url.path)
+
+    # Always log errors (>=400) and mutations, but suppress routine 200 OK polling spam
+    should_log = (status >= 400) or (request.method in ("POST", "PUT", "DELETE", "PATCH")) or (not is_silenced)
+
+    if should_log:
         method_colors = {
             "GET": "\x1b[32m",
             "POST": "\x1b[33m",
@@ -259,7 +270,6 @@ async def add_process_time_header(request: Request, call_next):
         }
         m_color = method_colors.get(request.method, "\x1b[37m")
 
-        status = response.status_code
         if status >= 500:
             s_color = "\x1b[31m"
         elif status >= 400:

@@ -242,6 +242,8 @@ def setup_logging():
     # Attach filter to all Uvicorn loggers to suppress high-frequency polling
     for uvicorn_log_name in ("uvicorn", "uvicorn.access", "uvicorn.error", "uvicorn.asgi"):
         u_log = logging.getLogger(uvicorn_log_name)
+        if uvicorn_log_name == "uvicorn.access":
+            u_log.setLevel(logging.WARNING)
         u_log.addFilter(endpoint_filter)
         for h in u_log.handlers:
             h.addFilter(endpoint_filter)

@@ -251,7 +251,7 @@ async def compile_video_from_panels(
             except Exception:
                 duration = suggested_duration
 
-            logger.info(
+            logger.debug(
                 f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}, Image: {img_name}): "
                 f"Reusing existing pre-generated audio ({duration:.1f}s) - Skipping synthesis."
             )
@@ -299,7 +299,7 @@ async def compile_video_from_panels(
                     logger.error(f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}): Audio synthesis failed: {e}")
                     duration = suggested_duration
             else:
-                logger.info(
+                logger.debug(
                     f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}, Image: {img_name}): "
                     f"No text to synthesize -> Using silent panel ({suggested_duration:.1f}s)."
                 )
