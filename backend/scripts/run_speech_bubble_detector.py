@@ -78,12 +78,23 @@ def load_input_image(input_source: str) -> tuple[Image.Image, str, str]:
         pil_img.save(temp_path)
         return pil_img, base_name, temp_path
 
-    # Case 2: Local File Path
-    if os.path.exists(input_source):
-        print(f"[*] Loading local image: {input_source}")
-        pil_img = Image.open(input_source).convert("RGB")
-        base_name = os.path.splitext(os.path.basename(input_source))[0]
-        return pil_img, base_name, input_source
+    # Case 2: Local File Path resolution with smart fallbacks
+    project_root = os.path.abspath(os.path.join(BACKEND_DIR, ".."))
+    candidate_paths = [
+        input_source,
+        os.path.abspath(input_source),
+        os.path.join(project_root, input_source),
+        os.path.join(BACKEND_DIR, input_source),
+        os.path.join(project_root, "frontend", "public", "sample image", input_source),
+        os.path.join(project_root, "frontend", "public", "sample image", os.path.basename(input_source)),
+    ]
+
+    for candidate in candidate_paths:
+        if os.path.exists(candidate) and os.path.isfile(candidate):
+            print(f"[*] Loading local image: {candidate}")
+            pil_img = Image.open(candidate).convert("RGB")
+            base_name = os.path.splitext(os.path.basename(candidate))[0]
+            return pil_img, base_name, candidate
 
     raise FileNotFoundError(f"Input file or URL not found: '{input_source}'")
 

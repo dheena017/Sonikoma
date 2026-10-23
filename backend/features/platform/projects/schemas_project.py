@@ -482,3 +482,40 @@ class PanelDetectionResponse(BaseModel):
     fallback: bool = False
     total_speech_bubbles_count: int = 0
     message: Optional[str] = None
+
+
+class DetectMangaGridRequest(BaseModel):
+    """Request payload for 2D multi-tier and multi-column manga grid panel detection."""
+    url: Optional[str] = Field(None, description="Target image public URL")
+    image_url: Optional[str] = Field(None, description="Target image URL alias")
+    image_base64: Optional[str] = Field(None, description="Base64-encoded image data")
+    reading_flow: Literal["right_to_left", "left_to_right"] = Field(
+        "right_to_left",
+        description="Reading order flow ('right_to_left' for Manga, 'left_to_right' for Western comics)"
+    )
+    is_white_bg: bool = Field(True, description="True if gutters/background are white, False if black/dark")
+    threshold_val: int = Field(220, ge=0, le=255, description="Binary threshold intensity (220 defaults to Otsu auto)")
+    canny_low: int = Field(25, ge=0, le=255, description="Canny lower edge threshold")
+    canny_high: int = Field(120, ge=0, le=255, description="Canny upper edge threshold")
+    close_kernel_size: int = Field(7, ge=1, le=50, description="Morphological closing kernel size")
+    high_sensitivity: bool = Field(False, description="Use adaptive thresholding for low-contrast/textured pages")
+    min_panel_area: float = Field(5000.0, ge=100.0, description="Minimum panel area in square pixels")
+    max_aspect_ratio: float = Field(10.0, ge=1.0, description="Maximum width/height aspect ratio")
+    min_aspect_ratio: float = Field(0.1, ge=0.01, description="Minimum width/height aspect ratio")
+    min_width_pct: float = Field(0.10, ge=0.01, le=1.0, description="Minimum panel width as percentage of image width")
+    min_height_px: int = Field(40, ge=10, description="Minimum panel height in pixels")
+
+
+class DetectMangaGridResponse(BaseModel):
+    """Response payload for 2D multi-tier and multi-column manga grid panel detection."""
+    success: bool
+    crop_type: str = "manga_grid"
+    image_width: int = Field(0, description="Source image width in pixels")
+    image_height: int = Field(0, description="Source image height in pixels")
+    reading_flow: str = Field("right_to_left", description="Applied reading order flow")
+    is_white_bg: bool = Field(True, description="Applied background polarity")
+    total_panels: int = Field(0, description="Total count of detected grid panels")
+    panels: List[PanelBoundingBox] = Field(default_factory=list, description="Ordered list of detected panel bounding boxes")
+    execution_time_ms: int = Field(0, description="Total processing time in milliseconds")
+    message: Optional[str] = None
+

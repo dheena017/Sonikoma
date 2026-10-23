@@ -22,7 +22,7 @@ LOCAL_MEDIA_ROOT = MEDIA_DIR
 LOCAL_MEDIA_URL_PREFIX = "/media"
 
 from features.image_editor.services.ocr.ocr_engine import extract_full_ocr_data
-from features.image_editor.services.panel_detection.panel_detector import _detect_bg_color_and_threshold
+from features.image_editor.services.panel_detection.panel_detector import detect_background_color_and_threshold
 from features.image_editor.services.panel_detection.speech_bubble_detector import (
     segment_speech_bubbles_and_text_balloons as segment_text_and_balloons,
 )
@@ -133,7 +133,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, Any]:
     height, width = original_img.shape[:2]
 
     gray_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
-    is_white_bg, threshold_val, median_bg, bg_std, top_median, bottom_median, bg_color_rgb = _detect_bg_color_and_threshold(gray_img, bg_mode="auto", sensitivity=30.0)
+    is_white_bg, threshold_val, median_bg, bg_std, top_median, bottom_median, bg_color_rgb = detect_background_color_and_threshold(gray_img, bg_mode="auto", sensitivity=30.0)
     logger.info(f"[Background Context] Detected background is {'white/light' if is_white_bg else 'black/dark'} (threshold_val={threshold_val})")
 
     text_mask = np.zeros((height, width), dtype=np.uint8)

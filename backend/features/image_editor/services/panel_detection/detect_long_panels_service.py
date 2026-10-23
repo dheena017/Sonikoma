@@ -24,11 +24,9 @@ from features.platform.projects.schemas_project import (
 from common.media import resolve_image_to_buffer
 from features.image_editor.services.panel_detection.panel_detector import (
     detect_vertical_strip_panels,
-    _detect_bg_color_and_threshold,
-    _subdivide_continuous_tall_art_panel,
-    _detect_panels_webtoon,
-    _detect_vertical_subgutters,
-    resolve_overlapping_panels_lineage,
+    detect_background_color_and_threshold,
+    subdivide_continuous_tall_art_panel,
+    resolve_overlapping_panels,
 )
 from features.image_editor.services.panel_detection.opencv_detector import detect_opencv_boxes
 from features.image_editor.services.panel_detection.speech_bubble_detector import detect_speech_bubbles as detect_yolo_entities
@@ -136,7 +134,7 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
     # Run horizontal projection valley segmenter guided by YOLO speech bubbles
     if len(cv_panels) <= 1 or img_h > img_w * 2:
         try:
-            bg_res = _detect_bg_color_and_threshold(gray_arr, request.background_mode, request.sensitivity)
+            bg_res = detect_background_color_and_threshold(gray_arr, request.background_mode, request.sensitivity)
             is_white_bg, threshold_val, median_bg, bg_std, top_med, bot_med, bg_rgb = bg_res
 
             webtoon_res = detect_vertical_strip_panels(
@@ -218,7 +216,7 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
                             if py <= (b.y + b.height // 2) <= (py + ph)
                         ]
                         if sub_gray.shape[0] > 0 and sub_gray.shape[1] > 0:
-                            sub_pieces = _subdivide_continuous_tall_art_panel(
+                            sub_pieces = subdivide_continuous_tall_art_panel(
                                 sub_gray, px, py, pw, ph, child_ocr
                             )
                             for piece in sub_pieces:
@@ -397,7 +395,7 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
     # ── POST-PROCESSING: Deduplicate overlapping slices ───────────────────────
     try:
         raw_dicts = [p.model_dump() for p in fused_panels]
-        cleaned_dicts = resolve_overlapping_panels_lineage(raw_dicts, iou_thresh=0.40)
+        cleaned_dicts = resolve_overlapping_panels(raw_dicts, iou_thresh=0.40)
         if cleaned_dicts:
             # Filter out tiny noise slivers and empty canvas background gutters
             min_h_thresh = max(120, int(request.min_panel_height * 0.70))

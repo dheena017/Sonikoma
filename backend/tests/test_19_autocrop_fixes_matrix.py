@@ -18,8 +18,8 @@ from features.image_editor.services.crop.long_panels_crop_service import _apply_
 from features.image_editor.services.crop.single_panels_crop_service import _apply_color_distance_autotrim as single_autotrim
 from features.image_editor.services.panel_detection.panel_detector import (
     detect_vertical_strip_panels,
-    _detect_vertical_subgutters,
-    _subdivide_continuous_tall_art_panel
+    detect_vertical_subgutters,
+    subdivide_continuous_tall_art_panel,
 )
 
 
@@ -70,7 +70,7 @@ def test_issue_2_continuous_tall_art_not_oversplit():
         gray_arr[y, 100:500] = (y % 150)
 
     # Subdivide should NOT chop this panel
-    pieces = _subdivide_continuous_tall_art_panel(
+    pieces = subdivide_continuous_tall_art_panel(
         sub_gray=gray_arr,
         bx=0,
         by=0,
@@ -132,7 +132,7 @@ def test_issue_4_side_by_side_panels_detected():
     # Right panel (x: 420..780) with dark art
     slice_gray[20:380, 420:780] = 70
 
-    sub_cols = _detect_vertical_subgutters(
+    sub_cols = detect_vertical_subgutters(
         slice_gray=slice_gray,
         is_white_bg=True,
         threshold_val=220,

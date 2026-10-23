@@ -28,8 +28,8 @@ from features.image_editor.services.panel_detection.speech_bubble_detector impor
 from features.image_editor.services.panel_detection.panel_fusion_service import fuse_panels_and_bubbles
 from features.image_editor.services.panel_detection.panel_detector import (
     detect_vertical_strip_panels,
-    _detect_bg_color_and_threshold,
-    resolve_overlapping_panels_lineage,
+    detect_background_color_and_threshold,
+    resolve_overlapping_panels,
 )
 from features.image_editor.services.panel_detection.ai_vision_detector import detect_ai_vision
 
@@ -90,7 +90,7 @@ async def detect_small_panels(request: DetectSmallPanelsRequest) -> DetectSmallP
     if aspect_ratio >= 1.0:
         try:
             gray_arr = np.array(pil_img.convert("L"))
-            bg_res = _detect_bg_color_and_threshold(gray_arr, "auto", 30.0)
+            bg_res = detect_background_color_and_threshold(gray_arr, "auto", 30.0)
             is_white_bg, threshold_val, median_bg, bg_std, top_med, bot_med, bg_rgb = bg_res
 
             res = detect_vertical_strip_panels(
@@ -186,7 +186,7 @@ async def detect_small_panels(request: DetectSmallPanelsRequest) -> DetectSmallP
     # ── POST-PROCESSING: Resolve any micro-panel noise & deduplication ────────
     try:
         raw_dicts = [p.model_dump() for p in fused_panels]
-        cleaned_dicts = resolve_overlapping_panels_lineage(raw_dicts, iou_thresh=0.40)
+        cleaned_dicts = resolve_overlapping_panels(raw_dicts, iou_thresh=0.40)
         if cleaned_dicts:
             fused_panels = [
                 PanelBoundingBox(**cd) for cd in cleaned_dicts

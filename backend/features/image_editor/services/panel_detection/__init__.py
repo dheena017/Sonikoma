@@ -35,16 +35,11 @@ Panel Detection & Comic Extraction Package:
    - detect_vertical_strip_panels
    - detect_background_color_and_threshold
    - detect_vertical_subgutters
-   - classify_content_rows
-   - compute_trim_bounds
    - sort_panels_reading_order
    - subdivide_continuous_tall_art_panel
-   - trim_solid_borders
-   - run_cv_detection / detect_panels_in_image
+   - run_cv_detection
    - normalize_panel_box
    - resolve_overlapping_panels
-   - resolve_micro_panels
-   - compute_post_panel_confidence
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -71,16 +66,13 @@ from .detect_composite_service import (
 )
 from .detect_characters_service import (
     detect_characters,
-    detect_characters_boxes,
     detect_character_entities,
     estimate_character_pose,
-    _estimate_character_pose,
     detect_character_face,
-    _detect_simple_face,
     get_yolo_character_segmentation_model,
     segment_character_foreground,
-    has_yolo_dependencies,
 )
+detect_characters_boxes = detect_character_entities
 
 # 2. Standalone Detectors & Vision Engines
 from .opencv_detector import (
@@ -90,8 +82,7 @@ from .opencv_detector import (
 from .grid_detector import (
     detect_manga_grid_panels,
     detect_manga_grid_pil,
-    _detect_panels_grid_cv,
-    _detect_panels_grid_pil,
+    detect_manga_grid_service,
 )
 from .speech_bubble_detector import (
     detect_speech_bubbles,
@@ -139,31 +130,17 @@ from .panel_fusion_service import (
 # 4. Core Engine & Post-Processing
 from .panel_detector import (
     PanelDetectionResult,
+    DetectStripPanelsRequest,
+    DetectStripPanelsResponse,
     detect_vertical_strip_panels,
-    _detect_panels_webtoon,
     detect_background_color_and_threshold,
-    _detect_bg_color_and_threshold,
     detect_vertical_subgutters,
-    _detect_vertical_subgutters,
-    classify_content_rows,
-    _classify_content_rows,
-    compute_trim_bounds,
-    _compute_trim_bounds,
     sort_panels_reading_order,
-    _sort_panels_reading_order,
     subdivide_continuous_tall_art_panel,
-    _subdivide_continuous_tall_art_panel,
-    _split_oversized_webtoon_boxes,
-    trim_solid_borders,
     run_cv_detection,
-    detect_panels_in_image,
     normalize_panel_box,
-    _normalize_box,
     resolve_overlapping_panels,
-    resolve_overlapping_panels_lineage,
-    resolve_micro_panels,
-    compute_post_panel_confidence,
-    postprocess_panel_boundaries,
+    detect_panels_service,
 )
 
 __all__ = [
@@ -186,8 +163,7 @@ __all__ = [
     "detect_opencv_boxes",
     "detect_manga_grid_panels",
     "detect_manga_grid_pil",
-    "_detect_panels_grid_cv",
-    "_detect_panels_grid_pil",
+    "detect_manga_grid_service",
     "detect_speech_bubbles",
     "detect_yolo_entities",
     "detect_chat_ui_bubbles",
@@ -238,29 +214,15 @@ __all__ = [
 
     # Core Engine & Post-Processing
     "PanelDetectionResult",
+    "DetectStripPanelsRequest",
+    "DetectStripPanelsResponse",
     "detect_vertical_strip_panels",
-    "_detect_panels_webtoon",
     "detect_background_color_and_threshold",
-    "_detect_bg_color_and_threshold",
     "detect_vertical_subgutters",
-    "_detect_vertical_subgutters",
-    "classify_content_rows",
-    "_classify_content_rows",
-    "compute_trim_bounds",
-    "_compute_trim_bounds",
     "sort_panels_reading_order",
-    "_sort_panels_reading_order",
     "subdivide_continuous_tall_art_panel",
-    "_subdivide_continuous_tall_art_panel",
-    "_split_oversized_webtoon_boxes",
-    "trim_solid_borders",
     "run_cv_detection",
-    "detect_panels_in_image",
     "normalize_panel_box",
-    "_normalize_box",
     "resolve_overlapping_panels",
-    "resolve_overlapping_panels_lineage",
-    "resolve_micro_panels",
-    "compute_post_panel_confidence",
-    "postprocess_panel_boundaries",
+    "detect_panels_service",
 ]

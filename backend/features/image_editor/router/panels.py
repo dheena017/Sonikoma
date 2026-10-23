@@ -36,6 +36,8 @@ from features.platform.projects.schemas_project import (
     DetectSpeechBubblesRequest,
     DetectSpeechBubblesResponse,
     DetectCompositeResponse,
+    DetectMangaGridRequest,
+    DetectMangaGridResponse,
 )
 from features.image_editor.services.processing.panel_splitter import split_vertical_strip_into_panels
 from common.media import resolve_image_to_buffer
@@ -49,6 +51,12 @@ from features.image_editor.services.panel_detection.detect_upload_service import
 from features.image_editor.services.panel_detection.detect_characters_service import detect_characters
 from features.image_editor.services.panel_detection.detect_composite_service import detect_composite_panels
 from features.image_editor.services.panel_detection.speech_bubble_detector import detect_speech_bubbles_service
+from features.image_editor.services.panel_detection.grid_detector import detect_manga_grid_service
+from features.image_editor.services.panel_detection.panel_detector import (
+    detect_panels_service,
+    DetectStripPanelsRequest,
+    DetectStripPanelsResponse,
+)
 
 
 logger = logging.getLogger("sonikoma.api.panels")
@@ -349,6 +357,68 @@ async def detect_speech_bubbles_endpoint(body: DetectSpeechBubblesRequest):
     except Exception as e:
         logger.error(f"[DetectSpeechBubbles API] Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── 12. Dedicated Manga Grid & Comic Tier Panel Detection ───────────────────
+
+@panels_router.post(
+    "/detect/grid",
+    response_model=DetectMangaGridResponse,
+    operation_id="detect_manga_grid",
+    summary="Detect multi-tier and multi-column 2D manga grid panels (RTL / LTR)",
+    description="Uses OpenCV contour + 2D projection tier decomposition to isolate multi-panel comic and manga page layouts."
+)
+async def detect_manga_grid_endpoint(body: DetectMangaGridRequest):
+    try:
+        if not body.url and not body.image_url and not body.image_base64:
+            raise HTTPException(status_code=400, detail="Must provide 'url', 'image_url', or 'image_base64'.")
+        return await detect_manga_grid_service(body)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[DetectMangaGrid API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@panels_router.post(
+    "/detect/manga-grid",
+    response_model=DetectMangaGridResponse,
+    operation_id="detect_manga_grid_alias",
+    include_in_schema=False
+)
+async def detect_manga_grid_alias_endpoint(body: DetectMangaGridRequest):
+    return await detect_manga_grid_endpoint(body)
+
+
+# ─── 13. Dedicated Computer Vision Strip Panel Detection ──────────────────────
+
+@panels_router.post(
+    "/detect/strip",
+    response_model=DetectStripPanelsResponse,
+    operation_id="detect_strip_panels",
+    summary="Pure Computer Vision Vertical Strip & Webtoon Panel Detection",
+    description="High-precision gutter seam slicing and layout decomposition directly via panel_detector.",
+)
+async def detect_strip_panels_endpoint(body: DetectStripPanelsRequest):
+    try:
+        if not body.url and not body.image_url and not body.image_base64:
+            raise HTTPException(status_code=400, detail="Must provide 'url', 'image_url', or 'image_base64'.")
+        return await detect_panels_service(body)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[DetectStripPanels API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@panels_router.post(
+    "/detect/vertical-strip",
+    response_model=DetectStripPanelsResponse,
+    operation_id="detect_vertical_strip_panels_alias",
+    include_in_schema=False,
+)
+async def detect_vertical_strip_panels_alias_endpoint(body: DetectStripPanelsRequest):
+    return await detect_strip_panels_endpoint(body)
 
 
 panel_router = panels_router

@@ -10,34 +10,56 @@ Grid layout panel detection strategies using OpenCV contours or PIL projection p
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import io
+import time
+import base64
 import logging
 from typing import List, Dict, Tuple, Any, Optional
+import cv2
 import numpy as np
+from PIL import Image
 
-try:
-    import cv2
-    HAS_CV = True
-except ImportError:
-    cv2 = None  # type: ignore
-    HAS_CV = False
+from common.media import resolve_image_to_buffer
 
 logger = logging.getLogger("sonikoma.services.image.panel_detection.grid_detector")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Default Detection & Filtering Constants
+# ─────────────────────────────────────────────────────────────────────────────
+DEFAULT_IS_WHITE_BG: bool = True
+DEFAULT_THRESHOLD_VAL: int = 220
+DEFAULT_CANNY_LOW: int = 25
+DEFAULT_CANNY_HIGH: int = 120
+DEFAULT_CLOSE_KERNEL_SIZE: int = 7
+DEFAULT_HIGH_SENSITIVITY: bool = False
+
+DEFAULT_MIN_PANEL_AREA: float = 5000.0
+DEFAULT_MAX_ASPECT_RATIO: float = 10.0
+DEFAULT_MIN_ASPECT_RATIO: float = 0.1
+DEFAULT_MIN_WIDTH_PCT: float = 0.10
+DEFAULT_MIN_HEIGHT_PX: int = 40
+
+DEFAULT_READING_FLOW: str = "right_to_left"
+DEFAULT_SENSITIVITY: float = 30.0
+
+DEFAULT_CONFIDENCE_GRID: float = 0.95
+DEFAULT_CONFIDENCE_TIER_COL: float = 0.90
 
 
 def detect_manga_grid_panels(
     gray: np.ndarray,
-    is_white_bg: bool = True,
-    threshold_val: int = 220,
-    canny_low: int = 25,
-    canny_high: int = 120,
-    close_kernel_size: int = 7,
-    high_sensitivity: bool = False,
-    min_panel_area: float = 5000.0,
-    max_aspect_ratio: float = 10.0,
-    min_aspect_ratio: float = 0.1,
-    min_width_pct: float = 0.10,
-    min_height_px: int = 40,
-    reading_flow: str = "right_to_left"
+    is_white_bg: bool = DEFAULT_IS_WHITE_BG,
+    threshold_val: int = DEFAULT_THRESHOLD_VAL,
+    canny_low: int = DEFAULT_CANNY_LOW,
+    canny_high: int = DEFAULT_CANNY_HIGH,
+    close_kernel_size: int = DEFAULT_CLOSE_KERNEL_SIZE,
+    high_sensitivity: bool = DEFAULT_HIGH_SENSITIVITY,
+    min_panel_area: float = DEFAULT_MIN_PANEL_AREA,
+    max_aspect_ratio: float = DEFAULT_MAX_ASPECT_RATIO,
+    min_aspect_ratio: float = DEFAULT_MIN_ASPECT_RATIO,
+    min_width_pct: float = DEFAULT_MIN_WIDTH_PCT,
+    min_height_px: int = DEFAULT_MIN_HEIGHT_PX,
+    reading_flow: str = DEFAULT_READING_FLOW,
 ) -> List[Dict[str, Any]]:
     """
     State-of-the-art 2D Manga/Comic grid panel detector:
@@ -46,26 +68,13 @@ def detect_manga_grid_panels(
     - Polygonal contour extraction (supports diagonal/slanted frames)
     - Reading flow aware ordering (RTL for Manga, LTR for Western)
     """
-    if cv2 is None or not HAS_CV:
-        logger.warning("[Grid Detector] cv2 is not available; falling back to PIL-based grid detection.")
-        return _detect_panels_grid_pil(
-            gray_arr=gray,
-            is_white_bg=is_white_bg,
-            sensitivity=30.0,
-            min_height_px=min_height_px,
-            min_panel_area=min_panel_area,
-            max_aspect_ratio=max_aspect_ratio,
-            min_aspect_ratio=min_aspect_ratio,
-            reading_flow=reading_flow,
-        )
-
     h_img, w_img = gray.shape[:2]
     img_area = float(w_img * h_img)
     effective_min_area = min(min_panel_area, max(200.0, img_area * 0.008))
 
     # 1. Dynamic Edge & Adaptive Threshold Fusion
     otsu_val, _ = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    dyn_thresh = int(otsu_val) if threshold_val == 220 else threshold_val
+    dyn_thresh = int(otsu_val) if threshold_val == DEFAULT_THRESHOLD_VAL else threshold_val
     
     if high_sensitivity:
         block_s = max(11, (int(w_img * 0.02) | 1))
@@ -78,18 +87,18 @@ def detect_manga_grid_panels(
         _, thresh = cv2.threshold(gray, dyn_thresh, 255, cv2.THRESH_BINARY_INV if is_white_bg else cv2.THRESH_BINARY)
         
     median_intensity = float(np.median(gray))
-    # Only auto-compute if caller left defaults unchanged (25 / 120).
+    # Only auto-compute if caller left defaults unchanged.
     # If the user passed a custom canny_low/canny_high those must be honoured exactly.
-    computed_canny_low = max(10, int(0.66 * median_intensity)) if canny_low == 25 else canny_low
-    computed_canny_high = min(250, int(1.33 * median_intensity)) if canny_high == 120 else canny_high
+    computed_canny_low = max(10, int(0.66 * median_intensity)) if canny_low == DEFAULT_CANNY_LOW else canny_low
+    computed_canny_high = min(250, int(1.33 * median_intensity)) if canny_high == DEFAULT_CANNY_HIGH else canny_high
     edges = cv2.Canny(gray, computed_canny_low, computed_canny_high)
     merged_mask = cv2.bitwise_or(thresh, edges)
     
     # 2. Morphological Closing: bridges dashed frames without bridging gutters.
     # Use the caller-supplied close_kernel_size so fine-tuning from AutoSlicer/API
-    # actually takes effect.  Fall back to auto-scaling only if close_kernel_size is
-    # the default value (7) which usually means "not explicitly set".
-    if close_kernel_size == 7:
+    # actually takes effect. Fall back to auto-scaling only if close_kernel_size is
+    # the default value which usually means "not explicitly set".
+    if close_kernel_size == DEFAULT_CLOSE_KERNEL_SIZE:
         kernel_w = max(3, (int(w_img * 0.006) | 1))
         kernel_h = max(3, (int(h_img * 0.006) | 1))
     else:
@@ -134,7 +143,7 @@ def detect_manga_grid_panels(
                 "width": w_box,
                 "height": h_box,
                 "polygon": polygon_pts,
-                "confidence": 0.95,
+                "confidence": DEFAULT_CONFIDENCE_GRID,
                 "label": "panel_manga_grid"
             })
 
@@ -143,7 +152,7 @@ def detect_manga_grid_panels(
         pil_boxes = detect_manga_grid_pil(
             gray_arr=gray,
             is_white_bg=is_white_bg,
-            sensitivity=30.0,
+            sensitivity=DEFAULT_SENSITIVITY,
             min_height_px=min_height_px,
             min_panel_area=effective_min_area,
             reading_flow=reading_flow
@@ -161,16 +170,15 @@ def detect_manga_grid_panels(
 
     return raw_boxes
 
-
 def detect_manga_grid_pil(
     gray_arr: np.ndarray,
-    is_white_bg: bool,
-    sensitivity: float,
-    min_height_px: int,
-    min_panel_area: float = 5000.0,
-    max_aspect_ratio: float = 10.0,
-    min_aspect_ratio: float = 0.1,
-    reading_flow: str = "right_to_left"
+    is_white_bg: bool = DEFAULT_IS_WHITE_BG,
+    sensitivity: float = DEFAULT_SENSITIVITY,
+    min_height_px: int = DEFAULT_MIN_HEIGHT_PX,
+    min_panel_area: float = DEFAULT_MIN_PANEL_AREA,
+    max_aspect_ratio: float = DEFAULT_MAX_ASPECT_RATIO,
+    min_aspect_ratio: float = DEFAULT_MIN_ASPECT_RATIO,
+    reading_flow: str = DEFAULT_READING_FLOW,
 ) -> List[Dict[str, Any]]:
     """
     2D Projection Tier & Column Decomposition:
@@ -293,21 +301,147 @@ def detect_manga_grid_pil(
                     "h": bh,
                     "width": bw,
                     "height": bh,
-                    "confidence": 0.90,
+                    "confidence": DEFAULT_CONFIDENCE_TIER_COL,
                     "label": "panel_tier_column"
                 })
 
     return raw_boxes
 
 
-# Backward-compatibility aliases
-_detect_panels_grid_cv = detect_manga_grid_panels
-_detect_panels_grid_pil = detect_manga_grid_pil
+# ─────────────────────────────────────────────────────────────────────────────
+# Dedicated FastAPI Service Endpoint Handler
+# ─────────────────────────────────────────────────────────────────────────────
+
+async def detect_manga_grid_service(
+    request: Any,
+) -> Any:
+    """
+    Dedicated FastAPI service handler for 2D multi-tier and multi-column manga grid panel detection.
+    Resolves input image from URL or Base64, executes the grid detector, and returns structured
+    DetectMangaGridResponse with PanelBoundingBox models.
+    """
+    start_time = time.perf_counter()
+
+    raw_bytes = None
+    target_url = getattr(request, "url", None) or getattr(request, "image_url", None)
+    image_base64 = getattr(request, "image_base64", None)
+
+    if target_url:
+        logger.debug(f"[MangaGrid Service] Resolving image buffer from URL: {target_url}...")
+        resolved = await resolve_image_to_buffer(target_url)
+        raw_bytes = resolved.get("data")
+    elif image_base64:
+        logger.debug("[MangaGrid Service] Decoding base64 image data payload...")
+        b64 = image_base64
+        if "," in b64:
+            b64 = b64.split(",", 1)[1]
+        raw_bytes = base64.b64decode(b64)
+
+    if not raw_bytes:
+        logger.error("[MangaGrid Service] Failed to resolve raw image data from request.")
+        raise ValueError("Could not resolve image data for manga grid detection.")
+
+    pil_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
+    img_w, img_h = pil_img.size
+    gray = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2GRAY)
+
+    reading_flow = getattr(request, "reading_flow", DEFAULT_READING_FLOW)
+    is_white_bg = getattr(request, "is_white_bg", DEFAULT_IS_WHITE_BG)
+    threshold_val = getattr(request, "threshold_val", DEFAULT_THRESHOLD_VAL)
+    canny_low = getattr(request, "canny_low", DEFAULT_CANNY_LOW)
+    canny_high = getattr(request, "canny_high", DEFAULT_CANNY_HIGH)
+    close_kernel_size = getattr(request, "close_kernel_size", DEFAULT_CLOSE_KERNEL_SIZE)
+    high_sensitivity = getattr(request, "high_sensitivity", DEFAULT_HIGH_SENSITIVITY)
+    min_panel_area = getattr(request, "min_panel_area", DEFAULT_MIN_PANEL_AREA)
+    max_aspect_ratio = getattr(request, "max_aspect_ratio", DEFAULT_MAX_ASPECT_RATIO)
+    min_aspect_ratio = getattr(request, "min_aspect_ratio", DEFAULT_MIN_ASPECT_RATIO)
+    min_width_pct = getattr(request, "min_width_pct", DEFAULT_MIN_WIDTH_PCT)
+    min_height_px = getattr(request, "min_height_px", DEFAULT_MIN_HEIGHT_PX)
+
+    raw_panels = detect_manga_grid_panels(
+        gray=gray,
+        is_white_bg=is_white_bg,
+        threshold_val=threshold_val,
+        canny_low=canny_low,
+        canny_high=canny_high,
+        close_kernel_size=close_kernel_size,
+        high_sensitivity=high_sensitivity,
+        min_panel_area=min_panel_area,
+        max_aspect_ratio=max_aspect_ratio,
+        min_aspect_ratio=min_aspect_ratio,
+        min_width_pct=min_width_pct,
+        min_height_px=min_height_px,
+        reading_flow=reading_flow,
+    )
+
+    from features.platform.projects.schemas_project import (
+        PanelBoundingBox,
+        DetectMangaGridResponse,
+        EntityLabel,
+        EntityCategory,
+    )
+
+    boxes: List[PanelBoundingBox] = []
+    for idx, p in enumerate(raw_panels, start=1):
+        bw = p.get("w", p.get("width", 0))
+        bh = p.get("h", p.get("height", 0))
+        boxes.append(
+            PanelBoundingBox(
+                id=f"panel_{idx}",
+                index=idx,
+                x=int(p["x"]),
+                y=int(p["y"]),
+                w=int(bw),
+                h=int(bh),
+                width=int(bw),
+                height=int(bh),
+                polygon=p.get("polygon"),
+                confidence=float(p.get("confidence", DEFAULT_CONFIDENCE_GRID)),
+                label=p.get("label", EntityLabel.PANEL_STANDARD.value),
+                category=EntityCategory.PANEL.value,
+                sub_type="manga_grid_tier",
+            )
+        )
+
+    elapsed_ms = int((time.perf_counter() - start_time) * 1000)
+    logger.info(
+        f"[MangaGrid Service] Completed grid panel detection: {len(boxes)} panel(s) "
+        f"in {elapsed_ms}ms (reading_flow={reading_flow})."
+    )
+
+    return DetectMangaGridResponse(
+        success=True,
+        crop_type="manga_grid",
+        image_width=img_w,
+        image_height=img_h,
+        reading_flow=reading_flow,
+        is_white_bg=is_white_bg,
+        total_panels=len(boxes),
+        panels=boxes,
+        execution_time_ms=elapsed_ms,
+        message=f"Successfully extracted {len(boxes)} manga grid panel(s).",
+    )
+
 
 __all__ = [
+    "DEFAULT_IS_WHITE_BG",
+    "DEFAULT_THRESHOLD_VAL",
+    "DEFAULT_CANNY_LOW",
+    "DEFAULT_CANNY_HIGH",
+    "DEFAULT_CLOSE_KERNEL_SIZE",
+    "DEFAULT_HIGH_SENSITIVITY",
+    "DEFAULT_MIN_PANEL_AREA",
+    "DEFAULT_MAX_ASPECT_RATIO",
+    "DEFAULT_MIN_ASPECT_RATIO",
+    "DEFAULT_MIN_WIDTH_PCT",
+    "DEFAULT_MIN_HEIGHT_PX",
+    "DEFAULT_READING_FLOW",
+    "DEFAULT_SENSITIVITY",
+    "DEFAULT_CONFIDENCE_GRID",
+    "DEFAULT_CONFIDENCE_TIER_COL",
     "detect_manga_grid_panels",
-    "_detect_panels_grid_cv",
     "detect_manga_grid_pil",
-    "_detect_panels_grid_pil",
+    "detect_manga_grid_service",
 ]
+
 
