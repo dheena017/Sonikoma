@@ -181,6 +181,15 @@ class EntityLabel(str, Enum):
     CHARACTER_FACE = "character_face"
 
 
+class BubblePlacementRelation(str, Enum):
+    """Speech bubble placement convention relative to panels."""
+    INSIDE = "inside_panel"
+    CROSSING_BORDER = "crossing_border"
+    OUTSIDE_GUTTER = "outside_panel"
+    SPANNING_PANELS = "spanning_two_panels"
+    OVERLAPPING_CHAIN = "overlapping_dialogue"
+
+
 class SpeechBubbleItem(BaseModel):
     """Rich metadata for a single detected speech bubble or dialogue caption."""
     bubble_id: str = Field(..., description="Unique bubble identifier")
@@ -197,6 +206,9 @@ class SpeechBubbleItem(BaseModel):
     confidence: float = Field(1.0, description="Detection confidence score")
     reading_order: int = Field(1, description="Reading sequence within panel")
     is_bound: bool = Field(True, description="Whether bubble was bound into panel boundary")
+    placement_relation: Optional[str] = Field("inside_panel", description="Spatial placement: inside_panel, crossing_border, outside_panel, spanning_two_panels, overlapping_dialogue")
+    spanning_panel_ids: List[str] = Field(default_factory=list, description="Panel IDs if bubble spans across multiple panels")
+    overlapping_bubble_ids: List[str] = Field(default_factory=list, description="IDs of overlapping dialogue bubbles")
 
 
 class CharacterPoseType(str, Enum):
