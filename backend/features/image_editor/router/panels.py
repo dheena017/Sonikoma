@@ -33,6 +33,8 @@ from features.platform.projects.schemas_project import (
     PanelDetectionResponse,
     DetectCharactersRequest,
     DetectCharactersResponse,
+    DetectSpeechBubblesRequest,
+    DetectSpeechBubblesResponse,
     DetectCompositeResponse,
 )
 from features.image_editor.services.processing.panel_splitter import split_vertical_strip_into_panels
@@ -46,6 +48,7 @@ from features.image_editor.services.panel_detection.detect_batch_service import 
 from features.image_editor.services.panel_detection.detect_upload_service import detect_upload_panels
 from features.image_editor.services.panel_detection.detect_characters_service import detect_characters
 from features.image_editor.services.panel_detection.detect_composite_service import detect_composite_panels
+from features.image_editor.services.panel_detection.speech_bubble_detector import detect_speech_bubbles_service
 
 
 logger = logging.getLogger("sonikoma.api.panels")
@@ -327,11 +330,30 @@ async def detect_composite_endpoint(body: DetectPanelsUrlRequest):
         raise
     except Exception as e:
         logger.error(f"[DetectComposite API] Error: {e}", exc_info=True)
+# ─── 11. Dedicated Speech Bubble & Dialogue Balloon Detection ──────────────────
+
+@panels_router.post(
+    "/detect/speech-bubbles",
+    response_model=DetectSpeechBubblesResponse,
+    operation_id="detect_speech_bubbles",
+    summary="Detect speech bubbles, dialogue balloons, and manhwa chat UI pills",
+    description="Uses fine-tuned YOLOv8-seg and Computer Vision to isolate speech balloons, thought clouds, and messenger UI dialogue.",
+)
+async def detect_speech_bubbles_endpoint(body: DetectSpeechBubblesRequest):
+    try:
+        if not body.url and not body.image_url and not body.image_base64:
+            raise HTTPException(status_code=400, detail="Must provide 'url', 'image_url', or 'image_base64'.")
+        return await detect_speech_bubbles_service(body)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[DetectSpeechBubbles API] Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 panel_router = panels_router
 router = panels_router
+
 
 __all__ = ["panels_router", "panel_router", "router"]
 

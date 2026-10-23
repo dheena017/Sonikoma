@@ -95,15 +95,14 @@ from .grid_detector import (
 )
 from .speech_bubble_detector import (
     detect_speech_bubbles,
-    detect_yolo_entities,
+    detect_speech_bubbles_service,
     detect_chat_ui_bubbles,
-    _detect_chat_ui_bubbles,
     get_yolo_speech_bubble_model,
-    get_yolo_model,
-    set_loaded_yolo_model,
-    _set_loaded_yolo_model,
     segment_speech_bubbles_and_text_balloons,
 )
+detect_yolo_entities = detect_speech_bubbles
+_detect_chat_ui_bubbles = detect_chat_ui_bubbles
+get_yolo_model = get_yolo_speech_bubble_model
 from .ai_vision_detector import (
     detect_ai_vision,
     detect_ai_vision_flow,

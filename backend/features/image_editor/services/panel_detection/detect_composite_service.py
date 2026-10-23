@@ -24,7 +24,7 @@ from features.platform.projects.schemas_project import (
 )
 from common.media import resolve_image_to_buffer
 from features.image_editor.services.panel_detection.opencv_detector import detect_opencv_boxes
-from features.image_editor.services.panel_detection.speech_bubble_detector import detect_yolo_entities
+from features.image_editor.services.panel_detection.speech_bubble_detector import detect_speech_bubbles as detect_yolo_entities
 from features.image_editor.services.panel_detection.detect_characters_service import detect_character_entities
 from features.image_editor.services.panel_detection.panel_fusion_service import fuse_panels_and_bubbles
 

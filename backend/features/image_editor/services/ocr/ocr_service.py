@@ -30,7 +30,7 @@ from features.image_editor.schemas import (
     OcrTextType
 )
 from common.media import resolve_image_to_buffer
-from features.image_editor.services.panel_detection.speech_bubble_detector import detect_yolo_entities
+from features.image_editor.services.panel_detection.speech_bubble_detector import detect_speech_bubbles as detect_yolo_entities
 
 
 def extract_text_from_image_bytes(image_bytes: bytes, languages: List[str] = ["en"]) -> str:

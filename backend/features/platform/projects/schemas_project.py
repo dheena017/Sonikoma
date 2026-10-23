@@ -324,6 +324,27 @@ class DetectCharactersResponse(BaseModel):
     execution_time_ms: int = 0
 
 
+class DetectSpeechBubblesRequest(BaseModel):
+    """Request payload for speech bubble and dialogue balloon detection."""
+    url: Optional[str] = Field(None, description="Target image public URL")
+    image_url: Optional[str] = Field(None, description="Alternative target image public URL")
+    image_base64: Optional[str] = Field(None, description="Base64-encoded image data")
+    conf_threshold: float = Field(0.25, ge=0.05, le=1.0, description="YOLO confidence threshold")
+    detect_chat_ui: bool = Field(True, description="Whether to detect manhwa smartphone chat/SMS dialogue bubbles")
+
+
+class DetectSpeechBubblesResponse(BaseModel):
+    """Response payload for speech bubble detection."""
+    success: bool
+    total_bubbles: int = 0
+    image_width: int = 0
+    image_height: int = 0
+    bubbles: List[SpeechBubbleItem] = Field(default_factory=list)
+    message: Optional[str] = None
+    execution_time_ms: int = 0
+
+
+
 class DetectCompositeResponse(BaseModel):
     """Unified composite detection response (Panels + Speech Bubbles + Characters + Cinematography)."""
     success: bool

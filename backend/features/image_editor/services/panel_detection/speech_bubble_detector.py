@@ -10,9 +10,17 @@ YOLO Deep-Learning Comic Speech Bubble Segmentation Engine:
 """
 
 import os
+import sys
 import io
+import time
+import base64
 import logging
 from typing import Optional, List, Tuple, Any
+
+# Ensure backend root directory is in sys.path when executed directly
+_backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+if _backend_dir not in sys.path:
+    sys.path.insert(0, _backend_dir)
 
 import cv2
 import numpy as np
@@ -20,18 +28,26 @@ from PIL import Image
 from ultralytics import YOLO
 from huggingface_hub import hf_hub_download
 
+from common.media import resolve_image_to_buffer
 from features.platform.projects.schemas_project import (
     SpeechBubbleItem,
     EntityLabel,
     EntityCategory,
+    DetectSpeechBubblesRequest,
+    DetectSpeechBubblesResponse,
 )
 
 logger = logging.getLogger("sonikoma.services.image.panel_detection.speech_bubble_detector")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 1. Global State
+# 1. Global State & Module Constants
 # ─────────────────────────────────────────────────────────────────────────────
 
+DEFAULT_CONF_THRESHOLD: float = 0.25
+CHAT_BUBBLE_CONFIDENCE: float = 0.88
+SEGMENTATION_CONF_THRESHOLD: float = 0.25
+
+# Cached YOLO deep-learning model singleton instance
 _yolo_model: Optional[Any] = None
 
 
@@ -50,57 +66,66 @@ def get_yolo_speech_bubble_model() -> Optional[Any]:
     """
     global _yolo_model
     if _yolo_model is not None:
+        logger.debug("[SpeechBubble Model] Reusing cached YOLO model instance from memory.")
         return _yolo_model
 
+    logger.info("[SpeechBubble Model] Initializing YOLO speech bubble segmentation engine...")
     models_dir = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "models")
     )
 
     # Priority 1: Local custom fine-tuned model
     custom_model = os.path.join(models_dir, "manga_finetuned.pt")
+    logger.debug(f"[SpeechBubble Model] Step 1/3: Checking local custom weights at '{custom_model}'...")
     if os.path.exists(custom_model):
         try:
-            logger.info(f"[SpeechBubble Detector] Loading custom fine-tuned model: {custom_model}")
+            logger.info(f"[SpeechBubble Model] Found local fine-tuned model: {custom_model}. Loading weights...")
             _yolo_model = YOLO(custom_model)
+            logger.info("[SpeechBubble Model] Local custom model loaded and ready.")
             return _yolo_model
         except Exception as e:
-            logger.debug(f"[SpeechBubble Detector] Failed to load custom model: {e}")
+            logger.warning(f"[SpeechBubble Model] Failed loading custom model ({e}), falling back to HuggingFace candidates...")
 
     # Priority 2: Hugging Face comic/manga models
     hf_models = [
-        ("kitsumed/yolov8m_seg-speech-bubble", "model.pt", "kitsumed segmentation"),
+        ("kitsumed/yolov8m_seg-speech-bubble", "model.pt", "kitsumed manga segmenter"),
         ("ogkalu/comic-speech-bubble-detector-yolov8m", "comic-speech-bubble-detector.pt", "ogkalu comic detector"),
     ]
+    logger.debug(f"[SpeechBubble Model] Step 2/3: Attempting {len(hf_models)} specialized HuggingFace candidates...")
     for repo_id, filename, name in hf_models:
         try:
+            logger.info(f"[SpeechBubble Model] Downloading/checking HuggingFace checkpoint '{repo_id}' ({name})...")
             path = hf_hub_download(repo_id=repo_id, filename=filename)
             _yolo_model = YOLO(path)
-            logger.info(f"[SpeechBubble Detector] Loaded {name} model successfully")
+            logger.info(f"[SpeechBubble Model] Successfully initialized specialized '{name}' checkpoint from: {path}")
             return _yolo_model
         except Exception as e:
-            logger.debug(f"[SpeechBubble Detector] {name} unavailable ({e}), trying next candidate...")
+            logger.debug(f"[SpeechBubble Model] HuggingFace candidate '{repo_id}' unavailable ({e}), trying next...")
 
     # Priority 3: Generic YOLOv8 fallback
     local_generic = os.path.join(models_dir, "yolov8n-seg.pt")
     target = local_generic if os.path.exists(local_generic) else "yolov8n-seg.pt"
+    logger.debug(f"[SpeechBubble Model] Step 3/3: Falling back to generic YOLOv8 model '{target}'...")
     try:
         _yolo_model = YOLO(target)
-        logger.info(f"[SpeechBubble Detector] Loaded fallback YOLO model: {target}")
+        logger.info(f"[SpeechBubble Model] Successfully loaded generic fallback YOLO model: '{target}'")
         return _yolo_model
     except Exception as e:
         logger.warning(
-            f"[SpeechBubble Detector] All YOLO model sources failed ({e}). Using contour detection fallback."
+            f"[SpeechBubble Model] All deep-learning YOLO sources failed ({e}). "
+            "Pipeline will automatically use adaptive computer-vision contour fallback."
         )
         _yolo_model = None
         return None
 
+
 # ─────────────────────────────────────────────────────────────────────────────
-# 4. Bubble Detection Engines
+# 3. Specialized Chat UI & Smartphone Dialogue Detection
 # ─────────────────────────────────────────────────────────────────────────────
 
 def detect_chat_ui_bubbles(
     pil_img: Image.Image,
-    min_confidence: float = 0.88,
+    min_confidence: float = CHAT_BUBBLE_CONFIDENCE,
 ) -> List[SpeechBubbleItem]:
     """
     Detects smartphone text message chat bubbles, SMS dialog pills, and messenger UI elements.
@@ -117,6 +142,7 @@ def detect_chat_ui_bubbles(
     """
     # ── Stage 1: Input Normalization & Guard Clauses ────────────────────────
     if pil_img is None or pil_img.size[0] < 10 or pil_img.size[1] < 10:
+        logger.debug("[ChatUI Detector] Input image is None or below minimum dimensions (10x10px), skipping.")
         return []
 
     # Ensure 3-channel RGB image for OpenCV color conversions
@@ -127,6 +153,7 @@ def detect_chat_ui_bubbles(
     try:
         cv_bgr = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
         h, w, _ = cv_bgr.shape
+        logger.debug(f"[ChatUI Detector] Processing {w}x{h}px panel for smartphone dialogue elements...")
         hsv = cv2.cvtColor(cv_bgr, cv2.COLOR_BGR2HSV)
         gray = cv2.cvtColor(cv_bgr, cv2.COLOR_BGR2GRAY)
 
@@ -154,6 +181,10 @@ def detect_chat_ui_bubbles(
             > 0
         )
         has_phone_screen = np.sum(dark_screen_mask) > (w * h * 0.04)
+        logger.debug(
+            f"[ChatUI Detector] Screen analysis: dark_pixels={np.sum(dark_screen_mask):,} "
+            f"(threshold={int(w*h*0.04):,}), phone_screen_detected={has_phone_screen}"
+        )
 
         chat_masks = [("blue_chat", color_mask)]
         if has_phone_screen:
@@ -174,6 +205,7 @@ def detect_chat_ui_bubbles(
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
             cleaned = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
             cnts, _ = cv2.findContours(cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            logger.debug(f"[ChatUI Detector] Mask '{name}': inspecting {len(cnts)} candidate contour(s)...")
 
             for c in cnts:
                 area = cv2.contourArea(c)
@@ -184,7 +216,8 @@ def detect_chat_ui_bubbles(
                 if 1.0 <= aspect <= 7.0 and bw <= int(w * 0.85):
                     patch = gray[y:y + bh, x:x + bw]
                     # Genuine message bubbles contain high-frequency dialogue text strokes
-                    if patch.size > 0 and float(np.std(patch)) >= 3.5:
+                    patch_std = float(np.std(patch)) if patch.size > 0 else 0.0
+                    if patch.size > 0 and patch_std >= 3.5:
                         poly = (
                             [[int(pt[0][0]), int(pt[0][1])] for pt in c]
                             if len(c) >= 3
@@ -208,17 +241,110 @@ def detect_chat_ui_bubbles(
                         idx_counter += 1
 
         # ── Stage 4: Output & Logging ───────────────────────────────────────
-        logger.debug(f"[SpeechBubble Detector] Detected {len(found_bubbles)} chat UI bubble(s)")
+        logger.info(f"[ChatUI Detector] Completed: Extracted {len(found_bubbles)} verified chat dialogue bubble(s).")
         return found_bubbles
 
     except Exception as e:
-        logger.debug(f"[SpeechBubble Detector] Chat bubble detection error: {e}")
-        return []
+        logger.warning(f"[ChatUI Detector] Chat bubble extraction error ({e}), returning empty list.")
+# ─────────────────────────────────────────────────────────────────────────────
+# 4. Core Speech Bubble Detection Engine
+# ─────────────────────────────────────────────────────────────────────────────
+
+def snap_and_refine_bubble_edges(
+    gray_np: np.ndarray,
+    bx: int,
+    by: int,
+    bw: int,
+    bh: int,
+    polygon: Optional[List[List[int]]] = None,
+) -> tuple[int, int, int, int, Optional[List[List[int]]]]:
+    """
+    Refines candidate speech bubble boundaries using morphological edge and contour snapping.
+    Prevents clipping the edges of dialogue bubbles when YOLO anchors slightly inside or
+    around interior dialogue text strokes.
+    """
+    img_h, img_w = gray_np.shape[:2]
+    pad_x = int(bw * 0.35)
+    pad_y = int(bh * 0.35)
+    rx1 = max(0, bx - pad_x)
+    ry1 = max(0, by - pad_y)
+    rx2 = min(img_w, bx + bw + pad_x)
+    ry2 = min(img_h, by + bh + pad_y)
+
+    roi = gray_np[ry1:ry2, rx1:rx2]
+    if roi.size == 0:
+        return bx, by, bw, bh, polygon
+
+    patch = gray_np[by:by + bh, bx:bx + bw]
+    p_mean = float(np.mean(patch)) if patch.size else 128.0
+
+    # 1. White / Light bubble
+    if p_mean >= 180:
+        p95 = float(np.percentile(patch, 95))
+        thresh_val = max(242, min(252, int(p95 - 8))) if p95 >= 245 else max(225, int(p95 - 15))
+        _, mask = cv2.threshold(roi, thresh_val, 255, cv2.THRESH_BINARY)
+    elif p_mean <= 75:
+        # 2. Inverted / Dark burst bubble
+        thresh_val = 60
+        _, mask = cv2.threshold(roi, thresh_val, 255, cv2.THRESH_BINARY_INV)
+    else:
+        return bx, by, bw, bh, polygon
+
+    # Bridge lettering strokes
+    k_w = max(5, int(bw * 0.08))
+    k_h = max(5, int(bh * 0.08))
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k_w, k_h))
+    closed = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+
+    contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    best_cnt = None
+    best_score = 0.0
+
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        if area < (bw * bh * 0.35):
+            continue
+        cx, cy, cw, ch = cv2.boundingRect(cnt)
+        # Prevent runaway expansion into surrounding panel borders
+        if cw > int(bw * 1.55) or ch > int(bh * 1.55):
+            continue
+        gx, gy = rx1 + cx, ry1 + cy
+
+        # Intersection with candidate
+        ix1 = max(bx, gx)
+        iy1 = max(by, gy)
+        ix2 = min(bx + bw, gx + cw)
+        iy2 = min(by + bh, gy + ch)
+        inter = max(0, ix2 - ix1) * max(0, iy2 - iy1)
+        coverage = inter / float(max(1, bw * bh))
+
+        if coverage > 0.65:
+            # Prefer contour with highest coverage and reasonable size
+            score = coverage - 0.2 * abs(1.0 - ((cw * ch) / float(max(1, bw * bh))))
+            if score > best_score:
+                best_score = score
+                best_cnt = (cnt, gx, gy, cw, ch)
+
+    if best_cnt is not None:
+        cnt, gx, gy, cw, ch = best_cnt
+        # Add slight 2px border expansion for outer boundary stroke
+        gx = max(0, gx - 2)
+        gy = max(0, gy - 2)
+        cw = min(img_w - gx, cw + 4)
+        ch = min(img_h - gy, ch + 4)
+
+        global_cnt = cnt + np.array([rx1, ry1])
+        peri = cv2.arcLength(global_cnt, True)
+        approx = cv2.approxPolyDP(global_cnt, 0.012 * peri, True)
+        new_poly = [[int(pt[0][0]), int(pt[0][1])] for pt in approx]
+        return gx, gy, cw, ch, new_poly
+
+    return bx, by, bw, bh, polygon
 
 
 def detect_speech_bubbles(
     image_input: Any,
-    conf_threshold: float = 0.25,
+    conf_threshold: float = DEFAULT_CONF_THRESHOLD,
 ) -> List[SpeechBubbleItem]:
     """
     Executes deep-learning semantic inference on comic images to detect speech bubbles and dialogue text.
@@ -236,12 +362,14 @@ def detect_speech_bubbles(
     """
     # ── Stage 1: Input Normalization & Guard Clauses ────────────────────────
     if image_input is None:
+        logger.debug("[SpeechBubble Detector] image_input is None, returning empty list.")
         return []
 
     if isinstance(image_input, Image.Image):
         pil_img = image_input.convert("RGB") if image_input.mode != "RGB" else image_input
     elif isinstance(image_input, bytes):
         if len(image_input) == 0:
+            logger.debug("[SpeechBubble Detector] image_input bytes is empty, returning empty list.")
             return []
         pil_img = Image.open(io.BytesIO(image_input)).convert("RGB")
     else:
@@ -249,7 +377,10 @@ def detect_speech_bubbles(
 
     img_w, img_h = pil_img.size
     if img_w < 10 or img_h < 10:
+        logger.debug(f"[SpeechBubble Detector] Image dimensions too small ({img_w}x{img_h}px), skipping.")
         return []
+
+    logger.info(f"[SpeechBubble Detector] Starting detection pipeline on image ({img_w}x{img_h}px, conf_threshold={conf_threshold})...")
 
     # ── Stage 2: Resolution Normalization & Inference ────────────────────────
     model = get_yolo_speech_bubble_model()
@@ -265,6 +396,7 @@ def detect_speech_bubbles(
             or "speech" in str(c).lower()
             for c in names_list
         )
+        logger.debug(f"[SpeechBubble Detector] Active model class tags: {names_list[:5]} (is_comic_specialized: {is_comic_yolo})")
 
     results = []
     scale_factor = 1.0
@@ -275,18 +407,21 @@ def detect_speech_bubbles(
                 target_w = 800
                 scale_factor = target_w / float(img_w)
                 target_h = int(img_h * scale_factor)
+                logger.debug(f"[SpeechBubble Detector] Upscaling narrow panel ({img_w}px -> {target_w}px, scale={scale_factor:.2f}) for optimal YOLO perception.")
                 infer_img = pil_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
             elif img_w > 1800:
                 target_w = 1200
                 scale_factor = target_w / float(img_w)
                 target_h = int(img_h * scale_factor)
+                logger.debug(f"[SpeechBubble Detector] Downscaling large strip ({img_w}px -> {target_w}px, scale={scale_factor:.2f}) to accelerate YOLO inference.")
                 infer_img = pil_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
             else:
                 infer_img = pil_img
 
+            logger.debug("[SpeechBubble Detector] Running YOLO segmentation forward pass...")
             results = model.predict(source=infer_img, conf=conf_threshold, verbose=False)
         except Exception as e:
-            logger.warning(f"[SpeechBubble Detector] Bubble inference error: {e}")
+            logger.warning(f"[SpeechBubble Detector] YOLO inference error: {e}")
             results = []
 
     # ── Stage 3: YOLO Entity Parsing & Content Verification ──────────────────
@@ -308,6 +443,8 @@ def detect_speech_bubbles(
             boxes = boxes_obj.xyxy.cpu().numpy() if (boxes_obj is not None and hasattr(boxes_obj, "xyxy")) else []
             confs = boxes_obj.conf.cpu().numpy() if (boxes_obj is not None and hasattr(boxes_obj, "conf")) else []
             masks = masks_obj.xy if (masks_obj is not None and hasattr(masks_obj, "xy")) else []
+
+            logger.debug(f"[SpeechBubble Detector] YOLO returned {len(boxes)} raw candidate(s). Verifying geometry and interior lettering...")
 
             for idx, (box, conf) in enumerate(zip(boxes, confs)):
                 rx1, ry1, rx2, ry2 = [float(v) for v in box]
@@ -340,6 +477,7 @@ def detect_speech_bubbles(
                     or w < min_bubble_w
                     or h < min_bubble_h
                 ):
+                    logger.debug(f"[SpeechBubble Detector] Skipping candidate at ({x1}, {y1}) - bounds out of range ({w}x{h}px).")
                     continue
 
                 sub_patch = gray_np[y1:y1 + h, x1:x1 + w]
@@ -349,7 +487,11 @@ def detect_speech_bubbles(
                 # Content verification: genuine speech bubbles contain dialogue text lettering
                 patch_std = float(np.std(sub_patch))
                 if patch_std < 2.0 and conf < 0.60:
+                    logger.debug(f"[SpeechBubble Detector] Skipping candidate at ({x1}, {y1}) - interior lettering stroke variance too low (std={patch_std:.2f}).")
                     continue
+
+                # Morphological boundary snapping to capture complete outer edges without clipping
+                x1, y1, w, h, polygon = snap_and_refine_bubble_edges(gray_np, x1, y1, w, h, polygon)
 
                 entities.append(SpeechBubbleItem(
                     bubble_id=f"bubble_{bubble_counter}",
@@ -368,8 +510,11 @@ def detect_speech_bubbles(
                 ))
                 bubble_counter += 1
 
+        logger.info(f"[SpeechBubble Detector] YOLO segmentation extracted {len(entities)} verified dialogue balloon(s).")
+
     # ── Stage 4: Chat UI Dialogue Augmentation ──────────────────────────────
     chat_bubbles = detect_chat_ui_bubbles(pil_img)
+    merged_chat_count = 0
     for cb in chat_bubbles:
         cb_x1, cb_y1, cb_x2, cb_y2 = cb.x, cb.y, cb.x + cb.width, cb.y + cb.height
         is_overlapping = False
@@ -386,9 +531,14 @@ def detect_speech_bubbles(
                     break
         if not is_overlapping:
             entities.append(cb)
+            merged_chat_count += 1
+
+    if merged_chat_count > 0:
+        logger.info(f"[SpeechBubble Detector] Augmented with {merged_chat_count} non-overlapping smartphone chat bubble(s).")
 
     # ── Stage 5: Adaptive Geometric Contour Fallback ─────────────────────────
     if not entities and not is_comic_yolo:
+        logger.info("[SpeechBubble Detector] Deep-learning model produced no entities. Initiating adaptive contour computer-vision fallback...")
         try:
             dyn_white_thresh = max(180.0, float(np.percentile(gray_np, 85)))
             block_size = max(11, (int(img_w * 0.02) | 1))
@@ -398,6 +548,7 @@ def detect_speech_bubbles(
             contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
             min_area_thresh = max(100.0, float(img_w * img_h * 0.0003))
+            logger.debug(f"[SpeechBubble Detector] Contour fallback: found {len(contours)} raw contours (dyn_white_thresh={dyn_white_thresh:.1f}).")
 
             for cnt in contours:
                 bx, by, bw, bh = cv2.boundingRect(cnt)
@@ -447,6 +598,8 @@ def detect_speech_bubbles(
                         is_bound=False,
                     ))
                     bubble_counter += 1
+
+            logger.info(f"[SpeechBubble Detector] Contour fallback extracted {len(entities)} candidate bubble(s).")
         except Exception as e:
             logger.warning(f"[SpeechBubble Detector] Contour bubble fallback error: {e}")
 
@@ -456,13 +609,17 @@ def detect_speech_bubbles(
         b.bubble_id = f"bubble_{i}"
         b.reading_order = i
 
-    logger.info(f"[SpeechBubble Detector] Detected {len(entities)} speech bubble entity/entities")
+    logger.info(f"[SpeechBubble Detector] Pipeline complete: {len(entities)} dialogue bubble(s) sequenced in reading order.")
     return entities
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. Dialogue Alpha Mask Segmentation
+# ─────────────────────────────────────────────────────────────────────────────
+
 def segment_speech_bubbles_and_text_balloons(
     image_path: str,
-    conf_threshold: float = 0.25,
+    conf_threshold: float = SEGMENTATION_CONF_THRESHOLD,
 ) -> Optional[np.ndarray]:
     """
     Infers text and speech balloon masks on a panel image using the YOLO model.
@@ -479,19 +636,22 @@ def segment_speech_bubbles_and_text_balloons(
     """
     # ── Stage 1: Input Normalization & Guard Clauses ────────────────────────
     if not image_path or not os.path.exists(image_path):
-        logger.warning(f"[SpeechBubble Detector] Image path does not exist: {image_path}")
+        logger.warning(f"[SpeechBubble Segmenter] Image path does not exist or invalid: '{image_path}'")
         return None
 
     model = get_yolo_speech_bubble_model()
     if model is None:
-        logger.debug("[SpeechBubble Detector] No YOLO model available for segmentation mask generation.")
+        logger.debug("[SpeechBubble Segmenter] No YOLO model available for binary segmentation mask generation.")
         return None
+
+    logger.info(f"[SpeechBubble Segmenter] Generating binary dialogue mask for '{image_path}' (conf_threshold={conf_threshold})...")
 
     # ── Stage 2: Inference & Dimensions Resolution ──────────────────────────
     try:
         raw_results = model.predict(image_path, conf=conf_threshold, verbose=False)
         results = list(raw_results) if raw_results is not None else []
         if not results:
+            logger.debug("[SpeechBubble Segmenter] YOLO inference returned empty results list.")
             return None
 
         result = results[0]
@@ -502,6 +662,7 @@ def segment_speech_bubbles_and_text_balloons(
         else:
             img = cv2.imread(image_path)
             if img is None:
+                logger.warning(f"[SpeechBubble Segmenter] Failed to read image from path '{image_path}' via cv2.")
                 return None
             height, width = img.shape[:2]
 
@@ -510,6 +671,7 @@ def segment_speech_bubbles_and_text_balloons(
         # ── Stage 3: Mask & Bounding-Box Binary Rasterization ────────────────
         # Case A: Instance segmentation masks available (YOLO-seg)
         if hasattr(result, "masks") and result.masks is not None and len(result.masks) > 0:
+            logger.debug(f"[SpeechBubble Segmenter] Case A: Rasterizing {len(result.masks.data)} instance polygon mask(s)...")
             for i, mask_instance in enumerate(result.masks.data):
                 if (
                     hasattr(result, "boxes")
@@ -531,6 +693,7 @@ def segment_speech_bubbles_and_text_balloons(
 
         # Case B: Detection bounding-boxes fallback (YOLO detection without masks)
         elif hasattr(result, "boxes") and result.boxes is not None and len(result.boxes) > 0:
+            logger.debug(f"[SpeechBubble Segmenter] Case B: Rasterizing {len(result.boxes)} bounding rectangle(s)...")
             boxes = result.boxes.xyxy.cpu().numpy() if hasattr(result.boxes, "xyxy") else []
             confs = result.boxes.conf.cpu().numpy() if hasattr(result.boxes, "conf") else []
             for box, conf in zip(boxes, confs):
@@ -540,24 +703,121 @@ def segment_speech_bubbles_and_text_balloons(
 
         # ── Stage 4: Output & Logging ───────────────────────────────────────
         active_pixels = int(np.count_nonzero(combined_mask))
-        logger.debug(f"[SpeechBubble Detector] Generated mask with {active_pixels} positive pixel(s)")
+        coverage_pct = (active_pixels / float(max(1, height * width))) * 100
+        logger.info(
+            f"[SpeechBubble Segmenter] Completed: Generated {width}x{height}px binary mask with "
+            f"{active_pixels:,} positive dialogue pixels ({coverage_pct:.1f}% coverage)."
+        )
         return combined_mask
 
     except Exception as e:
-        logger.warning(f"[SpeechBubble Detector] Balloon segmentation error: {e}")
+        logger.warning(f"[SpeechBubble Segmenter] Balloon segmentation error ({e}).")
         return None
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. Package Exports
+# 6. Service Endpoint Orchestrator
+# ─────────────────────────────────────────────────────────────────────────────
+
+async def detect_speech_bubbles_service(
+    request: DetectSpeechBubblesRequest,
+) -> DetectSpeechBubblesResponse:
+    """
+    Orchestrator endpoint handler for speech bubble detection.
+    Resolves image bytes, invokes YOLO + Chat UI detection, and returns structured API response.
+    """
+    start_time = time.perf_counter()
+
+    raw_bytes = None
+    target_url = request.url or request.image_url
+    source_type = "URL" if target_url else ("Base64" if request.image_base64 else "Unknown")
+    logger.info(
+        f"[SpeechBubble API] Incoming detection request (source: {source_type}, "
+        f"conf_threshold: {request.conf_threshold}, detect_chat_ui: {request.detect_chat_ui})..."
+    )
+
+    if target_url:
+        logger.debug(f"[SpeechBubble API] Resolving image buffer from URL: {target_url}...")
+        resolved = await resolve_image_to_buffer(target_url)
+        raw_bytes = resolved.get("data")
+    elif request.image_base64:
+        logger.debug("[SpeechBubble API] Decoding base64 image data payload...")
+        b64 = request.image_base64
+        if "," in b64:
+            b64 = b64.split(",", 1)[1]
+        raw_bytes = base64.b64decode(b64)
+
+    if not raw_bytes:
+        logger.error("[SpeechBubble API] Failed to resolve raw image data from request.")
+        raise ValueError("Could not resolve image data for speech bubble detection.")
+
+    pil_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
+    img_w, img_h = pil_img.size
+    logger.debug(f"[SpeechBubble API] Input decoded successfully: {img_w}x{img_h}px ({len(raw_bytes):,} bytes).")
+
+    bubbles = detect_speech_bubbles(
+        image_input=pil_img,
+        conf_threshold=request.conf_threshold,
+    )
+
+    elapsed_ms = int((time.perf_counter() - start_time) * 1000)
+    logger.info(
+        f"[SpeechBubble API] Request completed successfully in {elapsed_ms}ms: "
+        f"{len(bubbles)} dialogue bubble(s) returned."
+    )
+
+    return DetectSpeechBubblesResponse(
+        success=True,
+        total_bubbles=len(bubbles),
+        image_width=img_w,
+        image_height=img_h,
+        bubbles=bubbles,
+        execution_time_ms=elapsed_ms,
+        message=f"Detected {len(bubbles)} speech bubble(s) in {elapsed_ms}ms",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 7. Package Exports
 # ─────────────────────────────────────────────────────────────────────────────
 
 __all__ = [
     "get_yolo_speech_bubble_model",
     "detect_chat_ui_bubbles",
     "detect_speech_bubbles",
+    "detect_speech_bubbles_service",
     "segment_speech_bubbles_and_text_balloons",
 ]
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 8. Standalone CLI Demo Runner
+# ─────────────────────────────────────────────────────────────────────────────
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+    print("\n" + "=" * 75)
+    print("  SONIKOMA SPEECH BUBBLE DETECTOR: STANDALONE CLI TEST")
+    print("=" * 75)
+
+    # 1. Check or load model
+    model = get_yolo_speech_bubble_model()
+    model_type = type(model).__name__ if model is not None else "None (Contour Fallback Active)"
+    print(f"\n[*] Active Detection Engine: {model_type}")
+
+    # 2. Generate synthetic test canvas
+    from PIL import ImageDraw
+    test_canvas = Image.new("RGB", (450, 450), color=(230, 230, 230))
+    d = ImageDraw.Draw(test_canvas)
+    # Draw bubble outline and interior text lines
+    d.ellipse([50, 50, 320, 240], fill=(255, 255, 255), outline=(0, 0, 0), width=3)
+    for y_stroke in range(95, 195, 16):
+        d.line([90, y_stroke, 280, y_stroke], fill=(0, 0, 0), width=3)
+
+    # 3. Execute detection
+    detected = detect_speech_bubbles(test_canvas)
+    print(f"\n[✓] Detection Success: Extracted {len(detected)} dialogue bubble(s):")
+    for b in detected:
+        print(f"  • {b.bubble_id} [{b.sub_type}] bounds=(x={b.x}, y={b.y}, w={b.width}, h={b.height}), conf={b.confidence}")
+    print("=" * 75 + "\n")
 
