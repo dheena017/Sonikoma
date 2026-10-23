@@ -146,7 +146,7 @@ async def start_training(epochs: int = 20, batch_size: int = 4):
     os.makedirs(_TRAINING_DIR, exist_ok=True)
     orig_files = glob.glob(os.path.join(_TRAINING_DIR, "original_*.*"))
     try:
-        from features.image_editor.services.panel_detection.speech_bubble_detector import trigger_fine_tuning, _seed_starter_training_pairs
+        from features.image_editor.services.detector.main_service_detector.speech_bubble_detector import trigger_fine_tuning, _seed_starter_training_pairs
         if not orig_files:
             _seed_starter_training_pairs(_TRAINING_DIR)
         success = trigger_fine_tuning(epochs, batch_size)
@@ -160,7 +160,7 @@ async def start_training(epochs: int = 20, batch_size: int = 4):
 @router.get("/training-status", summary="Get status of current YOLO fine-tuning run")
 async def get_training_status():
     try:
-        from features.image_editor.services.panel_detection.speech_bubble_detector import status, is_training_locked, get_lock_pid
+        from features.image_editor.services.detector.main_service_detector.speech_bubble_detector import status, is_training_locked, get_lock_pid
         from features.intelligence.services_training.training_monitor import get_current_original_count, load_metadata, TRAINING_DATA_DIR
 
         status_dict = status.to_dict()

@@ -32,7 +32,7 @@ from features.creative.agent.schemas import (
 from features.creative.agent.cast_manager import CharacterCastManager
 from features.platform.scraper.services.scraper_service import scrape_chapter_service
 from features.image_editor.services.processing.compose import merge_images_service
-from features.image_editor.services.panel_detection.detect_long_panels_service import detect_long_panels
+from features.image_editor.services.detector import detect_long_panels
 from features.platform.projects.schemas_project import DetectLongPanelsRequest
 from features.image_editor.services.crop.long_panels_crop_service import crop_long_panels_batch
 from features.image_editor.schemas import LongPanelsCropRequest

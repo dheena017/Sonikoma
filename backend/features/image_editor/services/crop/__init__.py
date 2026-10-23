@@ -8,7 +8,10 @@ Crop Services Module:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from features.image_editor.services.panel_detection.detect_type_service import detect_image_layout_type
+try:
+    from features.image_editor.services.detector.detect_type_service import detect_image_layout_type
+except ImportError:
+    from features.image_editor.services.detector.detect_type_service import detect_image_layout_type
 from .long_panels_crop_service import crop_long_panels_batch
 from .single_panels_crop_service import crop_single_panels_margins
 

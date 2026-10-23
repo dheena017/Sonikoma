@@ -116,7 +116,7 @@ async def lifespan(app: FastAPI):
         if not skip_prewarm:
             try:
                 from features.image_editor.services.layer_separation.sam import get_rembg_session
-                from features.image_editor.services.panel_detection.speech_bubble_detector import get_yolo_speech_bubble_model
+                from features.image_editor.services.detector import get_yolo_speech_bubble_model
                 from features.image_editor.services.ocr.ocr_engine import _load_ocr_reader
                 await asyncio.to_thread(get_rembg_session)
                 await asyncio.to_thread(get_yolo_speech_bubble_model)

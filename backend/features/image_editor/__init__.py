@@ -9,9 +9,9 @@ Exposes canonical sub-domain routers, services, and shared schemas for:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from .router import panels_router, image_router, ocr_router
 from . import schemas
 from . import services
+from .router import panels_router, image_router, ocr_router
 
 __all__ = [
     "panels_router",

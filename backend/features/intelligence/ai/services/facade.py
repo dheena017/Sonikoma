@@ -1093,7 +1093,7 @@ async def facade_smart_crop(
                 tmp_in.write(img_buffer)
                 tmp_in_path = tmp_in.name
 
-            from features.image_editor.services.panel_detection.panel_detector import run_cv_detection
+            from features.image_editor.services.detector.main_service_detector.panel_detector import run_cv_detection
             cv_panels = run_cv_detection(
                 image_path=tmp_in_path,
                 sensitivity=sensitivity,
@@ -1168,7 +1168,7 @@ async def facade_smart_crop(
                 tmp_in.write(img_buffer)
                 tmp_in_path = tmp_in.name
 
-            from features.image_editor.services.panel_detection.panel_detector import run_cv_detection
+            from features.image_editor.services.detector.main_service_detector.panel_detector import run_cv_detection
             cv_panels = run_cv_detection(
                 image_path=tmp_in_path,
                 sensitivity=sensitivity,

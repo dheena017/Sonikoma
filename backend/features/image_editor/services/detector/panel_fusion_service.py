@@ -15,9 +15,16 @@ Intelligent Fusion Engine for OpenCV + YOLO + AI Entities:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import os
+import sys
 import math
 import logging
 from typing import List, Dict, Any, Tuple, Optional, Set
+
+# Ensure backend root directory is in sys.path when executed directly
+_backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+if _backend_dir not in sys.path:
+    sys.path.insert(0, _backend_dir)
 
 from features.platform.projects.schemas_project import (
     PanelBoundingBox,
@@ -29,7 +36,7 @@ from features.platform.projects.schemas_project import (
     BubblePlacementRelation,
 )
 
-logger = logging.getLogger("sonikoma.services.panel_detection.fusion")
+logger = logging.getLogger("sonikoma.services.image.detector.fusion")
 
 
 # ── Geometry Helpers ──────────────────────────────────────────────────────────

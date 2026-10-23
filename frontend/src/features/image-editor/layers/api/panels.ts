@@ -5,8 +5,7 @@
  * - detectSmallPanels: Tight frame snapping & speech bubble binding (Small Images / 2D Manga)
  * - detectLongPanels: Continuous webtoon strip gutter slicing (Tall Strips)
  * - detectUltraLongPanels: Giant Full-Chapter Continuous Scrolls (Sliding Window)
- * - detectPanelsCVYOLO: Option 1: OpenCV + YOLO Deep Learning Detector
- * - detectPanelsAIVision: Option 2: Full Multimodal AI Vision & Reading Flow
+ * - detectPanelsCVYOLO: OpenCV + YOLO Deep Learning Detector
  * - detectPanelsBatch: Parallel multi-image detection
  * - detectPanelsByUrl: Generic single URL panel detector
  * ─────────────────────────────────────────────────────────────────────────────
@@ -178,21 +177,6 @@ export const detectPanelsCVYOLO = async (
   });
 };
 
-/**
- * Option 2: Full Multimodal AI Vision & Reading Flow Pipeline.
- */
-export const detectPanelsAIVision = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/ai-vision", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-};
 
 /**
  * Batch multi-image panel detector.
@@ -211,21 +195,14 @@ export const detectPanelsBatch = async (
 };
 
 /**
- * Generic single URL panel detector (Routes to Option 1 CV+YOLO or Option 2 AI-Vision).
+ * Generic single URL panel detector (Routes to CV+YOLO detector).
  */
 export const detectPanelsByUrl = async (
   fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  const isAIVision =
-    data.engine_mode === "ai_vision" ||
-    data.strategy === "ai-vision" ||
-    data.strategy === "cloud-ai";
-  const endpoint = isAIVision
-    ? "/api/v1/panels/detect/ai-vision"
-    : "/api/v1/panels/detect/cv-yolo";
-  return apiRequest(fetchWithInterceptor, endpoint, {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/cv-yolo", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

@@ -2,14 +2,13 @@
 backend/app/api/v1/panels/router.py
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Panel Detection & Processing API Routes:
-1. POST /detect/cv-yolo          -> Option 1: OpenCV + YOLO Dialogue & Panel Detector
-2. POST /detect/ai-vision        -> Option 2: Full Multimodal AI Vision & Reading Flow
-3. POST /detect/small-panels     -> Small Images & Single Frames (Tight frame snapping)
-4. POST /detect/long-panels      -> Tall Webtoon Strips (Gutter seam slicing)
-5. POST /detect/ultra-long-panels -> Giant Full-Chapter Continuous Scrolls (Sliding Window)
-6. POST /detect/batch            -> Batch URL Panel Detector
-7. POST /detect/upload           -> Multipart Form File Upload Detector
-8. POST /split                   -> Split tall vertical strip into discrete panels (Background Job)
+1. POST /detect/cv-yolo          -> OpenCV + YOLO Dialogue & Panel Detector
+2. POST /detect/small-panels     -> Small Images & Single Frames (Tight frame snapping)
+3. POST /detect/long-panels      -> Tall Webtoon Strips (Gutter seam slicing)
+4. POST /detect/ultra-long-panels -> Giant Full-Chapter Continuous Scrolls (Sliding Window)
+5. POST /detect/batch            -> Batch URL Panel Detector
+6. POST /detect/upload           -> Multipart Form File Upload Detector
+7. POST /split                   -> Split tall vertical strip into discrete panels (Background Job)
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 """
 
@@ -44,17 +43,18 @@ from common.media import resolve_image_to_buffer
 from features.platform.jobs import job_manager, JobType, JobStage, JobStatusResponse
 
 # Specialized Panel Detection Services
-from features.image_editor.services.panel_detection.detect_small_panels_service import detect_small_panels
-from features.image_editor.services.panel_detection.detect_long_panels_service import detect_long_panels
-from features.image_editor.services.panel_detection.detect_batch_service import detect_batch_panels
-from features.image_editor.services.panel_detection.detect_characters_service import detect_characters
-from features.image_editor.services.panel_detection.detect_composite_service import detect_composite_panels
-from features.image_editor.services.panel_detection.speech_bubble_detector import detect_speech_bubbles_service
-from features.image_editor.services.panel_detection.grid_detector import detect_manga_grid_service
-from features.image_editor.services.panel_detection.panel_detector import (
+from features.image_editor.services.detector import (
+    detect_small_panels,
+    detect_long_panels,
+    detect_batch_panels,
+    detect_characters,
+    detect_composite_panels,
+    detect_speech_bubbles_service,
+    detect_manga_grid_service,
     detect_panels_service,
     DetectStripPanelsRequest,
     DetectStripPanelsResponse,
+    detect_image_layout_type,
 )
 
 
@@ -89,9 +89,16 @@ async def detect_cv_yolo_endpoint(body: DetectPanelsUrlRequest):
     try:
         body.engine_mode = "cv_yolo"
         raw = await _resolve_bytes(body)
-        with Image.open(io.BytesIO(raw)) as im:
-            w, h = im.size
-            is_tall = h > w * 2
+
+        # 1st call detect_type_service to classify image layout format
+        type_res = await detect_image_layout_type(raw_bytes=raw)
+        crop_type_str = str(
+            type_res.crop_type.value if hasattr(type_res.crop_type, "value") else type_res.crop_type
+        ).lower()
+        is_tall = (
+            crop_type_str in ("long_panels", "ultra_long_panels", "four_koma")
+            or (type_res.aspect_ratio or 0) >= 2.0
+        )
 
         if is_tall:
             long_req = DetectLongPanelsRequest(
@@ -114,43 +121,6 @@ async def detect_cv_yolo_endpoint(body: DetectPanelsUrlRequest):
         logger.error(f"[DetectCVYOLO API] Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-
-# â”€â”€â”€ 2. Primary Strategy Option 2: Full Multimodal AI Vision & Reading Flow â”€â”€â”€
-
-@panels_router.post(
-    "/detect/ai-vision",
-    operation_id="detect_panels_ai_vision",
-    summary="Option 2: Full AI Vision Reading Flow + YOLO + OpenCV Multimodal Pipeline",
-    description="Executes OCR transcription, reading order reasoning (TTB/RTL), and breakout scene analysis."
-)
-async def detect_ai_vision_endpoint(body: DetectPanelsUrlRequest):
-    try:
-        body.engine_mode = "ai_vision"
-        raw = await _resolve_bytes(body)
-        with Image.open(io.BytesIO(raw)) as im:
-            w, h = im.size
-            is_tall = h > w * 2
-
-        if is_tall:
-            long_req = DetectLongPanelsRequest(
-                url=body.url,
-                image_base64=body.image_base64,
-                engine_mode="ai_vision",
-                sensitivity=body.sensitivity
-            )
-            return await detect_long_panels(long_req)
-        else:
-            small_req = DetectSmallPanelsRequest(
-                url=body.url,
-                image_base64=body.image_base64,
-                engine_mode="ai_vision"
-            )
-            return await detect_small_panels(small_req)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"[DetectAIVision API] Error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ─── 3. Dedicated Small-Panels Detection ──────────────────────────────────────

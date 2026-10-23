@@ -16,7 +16,7 @@ import pytest
 
 from features.image_editor.services.crop.long_panels_crop_service import _apply_color_distance_autotrim as long_autotrim
 from features.image_editor.services.crop.single_panels_crop_service import _apply_color_distance_autotrim as single_autotrim
-from features.image_editor.services.panel_detection.panel_detector import (
+from features.image_editor.services.detector.main_service_detector.panel_detector import (
     detect_vertical_strip_panels,
     detect_vertical_subgutters,
     subdivide_continuous_tall_art_panel,

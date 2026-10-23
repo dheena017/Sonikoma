@@ -30,7 +30,7 @@ from features.platform.projects.schemas_project import (
     DetectSpeechBubblesRequest,
     DetectSpeechBubblesResponse,
 )
-from features.image_editor.services.panel_detection.speech_bubble_detector import (
+from features.image_editor.services.detector.main_service_detector.speech_bubble_detector import (
     detect_speech_bubbles,
     detect_speech_bubbles_service,
 )

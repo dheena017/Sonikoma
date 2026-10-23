@@ -289,7 +289,7 @@ def _train_worker(epochs: int, batch_size: int = 4):
             raise
 
         from ultralytics import YOLO
-        from features.image_editor.services.panel_detection.speech_bubble_detector import get_yolo_speech_bubble_model, _set_loaded_yolo_model
+        from features.image_editor.services.detector.main_service_detector.speech_bubble_detector import get_yolo_speech_bubble_model, _set_loaded_yolo_model
 
         if os.path.exists(dataset_dir):
             shutil.rmtree(dataset_dir, ignore_errors=True)

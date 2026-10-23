@@ -1,12 +1,12 @@
 # image-editor/layers/api
 
-Panel detection API — CV+YOLO, AI Vision, batch, upload.
+Panel detection API — CV+YOLO, batch, upload.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `panels.ts` | detectSmallPanels, detectLongPanels, detectPanelsCVYOLO, detectPanelsAIVision, detectPanelsBatch |
+| `panels.ts` | detectSmallPanels, detectLongPanels, detectPanelsCVYOLO, detectPanelsBatch |
 
 ## Usage
 

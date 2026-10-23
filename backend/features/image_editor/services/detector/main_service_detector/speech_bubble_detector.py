@@ -18,7 +18,7 @@ import logging
 from typing import Optional, List, Tuple, Any
 
 # Ensure backend root directory is in sys.path when executed directly
-_backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+_backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", ".."))
 if _backend_dir not in sys.path:
     sys.path.insert(0, _backend_dir)
 

@@ -32,7 +32,7 @@ BACKEND_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
-from features.image_editor.services.panel_detection.speech_bubble_detector import (
+from features.image_editor.services.detector.main_service_detector.speech_bubble_detector import (
     get_yolo_speech_bubble_model,
     detect_speech_bubbles,
     detect_chat_ui_bubbles,

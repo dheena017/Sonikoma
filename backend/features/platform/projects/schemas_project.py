@@ -258,11 +258,13 @@ class PanelCinematography(BaseModel):
 class PanelBoundingBox(BaseModel):
     """Detected comic panel bounding box coordinates with rich multimodal metadata."""
     id: Optional[str] = Field(None, description="Panel identifier")
+    panel_id: Optional[str] = Field(None, description="Panel identifier alias")
     index: int = Field(0, description="Reading order index")
-    x: int = Field(..., description="X pixel coordinate")
-    y: int = Field(..., description="Y pixel coordinate")
-    w: int = Field(..., description="Width in pixels")
-    h: int = Field(..., description="Height in pixels")
+    reading_order: Optional[int] = Field(None, description="Reading order index alias")
+    x: int = Field(0, description="X pixel coordinate")
+    y: int = Field(0, description="Y pixel coordinate")
+    w: int = Field(0, description="Width in pixels")
+    h: int = Field(0, description="Height in pixels")
     width: Optional[int] = Field(None, description="Width alias in pixels")
     height: Optional[int] = Field(None, description="Height alias in pixels")
     polygon: Optional[List[List[int]]] = Field(None, description="Exact polygon vertices for diagonal frames")
@@ -276,6 +278,7 @@ class PanelBoundingBox(BaseModel):
     has_bound_bubbles: bool = Field(False, description="Whether dialogue bubbles were bound inside")
     speech_bubbles_count: int = Field(0, description="Count of speech bubbles in panel")
     speech_bubbles: List[SpeechBubbleItem] = Field(default_factory=list, description="Bound speech bubble items")
+    contained_bubbles: Optional[List[SpeechBubbleItem]] = Field(None, description="Bound speech bubbles alias")
     characters: List[CharacterEntityItem] = Field(default_factory=list, description="Detected characters inside this panel")
     characters_count: int = Field(0, description="Count of characters in panel")
     dialogue_transcript: Optional[str] = Field(None, description="Combined dialogue transcript of this panel")
@@ -286,6 +289,24 @@ class PanelBoundingBox(BaseModel):
     @classmethod
     def sync_dimensions(cls, data: Any) -> Any:
         if isinstance(data, dict):
+            # Synchronize id / panel_id
+            if data.get("panel_id") and not data.get("id"):
+                data["id"] = data["panel_id"]
+            elif data.get("id") and not data.get("panel_id"):
+                data["panel_id"] = data["id"]
+
+            # Synchronize index / reading_order
+            if data.get("reading_order") is not None and not data.get("index"):
+                data["index"] = data["reading_order"]
+            elif data.get("index") is not None and not data.get("reading_order"):
+                data["reading_order"] = data["index"]
+
+            # Synchronize speech_bubbles / contained_bubbles
+            if data.get("contained_bubbles") is not None and not data.get("speech_bubbles"):
+                data["speech_bubbles"] = data["contained_bubbles"]
+            elif data.get("speech_bubbles") is not None and not data.get("contained_bubbles"):
+                data["contained_bubbles"] = data["speech_bubbles"]
+
             x = data.get("x") if data.get("x") is not None else data.get("left", 0)
             y = data.get("y") if data.get("y") is not None else data.get("top", 0)
             w = data.get("w")
@@ -310,7 +331,7 @@ class DetectCharactersRequest(BaseModel):
     conf_threshold: float = Field(0.25, ge=0.05, le=1.0, description="YOLO confidence threshold")
     detect_faces: bool = Field(True, description="Whether to extract faces and expressions")
     extract_thumbnails: bool = Field(False, description="Whether to generate base64 avatar thumbnails")
-    engine_mode: Literal["yolo", "ai_vision", "auto"] = Field("auto", description="Detection engine mode")
+    engine_mode: Literal["yolo", "auto"] = Field("auto", description="Detection engine mode")
 
 
 class DetectCharactersResponse(BaseModel):
@@ -343,6 +364,10 @@ class DetectSpeechBubblesResponse(BaseModel):
     message: Optional[str] = None
     execution_time_ms: int = 0
 
+    @property
+    def speech_bubbles(self) -> List[SpeechBubbleItem]:
+        return self.bubbles
+
 
 
 class DetectCompositeResponse(BaseModel):
@@ -367,9 +392,9 @@ class DetectSmallPanelsRequest(BaseModel):
     """Request payload for Small Image & Single Frame detection."""
     url: Optional[str] = Field(None, description="Target image public URL")
     image_base64: Optional[str] = Field(None, description="Base64-encoded image data")
-    engine_mode: Literal["cv_yolo", "ai_vision"] = Field(
+    engine_mode: str = Field(
         "cv_yolo",
-        description="Detection strategy: 'cv_yolo' (OpenCV + YOLO Dialogue/Panels) or 'ai_vision' (Full AI Vision OCR & Flow)"
+        description="Detection strategy: 'cv_yolo' (OpenCV + YOLO Dialogue/Panels)"
     )
     aspect_ratio: str = Field("free", description="Target aspect ratio lock")
     auto_trim: bool = Field(True, description="Auto-trim solid background borders")
@@ -399,9 +424,9 @@ class DetectLongPanelsRequest(BaseModel):
     """Request payload for Tall Webtoon Strip detection."""
     url: Optional[str] = Field(None, description="Target image public URL")
     image_base64: Optional[str] = Field(None, description="Base64-encoded image data")
-    engine_mode: Literal["cv_yolo", "ai_vision"] = Field(
+    engine_mode: str = Field(
         "cv_yolo",
-        description="Detection strategy: 'cv_yolo' (OpenCV + YOLO Dialogue/Panels) or 'ai_vision' (Full AI Vision OCR & Flow)"
+        description="Detection strategy: 'cv_yolo' (OpenCV + YOLO Dialogue/Panels)"
     )
     sensitivity: float = Field(30.0, ge=0.0, le=100.0, description="Gutter seam sensitivity")
     background_mode: str = Field("auto", description="'auto', 'white', 'black'")
@@ -431,9 +456,9 @@ class DetectPanelsUrlRequest(BaseModel):
     url: Optional[str] = None
     image_url: Optional[str] = None
     image_base64: Optional[str] = None
-    engine_mode: Literal["cv_yolo", "ai_vision"] = Field(
+    engine_mode: str = Field(
         "cv_yolo",
-        description="Detection strategy: 'cv_yolo' (OpenCV + YOLO) or 'ai_vision' (Full AI Vision)"
+        description="Detection strategy: 'cv_yolo' (OpenCV + YOLO)"
     )
     sensitivity: float = Field(30.0, ge=0.0, le=100.0)
     background_mode: str = "auto"
@@ -489,9 +514,9 @@ class DetectMangaGridRequest(BaseModel):
     url: Optional[str] = Field(None, description="Target image public URL")
     image_url: Optional[str] = Field(None, description="Target image URL alias")
     image_base64: Optional[str] = Field(None, description="Base64-encoded image data")
-    reading_flow: Literal["right_to_left", "left_to_right"] = Field(
+    reading_flow: Literal["right_to_left", "left_to_right", "top_to_bottom"] = Field(
         "right_to_left",
-        description="Reading order flow ('right_to_left' for Manga, 'left_to_right' for Western comics)"
+        description="Reading order flow ('right_to_left' for Manga, 'left_to_right' for Western comics, 'top_to_bottom' for vertical strips)"
     )
     is_white_bg: bool = Field(True, description="True if gutters/background are white, False if black/dark")
     threshold_val: int = Field(220, ge=0, le=255, description="Binary threshold intensity (220 defaults to Otsu auto)")
