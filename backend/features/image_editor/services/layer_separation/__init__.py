@@ -16,6 +16,12 @@ from features.image_editor.services.layer_separation.layer_segmentation import (
     create_blank_webp,
     create_blank_png,
 )
+from features.image_editor.services.layer_separation.sam import (
+    segment_character_layer,
+    segment_with_sam,
+    segment_character_sam,
+    segment_character_u2net,
+)
 
 __all__ = [
     "extract_panel_layers_service",
@@ -24,4 +30,9 @@ __all__ = [
     "process_layers",
     "create_blank_webp",
     "create_blank_png",
+    "segment_character_layer",
+    "segment_with_sam",
+    "segment_character_sam",
+    "segment_character_u2net",
 ]
+

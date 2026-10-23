@@ -28,7 +28,12 @@ from features.image_editor.services.panel_detection.speech_bubble_detector impor
     segment_character_foreground as segment_characters,
 )
 from database.supabase import upload_to_supabase_bucket
-from features.image_editor.services.layer_separation.sam import has_rembg, segment_character_u2net
+from features.image_editor.services.layer_separation.sam import (
+    has_rembg,
+    has_sam,
+    segment_character_layer,
+    segment_character_u2net,
+)
 
 
 def create_blank_webp(width: int, height: int) -> bytes:
@@ -143,9 +148,9 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, Any]:
         logger.error(f"[Global Detection] EasyOCR scan failed: {e}", exc_info=True)
 
     try:
-        if has_rembg:
+        if has_sam or has_rembg:
             pil_orig = Image.fromarray(cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB))
-            char_pil_scan = segment_character_u2net(pil_orig)
+            char_pil_scan = segment_character_layer(pil_orig)
             if char_pil_scan is not None:
                 char_np_scan = np.array(char_pil_scan)
                 if char_np_scan.ndim == 3 and char_np_scan.shape[2] == 4:
@@ -342,16 +347,16 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, Any]:
 
     if not yolo_success:
         try:
-            if not has_rembg:
-                logger.warning("rembg is not installed. Character mask will be blank.")
+            if not has_sam and not has_rembg:
+                logger.warning("Neither SAM nor rembg is installed. Character mask will be blank.")
             else:
                 pil_textless = Image.fromarray(cv2.cvtColor(textless_img, cv2.COLOR_BGR2RGB))
-                char_pil = segment_character_u2net(pil_textless)
+                char_pil = segment_character_layer(pil_textless)
                 if char_pil is not None:
                     char_np = np.array(char_pil)
                     if char_np.ndim == 3 and char_np.shape[2] == 4:
                         char_mask = char_np[:, :, 3]
-                        logger.info("rembg fallback completed successfully.")
+                        logger.info("Character fallback segmentation (SAM/rembg) completed successfully.")
         except Exception as e:
             logger.error(f"Fallback character segmentation failed: {e}", exc_info=True)
 
