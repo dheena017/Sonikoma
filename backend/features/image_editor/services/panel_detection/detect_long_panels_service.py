@@ -63,11 +63,14 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
     # We run YOLO first so bubble locations guide and protect panel seam slicing
     yolo_bubbles = []
     try:
-        if img_h > 4000:
-            # Ultra-Long Webtoon Strip: Adaptive chunks covering full strip height
-            chunk_h = 6000
-            overlap = 800
-            step = chunk_h - overlap
+        if img_h > int(img_w * 2.0):
+            # Ultra-Long Webtoon Strip: Adaptive chunks maintaining optimal aspect ratio for YOLO (~1:1.5 to 1:1.75)
+            if img_w < 600:
+                chunk_h = max(300, int(img_w * 2.5))
+            else:
+                chunk_h = min(2200, max(1000, int(img_w * 1.6)))
+            overlap = max(10, int(chunk_h * 0.25))
+            step = max(20, chunk_h - overlap)
             seen_bubbles = []
             max_chunks = int(img_h // step) + 5
             chunks_processed = 0
@@ -79,17 +82,17 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                 box_bottom = min(img_h, y_offset + chunk_h)
                 chunk_img = pil_img.crop((0, box_top, img_w, box_bottom))
 
-                chunk_bubbles = detect_yolo_entities(chunk_img, conf_threshold=0.20)
+                chunk_bubbles = detect_yolo_entities(chunk_img, conf_threshold=0.25)
                 chunks_processed += 1
                 for cb in chunk_bubbles:
-                    # Offset Y coordinate to absolute image coordinates
                     cb.y += box_top
                     if cb.polygon:
                         cb.polygon = [[pt[0], pt[1] + box_top] for pt in cb.polygon]
 
-                    # Deduplicate overlapping bubbles
+                    # Deduplicate overlapping bubbles across chunk seams
+                    dup_tol = max(6, int(img_w * 0.05))
                     is_dup = any(
-                        abs(cb.x - prev.x) < 30 and abs(cb.y - prev.y) < 30
+                        abs(cb.x - prev.x) < dup_tol and abs(cb.y - prev.y) < dup_tol
                         for prev in seen_bubbles
                     )
                     if not is_dup:
@@ -102,53 +105,10 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
             yolo_bubbles = seen_bubbles
             logger.info(f"[LongPanels: YOLO] Sliding window detected {len(yolo_bubbles)} speech bubbles across {chunks_processed} chunks.")
         else:
-            yolo_bubbles = detect_yolo_entities(pil_img, conf_threshold=0.20)
+            yolo_bubbles = detect_yolo_entities(pil_img, conf_threshold=0.25)
             logger.info(f"[LongPanels: YOLO] Single-pass detected {len(yolo_bubbles)} speech bubbles.")
     except Exception as e:
         logger.warning(f"[LongPanels: YOLO] YOLO detection error: {e}", exc_info=True)
-
-    # Supplemental: Detect rectangular narration boxes & contours that YOLO missed
-    try:
-        import cv2
-        import numpy as np
-        gray_full = np.array(pil_img.convert("L"))
-        _, bright_thresh = cv2.threshold(gray_full, 230, 255, cv2.THRESH_BINARY)
-        kernel_close = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
-        closed_mask = cv2.morphologyEx(bright_thresh, cv2.MORPH_CLOSE, kernel_close)
-        contours, _ = cv2.findContours(closed_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contour_boxes = []
-        for c in contours:
-            cx, cy, cw, ch = cv2.boundingRect(c)
-            if 35 <= cw <= int(img_w * 0.92) and 20 <= ch <= int(img_h * 0.25):
-                c_slice = gray_full[cy : cy + ch, cx : cx + cw]
-                if c_slice.size > 0:
-                    c_std = float(np.std(c_slice))
-                    # Std indicates ink text strokes inside bright background
-                    if 1.5 <= c_std <= 50.0:
-                        is_already_covered = any(
-                            abs(b.x - cx) < 35 and abs(b.y - cy) < 35 and abs(b.width - cw) < 50 and abs(b.height - ch) < 50
-                            for b in yolo_bubbles
-                        )
-                        if not is_already_covered:
-                            contour_boxes.append({"x": cx, "y": cy, "w": cw, "h": ch})
-        if contour_boxes:
-            logger.info(f"[LongPanels: Contour Fallback] Detected {len(contour_boxes)} supplemental speech / narration boxes.")
-            for cb in contour_boxes:
-                from features.platform.projects.schemas_project import SpeechBubbleItem
-                yolo_bubbles.append(
-                    SpeechBubbleItem(
-                        bubble_id=f"bubble_contour_{len(yolo_bubbles) + 1}",
-                        text="",
-                        confidence=0.85,
-                        reading_order=len(yolo_bubbles) + 1,
-                        x=cb["x"],
-                        y=cb["y"],
-                        width=cb["w"],
-                        height=cb["h"],
-                    )
-                )
-    except Exception as c_err:
-        logger.warning(f"[LongPanels: Contour Fallback] Error: {c_err}")
 
     yolo_ocr_boxes = [
         {"x": b.x, "y": b.y, "w": b.width, "h": b.height}
@@ -180,7 +140,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                 gray_arr=gray_arr,
                 is_white_bg=is_white_bg,
                 threshold_val=threshold_val,
-                min_height_px=max(120, request.min_panel_height // 2),
+                min_height_px=max(160, int(request.min_panel_height)),
                 min_width_pct=0.10,
                 ocr_boxes=yolo_ocr_boxes,
                 median_bg=median_bg,
@@ -238,7 +198,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                             has_subcols = True
                             for col_idx, (cx1, cx2) in enumerate(sub_cols):
                                 cw = cx2 - cx1
-                                if cw >= max(40, int(pw * 0.15)):
+                                if cw >= max(10, int(pw * 0.15)):
                                     subdivided_cv.append({
                                         "x": px + cx1,
                                         "y": py,
@@ -252,8 +212,8 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                         continue
 
                     # In Webtoon strips, only subdivide exceptionally tall continuous art scenes
-                    # along natural valley seams (aspect ratio > 2.8:1 or height > 2000px):
-                    if ph > int(pw * 2.8) or (ph > 2000 and ph > int(pw * 2.2)):
+                    # along natural valley seams (aspect ratio > 2.8:1 or height > 2.2x strip width):
+                    if ph > int(pw * 2.8) or (ph > int(img_w * 2.2) and ph > int(pw * 2.0)):
                         from features.image_editor.services.panel_detection.panel_detector import _subdivide_continuous_tall_art_panel
                         child_ocr = [
                             {"x": max(0, b.x - px), "y": max(0, b.y - py), "w": b.width, "h": b.height}
@@ -266,7 +226,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                             )
                             for piece in sub_pieces:
                                 piece_h = piece.get("h", ph)
-                                if piece_h >= max(60, int(pw * 0.15)):
+                                if piece_h >= max(15, int(pw * 0.15)):
                                     subdivided_cv.append({
                                         "x": px,
                                         "y": py + piece.get("y", 0),
@@ -402,22 +362,30 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                     boundary = p2_y1 + (overlap // 2)
 
                 boundary = max(p2_y1, min(p1_y2, boundary))
-                new_h1 = max(10, boundary - p1_y1)
+                new_h1 = boundary - p1_y1
                 p2_orig_y2 = p2_y1 + int(p2.get("h") or p2.get("height") or 0)
-                new_h2 = max(10, p2_orig_y2 - boundary)
+                new_h2 = p2_orig_y2 - boundary
 
-                p1["h"] = new_h1
+                if new_h1 < 100 or new_h2 < 100:
+                    p2["x"] = min(p1_x1, p2_x1)
+                    p2["y"] = min(p1_y1, p2_y1)
+                    p2["w"] = p2["width"] = max(p1_x2, p2_x2) - p2["x"]
+                    p2["h"] = p2["height"] = max(p1_y2, p2_orig_y2) - p2["y"]
+                    p1["h"] = p1["height"] = 0
+                    continue
+
+                p1["h"] = max(10, new_h1)
                 if "height" in p1:
-                    p1["height"] = new_h1
+                    p1["height"] = max(10, new_h1)
                 p2["y"] = boundary
-                p2["h"] = new_h2
+                p2["h"] = max(10, new_h2)
                 if "height" in p2:
-                    p2["height"] = new_h2
+                    p2["height"] = max(10, new_h2)
                 logger.debug(
                     f"[LongPanels: Pre-Fusion Clip] panels[{_i}] y2 {p1_y2}->{boundary}, "
                     f"panels[{_i+1}] y1 {p2_y1}->{boundary} (overlap was {overlap}px at optimal seam)"
                 )
-        cv_panels = cv_panels_pre
+        cv_panels = [p for p in cv_panels_pre if int(p.get("h") or p.get("height") or 0) >= 60]
 
     # ── FUSION: Bind Speech Bubbles into Panel Slices ─────────────────────────
     fused_panels, all_bubbles, _ = fuse_panels_and_bubbles(
@@ -435,11 +403,36 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
         raw_dicts = [p.model_dump() for p in fused_panels]
         cleaned_dicts = resolve_overlapping_panels_lineage(raw_dicts, iou_thresh=0.40)
         if cleaned_dicts:
-            # Filter out tiny noise slivers (e.g., logo watermarks or border artifacts)
-            valid_dicts = [
-                cd for cd in cleaned_dicts
-                if int(cd.get("w", 0)) >= max(50, int(img_w * 0.15)) and int(cd.get("h", 0)) >= 50
-            ]
+            # Filter out tiny noise slivers and empty canvas background gutters
+            min_h_thresh = max(120, int(request.min_panel_height * 0.70))
+            valid_dicts = []
+            for cd in cleaned_dicts:
+                cw = int(cd.get("w", 0))
+                ch = int(cd.get("h", 0))
+                cx = int(cd.get("x", 0))
+                cy = int(cd.get("y", 0))
+                has_bubbles = len(cd.get("speech_bubbles") or []) > 0
+
+                if cw < max(50, int(img_w * 0.15)):
+                    continue
+                if ch < min_h_thresh and not has_bubbles:
+                    continue
+
+                # Filter out pure blank canvas gutter slices between panels
+                if ch >= 40 and cw >= 40:
+                    patch = gray_arr[cy:cy + ch, cx:cx + cw]
+                    if patch.size > 0:
+                        patch_std = float(np.std(patch))
+                        if is_white_bg:
+                            bg_match_pct = float(np.mean(patch >= (threshold_val - 8)))
+                        else:
+                            bg_match_pct = float(np.mean(patch <= (threshold_val + 8)))
+                        # If >= 90% is solid canvas background, variance is near 0, and no speech bubbles exist, it's a gutter
+                        if bg_match_pct >= 0.90 and patch_std < 8.0 and not has_bubbles:
+                            continue
+
+                valid_dicts.append(cd)
+
             fused_panels = [
                 PanelBoundingBox(**cd) for cd in (valid_dicts if valid_dicts else cleaned_dicts)
             ]

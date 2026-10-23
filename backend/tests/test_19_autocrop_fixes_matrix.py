@@ -229,3 +229,47 @@ def test_issue_6_speech_bubble_never_cut_in_half():
     ]
     assert len(enclosing_panel) >= 1, "Speech bubble was not fully enclosed in any panel!"
 
+
+def test_issue_7_character_artwork_never_sliced_into_thin_horizontal_strips():
+    """
+    Issue 7 Fix:
+    Verifies that flat anime cel-shading (e.g. jacket, clothing, dark hair)
+    inside a character artwork panel is NEVER falsely classified as a gutter,
+    and the panel is preserved intact rather than fragmented into thin ribbons (< 150px).
+    """
+    w, h = 800, 1600
+    gray_arr = np.full((h, w), 255, dtype=np.uint8)
+
+    # Panel 1: y: 50..700 (Character drawing with smooth shaded jacket & hair)
+    # Background inside panel is dark/tinted art
+    gray_arr[50:700, 50:750] = 120
+    # Character jacket with uniform flat dark shading: y: 350..550
+    gray_arr[350:550, 100:700] = 40
+    # Outline lines around character
+    gray_arr[350, 100:700] = 0
+    gray_arr[549, 100:700] = 0
+
+    # True white gutter between panels: y: 700..850 (150px white canvas gap)
+
+    # Panel 2: y: 850..1500 (Second character drawing)
+    gray_arr[850:1500, 50:750] = 90
+    gray_arr[1050:1300, 120:680] = 30
+
+    res = detect_vertical_strip_panels(
+        gray_arr=gray_arr,
+        is_white_bg=True,
+        threshold_val=220,
+        min_height_px=150,
+        min_width_pct=0.10,
+        median_bg=255.0
+    )
+
+    panels = res.panels
+    # Must detect exactly the 2 major panels without slicing through the jacket
+    assert len(panels) == 2, f"Expected 2 intact panels, but got {len(panels)} fragmented pieces!"
+    p1 = panels[0]
+    p2 = panels[1]
+    assert p1.get("h", 0) >= 500, f"Panel 1 was chopped into thin strip: h={p1.get('h')}"
+    assert p2.get("h", 0) >= 500, f"Panel 2 was chopped into thin strip: h={p2.get('h')}"
+
+

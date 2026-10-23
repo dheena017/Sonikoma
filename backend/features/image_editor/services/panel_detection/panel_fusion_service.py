@@ -135,6 +135,28 @@ def fuse_panels_and_bubbles(
     max_gutter_reach = max(20, int(img_w * 0.25))
     fused_panels: List[PanelBoundingBox] = []
 
+    # Pre-pass: Assign speech bubbles by strict panel containment first
+    # This prevents earlier panels from greedily stealing bubbles that belong to subsequent panels
+    panel_bubble_map: Dict[int, List[SpeechBubbleItem]] = {idx: [] for idx in range(n)}
+    for bubble in list(unassigned_bubbles):
+        bc_x = bubble.x + bubble.width // 2
+        bc_y = bubble.y + bubble.height // 2
+
+        for idx, cp in enumerate(ordered):
+            px = int(cp.get("x") or 0)
+            py = int(cp.get("y") or 0)
+            pw = int(cp.get("w") or cp.get("width") or img_w)
+            ph = int(cp.get("h") or cp.get("height") or 100)
+            tol_x = max(4, int(pw * 0.03))
+            tol_y = max(4, int(ph * 0.03))
+
+            if (px - tol_x) <= bc_x <= (px + pw + tol_x) and (py - tol_y) <= bc_y <= (py + ph + tol_y):
+                bubble.parent_panel_id = f"panel_{idx + 1}"
+                bubble.is_bound = True
+                panel_bubble_map[idx].append(bubble)
+                unassigned_bubbles.remove(bubble)
+                break
+
     for idx, cp in enumerate(ordered):
         px = int(cp.get("x") or 0)
         py = int(cp.get("y") or 0)
@@ -152,7 +174,7 @@ def fuse_panels_and_bubbles(
         tol_y = max(4, int(ph * 0.03))
         dyn_max_dist = max(10, int(pw * 0.08)) if max_binding_dist_px == 60 else max_binding_dist_px
 
-        panel_bubbles: List[SpeechBubbleItem] = []
+        panel_bubbles: List[SpeechBubbleItem] = list(panel_bubble_map.get(idx, []))
         panel_characters: List[CharacterEntityItem] = []
 
         # 1. Assign characters whose centre falls within (or just outside) this panel
@@ -163,22 +185,23 @@ def fuse_panels_and_bubbles(
                 char.panel_id = p_id
                 panel_characters.append(char)
 
-        # 2. Bind speech bubbles that belong to or are adjacent to this panel
+        # 2. Bind unassigned gutter/orphan bubbles that sit immediately adjacent to this panel
         for bubble in list(unassigned_bubbles):
             bc_x = bubble.x + bubble.width // 2
             bc_y = bubble.y + bubble.height // 2
 
             inside_x        = (px - tol_x) <= bc_x <= (px + pw + tol_x)
-            is_inside        = (py - tol_y) <= bc_y <= (py + ph + tol_y)
             is_above_gutter  = 0 <= (py - (bubble.y + bubble.height)) <= max_gutter_reach
             is_below_gutter  = 0 <= (bubble.y - (py + ph)) <= max_gutter_reach
             is_near          = _box_distance(px, py, pw, ph, bubble.x, bubble.y, bubble.width, bubble.height) <= dyn_max_dist
 
-            if not (inside_x and (is_inside or is_above_gutter or is_below_gutter or is_near)):
+            if not (inside_x and (is_above_gutter or is_below_gutter or is_near)):
                 continue
 
             bubble.parent_panel_id = p_id
             bubble.is_bound = True
+            panel_bubbles.append(bubble)
+            unassigned_bubbles.remove(bubble)
 
             if panel_characters:
                 closest = min(
@@ -267,17 +290,41 @@ def fuse_panels_and_bubbles(
 
         overlap_px = cur_y2 - nxt.y
         boundary   = (cur_y2 + nxt.y) // 2
-        new_h_cur  = max(10, boundary - cur.y)
+        new_h_cur  = boundary - cur.y
         nxt_orig_y2 = nxt.y + nxt.h
-        new_h_nxt  = max(10, nxt_orig_y2 - boundary)
+        new_h_nxt  = nxt_orig_y2 - boundary
+
+        # If clipping would reduce either panel into an unnatural tiny sliver (< 100px),
+        # merge the tiny fragment into the adjacent panel rather than leaving a sliced strip:
+        if new_h_cur < 100 or new_h_nxt < 100:
+            merged_y1 = min(cur.y, nxt.y)
+            merged_y2 = max(cur_y2, nxt_orig_y2)
+            merged_x1 = min(cur.x, nxt.x)
+            merged_x2 = max(cur_x2, nxt_x2)
+            nxt.x = merged_x1
+            nxt.y = merged_y1
+            nxt.w = nxt.width = merged_x2 - merged_x1
+            seen_bubble_keys = set()
+            merged_bubbles = []
+            for b in (cur.speech_bubbles or []) + (nxt.speech_bubbles or []):
+                b_key = getattr(b, "id", None) or (getattr(b, "x", None), getattr(b, "y", None), getattr(b, "w", None), getattr(b, "h", None))
+                if b_key not in seen_bubble_keys:
+                    seen_bubble_keys.add(b_key)
+                    merged_bubbles.append(b)
+            nxt.speech_bubbles = merged_bubbles
+            nxt.speech_bubbles_count = len(nxt.speech_bubbles)
+            cur.h = cur.height = 0  # Mark to drop
+            continue
 
         logger.debug(
             "[Panel Fusion] Non-overlap clip: panel %d y2 %d→%d, panel %d y1 %d→%d (overlap=%dpx)",
             i, cur_y2, boundary, i + 1, nxt.y, boundary, overlap_px,
         )
-        cur.h = cur.height = new_h_cur
+        cur.h = cur.height = max(10, new_h_cur)
         nxt.y = boundary
-        nxt.h = nxt.height = new_h_nxt
+        nxt.h = nxt.height = max(10, new_h_nxt)
+
+    fused_panels = [p for p in fused_panels if p.h >= 60]
 
     # ── Re-index ──────────────────────────────────────────────────────────────
     for i, p in enumerate(fused_panels):

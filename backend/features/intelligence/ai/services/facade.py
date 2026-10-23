@@ -17,6 +17,7 @@ import tempfile
 import json
 import re
 from typing import List, Optional, Dict, Any, Union, Tuple
+import math
 from PIL import Image
 
 from app.core.config import call_gemini_with_retry
@@ -834,7 +835,7 @@ async def facade_analyze_batch(
         overall_scene_summary = summary
         single_call_success = any(bool(it) for it in items)
     else:
-        num_chunks = int(np.ceil(len(panels) / float(CHUNK_SIZE)))
+        num_chunks = int(math.ceil(len(panels) / float(CHUNK_SIZE)))
         logger.info(f"[AI Analysis] Dividing {len(panels)} panels into {num_chunks} chunks of {CHUNK_SIZE} for parallel vision analysis (Model: {model or 'default'})...")
         chunk_tasks = []
         for c_idx in range(num_chunks):

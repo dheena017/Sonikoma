@@ -71,9 +71,25 @@ def _detect_bg_color_and_threshold(
     top_median = float(np.median(top_edge))
     bottom_median = float(np.median(bottom_edge))
 
-    edge_samples = np.concatenate([top_edge.ravel(), bottom_edge.ravel(), left_edge.ravel(), right_edge.ravel()])
-    median_bg = float(np.median(edge_samples))
-    bg_std = float(np.std(edge_samples))
+    if h > int(w * 1.5):
+        # Tall webtoon strip: left/right edges frequently contain full-bleed art.
+        # Sample flat horizontal gutter rows across the strip for true canvas background.
+        step = max(1, h // 2000)
+        sub_sample = gray_arr[::step, :]
+        row_stds_fast = np.std(sub_sample, axis=1)
+        flat_mask = row_stds_fast < 5.0
+        if np.any(flat_mask):
+            flat_medians = np.median(sub_sample[flat_mask, :], axis=1)
+            median_bg = float(np.median(flat_medians))
+            bg_std = float(np.std(flat_medians))
+        else:
+            edge_samples = np.concatenate([top_edge.ravel(), bottom_edge.ravel()])
+            median_bg = float(np.median(edge_samples))
+            bg_std = float(np.std(edge_samples))
+    else:
+        edge_samples = np.concatenate([top_edge.ravel(), bottom_edge.ravel(), left_edge.ravel(), right_edge.ravel()])
+        median_bg = float(np.median(edge_samples))
+        bg_std = float(np.std(edge_samples))
 
     if bg_mode == "auto":
         is_white_bg = (median_bg > 127.0)
@@ -81,11 +97,11 @@ def _detect_bg_color_and_threshold(
         is_white_bg = bg_mode == "white"
         median_bg = 255.0 if is_white_bg else 0.0
 
-    noise_adaptive_offset = max(10.0, min(35.0, (sensitivity * 1.5) + (bg_std * 0.5)))
+    noise_adaptive_offset = max(8.0, min(30.0, (sensitivity * 0.8) + (bg_std * 0.4)))
     if is_white_bg:
-        threshold_val = int(min(252, max(140, median_bg - noise_adaptive_offset)))
+        threshold_val = int(min(252, max(210, median_bg - noise_adaptive_offset)))
     else:
-        threshold_val = int(max(8, min(115, median_bg + noise_adaptive_offset)))
+        threshold_val = int(max(8, min(45, median_bg + noise_adaptive_offset)))
 
     bg_color_rgb = (255, 255, 255) if is_white_bg else (0, 0, 0)
     if color_arr is not None and color_arr.ndim == 3 and color_arr.shape[2] >= 3:
@@ -120,18 +136,19 @@ def _detect_vertical_subgutters(
         return [(0, sw)]
 
     col_stds = np.std(slice_gray, axis=0)
+    col_medians = np.median(slice_gray, axis=0)
+    bg_color_match = np.abs(col_medians - float(median_bg)) <= 12.0
     if is_white_bg:
-        bg_col_counts = np.sum(slice_gray > threshold_val, axis=0)
+        bg_col_counts = np.sum(slice_gray >= threshold_val, axis=0)
     else:
-        bg_col_counts = np.sum(slice_gray < threshold_val, axis=0)
+        bg_col_counts = np.sum(slice_gray <= threshold_val, axis=0)
     col_bg_ratios = bg_col_counts / float(max(1, sh))
 
     col_diff_y = np.abs(np.diff(slice_gray.astype(float), axis=0)) if sh > 1 else np.zeros((1, sw))
     col_strokes = np.sum(col_diff_y > 18.0, axis=0)
 
-    # Column gutter requires consistent background and minimal ink stroke transitions
-    # (relaxed std to 14.0 and bg_ratio to 0.75 for scan noise / slight gradients)
-    is_col_gutter = ((col_bg_ratios >= 0.75) | (col_stds < 14.0)) & (col_strokes <= max(2, int(sh * 0.025)))
+    # Column gutter requires genuine canvas background match, consistent brightness, and zero ink stroke transitions
+    is_col_gutter = bg_color_match & (col_bg_ratios >= 0.80) & (col_stds < 12.0) & (col_strokes <= max(2, int(sh * 0.02)))
     is_col_content = ~is_col_gutter
 
     sub_cols: List[Tuple[int, int]] = []
@@ -271,12 +288,12 @@ def detect_vertical_strip_panels(
     gray_center = gray_arr[:, margin:-margin] if w > margin * 2 else gray_arr
     w_center = gray_center.shape[1]
 
-    effective_gutter_bg_ratio = max(0.35, min(0.65, gutter_bg_ratio))
+    effective_gutter_bg_ratio = max(0.45, min(0.75, gutter_bg_ratio))
 
     if high_sensitivity:
-        effective_gutter_bg_ratio = max(0.25, effective_gutter_bg_ratio - 0.10)
+        effective_gutter_bg_ratio = max(0.35, effective_gutter_bg_ratio - 0.10)
         gutter_flat_bg_ratio = max(0.25, gutter_flat_bg_ratio - 0.10)
-        gutter_std_thresh = gutter_std_thresh + 6.0
+        gutter_std_thresh = gutter_std_thresh + 4.0
 
     # Vectorized row-by-row background estimation
     row_stds = np.std(gray_center, axis=1)
@@ -285,10 +302,14 @@ def detect_vertical_strip_panels(
     row_grads = np.abs(np.gradient(gray_center.astype(float), axis=1))
     edge_counts = np.sum(row_grads > 12.0, axis=1)
 
-    row_medians = np.median(gray_center, axis=1)
+    # Background verification against actual page background color (target_bg)
+    target_bg = float(median_bg) if median_bg is not None else (255.0 if is_white_bg else 0.0)
     bg_tolerance = max(18.0, min(40.0, sensitivity * 0.9))
-    bg_pixel_count = np.sum(np.abs(gray_center.astype(float) - row_medians[:, np.newaxis]) <= bg_tolerance, axis=1)
-    bg_ratio = bg_pixel_count / float(max(1, w_center))
+    if is_white_bg:
+        bg_match = (gray_center >= threshold_val) | (np.abs(gray_center.astype(float) - target_bg) <= bg_tolerance)
+    else:
+        bg_match = (gray_center <= threshold_val) | (np.abs(gray_center.astype(float) - target_bg) <= bg_tolerance)
+    page_bg_ratio = np.sum(bg_match, axis=1) / float(max(1, w_center))
 
     med_std = float(np.median(row_stds))
     mad_std = float(np.median(np.abs(row_stds - med_std)))
@@ -303,20 +324,19 @@ def detect_vertical_strip_panels(
     mad_score = np.clip(1.0 - (mad_norm_std / 3.0), 0.0, 1.0)
 
     separator_score = (
-        0.45 * bg_ratio +
+        0.50 * page_bg_ratio +
         0.20 * stroke_score +
-        0.20 * edge_score +
+        0.15 * edge_score +
         0.15 * mad_score
     )
 
-    # Lowered from 0.33/0.28 → 0.25/0.20 so narrow, tinted, or gradient gutters
-    # between dense comic panels are no longer merged into one panel.
-    sep_threshold = 0.20 if high_sensitivity else 0.25
+    sep_threshold = 0.45 if high_sensitivity else 0.55
     max_stroke_count = max(4, int(w_center * 0.025))
     is_gutter_row = (
         (stroke_counts <= max_stroke_count) &
-        ((separator_score >= sep_threshold) | (bg_ratio >= 0.30) | (row_stds <= gutter_std_thresh * 2.5)) &
-        (edge_density <= 0.20)
+        (page_bg_ratio >= (effective_gutter_bg_ratio - 0.10)) &
+        ((separator_score >= sep_threshold) | (row_stds <= gutter_std_thresh * 1.8)) &
+        (edge_density <= 0.15)
     )
     is_content_row = ~is_gutter_row
 
@@ -351,8 +371,8 @@ def detect_vertical_strip_panels(
     
     in_gutter = False
     g_start = 0
-    # Minimum 2px gutter height to detect narrow panel dividers
-    min_gutter_h = max(2, int(w * 0.005))
+    # Minimum gutter height: 6px or 0.8% of width to ensure reliable panel separation without false-splitting art
+    min_gutter_h = max(6, int(w * 0.008))
 
     for i in range(h):
         if is_gutter_row[i] and not in_gutter:
@@ -363,9 +383,9 @@ def detect_vertical_strip_panels(
             g_end = i
             gh = g_end - g_start
             if gh >= min_gutter_h:
-                avg_bg_ratio = float(np.mean(bg_ratio[g_start:g_end]))
+                avg_bg_ratio = float(np.mean(page_bg_ratio[g_start:g_end]))
                 avg_std = float(np.mean(row_stds[g_start:g_end]))
-                if (avg_bg_ratio >= (effective_gutter_bg_ratio - 0.12) or avg_std <= gutter_std_thresh * 2.5 or gh >= max(6, int(w * 0.012))):
+                if avg_bg_ratio >= (effective_gutter_bg_ratio - 0.15) and (avg_std <= gutter_std_thresh * 2.2 or gh >= max(8, int(w * 0.012))):
                     cut_y = (g_start + g_end) // 2
                     cut_points.append(cut_y)
                     gutter_heights.append(gh)
@@ -374,9 +394,9 @@ def detect_vertical_strip_panels(
         g_end = h
         gh = g_end - g_start
         if gh >= min_gutter_h:
-            avg_bg_ratio = float(np.mean(bg_ratio[g_start:g_end]))
+            avg_bg_ratio = float(np.mean(page_bg_ratio[g_start:g_end]))
             avg_std = float(np.mean(row_stds[g_start:g_end]))
-            if (avg_bg_ratio >= (effective_gutter_bg_ratio - 0.12) or avg_std <= gutter_std_thresh * 2.5 or gh >= max(6, int(w * 0.012))):
+            if avg_bg_ratio >= (effective_gutter_bg_ratio - 0.15) and (avg_std <= gutter_std_thresh * 2.2 or gh >= max(8, int(w * 0.012))):
                 cut_y = (g_start + g_end) // 2
                 cut_points.append(cut_y)
                 gutter_heights.append(gh)

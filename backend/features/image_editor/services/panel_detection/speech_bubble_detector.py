@@ -118,13 +118,85 @@ def _set_loaded_yolo_model(model_instance: Any):
     _yolo_model = model_instance
 
 
+def _detect_chat_ui_bubbles(pil_img: Image.Image) -> List[SpeechBubbleItem]:
+    """
+    Detects smartphone text message chat bubbles, SMS bubbles, and dialog pills in comic panels.
+    Captures blue (iMessage/Webtoon), green (WhatsApp/Line), and white pills on dark smartphone screens.
+    """
+    try:
+        cv_bgr = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+        h, w, _ = cv_bgr.shape
+        hsv = cv2.cvtColor(cv_bgr, cv2.COLOR_BGR2HSV)
+        gray = cv2.cvtColor(cv_bgr, cv2.COLOR_BGR2GRAY)
+
+        # 1. Blue chat bubbles (iMessage / Android / manhwa phone UI)
+        blue_mask = cv2.inRange(hsv, (95, 55, 80), (130, 255, 255))
+        # 2. Green chat bubbles (WeChat / WhatsApp / Line UI)
+        green_mask = cv2.inRange(hsv, (35, 55, 80), (85, 255, 255))
+        color_mask = cv2.bitwise_or(blue_mask, green_mask)
+
+        # 3. White chat pills on dark smartphone screens (Value < 75 background)
+        dark_screen_mask = (cv2.inRange(hsv, (0, 0, 0), (180, 255, 75)) > 0)
+        has_phone_screen = np.sum(dark_screen_mask) > (w * h * 0.04)
+
+        chat_masks = [("blue_chat", color_mask)]
+        if has_phone_screen:
+            white_pill_mask = cv2.inRange(hsv, (0, 0, 180), (180, 45, 255))
+            chat_masks.append(("white_chat", white_pill_mask))
+
+        found_bubbles: List[SpeechBubbleItem] = []
+        min_area = int(w * h * 0.0008)
+        max_area = int(w * h * 0.20)
+        idx_counter = 1
+
+        for name, mask in chat_masks:
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+            cleaned = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+            cnts, _ = cv2.findContours(cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+            for c in cnts:
+                area = cv2.contourArea(c)
+                if area < min_area or area > max_area:
+                    continue
+                x, y, bw, bh = cv2.boundingRect(c)
+                aspect = bw / float(max(1, bh))
+                if 1.0 <= aspect <= 7.0 and bw <= int(w * 0.85):
+                    patch = gray[y:y+bh, x:x+bw]
+                    # Genuine message bubbles contain high-frequency dialogue text strokes
+                    if patch.size > 0 and float(np.std(patch)) >= 3.5:
+                        # Extract smooth polygon from contour
+                        poly = [[int(pt[0][0]), int(pt[0][1])] for pt in c] if len(c) >= 3 else None
+                        found_bubbles.append(SpeechBubbleItem(
+                            bubble_id=f"chat_{name}_{idx_counter}",
+                            label=EntityLabel.BUBBLE_SPEECH.value,
+                            category=EntityCategory.TEXT.value,
+                            sub_type="chat_message",
+                            x=x,
+                            y=y,
+                            width=bw,
+                            height=bh,
+                            polygon=poly,
+                            dialogue_text=None,
+                            confidence=0.88,
+                            reading_order=idx_counter,
+                            is_bound=False
+                        ))
+                        idx_counter += 1
+
+        return found_bubbles
+    except Exception as e:
+        logger.debug(f"[Vision Engine] Chat bubble detection fallback: {e}")
+        return []
+
+
 def detect_yolo_entities(
     image_input: Any,
-    conf_threshold: float = 0.30
+    conf_threshold: float = 0.25
 ) -> List[SpeechBubbleItem]:
     """
     Executes YOLOv8m-seg semantic inference on comic image bytes or PIL Image.
-    Extracts dialogue bubbles, thought clouds, captions, and polygon masks.
+    Extracts dialogue bubbles, thought clouds, captions, chat messages, and polygon masks.
+    Dynamically normalizes resolution so strips of any width/height are accurately detected.
     """
     if isinstance(image_input, Image.Image):
         pil_img = image_input
@@ -135,7 +207,6 @@ def detect_yolo_entities(
     img_w, img_h = pil_img.size
 
     model = get_yolo_speech_bubble_model()
-    # If YOLO model is available and trained on comic entities, use YOLO
     is_comic_yolo = False
     if model is not None:
         model_names = getattr(model, "names", {})
@@ -143,35 +214,43 @@ def detect_yolo_entities(
             names_list = list(model_names.values())
         else:
             names_list = list(model_names)
-        # Check if model has comic/speech bubble classes
         is_coco = any(c in names_list for c in ["person", "bicycle", "car", "dog", "cat", "chair", "cup"])
         is_comic_yolo = not is_coco and any("bubble" in str(c).lower() or "text" in str(c).lower() or "balloon" in str(c).lower() or "speech" in str(c).lower() for c in names_list)
-    else:
-        pass
 
+    results = []
+    scale_factor = 1.0
     if is_comic_yolo and model is not None:
         try:
-            results = model.predict(source=pil_img, conf=conf_threshold, verbose=False)
+            # Canonical resolution normalization:
+            # Narrow strips (e.g. 110px) are scaled up to standard width (~800px) so bubbles match YOLO receptive field
+            if img_w < 600:
+                target_w = 800
+                scale_factor = target_w / float(img_w)
+                target_h = int(img_h * scale_factor)
+                infer_img = pil_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
+            elif img_w > 1800:
+                target_w = 1200
+                scale_factor = target_w / float(img_w)
+                target_h = int(img_h * scale_factor)
+                infer_img = pil_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
+            else:
+                infer_img = pil_img
+
+            results = model.predict(source=infer_img, conf=conf_threshold, verbose=False)
         except Exception as e:
             logger.warning(f"[Vision Engine] Bubble inference error: {e}")
             results = []
-    else:
-        results = []
 
     gray_np = np.array(pil_img.convert("L"))
-    otsu_val, _ = cv2.threshold(gray_np, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    dyn_white_thresh = max(150.0, min(240.0, float(otsu_val) * 1.12))
-
     entities: List[SpeechBubbleItem] = []
     bubble_counter = 1
 
-    # Dynamic image-proportional bubble limits
-    is_tall_webtoon = img_h > (img_w * 2.5)
-    max_bubble_w = int(img_w * 0.75) if is_tall_webtoon else int(img_w * 0.40)
-    max_bubble_h = int(img_w * 0.50) if is_tall_webtoon else int(img_h * 0.25)
-    max_bubble_area = int(img_w * min(img_h, int(img_w * 2.0)) * 0.15)
-    min_bubble_w = max(10, int(img_w * 0.02))
-    min_bubble_h = max(10, int(img_h * 0.008)) if is_tall_webtoon else max(10, int(img_w * 0.015))
+    # Dynamic proportional limits based on strip width (independent of tall strip height)
+    max_bubble_w = int(img_w * 0.90)
+    max_bubble_h = int(img_w * 1.60)
+    max_bubble_area = int(img_w * img_w * 1.25)
+    min_bubble_w = max(4, int(img_w * 0.015))
+    min_bubble_h = max(4, int(img_w * 0.015))
 
     if results:
         for r in results:
@@ -182,13 +261,24 @@ def detect_yolo_entities(
             masks = masks_obj.xy if (masks_obj is not None and hasattr(masks_obj, "xy")) else []  # type: ignore
 
             for idx, (box, conf) in enumerate(zip(boxes, confs)):
-                x1, y1, x2, y2 = [int(v) for v in box]
-                w = max(10, x2 - x1)
-                h = max(10, y2 - y1)
+                rx1, ry1, rx2, ry2 = [float(v) for v in box]
+                if scale_factor != 1.0:
+                    x1 = int(rx1 / scale_factor)
+                    y1 = int(ry1 / scale_factor)
+                    x2 = int(rx2 / scale_factor)
+                    y2 = int(ry2 / scale_factor)
+                else:
+                    x1, y1, x2, y2 = int(rx1), int(ry1), int(rx2), int(ry2)
+
+                w = max(4, x2 - x1)
+                h = max(4, y2 - y1)
 
                 polygon = None
                 if idx < len(masks) and masks[idx] is not None and len(masks[idx]) > 2:
-                    polygon = [[int(pt[0]), int(pt[1])] for pt in masks[idx]]
+                    if scale_factor != 1.0:
+                        polygon = [[int(pt[0] / scale_factor), int(pt[1] / scale_factor)] for pt in masks[idx]]
+                    else:
+                        polygon = [[int(pt[0]), int(pt[1])] for pt in masks[idx]]
 
                 if w > max_bubble_w or h > max_bubble_h or (w * h) > max_bubble_area or w < min_bubble_w or h < min_bubble_h:
                     continue
@@ -196,9 +286,10 @@ def detect_yolo_entities(
                 sub_patch = gray_np[y1:y1 + h, x1:x1 + w]
                 if sub_patch.size == 0:
                     continue
-                
-                white_ratio = float(np.mean(sub_patch > dyn_white_thresh))
-                if white_ratio < 0.50:
+
+                # Content verification: genuine speech bubbles contain dialogue text lettering
+                patch_std = float(np.std(sub_patch))
+                if patch_std < 2.0 and conf < 0.60:
                     continue
 
                 aspect = w / float(h)
@@ -211,7 +302,6 @@ def detect_yolo_entities(
                 else:
                     bubble_type = "thought"
                     label = EntityLabel.BUBBLE_THOUGHT.value
-
 
                 entities.append(SpeechBubbleItem(
                     bubble_id=f"bubble_{bubble_counter}",
@@ -230,8 +320,31 @@ def detect_yolo_entities(
                 ))
                 bubble_counter += 1
 
-    # Adaptive Geometric Contour Speech Bubble Fallback
-    if not entities:
+    # Augment with smartphone text message / chat UI bubbles
+    chat_bubbles = _detect_chat_ui_bubbles(pil_img)
+    for cb in chat_bubbles:
+        # Check IoU overlap against existing YOLO entities
+        cb_x1, cb_y1, cb_x2, cb_y2 = cb.x, cb.y, cb.x + cb.width, cb.y + cb.height
+        is_overlapping = False
+        for ex in entities:
+            ex_x1, ex_y1, ex_x2, ex_y2 = ex.x, ex.y, ex.x + ex.width, ex.y + ex.height
+            inter_w = max(0, min(cb_x2, ex_x2) - max(cb_x1, ex_x1))
+            inter_h = max(0, min(cb_y2, ex_y2) - max(cb_y1, ex_y1))
+            inter_area = inter_w * inter_h
+            if inter_area > 0:
+                union_area = (cb.width * cb.height) + (ex.width * ex.height) - inter_area
+                iou = inter_area / float(max(1, union_area))
+                if iou >= 0.35:
+                    is_overlapping = True
+                    break
+        if not is_overlapping:
+            cb.bubble_id = f"bubble_{bubble_counter}"
+            cb.reading_order = bubble_counter
+            entities.append(cb)
+            bubble_counter += 1
+
+    # Adaptive Geometric Contour Speech Bubble Fallback (only when YOLO is unavailable)
+    if not entities and not is_comic_yolo:
         try:
             block_size = max(11, (int(img_w * 0.02) | 1))
             thresh = cv2.adaptiveThreshold(gray_np, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, block_size, 2)
