@@ -1,5 +1,5 @@
 """
-backend/app/services/image/panel_detection/detect_long_panels_service.py
+backend/features/image_editor/services/panel_detection/detect_long_panels_service.py
 ─────────────────────────────────────────────────────────────────────────────
 Orchestrator Service for Tall Webtoon Strips:
 - Horizontal projection profile variance for gutter seam slicing
@@ -13,6 +13,7 @@ import time
 import base64
 import logging
 from typing import Any, Dict, List, Optional
+import numpy as np
 from PIL import Image
 
 from features.platform.projects.schemas_project import (
@@ -25,16 +26,21 @@ from features.image_editor.services.panel_detection.panel_detector import (
     detect_vertical_strip_panels,
     _detect_bg_color_and_threshold,
     _subdivide_continuous_tall_art_panel,
-    _detect_panels_webtoon
+    _detect_panels_webtoon,
+    _detect_vertical_subgutters,
+    resolve_overlapping_panels_lineage,
 )
 from features.image_editor.services.panel_detection.opencv_detector import detect_opencv_boxes
-from features.image_editor.services.panel_detection.speech_bubble_detector import detect_yolo_entities
+from features.image_editor.services.panel_detection.speech_bubble_detector import detect_speech_bubbles as detect_yolo_entities
 from features.image_editor.services.panel_detection.panel_fusion_service import fuse_panels_and_bubbles
+from features.image_editor.services.panel_detection.ai_vision_detector import detect_ai_vision
 
 logger = logging.getLogger("sonikoma.services.panel_detection.long_panels")
 
+__all__ = ["detect_long_panels", "detect_long_panels_boxes"]
 
-async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLongPanelsResponse:
+
+async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPanelsResponse:
     """
     Executes multi-panel detection on tall scrolling webtoon strips.
     """
@@ -56,6 +62,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
     pil_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
     img_w, img_h = pil_img.size
     aspect_ratio = img_h / float(max(1, img_w))
+    gray_arr = np.array(pil_img.convert("L"))
 
     logger.info(f"[LongPanels Detector] Starting Tri-Engine detection on {img_w}x{img_h}px image (aspect_ratio={aspect_ratio:.2f})...")
 
@@ -124,15 +131,11 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
     )
     cv_panels = cv_res.get("panels", [])
 
+    is_white_bg = True
+    threshold_val = 220
     # Run horizontal projection valley segmenter guided by YOLO speech bubbles
-    if (len(cv_panels) <= 1 or img_h > img_w * 2):
+    if len(cv_panels) <= 1 or img_h > img_w * 2:
         try:
-            import numpy as np
-            from features.image_editor.services.panel_detection.panel_detector import (
-                detect_vertical_strip_panels,
-                _detect_bg_color_and_threshold
-            )
-            gray_arr = np.array(pil_img.convert("L"))
             bg_res = _detect_bg_color_and_threshold(gray_arr, request.background_mode, request.sensitivity)
             is_white_bg, threshold_val, median_bg, bg_std, top_med, bot_med, bg_rgb = bg_res
 
@@ -160,7 +163,6 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
     flow = "top_to_bottom"
     if request.engine_mode == "ai_vision":
         try:
-            from features.image_editor.services.panel_detection.ai_vision_detector import detect_ai_vision
             ai_res = await detect_ai_vision(raw_bytes)
             flow = ai_res.get("reading_flow", "top_to_bottom")
             logger.info(f"[LongPanels: AI Vision] Reading flow classified as '{flow}'.")
@@ -171,10 +173,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
     # Break down macro-page slices into individual separate comic panel frames
     if request.auto_split:
         try:
-            import numpy as np
-            gray_arr = np.array(pil_img.convert("L"))
             subdivided_cv: List[Dict[str, Any]] = []
-
             is_webtoon_scroll = (request.background_mode != "manga_grid") or (img_h > img_w * 1.5)
 
             for p in cv_panels:
@@ -192,7 +191,6 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                     sub_gray = gray_arr[py : py + ph, px : px + pw]
                     has_subcols = False
                     if sub_gray.shape[0] > 0 and sub_gray.shape[1] > 0 and pw >= int(img_w * 0.70):
-                        from features.image_editor.services.panel_detection.panel_detector import _detect_vertical_subgutters
                         sub_cols = _detect_vertical_subgutters(sub_gray, is_white_bg=True, threshold_val=220, median_bg=255.0)
                         if len(sub_cols) > 1:
                             has_subcols = True
@@ -214,7 +212,6 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                     # In Webtoon strips, only subdivide exceptionally tall continuous art scenes
                     # along natural valley seams (aspect ratio > 2.8:1 or height > 2.2x strip width):
                     if ph > int(pw * 2.8) or (ph > int(img_w * 2.2) and ph > int(pw * 2.0)):
-                        from features.image_editor.services.panel_detection.panel_detector import _subdivide_continuous_tall_art_panel
                         child_ocr = [
                             {"x": max(0, b.x - px), "y": max(0, b.y - py), "w": b.width, "h": b.height}
                             for b in yolo_bubbles
@@ -350,7 +347,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                 # Find optimal boundary row in overlap zone: minimum ink strokes / edge density
                 boundary = p2_y1 + (overlap // 2)
                 try:
-                    if "gray_arr" in locals() and gray_arr is not None:
+                    if gray_arr is not None:
                         overlap_band = gray_arr[p2_y1:p1_y2, :]
                         if overlap_band.shape[0] > 0 and overlap_band.shape[1] > 1:
                             row_diffs = np.abs(np.diff(overlap_band.astype(float), axis=1))
@@ -399,7 +396,6 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
 
     # ── POST-PROCESSING: Deduplicate overlapping slices ───────────────────────
     try:
-        from features.image_editor.services.panel_detection.panel_detector import resolve_overlapping_panels_lineage
         raw_dicts = [p.model_dump() for p in fused_panels]
         cleaned_dicts = resolve_overlapping_panels_lineage(raw_dicts, iou_thresh=0.40)
         if cleaned_dicts:
@@ -461,3 +457,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
         gutter_count=max(0, len(fused_panels) - 1),
         message=f"Detected {len(fused_panels)} panels in {elapsed_ms}ms."
     )
+
+
+# Backward-compatible alias
+detect_long_panels_boxes = detect_long_panels

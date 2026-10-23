@@ -1,5 +1,5 @@
 """
-backend/app/services/image/panel_detection/detect_composite_service.py
+backend/features/image_editor/services/panel_detection/detect_composite_service.py
 ─────────────────────────────────────────────────────────────────────────────
 Unified Composite Detection Service:
 - Synchronous single-call pipeline for Panels + Speech Bubbles + Characters
@@ -31,7 +31,7 @@ from features.image_editor.services.panel_detection.panel_fusion_service import 
 logger = logging.getLogger("sonikoma.services.panel_detection.composite")
 
 
-async def detect_composite_boxes(body: DetectPanelsUrlRequest) -> DetectCompositeResponse:
+async def detect_composite_panels(body: DetectPanelsUrlRequest) -> DetectCompositeResponse:
     """
     Executes unified composite detection on comic image bytes:
     1. Resolves image to in-memory bytes.
@@ -117,3 +117,9 @@ async def detect_composite_boxes(body: DetectPanelsUrlRequest) -> DetectComposit
         execution_time_ms=elapsed_ms,
         message=f"Detected {len(fused_panels)} panel(s), {len(yolo_bubbles)} bubble(s), and {len(characters)} character(s) in {elapsed_ms}ms"
     )
+
+
+# Backward-compatible alias
+detect_composite_boxes = detect_composite_panels
+
+__all__ = ["detect_composite_panels", "detect_composite_boxes"]

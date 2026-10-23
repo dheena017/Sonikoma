@@ -1,5 +1,5 @@
 """
-backend/app/services/image/panel_detection/panel_detector.py
+backend/features/image_editor/services/panel_detection/panel_detector.py
 ─────────────────────────────────────────────────────────────────────────────
 Unified Panel Detection & Webtoon Slicing Engine:
 - High-precision Webtoon vertical strip slicing (detect_vertical_strip_panels)
@@ -49,7 +49,7 @@ class PanelDetectionResult:
         yield self.gutter_ranges
 
 
-def _detect_bg_color_and_threshold(
+def detect_background_color_and_threshold(
     gray_arr: np.ndarray,
     bg_mode: str = "auto",
     sensitivity: float = 30.0,
@@ -121,7 +121,11 @@ def _detect_bg_color_and_threshold(
     return is_white_bg, threshold_val, median_bg, bg_std, top_median, bottom_median, bg_color_rgb
 
 
-def _detect_vertical_subgutters(
+# Backward-compatible alias
+_detect_bg_color_and_threshold = detect_background_color_and_threshold
+
+
+def detect_vertical_subgutters(
     slice_gray: np.ndarray,
     is_white_bg: bool,
     threshold_val: int,
@@ -175,7 +179,11 @@ def _detect_vertical_subgutters(
     return sub_cols
 
 
-def _classify_content_rows(
+# Backward-compatible alias
+_detect_vertical_subgutters = detect_vertical_subgutters
+
+
+def classify_content_rows(
     sub_slice: np.ndarray,
     is_white_bg: bool,
     threshold_val: int,
@@ -229,7 +237,11 @@ def _classify_content_rows(
     return content_rows
 
 
-def _compute_trim_bounds(
+# Backward-compatible alias
+_classify_content_rows = classify_content_rows
+
+
+def compute_trim_bounds(
     content_rows: np.ndarray,
     slice_h: int,
     w: int,
@@ -258,6 +270,10 @@ def _compute_trim_bounds(
     bottom_removed = slice_h - bot_pad
 
     return top_pad, final_h, top_removed, bottom_removed
+
+
+# Backward-compatible alias
+_compute_trim_bounds = compute_trim_bounds
 
 
 def detect_vertical_strip_panels(
@@ -644,7 +660,7 @@ def detect_vertical_strip_panels(
 _detect_panels_webtoon = detect_vertical_strip_panels
 
 
-def _sort_panels_reading_order(panels: List[Dict[str, Any]], reading_order: str = "ltr") -> List[Dict[str, Any]]:
+def sort_panels_reading_order(panels: List[Dict[str, Any]], reading_order: str = "ltr") -> List[Dict[str, Any]]:
     """
     Sorts comic & webtoon panels into true 2D visual reading order.
     """
@@ -683,7 +699,11 @@ def _sort_panels_reading_order(panels: List[Dict[str, Any]], reading_order: str 
     return ordered_panels
 
 
-def _subdivide_continuous_tall_art_panel(
+# Backward-compatible alias
+_sort_panels_reading_order = sort_panels_reading_order
+
+
+def subdivide_continuous_tall_art_panel(
     sub_gray: np.ndarray,
     bx: int,
     by: int,
@@ -922,12 +942,13 @@ def run_cv_detection(
 
 
 detect_panels_in_image = run_cv_detection
-_split_oversized_webtoon_boxes = _subdivide_continuous_tall_art_panel
+_subdivide_continuous_tall_art_panel = subdivide_continuous_tall_art_panel
+_split_oversized_webtoon_boxes = subdivide_continuous_tall_art_panel
 
 
 # ─── Post-Processing & Overlap Resolution ─────────────────────────────────────
 
-def _normalize_box(box: Dict[str, Any]) -> Dict[str, Any]:
+def normalize_panel_box(box: Dict[str, Any]) -> Dict[str, Any]:
     x = box.get("x")
     if x is None:
         x = box.get("left", 0)
@@ -960,7 +981,11 @@ def _normalize_box(box: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def resolve_overlapping_panels_lineage(
+# Backward-compatible alias
+_normalize_box = normalize_panel_box
+
+
+def resolve_overlapping_panels(
     boxes: List[Dict[str, Any]],
     orig_w: int = 800,
     orig_h: int = 1200,
@@ -1069,4 +1094,35 @@ def compute_post_panel_confidence(
     return float(np.clip(float(box.get("confidence", 0.95)), 0.50, 0.99))
 
 
+# Backward-compatible aliases
+resolve_overlapping_panels_lineage = resolve_overlapping_panels
 postprocess_panel_boundaries = compute_post_panel_confidence
+
+__all__ = [
+    "PanelDetectionResult",
+    "detect_vertical_strip_panels",
+    "_detect_panels_webtoon",
+    "detect_background_color_and_threshold",
+    "_detect_bg_color_and_threshold",
+    "detect_vertical_subgutters",
+    "_detect_vertical_subgutters",
+    "classify_content_rows",
+    "_classify_content_rows",
+    "compute_trim_bounds",
+    "_compute_trim_bounds",
+    "sort_panels_reading_order",
+    "_sort_panels_reading_order",
+    "subdivide_continuous_tall_art_panel",
+    "_subdivide_continuous_tall_art_panel",
+    "_split_oversized_webtoon_boxes",
+    "trim_solid_borders",
+    "run_cv_detection",
+    "detect_panels_in_image",
+    "normalize_panel_box",
+    "_normalize_box",
+    "resolve_overlapping_panels",
+    "resolve_overlapping_panels_lineage",
+    "resolve_micro_panels",
+    "compute_post_panel_confidence",
+    "postprocess_panel_boundaries",
+]

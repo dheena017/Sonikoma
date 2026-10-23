@@ -1,5 +1,5 @@
 """
-backend/app/services/image/panel_detection/panel_fusion_service.py
+backend/features/image_editor/services/panel_detection/panel_fusion_service.py
 ─────────────────────────────────────────────────────────────────────────────
 Intelligent Fusion Engine for OpenCV + YOLO + AI Entities:
 - Speech Bubble Placement & Binding (5 Canonical Manga Conventions):
@@ -34,14 +34,14 @@ logger = logging.getLogger("sonikoma.services.panel_detection.fusion")
 
 # ── Geometry Helpers ──────────────────────────────────────────────────────────
 
-def _box_distance(px: int, py: int, pw: int, ph: int, bx: int, by: int, bw: int, bh: int) -> float:
+def compute_box_distance(px: int, py: int, pw: int, ph: int, bx: int, by: int, bw: int, bh: int) -> float:
     """Minimum Euclidean distance between two axis-aligned rectangles (0 if overlapping)."""
     dx = max(0, px - (bx + bw), bx - (px + pw))
     dy = max(0, py - (by + bh), by - (py + ph))
     return math.sqrt(dx * dx + dy * dy)
 
 
-def _box_intersection_area(
+def compute_box_intersection_area(
     x1: int, y1: int, w1: int, h1: int,
     x2: int, y2: int, w2: int, h2: int
 ) -> int:
@@ -55,17 +55,17 @@ def _box_intersection_area(
     return 0
 
 
-def _raw_y1(panel: Dict[str, Any]) -> int:
+def get_panel_y1(panel: Dict[str, Any]) -> int:
     """Top Y coordinate of a raw cv_panel dict."""
     return int(panel.get("y") or 0)
 
 
-def _raw_y2(panel: Dict[str, Any]) -> int:
+def get_panel_y2(panel: Dict[str, Any]) -> int:
     """Bottom Y coordinate of a raw cv_panel dict."""
-    return _raw_y1(panel) + int(panel.get("h") or panel.get("height") or 0)
+    return get_panel_y1(panel) + int(panel.get("h") or panel.get("height") or 0)
 
 
-def _estimate_cinematography(panel_w: int, panel_h: int, characters: List[CharacterEntityItem]) -> PanelCinematography:
+def estimate_cinematography(panel_w: int, panel_h: int, characters: List[CharacterEntityItem]) -> PanelCinematography:
     """Infer camera shot type and suggested motion from character framing."""
     if not characters:
         return PanelCinematography(
@@ -97,6 +97,14 @@ def _estimate_cinematography(panel_w: int, panel_h: int, characters: List[Charac
         dominant_mood="action",
         suggested_camera_motion="pan_down",
     )
+
+
+# Backward-compatible aliases
+_box_distance = compute_box_distance
+_box_intersection_area = compute_box_intersection_area
+_raw_y1 = get_panel_y1
+_raw_y2 = get_panel_y2
+_estimate_cinematography = estimate_cinematography
 
 
 # ── Speech Bubble Placement Functions (5 Canonical Manga Conventions) ─────────
@@ -670,3 +678,31 @@ def fuse_panels_and_bubbles(
 
     logger.info("[Panel Fusion] Done: %d panel(s) produced.", len(fused_panels))
     return fused_panels, yolo_bubbles, margins
+
+
+__all__ = [
+    "fuse_panels_and_bubbles",
+    "classify_speech_bubble_placement",
+    "is_bubble_inside_panel",
+    "is_bubble_crossing_panel_border",
+    "is_bubble_outside_panel_gutter",
+    "find_bubble_spanning_panels",
+    "find_overlapping_dialogue_bubbles",
+    "assign_characters_to_panels",
+    "bind_bubbles_to_characters",
+    "expand_panel_boundary_for_bubble",
+    "apply_bleed_padding",
+    "detect_and_mark_inset_panels",
+    "enforce_strict_non_overlap",
+    "compute_crop_margins",
+    "compute_box_distance",
+    "_box_distance",
+    "compute_box_intersection_area",
+    "_box_intersection_area",
+    "get_panel_y1",
+    "_raw_y1",
+    "get_panel_y2",
+    "_raw_y2",
+    "estimate_cinematography",
+    "_estimate_cinematography",
+]

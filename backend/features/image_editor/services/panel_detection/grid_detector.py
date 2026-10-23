@@ -1,13 +1,25 @@
 """
-backend/app/services/image/panel_detection/grid_detector.py
+backend/features/image_editor/services/panel_detection/grid_detector.py
 ─────────────────────────────────────────────────────────────────────────────
 Grid layout panel detection strategies using OpenCV contours or PIL projection profiles.
+- Multi-scale Canny + Adaptive threshold edge fusion
+- Morphological frame closing preserving gutters
+- Polygonal contour extraction (supports diagonal/slanted frames)
+- Reading flow aware ordering (RTL for Manga, LTR for Western)
+- 2D projection tier and column decomposition fallback
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import logging
+from typing import List, Dict, Tuple, Any, Optional
 import numpy as np
-from typing import List, Dict, Tuple, Any
+
+try:
+    import cv2
+    HAS_CV = True
+except ImportError:
+    cv2 = None  # type: ignore
+    HAS_CV = False
 
 logger = logging.getLogger("sonikoma.services.image.panel_detection.grid_detector")
 
@@ -34,7 +46,19 @@ def detect_manga_grid_panels(
     - Polygonal contour extraction (supports diagonal/slanted frames)
     - Reading flow aware ordering (RTL for Manga, LTR for Western)
     """
-    import cv2
+    if cv2 is None or not HAS_CV:
+        logger.warning("[Grid Detector] cv2 is not available; falling back to PIL-based grid detection.")
+        return _detect_panels_grid_pil(
+            gray_arr=gray,
+            is_white_bg=is_white_bg,
+            sensitivity=30.0,
+            min_height_px=min_height_px,
+            min_panel_area=min_panel_area,
+            max_aspect_ratio=max_aspect_ratio,
+            min_aspect_ratio=min_aspect_ratio,
+            reading_flow=reading_flow,
+        )
+
     h_img, w_img = gray.shape[:2]
     img_area = float(w_img * h_img)
     effective_min_area = min(min_panel_area, max(200.0, img_area * 0.008))
@@ -116,7 +140,7 @@ def detect_manga_grid_panels(
 
     # If contours missed multi-column subpanels, run 2D projection fallback
     if len(raw_boxes) <= 1:
-        pil_boxes = _detect_panels_grid_pil(
+        pil_boxes = detect_manga_grid_pil(
             gray_arr=gray,
             is_white_bg=is_white_bg,
             sensitivity=30.0,
@@ -138,7 +162,7 @@ def detect_manga_grid_panels(
     return raw_boxes
 
 
-def _detect_panels_grid_pil(
+def detect_manga_grid_pil(
     gray_arr: np.ndarray,
     is_white_bg: bool,
     sensitivity: float,
@@ -276,6 +300,14 @@ def _detect_panels_grid_pil(
     return raw_boxes
 
 
-# Backward-compatibility alias
+# Backward-compatibility aliases
 _detect_panels_grid_cv = detect_manga_grid_panels
+_detect_panels_grid_pil = detect_manga_grid_pil
+
+__all__ = [
+    "detect_manga_grid_panels",
+    "_detect_panels_grid_cv",
+    "detect_manga_grid_pil",
+    "_detect_panels_grid_pil",
+]
 

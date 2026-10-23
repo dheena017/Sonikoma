@@ -1,5 +1,5 @@
 """
-backend/app/services/image/panel_detection/detect_batch_service.py
+backend/features/image_editor/services/panel_detection/detect_batch_service.py
 ─────────────────────────────────────────────────────────────────────────────
 Orchestrator Service for Batch Image URL Panel Detection:
 - Runs concurrent asynchronous processing across an array of URLs
@@ -18,17 +18,23 @@ from features.platform.projects.schemas_project import (
     DetectLongPanelsRequest
 )
 from features.image_editor.services.crop.detect_type_service import detect_image_layout_type
-from features.image_editor.services.panel_detection.detect_small_panels_service import detect_small_panels_boxes
-from features.image_editor.services.panel_detection.detect_long_panels_service import detect_long_panels_boxes
+from features.image_editor.services.panel_detection.detect_small_panels_service import detect_small_panels
+from features.image_editor.services.panel_detection.detect_long_panels_service import detect_long_panels
 
 logger = logging.getLogger("sonikoma.services.panel_detection.batch")
 
+__all__ = ["detect_batch_panels", "process_single_url", "_process_single_url"]
 
-async def _process_single_url(url: str, options: DetectPanelsBatchRequest) -> Dict[str, Any]:
+
+async def process_single_url(url: str, options: DetectPanelsBatchRequest) -> Dict[str, Any]:
+    """Processes a single URL within a batch detection run."""
     try:
         # Step 1: Detect layout type
         type_res = await detect_image_layout_type(url=url)
-        is_tall = str(type_res.crop_type.value if hasattr(type_res.crop_type, 'value') else type_res.crop_type) in ("long_panels", "ultra_long_panels", "four_koma") or (type_res.aspect_ratio or 0) >= 2.0
+        is_tall = (
+            str(type_res.crop_type.value if hasattr(type_res.crop_type, 'value') else type_res.crop_type) in ("long_panels", "ultra_long_panels", "four_koma")
+            or (type_res.aspect_ratio or 0) >= 2.0
+        )
 
         # Step 2: Route to appropriate service
         if is_tall:
@@ -38,7 +44,7 @@ async def _process_single_url(url: str, options: DetectPanelsBatchRequest) -> Di
                 background_mode=options.background_mode,
                 auto_split=options.auto_split
             )
-            res = await detect_long_panels_boxes(req)
+            res = await detect_long_panels(req)
             return {
                 "url": url,
                 "success": True,
@@ -52,7 +58,7 @@ async def _process_single_url(url: str, options: DetectPanelsBatchRequest) -> Di
                 auto_trim=True,
                 snap_to_frame=True
             )
-            res = await detect_small_panels_boxes(req)
+            res = await detect_small_panels(req)
             return {
                 "url": url,
                 "success": True,
@@ -69,9 +75,13 @@ async def _process_single_url(url: str, options: DetectPanelsBatchRequest) -> Di
         }
 
 
+# Backward-compatible alias
+_process_single_url = process_single_url
+
+
 async def detect_batch_panels(request: DetectPanelsBatchRequest) -> DetectPanelsBatchResponse:
     """Processes multiple image URLs concurrently."""
-    tasks = [_process_single_url(url, request) for url in request.urls]
+    tasks = [process_single_url(url, request) for url in request.urls]
     results = await asyncio.gather(*tasks)
 
     return DetectPanelsBatchResponse(

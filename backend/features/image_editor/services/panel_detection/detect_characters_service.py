@@ -1,5 +1,5 @@
 """
-backend/app/services/image/panel_detection/detect_characters_service.py
+backend/features/image_editor/services/panel_detection/detect_characters_service.py
 ─────────────────────────────────────────────────────────────────────────────
 Character & Silhouette Detection Service for Comics, Manga, and Webtoons:
 - Multi-tier character detection (YOLOv8-seg, OpenCV Saliency, AI Vision)
@@ -10,10 +10,12 @@ Character & Silhouette Detection Service for Comics, Manga, and Webtoons:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import os
 import io
 import time
 import base64
 import logging
+import importlib.util
 from typing import List, Dict, Any, Optional, Tuple
 from PIL import Image
 import numpy as np
@@ -27,15 +29,118 @@ from features.platform.projects.schemas_project import (
     DetectCharactersResponse,
 )
 from common.media import resolve_image_to_buffer
-from features.image_editor.services.panel_detection.speech_bubble_detector import (
-    get_yolo_character_segmentation_model,
-    has_yolo_dependencies
-)
 
 logger = logging.getLogger("sonikoma.services.panel_detection.characters")
 
+# Dependency guard
+has_yolo_dependencies = False
+try:
+    if (
+        importlib.util.find_spec("ultralytics") is not None
+        and importlib.util.find_spec("huggingface_hub") is not None
+    ):
+        has_yolo_dependencies = True
+except Exception:
+    has_yolo_dependencies = False
+    logger.warning("[Character Detector] ultralytics or huggingface_hub check failed. YOLO character segmentation disabled.")
 
-def _estimate_character_pose(char_w: int, char_h: int, img_w: int, img_h: int) -> CharacterPoseType:
+_yolo_char_model = None
+
+
+def get_yolo_character_segmentation_model():
+    """Lazily loads the YOLOv8-seg model for character detection."""
+    global _yolo_char_model
+    if _yolo_char_model is not None:
+        return _yolo_char_model
+
+    if not has_yolo_dependencies:
+        return None
+
+    try:
+        from ultralytics import YOLO
+        from database.config import DATA_DIR, _BACKEND_ROOT as base_dir
+        model_candidate = os.path.join(DATA_DIR, "models", "yolov8n-seg.pt")
+        local_path = model_candidate if os.path.exists(model_candidate) else os.path.join(base_dir, "yolov8n-seg.pt")
+        if os.path.exists(local_path):
+            _yolo_char_model = YOLO(local_path)
+        else:
+            _yolo_char_model = YOLO("yolov8n-seg.pt")
+        return _yolo_char_model
+    except Exception as e:
+        logger.warning(f"[Vision Engine] Character segmentation model unavailable: {e}")
+        return None
+
+
+def segment_character_foreground(
+    image_path: str,
+    conf_threshold: float = 0.25
+) -> Optional[np.ndarray]:
+    """Detects character foreground silhouettes using YOLOv8-seg."""
+    if not has_yolo_dependencies:
+        return None
+
+    model = get_yolo_character_segmentation_model()
+    if model is None:
+        return None
+
+    if not os.path.exists(image_path):
+        raise FileNotFoundError(f"Image path does not exist: {image_path}")
+
+    try:
+        raw_results = model.predict(image_path, conf=conf_threshold, verbose=False)
+        results = list(raw_results) if raw_results is not None else []
+        if not results:
+            return None
+
+        result = results[0]
+        if not hasattr(result, "masks") or result.masks is None or len(result.masks) == 0:
+            img = cv2.imread(image_path)
+            if img is not None:
+                return np.zeros(img.shape[:2], dtype=np.uint8)
+            return None
+
+        if hasattr(result, "orig_shape") and result.orig_shape is not None:
+            height, width = int(result.orig_shape[0]), int(result.orig_shape[1])
+        else:
+            img = cv2.imread(image_path)
+            if img is not None:
+                height, width = img.shape[:2]
+            else:
+                return None
+
+        combined_mask = np.zeros((height, width), dtype=np.uint8)
+
+        for i, mask_instance in enumerate(result.masks.data):
+            if (
+                hasattr(result, "boxes")
+                and result.boxes is not None
+                and hasattr(result.boxes, "cls")
+                and len(result.boxes.cls) > i
+                and hasattr(result.boxes, "conf")
+                and len(result.boxes.conf) > i
+            ):
+                cls_id = int(result.boxes.cls[i].item())
+                confidence = float(result.boxes.conf[i].item())
+            else:
+                cls_id = 0
+                confidence = 1.0
+
+            if cls_id == 0 and confidence >= conf_threshold:
+                mask_np = mask_instance.cpu().numpy()
+                if mask_np.shape[:2] != (height, width):
+                    mask_np = cv2.resize(mask_np, (width, height), interpolation=cv2.INTER_NEAREST)
+
+                binary_slice = (mask_np > 0.5).astype(np.uint8) * 255
+                combined_mask = cv2.bitwise_or(combined_mask, binary_slice)
+
+        return combined_mask
+
+    except Exception as e:
+        logger.warning(f"[Vision Engine] Character segmentation failed: {e}")
+        return None
+
+
+def estimate_character_pose(char_w: int, char_h: int, img_w: int, img_h: int) -> CharacterPoseType:
     """Estimates whether the character is a full body, upper body, or face close-up."""
     aspect = char_h / float(max(1, char_w))
     height_ratio = char_h / float(max(1, img_h))
@@ -50,7 +155,7 @@ def _estimate_character_pose(char_w: int, char_h: int, img_w: int, img_h: int) -
         return CharacterPoseType.SILHOUETTE
 
 
-def _detect_simple_face(img_bgr: np.ndarray, char_x: int, char_y: int, char_w: int, char_h: int) -> Optional[CharacterFaceItem]:
+def detect_character_face(img_bgr: np.ndarray, char_x: int, char_y: int, char_w: int, char_h: int) -> Optional[CharacterFaceItem]:
     """Extracts approximate face sub-box and emotion inside character crop."""
     try:
         crop = img_bgr[char_y : char_y + char_h, char_x : char_x + char_w]
@@ -73,6 +178,11 @@ def _detect_simple_face(img_bgr: np.ndarray, char_x: int, char_y: int, char_w: i
         )
     except Exception:
         return None
+
+
+# Backward-compatible aliases
+_estimate_character_pose = estimate_character_pose
+_detect_simple_face = detect_character_face
 
 
 def detect_character_entities(
@@ -283,7 +393,7 @@ def detect_character_entities(
     return characters
 
 
-async def detect_characters_boxes(request: DetectCharactersRequest) -> DetectCharactersResponse:
+async def detect_characters(request: DetectCharactersRequest) -> DetectCharactersResponse:
     """Orchestrator endpoint handler for character detection."""
     start_time = time.perf_counter()
 
@@ -332,3 +442,20 @@ async def detect_characters_boxes(request: DetectCharactersRequest) -> DetectCha
         execution_time_ms=elapsed_ms,
         message=f"Detected {len(characters)} character(s) in {elapsed_ms}ms"
     )
+
+
+# Backward-compatible alias
+detect_characters_boxes = detect_characters
+
+__all__ = [
+    "detect_characters",
+    "detect_characters_boxes",
+    "detect_character_entities",
+    "estimate_character_pose",
+    "_estimate_character_pose",
+    "detect_character_face",
+    "_detect_simple_face",
+    "get_yolo_character_segmentation_model",
+    "segment_character_foreground",
+    "has_yolo_dependencies",
+]

@@ -1,5 +1,5 @@
 """
-backend/app/services/image/panel_detection/detect_upload_service.py
+backend/features/image_editor/services/panel_detection/detect_upload_service.py
 ─────────────────────────────────────────────────────────────────────────────
 Orchestrator Service for Multipart File Uploads:
 - Reads uploaded file bytes directly in memory
@@ -10,6 +10,7 @@ Orchestrator Service for Multipart File Uploads:
 
 import io
 import time
+import base64
 import logging
 from PIL import Image
 from fastapi import UploadFile
@@ -23,6 +24,8 @@ from features.image_editor.services.panel_detection.detect_small_panels_service 
 from features.image_editor.services.panel_detection.detect_long_panels_service import detect_long_panels_boxes
 
 logger = logging.getLogger("sonikoma.services.panel_detection.upload")
+
+__all__ = ["detect_upload_panels"]
 
 
 async def detect_upload_panels(file: UploadFile) -> PanelDetectionResponse:
@@ -38,11 +41,10 @@ async def detect_upload_panels(file: UploadFile) -> PanelDetectionResponse:
         aspect_ratio = img_h / float(max(1, img_w))
 
     is_tall = aspect_ratio >= 2.2
+    b64 = base64.b64encode(raw_bytes).decode("utf-8")
 
     if is_tall:
         # Long panels detection
-        import base64
-        b64 = base64.b64encode(raw_bytes).decode("utf-8")
         req = DetectLongPanelsRequest(image_base64=b64)
         res = await detect_long_panels_boxes(req)
 
@@ -60,8 +62,6 @@ async def detect_upload_panels(file: UploadFile) -> PanelDetectionResponse:
         )
     else:
         # Small panels detection
-        import base64
-        b64 = base64.b64encode(raw_bytes).decode("utf-8")
         req = DetectSmallPanelsRequest(image_base64=b64)
         res = await detect_small_panels_boxes(req)
 

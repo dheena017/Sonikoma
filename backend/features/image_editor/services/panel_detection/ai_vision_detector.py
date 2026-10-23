@@ -1,5 +1,5 @@
 """
-backend/app/services/image/panel_detection/ai_vision_detector.py
+backend/features/image_editor/services/panel_detection/ai_vision_detector.py
 ─────────────────────────────────────────────────────────────────────────────
 Pure AI Vision & OCR Engine:
 - Multimodal reading flow classification (Manga RTL, Webtoon TTB, Western LTR)
@@ -9,7 +9,6 @@ Pure AI Vision & OCR Engine:
 """
 
 import io
-import base64
 import logging
 from typing import List, Dict, Any, Optional
 from PIL import Image
@@ -17,6 +16,8 @@ from PIL import Image
 from features.image_editor.schemas import ReadingFlow
 
 logger = logging.getLogger("sonikoma.services.panel_detection.ai_vision")
+
+__all__ = ["detect_ai_vision", "detect_ai_vision_flow"]
 
 
 async def detect_ai_vision(
@@ -63,3 +64,7 @@ async def detect_ai_vision(
         "image_height": height,
         "dialogues": extracted_dialogue
     }
+
+
+# Descriptive alias
+detect_ai_vision_flow = detect_ai_vision

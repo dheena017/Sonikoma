@@ -40,12 +40,13 @@ from common.media import resolve_image_to_buffer
 from features.platform.jobs import job_manager, JobType, JobStage, JobStatusResponse
 
 # Specialized Panel Detection Services
-from features.image_editor.services.panel_detection.detect_small_panels_service import detect_small_panels_boxes
-from features.image_editor.services.panel_detection.detect_long_panels_service import detect_long_panels_boxes
+from features.image_editor.services.panel_detection.detect_small_panels_service import detect_small_panels
+from features.image_editor.services.panel_detection.detect_long_panels_service import detect_long_panels
 from features.image_editor.services.panel_detection.detect_batch_service import detect_batch_panels
 from features.image_editor.services.panel_detection.detect_upload_service import detect_upload_panels
-from features.image_editor.services.panel_detection.detect_characters_service import detect_characters_boxes
-from features.image_editor.services.panel_detection.detect_composite_service import detect_composite_boxes
+from features.image_editor.services.panel_detection.detect_characters_service import detect_characters
+from features.image_editor.services.panel_detection.detect_composite_service import detect_composite_panels
+
 
 logger = logging.getLogger("sonikoma.api.panels")
 panels_router = APIRouter()
@@ -127,14 +128,14 @@ async def detect_ai_vision_endpoint(body: DetectPanelsUrlRequest):
                 engine_mode="ai_vision",
                 sensitivity=body.sensitivity
             )
-            return await detect_long_panels_boxes(long_req)
+            return await detect_long_panels(long_req)
         else:
             small_req = DetectSmallPanelsRequest(
                 url=body.url,
                 image_base64=body.image_base64,
                 engine_mode="ai_vision"
             )
-            return await detect_small_panels_boxes(small_req)
+            return await detect_small_panels(small_req)
     except HTTPException:
         raise
     except Exception as e:
@@ -142,7 +143,7 @@ async def detect_ai_vision_endpoint(body: DetectPanelsUrlRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# â”€â”€â”€ 3. Dedicated Small-Panels Detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── 3. Dedicated Small-Panels Detection ──────────────────────────────────────
 
 @panels_router.post(
     "/detect/small-panels",
@@ -155,7 +156,7 @@ async def detect_small_panels_endpoint(body: DetectSmallPanelsRequest):
     try:
         if not body.url and not body.image_base64:
             raise HTTPException(status_code=400, detail="Must provide 'url' or 'image_base64'.")
-        return await detect_small_panels_boxes(body)
+        return await detect_small_panels(body)
     except HTTPException:
         raise
     except Exception as e:
@@ -163,7 +164,7 @@ async def detect_small_panels_endpoint(body: DetectSmallPanelsRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# â”€â”€â”€ 4. Dedicated Long-Panels Detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── 4. Dedicated Long-Panels Detection ───────────────────────────────────────
 
 @panels_router.post(
     "/detect/long-panels",
@@ -176,7 +177,7 @@ async def detect_long_panels_endpoint(body: DetectLongPanelsRequest):
     try:
         if not body.url and not body.image_base64:
             raise HTTPException(status_code=400, detail="Must provide 'url' or 'image_base64'.")
-        return await detect_long_panels_boxes(body)
+        return await detect_long_panels(body)
     except HTTPException:
         raise
     except Exception as e:
@@ -184,7 +185,7 @@ async def detect_long_panels_endpoint(body: DetectLongPanelsRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# â”€â”€â”€ 5. Dedicated Ultra-Long Chapter Scroll Detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── 5. Dedicated Ultra-Long Chapter Scroll Detection ─────────────────────────
 
 @panels_router.post(
     "/detect/ultra-long-panels",
@@ -197,7 +198,7 @@ async def detect_ultra_long_panels_endpoint(body: DetectLongPanelsRequest):
     try:
         if not body.url and not body.image_base64:
             raise HTTPException(status_code=400, detail="Must provide 'url' or 'image_base64'.")
-        return await detect_long_panels_boxes(body)
+        return await detect_long_panels(body)
     except HTTPException:
         raise
     except Exception as e:
@@ -300,7 +301,7 @@ async def detect_characters_endpoint(body: DetectCharactersRequest):
     try:
         if not body.url and not body.image_base64:
             raise HTTPException(status_code=400, detail="Must provide 'url' or 'image_base64'.")
-        return await detect_characters_boxes(body)
+        return await detect_characters(body)
     except HTTPException:
         raise
     except Exception as e:
@@ -308,7 +309,7 @@ async def detect_characters_endpoint(body: DetectCharactersRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# â”€â”€â”€ 10. Unified Composite Detection (Panels + Speech + Characters) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── 10. Unified Composite Detection (Panels + Speech + Characters) ───────────
 
 @panels_router.post(
     "/detect/composite",
@@ -321,7 +322,7 @@ async def detect_composite_endpoint(body: DetectPanelsUrlRequest):
     try:
         if not body.url and not body.image_url and not body.image_base64:
             raise HTTPException(status_code=400, detail="Must provide 'url', 'image_url', or 'image_base64'.")
-        return await detect_composite_boxes(body)
+        return await detect_composite_panels(body)
     except HTTPException:
         raise
     except Exception as e:

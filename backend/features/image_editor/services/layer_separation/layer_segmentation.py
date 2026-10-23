@@ -25,6 +25,8 @@ from features.image_editor.services.ocr.ocr_engine import extract_full_ocr_data
 from features.image_editor.services.panel_detection.panel_detector import _detect_bg_color_and_threshold
 from features.image_editor.services.panel_detection.speech_bubble_detector import (
     segment_speech_bubbles_and_text_balloons as segment_text_and_balloons,
+)
+from features.image_editor.services.panel_detection.detect_characters_service import (
     segment_character_foreground as segment_characters,
 )
 from database.supabase import upload_to_supabase_bucket

@@ -1,5 +1,5 @@
 """
-backend/app/services/image/panel_detection/detect_small_panels_service.py
+backend/features/image_editor/services/panel_detection/detect_small_panels_service.py
 ─────────────────────────────────────────────────────────────────────────────
 Orchestrator Service for Small Images & Single Comic Frames:
 - Tight frame snapping (snaps to black borders, drops trailing white space & SFX)
@@ -12,23 +12,33 @@ import io
 import time
 import base64
 import logging
+from typing import List, Dict, Any, Optional
 import numpy as np
 from PIL import Image
 
 from features.platform.projects.schemas_project import (
     DetectSmallPanelsRequest,
     DetectSmallPanelsResponse,
-    PanelBoundingBox
+    PanelBoundingBox,
 )
 from common.media import resolve_image_to_buffer
 from features.image_editor.services.panel_detection.opencv_detector import detect_opencv_boxes
-from features.image_editor.services.panel_detection.speech_bubble_detector import detect_yolo_entities
+from features.image_editor.services.panel_detection.grid_detector import detect_manga_grid_panels
+from features.image_editor.services.panel_detection.speech_bubble_detector import detect_speech_bubbles as detect_yolo_entities
 from features.image_editor.services.panel_detection.panel_fusion_service import fuse_panels_and_bubbles
+from features.image_editor.services.panel_detection.panel_detector import (
+    detect_vertical_strip_panels,
+    _detect_bg_color_and_threshold,
+    resolve_overlapping_panels_lineage,
+)
+from features.image_editor.services.panel_detection.ai_vision_detector import detect_ai_vision
 
 logger = logging.getLogger("sonikoma.services.panel_detection.small_panels")
 
+__all__ = ["detect_small_panels", "detect_small_panels_boxes"]
 
-async def detect_small_panels_boxes(request: DetectSmallPanelsRequest) -> DetectSmallPanelsResponse:
+
+async def detect_small_panels(request: DetectSmallPanelsRequest) -> DetectSmallPanelsResponse:
     """
     Executes detection on small comic images / single frames:
     1. Resolves image to in-memory bytes.
@@ -59,7 +69,6 @@ async def detect_small_panels_boxes(request: DetectSmallPanelsRequest) -> Detect
     logger.info(f"[SmallPanels Detector] Starting Tri-Engine detection on {img_w}x{img_h}px image (aspect_ratio={aspect_ratio:.3f})...")
 
     # ── ENGINE 1: YOLO Deep-Learning Speech Bubble Detection ──────────────────
-    # Run YOLO first so dialogue positions guide panel frame boundaries
     yolo_bubbles = []
     if request.merge_speech_bubbles:
         try:
@@ -75,15 +84,11 @@ async def detect_small_panels_boxes(request: DetectSmallPanelsRequest) -> Detect
 
     # ── ENGINE 2: Webtoon Gutter Slicing & 2D Manga Grid Detection ───────────
     prop_min_h = max(20, int(img_h * 0.05))
-    cv_panels = []
+    cv_panels: List[Dict[str, Any]] = []
 
     # Check for horizontal webtoon gutter seams first if image is tall or square-ish
     if aspect_ratio >= 1.0:
         try:
-            from features.image_editor.services.panel_detection.panel_detector import (
-                detect_vertical_strip_panels,
-                _detect_bg_color_and_threshold
-            )
             gray_arr = np.array(pil_img.convert("L"))
             bg_res = _detect_bg_color_and_threshold(gray_arr, "auto", 30.0)
             is_white_bg, threshold_val, median_bg, bg_std, top_med, bot_med, bg_rgb = bg_res
@@ -112,7 +117,6 @@ async def detect_small_panels_boxes(request: DetectSmallPanelsRequest) -> Detect
     # If no multi-panel horizontal gutters, try 2D Manga grid for print manga pages
     if not cv_panels and 0.6 <= aspect_ratio <= 1.6:
         try:
-            from features.image_editor.services.panel_detection.grid_detector import detect_manga_grid_panels
             gray_arr = np.array(pil_img.convert("L"))
             grid_boxes = detect_manga_grid_panels(gray_arr, min_width_pct=0.15, min_height_px=prop_min_h)
             if grid_boxes and len(grid_boxes) >= 2:
@@ -162,7 +166,6 @@ async def detect_small_panels_boxes(request: DetectSmallPanelsRequest) -> Detect
     ai_flow = "left_to_right"
     if request.engine_mode == "ai_vision":
         try:
-            from features.image_editor.services.panel_detection.ai_vision_detector import detect_ai_vision
             ai_res = await detect_ai_vision(raw_bytes)
             ai_flow = ai_res.get("reading_flow", "left_to_right")
             logger.info(f"[SmallPanels: AI Vision] Flow: {ai_flow}")
@@ -182,7 +185,6 @@ async def detect_small_panels_boxes(request: DetectSmallPanelsRequest) -> Detect
 
     # ── POST-PROCESSING: Resolve any micro-panel noise & deduplication ────────
     try:
-        from features.image_editor.services.panel_detection.panel_detector import resolve_overlapping_panels_lineage
         raw_dicts = [p.model_dump() for p in fused_panels]
         cleaned_dicts = resolve_overlapping_panels_lineage(raw_dicts, iou_thresh=0.40)
         if cleaned_dicts:
@@ -216,3 +218,7 @@ async def detect_small_panels_boxes(request: DetectSmallPanelsRequest) -> Detect
         margins=margins,
         message=f"Detected {len(fused_panels)} panel(s) with {len(bound_bubbles)} bound bubble(s) via {request.engine_mode} in {elapsed_ms}ms"
     )
+
+
+# Backward-compatible alias
+detect_small_panels_boxes = detect_small_panels

@@ -1,5 +1,5 @@
 """
-backend/app/services/image/panel_detection/opencv_detector.py
+backend/features/image_editor/services/panel_detection/opencv_detector.py
 ─────────────────────────────────────────────────────────────────────────────
 Pure OpenCV Computer Vision Detection Engine:
 - Bilateral line-art pre-filtering (removes paper textures while preserving black ink lines)
@@ -24,8 +24,10 @@ except ImportError:
 
 logger = logging.getLogger("sonikoma.services.panel_detection.opencv")
 
+__all__ = ["detect_opencv_panels", "detect_opencv_boxes"]
 
-def detect_opencv_boxes(
+
+def detect_opencv_panels(
     image_bytes: Any,
     canny_low: int = 20,
     canny_high: int = 100,
@@ -165,3 +167,7 @@ def detect_opencv_boxes(
         "image_width": img_w,
         "image_height": img_h
     }
+
+
+# Backward-compatible alias
+detect_opencv_boxes = detect_opencv_panels
