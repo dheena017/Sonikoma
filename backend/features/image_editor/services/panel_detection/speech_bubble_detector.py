@@ -342,6 +342,160 @@ def snap_and_refine_bubble_edges(
     return bx, by, bw, bh, polygon
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. Sliding-Window Tiling & NMS Engine for Tall Webtoon Strips
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _deduplicate_bubbles_nms(
+    bubbles: List[SpeechBubbleItem],
+    iou_thresh: float = 0.35,
+) -> List[SpeechBubbleItem]:
+    """
+    Applies Non-Maximum Suppression (NMS) to merge overlapping candidate bubbles across tiles.
+    Prioritizes detections with higher neural confidence scores and enclosing area.
+    """
+    if not bubbles:
+        return []
+
+    sorted_bubbles = sorted(
+        bubbles,
+        key=lambda b: (b.confidence, b.width * b.height),
+        reverse=True,
+    )
+    keep: List[SpeechBubbleItem] = []
+
+    for cand in sorted_bubbles:
+        cx1, cy1 = cand.x, cand.y
+        cx2, cy2 = cand.x + cand.width, cand.y + cand.height
+        c_area = cand.width * cand.height
+
+        is_suppressed = False
+        for ex in keep:
+            ex1, ey1 = ex.x, ex.y
+            ex2, ey2 = ex.x + ex.width, ex.y + ex.height
+            e_area = ex.width * ex.height
+
+            ix1 = max(cx1, ex1)
+            iy1 = max(cy1, ey1)
+            ix2 = min(cx2, ex2)
+            iy2 = min(cy2, ey2)
+            iw = max(0, ix2 - ix1)
+            ih = max(0, iy2 - iy1)
+            inter = iw * ih
+
+            if inter > 0:
+                union = c_area + e_area - inter
+                iou = inter / float(max(1, union))
+                overlap_ratio = inter / float(max(1, min(c_area, e_area)))
+                if iou >= iou_thresh or overlap_ratio >= 0.70:
+                    is_suppressed = True
+                    break
+
+        if not is_suppressed:
+            keep.append(cand)
+
+    return keep
+
+
+def _detect_speech_bubbles_tiled(
+    pil_img: Image.Image,
+    conf_threshold: float = DEFAULT_CONF_THRESHOLD,
+) -> List[SpeechBubbleItem]:
+    """
+    Processes tall scrolling manhwa/webtoon strips using overlapping sliding window tiles.
+    
+    Why this is required:
+    - Vertical scrolling webtoons can be 10,000px to 60,000px tall.
+    - YOLO models compress input images to 640x640px, squashing a 60,000px strip by 93x.
+    - Sliding window tiling slices the strip into normal ~2,000px crops with 400px overlaps,
+      runs deep learning detection per tile without distortion, translates coordinates,
+      and seamlessly merges cross-tile duplicates via Non-Maximum Suppression (NMS).
+    """
+    img_w, img_h = pil_img.size
+
+    # Efficient tiling in original strip space (avoids allocating gigantic 400,000px intermediate canvases)
+    tile_h = 2400 if img_w < 500 else min(2600, max(1400, int(img_w * 2.2)))
+    overlap = max(350, int(tile_h * 0.20))
+    stride = tile_h - overlap
+    total_expected_tiles = max(1, int(np.ceil(img_h / float(stride))))
+
+    logger.info(
+        f"[SpeechBubble Tiled] Slicing strip ({img_w}x{img_h}px) into ~{total_expected_tiles} vertical tiles: "
+        f"tile_h={tile_h}px, overlap={overlap}px, stride={stride}px"
+    )
+
+    all_bubbles: List[SpeechBubbleItem] = []
+    y_start = 0
+    tile_idx = 1
+
+    while y_start < img_h:
+        y_end = min(img_h, y_start + tile_h)
+        tile = pil_img.crop((0, y_start, img_w, y_end))
+
+        # If image was narrow/downscaled (e.g. width < 500px), upscale just this individual tile for YOLO
+        scale_w = 1.0
+        if img_w < 500:
+            target_w = 800
+            scale_w = target_w / float(img_w)
+            tile_infer = tile.resize((target_w, int(tile.height * scale_w)), Image.Resampling.LANCZOS)
+        else:
+            tile_infer = tile
+
+        tile_bubbles = _detect_speech_bubbles_single_frame(tile_infer, conf_threshold=conf_threshold)
+
+        # Translate coordinates to global strip space (and rescale if tile was upscaled)
+        for b in tile_bubbles:
+            bx = b.x
+            by = b.y
+            bw = b.width
+            bh = b.height
+            b_poly = b.polygon
+
+            if scale_w != 1.0:
+                bx = int(bx / scale_w)
+                by = int(by / scale_w)
+                bw = max(4, int(bw / scale_w))
+                bh = max(4, int(bh / scale_w))
+                if b_poly:
+                    b_poly = [[int(pt[0] / scale_w), int(pt[1] / scale_w)] for pt in b_poly]
+
+            # Shift Y offset to global strip position
+            by += y_start
+            if b_poly:
+                b_poly = [[pt[0], pt[1] + y_start] for pt in b_poly]
+
+            b.x = bx
+            b.y = by
+            b.width = bw
+            b.height = bh
+            b.polygon = b_poly
+            all_bubbles.append(b)
+
+        if y_end >= img_h:
+            break
+        y_start += stride
+        tile_idx += 1
+
+    logger.info(f"[SpeechBubble Tiled] Extracted {len(all_bubbles)} raw candidates across {tile_idx} tiles. Deduplicating seam overlaps via NMS...")
+
+    # Non-Maximum Suppression to merge duplicate bubbles on tile seams
+    deduped = _deduplicate_bubbles_nms(all_bubbles, iou_thresh=0.35)
+
+    # Sort in reading order (top-to-bottom, left-to-right)
+    deduped.sort(key=lambda b: (b.y // 40, b.x))
+    for i, b in enumerate(deduped, start=1):
+        b.bubble_id = f"bubble_{i}"
+        b.reading_order = i
+
+    logger.info(f"[SpeechBubble Tiled] Complete: {len(deduped)} distinct dialogue bubble(s) sequenced across full strip.")
+    return deduped
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 6. Single-Frame Deep Learning Inference Engine
+# ─────────────────────────────────────────────────────────────────────────────
+
+
 def detect_speech_bubbles(
     image_input: Any,
     conf_threshold: float = DEFAULT_CONF_THRESHOLD,
@@ -381,6 +535,21 @@ def detect_speech_bubbles(
         return []
 
     logger.info(f"[SpeechBubble Detector] Starting detection pipeline on image ({img_w}x{img_h}px, conf_threshold={conf_threshold})...")
+
+    # Routing: If tall scrolling manhwa strip, process via sliding-window tiling engine
+    if img_h > 2400 and (img_h / float(img_w)) > 2.0:
+        logger.info(f"[SpeechBubble Detector] Tall webtoon strip detected ({img_w}x{img_h}px, aspect ratio {img_h/img_w:.1f}:1). Engaging sliding-window tiling engine...")
+        return _detect_speech_bubbles_tiled(pil_img, conf_threshold=conf_threshold)
+
+    return _detect_speech_bubbles_single_frame(pil_img, conf_threshold=conf_threshold)
+
+
+def _detect_speech_bubbles_single_frame(
+    pil_img: Image.Image,
+    conf_threshold: float = DEFAULT_CONF_THRESHOLD,
+) -> List[SpeechBubbleItem]:
+    """Single-frame detection pass on standard resolution comic images or individual tiles."""
+    img_w, img_h = pil_img.size
 
     # ── Stage 2: Resolution Normalization & Inference ────────────────────────
     model = get_yolo_speech_bubble_model()
@@ -638,6 +807,27 @@ def segment_speech_bubbles_and_text_balloons(
     if not image_path or not os.path.exists(image_path):
         logger.warning(f"[SpeechBubble Segmenter] Image path does not exist or invalid: '{image_path}'")
         return None
+
+    try:
+        with Image.open(image_path) as pimg:
+            img_w, img_h = pimg.size
+    except Exception as e:
+        logger.warning(f"[SpeechBubble Segmenter] Failed to read image header for '{image_path}': {e}")
+        return None
+
+    # For tall webtoon strips, rasterize mask directly from tiled detection to avoid neural squashing
+    if img_h > 2400 and (img_h / float(img_w)) > 2.0:
+        logger.info(f"[SpeechBubble Segmenter] Tall strip ({img_w}x{img_h}px) detected. Rasterizing tiled segmentation mask...")
+        with Image.open(image_path) as pimg:
+            bubbles = detect_speech_bubbles(pimg, conf_threshold=conf_threshold)
+        mask = np.zeros((img_h, img_w), dtype=np.uint8)
+        for b in bubbles:
+            if b.polygon and len(b.polygon) >= 3:
+                pts = np.array(b.polygon, dtype=np.int32).reshape((-1, 1, 2))
+                cv2.fillPoly(mask, [pts], 255)
+            else:
+                cv2.rectangle(mask, (b.x, b.y), (b.x + b.width, b.y + b.height), 255, -1)
+        return mask
 
     model = get_yolo_speech_bubble_model()
     if model is None:
