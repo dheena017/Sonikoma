@@ -47,7 +47,6 @@ from features.platform.jobs import job_manager, JobType, JobStage, JobStatusResp
 from features.image_editor.services.panel_detection.detect_small_panels_service import detect_small_panels
 from features.image_editor.services.panel_detection.detect_long_panels_service import detect_long_panels
 from features.image_editor.services.panel_detection.detect_batch_service import detect_batch_panels
-from features.image_editor.services.panel_detection.detect_upload_service import detect_upload_panels
 from features.image_editor.services.panel_detection.detect_characters_service import detect_characters
 from features.image_editor.services.panel_detection.detect_composite_service import detect_composite_panels
 from features.image_editor.services.panel_detection.speech_bubble_detector import detect_speech_bubbles_service
@@ -101,14 +100,14 @@ async def detect_cv_yolo_endpoint(body: DetectPanelsUrlRequest):
                 engine_mode="cv_yolo",
                 sensitivity=body.sensitivity
             )
-            return await detect_long_panels_boxes(long_req)
+            return await detect_long_panels(long_req)
         else:
             small_req = DetectSmallPanelsRequest(
                 url=body.url,
                 image_base64=body.image_base64,
                 engine_mode="cv_yolo"
             )
-            return await detect_small_panels_boxes(small_req)
+            return await detect_small_panels(small_req)
     except HTTPException:
         raise
     except Exception as e:
@@ -237,22 +236,6 @@ async def detect_batch_endpoint(body: DetectPanelsBatchRequest):
         logger.error(f"[DetectBatch API] Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-
-# â”€â”€â”€ 7. Dedicated Multipart File Upload Detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-@panels_router.post(
-    "/detect/upload",
-    response_model=PanelDetectionResponse,
-    operation_id="detect_panels_upload",
-    summary="In-memory multipart form file upload detector",
-    description="Accepts a raw image file directly from multipart form-data and streams results without disk overhead."
-)
-async def detect_upload_endpoint(file: UploadFile = File(...)):
-    try:
-        return await detect_upload_panels(file)
-    except Exception as e:
-        logger.error(f"[DetectUpload API] Error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 # â”€â”€â”€ 8. Vertical Strip Splitting (Background Job) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

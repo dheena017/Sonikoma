@@ -4,7 +4,8 @@ backend/features/image_editor/services/panel_detection/detect_small_panels_servi
 Orchestrator Service for Small Images & Single Comic Frames:
 - Tight frame snapping (snaps to black borders, drops trailing white space & SFX)
 - Speech bubble binding (attaches nearby dialogue into the artwork card)
-- Returns DetectSmallPanelsResponse with precise directional margins
+- Tri-engine pipeline: YOLO speech bubbles + Gutter/Grid decomposition + AI vision
+- Returns standardized DetectSmallPanelsResponse with precise directional margins
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -22,7 +23,7 @@ from features.platform.projects.schemas_project import (
     PanelBoundingBox,
 )
 from common.media import resolve_image_to_buffer
-from features.image_editor.services.panel_detection.opencv_detector import detect_opencv_boxes
+from features.image_editor.services.panel_detection.opencv_detector import detect_opencv_panels
 from features.image_editor.services.panel_detection.grid_detector import detect_manga_grid_panels
 from features.image_editor.services.panel_detection.speech_bubble_detector import detect_speech_bubbles as detect_yolo_entities
 from features.image_editor.services.panel_detection.panel_fusion_service import fuse_panels_and_bubbles
@@ -33,56 +34,94 @@ from features.image_editor.services.panel_detection.panel_detector import (
 )
 from features.image_editor.services.panel_detection.ai_vision_detector import detect_ai_vision
 
-logger = logging.getLogger("sonikoma.services.panel_detection.small_panels")
+logger = logging.getLogger("sonikoma.services.image.panel_detection.small_panels")
 
-__all__ = ["detect_small_panels", "detect_small_panels_boxes"]
+__all__ = ["detect_small_panels"]
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 1. Small Comic & Single Frame Detection Engine
+# ─────────────────────────────────────────────────────────────────────────────
 
 async def detect_small_panels(request: DetectSmallPanelsRequest) -> DetectSmallPanelsResponse:
     """
-    Executes detection on small comic images / single frames:
-    1. Resolves image to in-memory bytes.
-    2. Runs OpenCV contour & tight frame analysis.
-    3. Runs YOLO speech bubble detection.
-    4. Fuses dialogue bubbles into the panel frame.
-    5. Discards bottom white space and loose gutter SFX ("RATTLE").
+    Executes multi-engine panel and dialogue detection on small comic images.
+
+    Args:
+        request (DetectSmallPanelsRequest): Request containing image url or base64,
+            plus engine mode, snap settings, and margin preferences.
+
+    Returns:
+        DetectSmallPanelsResponse: Standardized response with detected primary frame,
+            all panels, bound speech bubbles, and bounding margins.
+
+    Raises:
+        ValueError: If neither 'url' nor 'image_base64' is provided, or image data is corrupt.
     """
+    # ── Stage 1: Timing & Guard Clauses ───────────────────────────────────────
     start_time = time.perf_counter()
 
-    raw_bytes = None
+    if not request.url and not request.image_base64:
+        raise ValueError("Must provide either 'url' or 'image_base64' for small-panels detection.")
+
+    # ── Stage 2: Input Normalization & Buffer Resolution ──────────────────────
+    raw_bytes: Optional[bytes] = None
+
     if request.url:
-        resolved = await resolve_image_to_buffer(request.url)
-        raw_bytes = resolved.get("data")
+        try:
+            resolved = await resolve_image_to_buffer(request.url)
+            raw_bytes = resolved.get("data")
+        except Exception as e:
+            logger.error(f"[SmallPanels] Failed to resolve URL '{request.url}': {e}", exc_info=True)
+            raise ValueError(f"Could not download image from URL: {e}")
     elif request.image_base64:
         b64 = request.image_base64
         if "," in b64:
             b64 = b64.split(",", 1)[1]
-        raw_bytes = base64.b64decode(b64)
+        try:
+            raw_bytes = base64.b64decode(b64)
+        except Exception as e:
+            logger.error(f"[SmallPanels] Base64 decoding failed: {e}")
+            raise ValueError(f"Invalid base64 payload: {e}")
 
     if not raw_bytes:
-        raise ValueError("Could not resolve image data for small-panels detection.")
+        raise ValueError("Resolved image buffer is empty (0 bytes).")
 
-    pil_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
-    img_w, img_h = pil_img.size
+    try:
+        pil_img = Image.open(io.BytesIO(raw_bytes))
+        if pil_img.mode != "RGB":
+            pil_img = pil_img.convert("RGB")
+        img_w, img_h = pil_img.size
+    except Exception as e:
+        logger.error(f"[SmallPanels] Image parsing error: {e}")
+        raise ValueError(f"Corrupt image payload: {e}")
+
+    if img_w < 10 or img_h < 10:
+        raise ValueError(f"Image dimensions too small ({img_w}x{img_h}px) for panel detection.")
+
     aspect_ratio = img_h / float(max(1, img_w))
+    logger.info(
+        f"[SmallPanels Detector] Starting Tri-Engine detection on {img_w}x{img_h}px image "
+        f"(aspect_ratio={aspect_ratio:.3f}, mode={request.engine_mode})..."
+    )
 
-    logger.info(f"[SmallPanels Detector] Starting Tri-Engine detection on {img_w}x{img_h}px image (aspect_ratio={aspect_ratio:.3f})...")
+    # ── Stage 3: Core Algorithmic Processing ──────────────────────────────────
 
-    # ── ENGINE 1: YOLO Deep-Learning Speech Bubble Detection ──────────────────
+    # ── Engine 1: YOLO Deep-Learning Speech Bubble Detection ──────────────────
     yolo_bubbles = []
     if request.merge_speech_bubbles:
         try:
             yolo_bubbles = detect_yolo_entities(raw_bytes, conf_threshold=0.25)
             logger.info(f"[SmallPanels: YOLO] Detected {len(yolo_bubbles)} speech bubble(s).")
         except Exception as e:
-            logger.warning(f"[SmallPanels: YOLO] YOLO detection fallback: {e}", exc_info=True)
+            logger.warning(f"[SmallPanels: YOLO] Bubble detector fallback: {e}", exc_info=True)
 
     yolo_ocr_boxes = [
         {"x": b.x, "y": b.y, "w": b.width, "h": b.height}
         for b in yolo_bubbles
     ]
 
-    # ── ENGINE 2: Webtoon Gutter Slicing & 2D Manga Grid Detection ───────────
+    # ── Engine 2: Webtoon Gutter Slicing & 2D Manga Grid Detection ───────────
     prop_min_h = max(20, int(img_h * 0.05))
     cv_panels: List[Dict[str, Any]] = []
 
@@ -105,7 +144,7 @@ async def detect_small_panels(request: DetectSmallPanelsRequest) -> DetectSmallP
                 top_median=top_med,
                 bottom_median=bot_med,
                 enable_x_trimming=False,
-                enable_column_split=False
+                enable_column_split=False,
             )
             webtoon_boxes = res.panels if hasattr(res, "panels") else (res[0] if isinstance(res, tuple) else [])
             if webtoon_boxes and len(webtoon_boxes) >= 2:
@@ -133,18 +172,21 @@ async def detect_small_panels(request: DetectSmallPanelsRequest) -> DetectSmallP
 
     # Fallback to OpenCV contour detection if still <= 1 panel
     if not cv_panels:
-        cv_res = detect_opencv_boxes(
-            image_bytes=raw_bytes,
-            min_width_pct=0.15,
-            min_height_px=prop_min_h,
-            bleed_padding_px=request.bleed_padding_px
-        )
-        candidate_panels = cv_res.get("panels", [])
-        # Filter out false vertical column cuts
-        cv_panels = [
-            cp for cp in candidate_panels
-            if not (int(cp.get("h", 0)) >= int(img_h * 0.80) and int(cp.get("w", 0)) < int(img_w * 0.60))
-        ]
+        try:
+            cv_res = detect_opencv_panels(
+                image_bytes=raw_bytes,
+                min_width_pct=0.15,
+                min_height_px=prop_min_h,
+                bleed_padding_px=request.bleed_padding_px,
+            )
+            candidate_panels = cv_res.get("panels", [])
+            # Filter out false vertical column cuts
+            cv_panels = [
+                cp for cp in candidate_panels
+                if not (int(cp.get("h", 0)) >= int(img_h * 0.80) and int(cp.get("w", 0)) < int(img_w * 0.60))
+            ]
+        except Exception as e:
+            logger.warning(f"[SmallPanels: OpenCV] Contour detector fallback: {e}")
 
     # If no distinct sub-panels, create a clean full-canvas baseline panel enclosing all speech bubbles
     if not cv_panels:
@@ -157,12 +199,12 @@ async def detect_small_panels(request: DetectSmallPanelsRequest) -> DetectSmallP
             "width": img_w,
             "height": img_h,
             "confidence": 0.95,
-            "label": "panel_standard"
+            "label": "panel_standard",
         }]
 
     logger.info(f"[SmallPanels: Detected] Total candidate frames: {len(cv_panels)}")
 
-    # ── ENGINE 3: AI Vision Reading Flow & Text Analysis (Optional Mode) ─────
+    # ── Engine 3: AI Vision Reading Flow & Text Analysis (Optional Mode) ─────
     ai_flow = "left_to_right"
     if request.engine_mode == "ai_vision":
         try:
@@ -172,7 +214,7 @@ async def detect_small_panels(request: DetectSmallPanelsRequest) -> DetectSmallP
         except Exception as e:
             logger.warning(f"[SmallPanels: AI Vision] Fallback: {e}")
 
-    # ── FUSION: Bind speech bubbles & calculate tight margins ────────────────
+    # ── Multimodal Fusion: Bind speech bubbles & calculate tight margins ─────
     fused_panels, bound_bubbles, margins = fuse_panels_and_bubbles(
         cv_panels=cv_panels,
         yolo_bubbles=yolo_bubbles,
@@ -180,28 +222,28 @@ async def detect_small_panels(request: DetectSmallPanelsRequest) -> DetectSmallP
         img_h=img_h,
         is_small_panel=True,
         snap_to_frame=request.snap_to_frame,
-        bleed_padding_px=request.bleed_padding_px
+        bleed_padding_px=request.bleed_padding_px,
     )
 
-    # ── POST-PROCESSING: Resolve any micro-panel noise & deduplication ────────
+    # ── Post-Processing: Resolve micro-panel noise & deduplication ───────────
     try:
         raw_dicts = [p.model_dump() for p in fused_panels]
         cleaned_dicts = resolve_overlapping_panels(raw_dicts, iou_thresh=0.40)
         if cleaned_dicts:
-            fused_panels = [
-                PanelBoundingBox(**cd) for cd in cleaned_dicts
-            ]
+            fused_panels = [PanelBoundingBox(**cd) for cd in cleaned_dicts]
             for idx, p in enumerate(fused_panels):
                 p.index = idx
                 p.id = f"panel_{idx + 1}"
     except Exception as e:
-        logger.warning(f"[SmallPanels: PostProcessor] Fallback: {e}")
+        logger.warning(f"[SmallPanels: PostProcessor] Deduplication fallback: {e}")
 
+    # ── Stage 4: Structured Output & Traceable Logging ────────────────────────
     primary_panel = fused_panels[0] if fused_panels else None
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)
 
     logger.info(
-        f"[SmallPanels Detector] Detected {len(fused_panels)} panel(s) and {len(bound_bubbles)} bound bubble(s) in {elapsed_ms}ms (size={img_w}x{img_h}px, mode={request.engine_mode})"
+        f"[SmallPanels Detector] Detected {len(fused_panels)} panel(s) and {len(bound_bubbles)} "
+        f"bound bubble(s) in {elapsed_ms}ms (size={img_w}x{img_h}px, mode={request.engine_mode})"
     )
 
     return DetectSmallPanelsResponse(
@@ -216,9 +258,5 @@ async def detect_small_panels(request: DetectSmallPanelsRequest) -> DetectSmallP
         total_speech_bubbles_count=len(yolo_bubbles),
         bound_speech_bubbles_count=len(bound_bubbles),
         margins=margins,
-        message=f"Detected {len(fused_panels)} panel(s) with {len(bound_bubbles)} bound bubble(s) via {request.engine_mode} in {elapsed_ms}ms"
+        message=f"Detected {len(fused_panels)} panel(s) with {len(bound_bubbles)} bound bubble(s) via {request.engine_mode} in {elapsed_ms}ms",
     )
-
-
-# Backward-compatible alias
-detect_small_panels_boxes = detect_small_panels

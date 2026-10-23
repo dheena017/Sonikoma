@@ -8,7 +8,6 @@
  * - detectPanelsCVYOLO: Option 1: OpenCV + YOLO Deep Learning Detector
  * - detectPanelsAIVision: Option 2: Full Multimodal AI Vision & Reading Flow
  * - detectPanelsBatch: Parallel multi-image detection
- * - detectPanelsUpload: Multipart file upload detector
  * - detectPanelsByUrl: Generic single URL panel detector
  * ─────────────────────────────────────────────────────────────────────────────
  */
@@ -207,21 +206,6 @@ export const detectPanelsBatch = async (
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
-    ...options,
-  });
-};
-
-/**
- * In-memory multipart file upload detector.
- */
-export const detectPanelsUpload = async (
-  fetchWithInterceptor: FetchClient,
-  formData: FormData,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/upload", {
-    method: "POST",
-    body: formData,
     ...options,
   });
 };

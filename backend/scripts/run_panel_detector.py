@@ -264,22 +264,18 @@ def process_and_save_panels(
     is_tall = img_h > img_w * 2.2
     separator_bands: List[int] = []
 
-    if is_tall:
-        print(f"  [*] Detected Tall Webtoon Strip ({img_w}x{img_h}px). Using vertical strip slicer...")
-        res = detect_vertical_strip_panels(
-            gray_arr=gray_np,
-            is_white_bg=is_white,
-            threshold_val=thresh,
-            min_height_px=60,
-            min_width_pct=0.10,
-            median_bg=med_bg,
-            sensitivity=sensitivity,
-        )
-        raw_panels = res.panels
-        separator_bands = res.separator_bands
-    else:
-        print(f"  [*] Detected Standard Comic Page ({img_w}x{img_h}px). Using Manga Grid & OpenCV...")
-        raw_panels = run_cv_detection(pil_img, sensitivity=sensitivity)
+    print(f"  [*] Running Unified Panel Detection Engine on {img_w}x{img_h}px canvas...")
+    raw_panels = run_cv_detection(pil_img, sensitivity=sensitivity)
+
+    # Derive gutter cut bands between consecutive ordered panels
+    sorted_raw = sorted(raw_panels, key=lambda p: int(p.get("y", 0)))
+    for idx in range(len(sorted_raw) - 1):
+        p1 = sorted_raw[idx]
+        p2 = sorted_raw[idx + 1]
+        y1_end = int(p1.get("y", 0)) + int(p1.get("height", p1.get("h", 0)))
+        y2_start = int(p2.get("y", 0))
+        if y2_start >= y1_end:
+            separator_bands.append((y1_end + y2_start) // 2)
 
     normalized = [normalize_panel_box(p) for p in raw_panels]
     deduped = resolve_overlapping_panels(normalized, orig_w=img_w, orig_h=img_h)

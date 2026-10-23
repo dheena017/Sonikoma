@@ -35,7 +35,7 @@ if BACKEND_DIR not in sys.path:
 
 from features.image_editor.services.panel_detection.opencv_detector import (
     detect_opencv_panels,
-    detect_opencv_boxes,
+    detect_opencv_panels,
 )
 from common.media import resolve_image_to_buffer
 

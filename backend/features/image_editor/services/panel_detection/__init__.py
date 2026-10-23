@@ -7,7 +7,6 @@ Panel Detection & Comic Extraction Package:
    - detect_small_panels         : Single panel / standard comic page detection
    - detect_long_panels          : Tall vertical scrolling webtoon strip slicing
    - detect_batch_panels         : Asynchronous multi-URL batch processor
-   - detect_upload_panels        : Multipart file upload in-memory processor
    - detect_composite_panels     : Single-call pipeline (panels + bubbles + characters)
    - detect_characters           : Dedicated character and pose detection orchestrator
 
@@ -46,23 +45,16 @@ Panel Detection & Comic Extraction Package:
 # 1. High-Level Workflow Orchestrators
 from .detect_small_panels_service import (
     detect_small_panels,
-    detect_small_panels_boxes,
 )
 from .detect_long_panels_service import (
     detect_long_panels,
-    detect_long_panels_boxes,
 )
 from .detect_batch_service import (
     detect_batch_panels,
     process_single_url,
-    _process_single_url,
-)
-from .detect_upload_service import (
-    detect_upload_panels,
 )
 from .detect_composite_service import (
     detect_composite_panels,
-    detect_composite_boxes,
 )
 from .detect_characters_service import (
     detect_characters,
@@ -77,7 +69,7 @@ detect_characters_boxes = detect_character_entities
 # 2. Standalone Detectors & Vision Engines
 from .opencv_detector import (
     detect_opencv_panels,
-    detect_opencv_boxes,
+    detect_opencv_panels,
 )
 from .grid_detector import (
     detect_manga_grid_panels,
@@ -96,7 +88,6 @@ _detect_chat_ui_bubbles = detect_chat_ui_bubbles
 get_yolo_model = get_yolo_speech_bubble_model
 from .ai_vision_detector import (
     detect_ai_vision,
-    detect_ai_vision_flow,
 )
 
 # 3. Spatial Fusion & Placement Logic
@@ -146,21 +137,16 @@ from .panel_detector import (
 __all__ = [
     # Workflow Orchestrators
     "detect_small_panels",
-    "detect_small_panels_boxes",
     "detect_long_panels",
-    "detect_long_panels_boxes",
     "detect_batch_panels",
     "process_single_url",
-    "_process_single_url",
-    "detect_upload_panels",
     "detect_composite_panels",
-    "detect_composite_boxes",
     "detect_characters",
     "detect_characters_boxes",
 
     # Standalone Detectors
     "detect_opencv_panels",
-    "detect_opencv_boxes",
+    "detect_opencv_panels",
     "detect_manga_grid_panels",
     "detect_manga_grid_pil",
     "detect_manga_grid_service",
@@ -170,12 +156,8 @@ __all__ = [
     "_detect_chat_ui_bubbles",
     "detect_character_entities",
     "estimate_character_pose",
-    "_estimate_character_pose",
     "detect_character_face",
-    "_detect_simple_face",
     "detect_ai_vision",
-    "detect_ai_vision_flow",
-    "has_yolo_dependencies",
 
     # Spatial Fusion
     "fuse_panels_and_bubbles",
@@ -206,8 +188,6 @@ __all__ = [
     # Models & Segmentation
     "get_yolo_speech_bubble_model",
     "get_yolo_model",
-    "set_loaded_yolo_model",
-    "_set_loaded_yolo_model",
     "segment_speech_bubbles_and_text_balloons",
     "get_yolo_character_segmentation_model",
     "segment_character_foreground",

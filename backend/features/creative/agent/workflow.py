@@ -32,7 +32,7 @@ from features.creative.agent.schemas import (
 from features.creative.agent.cast_manager import CharacterCastManager
 from features.platform.scraper.services.scraper_service import scrape_chapter_service
 from features.image_editor.services.processing.compose import merge_images_service
-from features.image_editor.services.panel_detection.detect_long_panels_service import detect_long_panels_boxes
+from features.image_editor.services.panel_detection.detect_long_panels_service import detect_long_panels
 from features.platform.projects.schemas_project import DetectLongPanelsRequest
 from features.image_editor.services.crop.long_panels_crop_service import crop_long_panels_batch
 from features.image_editor.schemas import LongPanelsCropRequest
@@ -480,7 +480,7 @@ class AutonomousAgentWorkflow:
             if merged_strip_url:
                 try:
                     detect_req = DetectLongPanelsRequest(url=merged_strip_url)
-                    detect_res = await detect_long_panels_boxes(detect_req)
+                    detect_res = await detect_long_panels(detect_req)
                     detected_boxes = detect_res.panels or []
                     self.log(
                         "auto_crop",

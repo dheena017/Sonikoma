@@ -3,8 +3,10 @@ backend/features/image_editor/services/panel_detection/detect_long_panels_servic
 ─────────────────────────────────────────────────────────────────────────────
 Orchestrator Service for Tall Webtoon Strips:
 - Horizontal projection profile variance for gutter seam slicing
-- Multi-panel sequence extraction with bleed guards (+5px)
-- YOLO speech bubble binding across sequential panel slices
+- Adaptive sliding-window YOLO bubble detection for ultra-long chapter scrolls
+- Subdivides continuous tall art panels along natural low-density valleys
+- Bleed guards (+5px) and pre-fusion overlap resolution
+- Returns standardized DetectLongPanelsResponse with reading order
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -19,57 +21,101 @@ from PIL import Image
 from features.platform.projects.schemas_project import (
     DetectLongPanelsRequest,
     DetectLongPanelsResponse,
-    PanelBoundingBox
+    PanelBoundingBox,
 )
 from common.media import resolve_image_to_buffer
 from features.image_editor.services.panel_detection.panel_detector import (
     detect_vertical_strip_panels,
     detect_background_color_and_threshold,
+    detect_vertical_subgutters,
     subdivide_continuous_tall_art_panel,
     resolve_overlapping_panels,
 )
-from features.image_editor.services.panel_detection.opencv_detector import detect_opencv_boxes
+from features.image_editor.services.panel_detection.opencv_detector import detect_opencv_panels
 from features.image_editor.services.panel_detection.speech_bubble_detector import detect_speech_bubbles as detect_yolo_entities
 from features.image_editor.services.panel_detection.panel_fusion_service import fuse_panels_and_bubbles
 from features.image_editor.services.panel_detection.ai_vision_detector import detect_ai_vision
 
-logger = logging.getLogger("sonikoma.services.panel_detection.long_panels")
+logger = logging.getLogger("sonikoma.services.image.panel_detection.long_panels")
 
-__all__ = ["detect_long_panels", "detect_long_panels_boxes"]
+__all__ = ["detect_long_panels"]
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 1. Tall Webtoon & Vertical Scrolling Strip Detection Engine
+# ─────────────────────────────────────────────────────────────────────────────
 
 async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPanelsResponse:
     """
-    Executes multi-panel detection on tall scrolling webtoon strips.
+    Executes multi-panel detection on tall scrolling webtoon strips and chapter scrolls.
+
+    Args:
+        request (DetectLongPanelsRequest): Request containing image url or base64,
+            plus sensitivity, background mode, min height, and auto-split settings.
+
+    Returns:
+        DetectLongPanelsResponse: Standardized response with detected panel bounding boxes,
+            speech bubbles, gutter count, and reading flow.
+
+    Raises:
+        ValueError: If neither 'url' nor 'image_base64' is provided, or image data is corrupt.
     """
+    # ── Stage 1: Timing & Guard Clauses ───────────────────────────────────────
     start_time = time.perf_counter()
 
-    raw_bytes = None
+    if not request.url and not request.image_base64:
+        raise ValueError("Must provide either 'url' or 'image_base64' for long-panels detection.")
+
+    # ── Stage 2: Input Normalization & Buffer Resolution ──────────────────────
+    raw_bytes: Optional[bytes] = None
+
     if request.url:
-        resolved = await resolve_image_to_buffer(request.url)
-        raw_bytes = resolved.get("data")
+        try:
+            resolved = await resolve_image_to_buffer(request.url)
+            raw_bytes = resolved.get("data")
+        except Exception as e:
+            logger.error(f"[LongPanels] Failed to resolve URL '{request.url}': {e}", exc_info=True)
+            raise ValueError(f"Could not download image from URL: {e}")
     elif request.image_base64:
         b64 = request.image_base64
         if "," in b64:
             b64 = b64.split(",", 1)[1]
-        raw_bytes = base64.b64decode(b64)
+        try:
+            raw_bytes = base64.b64decode(b64)
+        except Exception as e:
+            logger.error(f"[LongPanels] Base64 decoding failed: {e}")
+            raise ValueError(f"Invalid base64 payload: {e}")
 
     if not raw_bytes:
-        raise ValueError("Could not resolve image data for long-panels detection.")
+        raise ValueError("Resolved image buffer is empty (0 bytes).")
 
-    pil_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
-    img_w, img_h = pil_img.size
+    try:
+        pil_img = Image.open(io.BytesIO(raw_bytes))
+        if pil_img.mode != "RGB":
+            pil_img = pil_img.convert("RGB")
+        img_w, img_h = pil_img.size
+    except Exception as e:
+        logger.error(f"[LongPanels] Image parsing error: {e}")
+        raise ValueError(f"Corrupt image payload: {e}")
+
+    if img_w < 10 or img_h < 10:
+        raise ValueError(f"Image dimensions too small ({img_w}x{img_h}px) for strip detection.")
+
     aspect_ratio = img_h / float(max(1, img_w))
     gray_arr = np.array(pil_img.convert("L"))
 
-    logger.info(f"[LongPanels Detector] Starting Tri-Engine detection on {img_w}x{img_h}px image (aspect_ratio={aspect_ratio:.2f})...")
+    logger.info(
+        f"[LongPanels Detector] Starting Tri-Engine detection on {img_w}x{img_h}px image "
+        f"(aspect_ratio={aspect_ratio:.2f}, mode={request.engine_mode})..."
+    )
 
-    # ── ENGINE 1: YOLO Deep-Learning Speech Bubble & Entity Segmentation ──────
-    # We run YOLO first so bubble locations guide and protect panel seam slicing
+    # ── Stage 3: Core Algorithmic Processing ──────────────────────────────────
+
+    # ── Engine 1: YOLO Deep-Learning Speech Bubble & Entity Segmentation ──────
     yolo_bubbles = []
     try:
         if img_h > int(img_w * 2.0):
-            # Ultra-Long Webtoon Strip: Adaptive chunks maintaining optimal aspect ratio for YOLO (~1:1.5 to 1:1.75)
+            # Ultra-Long Webtoon Strip: Adaptive chunks maintaining optimal aspect ratio (~1:1.5 to 1:1.75)
             if img_w < 600:
                 chunk_h = max(300, int(img_w * 2.5))
             else:
@@ -108,31 +154,34 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
                 b.bubble_id = f"bubble_{idx + 1}"
                 b.reading_order = idx + 1
             yolo_bubbles = seen_bubbles
-            logger.info(f"[LongPanels: YOLO] Sliding window detected {len(yolo_bubbles)} speech bubbles across {chunks_processed} chunks.")
+            logger.info(
+                f"[LongPanels: YOLO] Sliding window detected {len(yolo_bubbles)} "
+                f"speech bubbles across {chunks_processed} chunks."
+            )
         else:
             yolo_bubbles = detect_yolo_entities(pil_img, conf_threshold=0.25)
             logger.info(f"[LongPanels: YOLO] Single-pass detected {len(yolo_bubbles)} speech bubbles.")
     except Exception as e:
-        logger.warning(f"[LongPanels: YOLO] YOLO detection error: {e}", exc_info=True)
+        logger.warning(f"[LongPanels: YOLO] Bubble detection fallback: {e}", exc_info=True)
 
     yolo_ocr_boxes = [
         {"x": b.x, "y": b.y, "w": b.width, "h": b.height}
         for b in yolo_bubbles
     ]
 
-    # ── ENGINE 2: OpenCV & Webtoon Adaptive Gutter Variance Slicing ───────────
-    cv_res = detect_opencv_boxes(
+    # ── Engine 2: OpenCV & Webtoon Adaptive Gutter Variance Slicing ───────────
+    cv_res = detect_opencv_panels(
         image_bytes=pil_img,
         min_width_pct=0.15,
         min_height_px=request.min_panel_height,
-        bleed_padding_px=request.bleed_padding_px
+        bleed_padding_px=request.bleed_padding_px,
     )
     cv_panels = cv_res.get("panels", [])
 
     is_white_bg = True
     threshold_val = 220
-    # Run horizontal projection valley segmenter guided by YOLO speech bubbles
-    if len(cv_panels) <= 1 or img_h > img_w * 2:
+    # If OpenCV found no frames (e.g. completely borderless scroll), fall back to gutter segmenter
+    if len(cv_panels) <= 1:
         try:
             bg_res = detect_background_color_and_threshold(gray_arr, request.background_mode, request.sensitivity)
             is_white_bg, threshold_val, median_bg, bg_std, top_med, bot_med, bg_rgb = bg_res
@@ -148,16 +197,20 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
                 sensitivity=request.sensitivity,
                 top_median=top_med,
                 bottom_median=bot_med,
-                padding_px=request.bleed_padding_px
+                padding_px=request.bleed_padding_px,
             )
-            webtoon_boxes = webtoon_res.panels if hasattr(webtoon_res, "panels") else (webtoon_res[0] if isinstance(webtoon_res, tuple) else [])
+            webtoon_boxes = (
+                webtoon_res.panels
+                if hasattr(webtoon_res, "panels")
+                else (webtoon_res[0] if isinstance(webtoon_res, tuple) else [])
+            )
             if webtoon_boxes:
                 cv_panels = webtoon_boxes
                 logger.info(f"[LongPanels: OpenCV] Webtoon gutter segmenter extracted {len(cv_panels)} panel seams.")
         except Exception as e:
             logger.warning(f"[LongPanels: OpenCV] Webtoon seam segmenter fallback: {e}", exc_info=True)
 
-    # ── ENGINE 3: AI Vision Reading Flow & OCR (Optional Mode) ────────────────
+    # ── Engine 3: AI Vision Reading Flow & OCR (Optional Mode) ────────────────
     flow = "top_to_bottom"
     if request.engine_mode == "ai_vision":
         try:
@@ -167,8 +220,7 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
         except Exception as e:
             logger.warning(f"[LongPanels: AI Vision] Fallback: {e}")
 
-    # ── SUBDIVIDE OVERSIZED COMPOSITE PANELS & 2D MANGA GRIDS ─────────────────
-    # Break down macro-page slices into individual separate comic panel frames
+    # ── Subdivide Oversized Composite Panels & 2D Manga Grids ─────────────────
     if request.auto_split:
         try:
             subdivided_cv: List[Dict[str, Any]] = []
@@ -189,7 +241,9 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
                     sub_gray = gray_arr[py : py + ph, px : px + pw]
                     has_subcols = False
                     if sub_gray.shape[0] > 0 and sub_gray.shape[1] > 0 and pw >= int(img_w * 0.70):
-                        sub_cols = _detect_vertical_subgutters(sub_gray, is_white_bg=True, threshold_val=220, median_bg=255.0)
+                        sub_cols = detect_vertical_subgutters(
+                            sub_gray, is_white_bg=True, threshold_val=220, median_bg=255.0
+                        )
                         if len(sub_cols) > 1:
                             has_subcols = True
                             for col_idx, (cx1, cx2) in enumerate(sub_cols):
@@ -201,14 +255,13 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
                                         "w": cw,
                                         "h": ph,
                                         "confidence": p.get("confidence", 0.95),
-                                        "label": "panel_col"
+                                        "label": "panel_col",
                                     })
 
                     if has_subcols:
                         continue
 
-                    # In Webtoon strips, only subdivide exceptionally tall continuous art scenes
-                    # along natural valley seams (aspect ratio > 2.8:1 or height > 2.2x strip width):
+                    # In Webtoon strips, subdivide exceptionally tall continuous art scenes along valley seams
                     if ph > int(pw * 2.8) or (ph > int(img_w * 2.2) and ph > int(pw * 2.0)):
                         child_ocr = [
                             {"x": max(0, b.x - px), "y": max(0, b.y - py), "w": b.width, "h": b.height}
@@ -228,7 +281,7 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
                                         "w": pw,
                                         "h": piece_h,
                                         "confidence": p.get("confidence", 0.95),
-                                        "label": "webtoon_subpanel"
+                                        "label": "webtoon_subpanel",
                                     })
                         else:
                             subdivided_cv.append({
@@ -237,7 +290,7 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
                                 "w": pw,
                                 "h": ph,
                                 "confidence": p.get("confidence", 0.95),
-                                "label": "panel"
+                                "label": "panel",
                             })
                     else:
                         subdivided_cv.append({
@@ -246,17 +299,16 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
                             "w": pw,
                             "h": ph,
                             "confidence": p.get("confidence", 0.95),
-                            "label": p.get("label", "panel")
+                            "label": p.get("label", "panel"),
                         })
                 else:
                     # Non-webtoon (print 2D Manga grid) pages with closed bordered frames
                     page_crop = pil_img.crop((px, py, px + pw, py + ph))
-
-                    cv_grid = detect_opencv_boxes(
+                    cv_grid = detect_opencv_panels(
                         page_crop,
                         min_width_pct=0.20,
                         min_height_px=max(int(pw * 0.12), int(ph * 0.08)),
-                        bleed_padding_px=request.bleed_padding_px
+                        bleed_padding_px=request.bleed_padding_px,
                     )
                     sub_panels = cv_grid.get("panels", [])
 
@@ -308,7 +360,7 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
                                 "w": sp_w,
                                 "h": sp_h,
                                 "confidence": p.get("confidence", 0.95),
-                                "label": p.get("label", "panel")
+                                "label": p.get("label", "panel"),
                             })
                         subdivided_cv.extend(cleaned_subs)
                     else:
@@ -320,16 +372,13 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
             logger.warning(f"[LongPanels: Subdivider] Fallback: {e}", exc_info=True)
 
     # ── PRE-FUSION: Resolve overlapping cv_panels before bubble fusion ────────
-    # Check whether panels actually overlap in both horizontal and vertical space.
-    # Find the cleanest gutter row (minimum ink strokes/gradients) in the overlap band
-    # to protect black frame borders and character art from being severed.
     if len(cv_panels) > 1:
         cv_panels_pre = sorted(cv_panels, key=lambda p: (int(p.get("y") or 0), int(p.get("x") or 0)))
         for _i in range(len(cv_panels_pre) - 1):
             p1 = cv_panels_pre[_i]
             p2 = cv_panels_pre[_i + 1]
             p1_y1 = int(p1.get("y") or 0)
-            p1_h  = int(p1.get("h") or p1.get("height") or 0)
+            p1_h = int(p1.get("h") or p1.get("height") or 0)
             p1_y2 = p1_y1 + p1_h
             p2_y1 = int(p2.get("y") or 0)
 
@@ -339,10 +388,9 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
             p2_x2 = p2_x1 + int(p2.get("w") or p2.get("width") or 0)
             x_overlap = min(p1_x2, p2_x2) - max(p1_x1, p2_x1)
 
-            # Only resolve vertical overlap if panels share horizontal space (not side-by-side)
+            # Only resolve vertical overlap if panels share horizontal space
             if p1_y2 > p2_y1 and x_overlap > max(15, int(img_w * 0.05)):
                 overlap = p1_y2 - p2_y1
-                # Find optimal boundary row in overlap zone: minimum ink strokes / edge density
                 boundary = p2_y1 + (overlap // 2)
                 try:
                     if gray_arr is not None:
@@ -376,28 +424,24 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
                 p2["h"] = max(10, new_h2)
                 if "height" in p2:
                     p2["height"] = max(10, new_h2)
-                logger.debug(
-                    f"[LongPanels: Pre-Fusion Clip] panels[{_i}] y2 {p1_y2}->{boundary}, "
-                    f"panels[{_i+1}] y1 {p2_y1}->{boundary} (overlap was {overlap}px at optimal seam)"
-                )
+
         cv_panels = [p for p in cv_panels_pre if int(p.get("h") or p.get("height") or 0) >= 60]
 
-    # ── FUSION: Bind Speech Bubbles into Panel Slices ─────────────────────────
+    # ── Multimodal Fusion: Bind Speech Bubbles into Panel Slices ──────────────
     fused_panels, all_bubbles, _ = fuse_panels_and_bubbles(
         cv_panels=cv_panels,
         yolo_bubbles=yolo_bubbles,
         img_w=img_w,
         img_h=img_h,
         is_small_panel=False,
-        bleed_padding_px=request.bleed_padding_px
+        bleed_padding_px=request.bleed_padding_px,
     )
 
-    # ── POST-PROCESSING: Deduplicate overlapping slices ───────────────────────
+    # ── Post-Processing: Resolve Overlapping Slices & Blank Gutters ───────────
     try:
         raw_dicts = [p.model_dump() for p in fused_panels]
         cleaned_dicts = resolve_overlapping_panels(raw_dicts, iou_thresh=0.40)
         if cleaned_dicts:
-            # Filter out tiny noise slivers and empty canvas background gutters
             min_h_thresh = max(120, int(request.min_panel_height * 0.70))
             valid_dicts = []
             for cd in cleaned_dicts:
@@ -414,14 +458,13 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
 
                 # Filter out pure blank canvas gutter slices between panels
                 if ch >= 40 and cw >= 40:
-                    patch = gray_arr[cy:cy + ch, cx:cx + cw]
+                    patch = gray_arr[cy : cy + ch, cx : cx + cw]
                     if patch.size > 0:
                         patch_std = float(np.std(patch))
                         if is_white_bg:
                             bg_match_pct = float(np.mean(patch >= (threshold_val - 8)))
                         else:
                             bg_match_pct = float(np.mean(patch <= (threshold_val + 8)))
-                        # If >= 90% is solid canvas background, variance is near 0, and no speech bubbles exist, it's a gutter
                         if bg_match_pct >= 0.90 and patch_std < 8.0 and not has_bubbles:
                             continue
 
@@ -434,12 +477,14 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
                 p.index = idx
                 p.id = f"panel_{idx + 1}"
     except Exception as e:
-        logger.warning(f"[LongPanels: PostProcessor] Fallback: {e}")
+        logger.warning(f"[LongPanels: PostProcessor] Deduplication fallback: {e}")
 
+    # ── Stage 4: Structured Output & Traceable Logging ────────────────────────
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)
 
     logger.info(
-        f"[LongPanels Detector] Successfully extracted {len(fused_panels)} panel(s) and {len(all_bubbles)} bubble(s) in {elapsed_ms}ms (size={img_w}x{img_h}px, mode={request.engine_mode})"
+        f"[LongPanels Detector] Successfully extracted {len(fused_panels)} panel(s) and "
+        f"{len(all_bubbles)} bubble(s) in {elapsed_ms}ms (size={img_w}x{img_h}px, mode={request.engine_mode})"
     )
 
     return DetectLongPanelsResponse(
@@ -453,7 +498,7 @@ async def detect_long_panels(request: DetectLongPanelsRequest) -> DetectLongPane
         reading_flow="top_to_bottom",
         panels=fused_panels,
         gutter_count=max(0, len(fused_panels) - 1),
-        message=f"Detected {len(fused_panels)} panels in {elapsed_ms}ms."
+        message=f"Detected {len(fused_panels)} panels in {elapsed_ms}ms.",
     )
 
 

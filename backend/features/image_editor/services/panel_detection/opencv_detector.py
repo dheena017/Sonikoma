@@ -9,22 +9,18 @@ Pure OpenCV Computer Vision Detection Engine:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import cv2
 import io
 import logging
 from typing import List, Dict, Any, Tuple, Optional
 import numpy as np
 from PIL import Image
 
-try:
-    import cv2
-    HAS_CV = True
-except ImportError:
-    cv2 = None  # type: ignore
-    HAS_CV = False
+
 
 logger = logging.getLogger("sonikoma.services.panel_detection.opencv")
 
-__all__ = ["detect_opencv_panels", "detect_opencv_boxes"]
+__all__ = ["detect_opencv_panels", "detect_opencv_panels"]
 
 
 def detect_opencv_panels(
@@ -40,9 +36,6 @@ def detect_opencv_panels(
     Executes pure OpenCV geometric contour and gutter analysis on image bytes or numpy array.
     Returns detected rectangular panels, webtoon gutter valleys, and edge energy.
     """
-    if cv2 is None or not HAS_CV:
-        logger.warning("[OpenCV Detector] cv2 module not installed. Returning empty results.")
-        return {"panels": [], "gutters": [], "edge_energy": 0.0, "image_width": 0, "image_height": 0}
 
     # Extract OpenCV BGR matrix from bytes or numpy array
     if isinstance(image_bytes, np.ndarray):
@@ -169,5 +162,4 @@ def detect_opencv_panels(
     }
 
 
-# Backward-compatible alias
-detect_opencv_boxes = detect_opencv_panels
+

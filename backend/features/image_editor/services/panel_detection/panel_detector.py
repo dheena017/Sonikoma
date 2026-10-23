@@ -38,7 +38,7 @@ from features.platform.projects.schemas_project import (
     EntityLabel,
     EntityCategory,
 )
-from features.image_editor.services.panel_detection.opencv_detector import detect_opencv_boxes
+from features.image_editor.services.panel_detection.opencv_detector import detect_opencv_panels
 from features.image_editor.services.panel_detection.grid_detector import detect_manga_grid_panels
 
 logger = logging.getLogger("sonikoma.services.image.panel_detection.panel_detector")
@@ -542,9 +542,12 @@ def detect_vertical_strip_panels(
             if gh >= min_gutter_h:
                 avg_bg_ratio = float(np.mean(page_bg_ratio[g_start:g_end]))
                 avg_std = float(np.mean(row_stds[g_start:g_end]))
-                if avg_bg_ratio >= (effective_gutter_bg_ratio - 0.15) and (
-                    avg_std <= gutter_std_thresh * 2.2 or gh >= max(8, int(w * 0.012))
-                ):
+                is_clean_gutter = (
+                    avg_bg_ratio >= max(0.65, effective_gutter_bg_ratio - 0.10)
+                    and avg_std <= gutter_std_thresh * 1.8
+                ) or (gh >= 25 and avg_bg_ratio >= 0.85 and avg_std <= gutter_std_thresh * 2.5)
+
+                if is_clean_gutter:
                     cut_y = (g_start + g_end) // 2
                     cut_points.append(cut_y)
                     gutter_heights.append(gh)
@@ -556,9 +559,12 @@ def detect_vertical_strip_panels(
         if gh >= min_gutter_h:
             avg_bg_ratio = float(np.mean(page_bg_ratio[g_start:g_end]))
             avg_std = float(np.mean(row_stds[g_start:g_end]))
-            if avg_bg_ratio >= (effective_gutter_bg_ratio - 0.15) and (
-                avg_std <= gutter_std_thresh * 2.2 or gh >= max(8, int(w * 0.012))
-            ):
+            is_clean_gutter = (
+                avg_bg_ratio >= max(0.65, effective_gutter_bg_ratio - 0.10)
+                and avg_std <= gutter_std_thresh * 1.8
+            ) or (gh >= 25 and avg_bg_ratio >= 0.85 and avg_std <= gutter_std_thresh * 2.5)
+
+            if is_clean_gutter:
                 cut_y = (g_start + g_end) // 2
                 cut_points.append(cut_y)
                 gutter_heights.append(gh)
@@ -1095,8 +1101,36 @@ def run_cv_detection(
     gray_arr = np.array(pil_img.convert("L"))
 
     # ── Stage 3: Core Algorithm Execution ───────────────────────────────────
-    if is_tall and auto_split:
-        logger.info(f"[Panel Detector] Processing tall Webtoon strip ({img_w}x{img_h}px) via vertical slicer...")
+    # Priority 1: High-Precision 2D OpenCV Contour & Frame Detector
+    # Robustly extracts true panel boundaries for both Manga pages and Webtoon strips with ink borders
+    cv_res = detect_opencv_panels(
+        raw_bytes or b"",
+        min_width_pct=min_width_pct,
+        min_height_px=min_height_px,
+        canny_low=canny_low,
+        canny_high=canny_high,
+        close_kernel_size=close_kernel_size,
+        bleed_padding_px=max(5, padding_px),
+    )
+    cv_panels = cv_res.get("panels", [])
+
+    if cv_panels and len(cv_panels) >= 1:
+        logger.info(f"[Panel Detector] OpenCV 2D contour engine detected {len(cv_panels)} panel frame(s).")
+        panels = cv_panels
+    elif not is_tall:
+        logger.info(f"[Panel Detector] Processing standard comic page ({img_w}x{img_h}px) via Manga Grid...")
+        grid_panels = detect_manga_grid_panels(
+            gray_arr,
+            min_width_pct=min_width_pct,
+            min_height_px=min_height_px,
+            canny_low=canny_low,
+            canny_high=canny_high,
+            close_kernel_size=close_kernel_size,
+        )
+        panels = grid_panels if (grid_panels and len(grid_panels) > 1) else cv_panels
+    else:
+        # Fallback: Vertical strip slicer for frameless / borderless webtoon scrolls without ink frames
+        logger.info(f"[Panel Detector] OpenCV found no frames; falling back to vertical strip slicer for {img_w}x{img_h}px scroll...")
         bg_res = detect_background_color_and_threshold(gray_arr, bg_mode, sensitivity)
         is_white_bg, threshold_val, median_bg, bg_std, top_med, bot_med, bg_rgb = bg_res
 
@@ -1114,31 +1148,6 @@ def run_cv_detection(
             padding_px=padding_px,
         )
         panels = res.panels if hasattr(res, "panels") else (res[0] if isinstance(res, tuple) else [])
-    else:
-        logger.info(f"[Panel Detector] Processing standard comic page ({img_w}x{img_h}px) via Grid / OpenCV...")
-        # Step A: Manga Grid Tier Decomposition
-        grid_panels = detect_manga_grid_panels(
-            gray_arr,
-            min_width_pct=min_width_pct,
-            min_height_px=min_height_px,
-            canny_low=canny_low,
-            canny_high=canny_high,
-            close_kernel_size=close_kernel_size,
-        )
-        if grid_panels and len(grid_panels) > 1:
-            panels = grid_panels
-        else:
-            # Step B: OpenCV Contour Fallback
-            cv_res = detect_opencv_boxes(
-                raw_bytes or b"",
-                min_width_pct=min_width_pct,
-                min_height_px=min_height_px,
-                canny_low=canny_low,
-                canny_high=canny_high,
-                close_kernel_size=close_kernel_size,
-                bleed_padding_px=max(5, padding_px),
-            )
-            panels = cv_res.get("panels", [])
 
     # ── Stage 4: Normalization & Traceable Output ───────────────────────────
     normalized = [normalize_panel_box(p) for p in panels]
@@ -1390,6 +1399,14 @@ async def detect_panels_service(
     logger.info(f"[Panel API] Processing image ({img_w}x{img_h}px, {len(raw_bytes):,} bytes)...")
 
     # ── Stage 3: Core Panel Detection Pipeline ──────────────────────────────
+    cv_res = detect_opencv_panels(
+        raw_bytes,
+        min_width_pct=req_obj.min_width_pct,
+        min_height_px=req_obj.min_height_px,
+        bleed_padding_px=max(5, req_obj.padding_px or 5),
+    )
+    cv_panels = cv_res.get("panels", [])
+
     is_white_bg, thresh_val, median_bg, bg_std, _, _, _ = detect_background_color_and_threshold(
         gray_arr,
         bg_mode=req_obj.background_mode,
@@ -1397,16 +1414,32 @@ async def detect_panels_service(
         color_arr=np.array(pil_img),
     )
 
-    det_result = detect_vertical_strip_panels(
-        gray_arr,
-        is_white_bg=is_white_bg,
-        threshold_val=thresh_val,
-        min_height_px=req_obj.min_height_px,
-        min_width_pct=req_obj.min_width_pct,
-        padding_px=req_obj.padding_px,
-    )
-
-    raw_panels = det_result.panels
+    if cv_panels and len(cv_panels) >= 1:
+        logger.info(f"[Panel API] Extracted {len(cv_panels)} frame(s) using high-precision OpenCV 2D engine.")
+        raw_panels = cv_panels
+        separator_bands = []
+        gutter_ranges = []
+        for idx in range(len(cv_panels) - 1):
+            p1 = cv_panels[idx]
+            p2 = cv_panels[idx + 1]
+            y1_end = int(p1.get("y", 0)) + int(p1.get("h", p1.get("height", 0)))
+            y2_start = int(p2.get("y", 0))
+            if y2_start >= y1_end:
+                separator_bands.append((y1_end + y2_start) // 2)
+                gutter_ranges.append((y1_end, y2_start))
+    else:
+        logger.info(f"[Panel API] OpenCV found no frames; falling back to Webtoon vertical strip slicer...")
+        det_result = detect_vertical_strip_panels(
+            gray_arr,
+            is_white_bg=is_white_bg,
+            threshold_val=thresh_val,
+            min_height_px=req_obj.min_height_px,
+            min_width_pct=req_obj.min_width_pct,
+            padding_px=req_obj.padding_px,
+        )
+        raw_panels = det_result.panels
+        separator_bands = det_result.separator_bands
+        gutter_ranges = det_result.gutter_ranges
 
     # Subdivide tall continuous artwork panels if enabled
     if req_obj.subdivide_tall:
@@ -1473,8 +1506,8 @@ async def detect_panels_service(
         reading_flow=req_obj.reading_flow,
         total_panels=len(panel_boxes),
         panels=panel_boxes,
-        separator_bands=det_result.separator_bands,
-        gutter_ranges=det_result.gutter_ranges,
+        separator_bands=separator_bands,
+        gutter_ranges=gutter_ranges,
         execution_time_ms=elapsed_ms,
         message=f"Successfully extracted {len(panel_boxes)} panel(s) in {elapsed_ms}ms",
     )
