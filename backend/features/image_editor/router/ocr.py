@@ -15,7 +15,7 @@ from app.core.dependencies.auth import get_current_user
 from features.platform.scraper.schemas_scraper import ExtractScriptRequest
 from features.image_editor.schemas import DetectTextRequest, DetectTextResponse
 from features.platform.scraper.services.scraper_service import scrape_and_initialize_project
-from features.image_editor.services.ocr.ocr_service import (
+from features.image_editor.services.ocr.dialogue_text_detector import (
     extract_script_from_panels,
     extract_direct_image_ocr,
     extract_bubble_guided_ocr,

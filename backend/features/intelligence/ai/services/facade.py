@@ -511,7 +511,7 @@ async def facade_analyze_image(
         logger.warning(f"[facade_analyze_image] Panel analysis vision execution failed: {exc}. Falling back to OCR.")
         ocr_text = ""
         try:
-            from features.image_editor.services.ocr.ocr_engine import extract_dialogue_from_panel
+            from features.image_editor.services.ocr.dialogue_text_detector import extract_dialogue_from_panel
             with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_ocr:
                 tmp_ocr.write(img_buffer)
                 tmp_ocr_path = tmp_ocr.name

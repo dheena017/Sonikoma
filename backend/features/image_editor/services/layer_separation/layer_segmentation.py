@@ -45,7 +45,7 @@ from features.image_editor.services.layer_separation.sam import (
     has_rembg,
     has_sam,
 )
-from features.image_editor.services.ocr.ocr_engine import extract_full_ocr_data
+from features.image_editor.services.ocr.dialogue_text_detector import extract_full_ocr_data
 
 logger = logging.getLogger("sonikoma.services.image.layer_separation.layer_segmentation")
 

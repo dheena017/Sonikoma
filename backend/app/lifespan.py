@@ -117,10 +117,10 @@ async def lifespan(app: FastAPI):
             try:
                 from features.image_editor.services.layer_separation.sam import get_rembg_session
                 from features.image_editor.services.detector import get_yolo_speech_bubble_model
-                from features.image_editor.services.ocr.ocr_engine import _load_ocr_reader
+                from features.image_editor.services.ocr.dialogue_text_detector import get_ocr_reader
                 await asyncio.to_thread(get_rembg_session)
                 await asyncio.to_thread(get_yolo_speech_bubble_model)
-                await asyncio.to_thread(_load_ocr_reader, ["en"])
+                await asyncio.to_thread(get_ocr_reader, ["en"])
             except Exception as e:
                 logger.warning(f"[Startup] Model pre-warm failed (non-critical, will lazy-load on first request): {e}")
         else:

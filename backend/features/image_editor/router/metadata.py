@@ -8,7 +8,7 @@ Endpoints for extracting image metadata and performing OCR dialogue extraction.
 import logging
 from fastapi import APIRouter, HTTPException
 
-from features.image_editor.schemas import MetadataRequest, OCRBase64Request
+from features.image_editor.schemas import MetadataRequest
 import features.image_editor.services.utils.image_utils as img_utils
 
 logger = logging.getLogger("sonikoma.api.images.metadata")
@@ -37,33 +37,4 @@ async def get_image_metadata(body: MetadataRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/extract", summary="Extract speech dialogue transcriptions sequentially from panel URL")
-async def extract_text(body: MetadataRequest):
-    try:
-        from features.image_editor.services.ocr.ocr_engine import extract_dialogue_from_panel
-        dialogue = await extract_dialogue_from_panel(body.url)
-        return {"success": True, "dialogue": dialogue}
-    except Exception as e:
-        logger.error(f"[OCR API] Error extracting dialogue text: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/extract-full", summary="Extract full bounding-box dialogue map sequentially from panel URL")
-async def extract_full_text(body: MetadataRequest):
-    try:
-        from features.image_editor.services.ocr.ocr_engine import extract_full_ocr_data
-        full_data = await extract_full_ocr_data(body.url)
-        return {"success": True, "ocr_data": full_data}
-    except Exception as e:
-        logger.error(f"[OCR Full API] Error extracting full boundary map: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/extract-b64", include_in_schema=False)
-async def extract_text_b64(body: OCRBase64Request):
-    return {"success": False, "error": "B64 endpoints deprecated. Please upload file and use URL."}
-
-
-@router.post("/extract-full-b64", include_in_schema=False)
-async def extract_full_text_b64(body: OCRBase64Request):
-    return {"success": False, "error": "B64 endpoints deprecated. Please upload file and use URL."}
+__all__ = ["router"]
