@@ -110,6 +110,46 @@ Every single service file strictly adheres to the following structural standard:
 
 ---
 
+## 2.1 Simplified English Function Naming Standard
+
+All canonical public API functions follow concise, plain English naming conventions (Verb + Noun). For seamless backward compatibility, all previous names remain available as direct aliases:
+
+| Sub-Module | File | Simplest English API (Primary) | Backward-Compatible Alias |
+| :--- | :--- | :--- | :--- |
+| **compiler** | `video_compiler.py` | `compile_video(...)` | `compile_video_from_panels(...)` |
+| **compiler** | `render_job.py` | `run_render_job(...)` | `process_render_job(...)` |
+| **compiler** | `timeline_engine.py` | `build_timeline(...)` | `build_multi_track_timeline(...)` |
+| **compiler** | `audio_sync_engine.py`| `sync_dialogue(...)` | `align_dialogue_with_audio(...)` |
+| **motion** | `motion_engine.py` | `apply_motion(...)` | `build_cinematic_motion_clip(...)` |
+| **motion** | `camera_shake_engine.py`| `apply_shake(...)` | `build_camera_shake_clip(...)` |
+| **motion** | `parallax_engine.py` | `apply_parallax(...)` | `build_parallax_motion_clip(...)` |
+| **motion** | `transition_engine.py` | `apply_transition(...)` | `apply_clip_transition(...)` |
+| **composition** | `frame_builder.py` | `build_frame(...)` | `build_panel_frame_image(...)` |
+| **composition** | `subtitle_overlay.py` | `create_subtitles(...)` | `create_subtitle_overlay(...)` |
+| **composition** | `sfx_visualizer.py` | `add_sfx_text(...)` | `overlay_manga_sfx(...)` |
+| **composition** | `watermark_overlay.py` | `add_watermark(...)` | `apply_video_watermark(...)` |
+| **operations** | `cutter_service.py` | `cut_video(...)` | `cut_video_clip(...)` |
+| **operations** | `concat_service.py` | `concat_videos(...)` | `concatenate_video_clips(...)` |
+| **operations** | `filter_service.py` | `apply_filter(...)` | `apply_video_filter(...)` |
+| **operations** | `speed_service.py` | `change_speed(...)` | `adjust_video_speed(...)` |
+| **operations** | `audio_merge_service.py`| `extract_audio(...)` | `extract_audio_from_video(...)` |
+| **operations** | `audio_merge_service.py`| `mix_audio(...)` | `mix_audio_into_video(...)` |
+| **operations** | `subtitle_burn_service.py`| `burn_subtitles(...)` | `burn_subtitles_into_video(...)` |
+| **operations** | `thumbnail_service.py` | `get_thumbnail(...)` | `extract_video_thumbnail(...)` |
+| **operations** | `probe_service.py` | `get_video_info(...)` | `probe_video_metadata(...)` |
+| **export** | `export_presets.py` | `get_export_preset(...)` | `get_platform_export_profile(...)` |
+| **export** | `export_gif.py` | `export_gif(...)` | `export_animated_teaser(...)` |
+| **export** | `video_packager.py` | `save_video(...)` | `package_and_store_video(...)` |
+| **utils** | `resolutions.py` | `make_even_dimensions(...)` | `ensure_even_dimensions(...)` |
+| **utils** | `resolutions.py` | `get_resolution(...)` | `resolve_resolution(...)` |
+| **utils** | `resolutions.py` | `get_bitrate(...)` | `calculate_video_bitrate(...)` |
+| **utils** | `timecodes.py` | `get_total_frames(...)` | `calculate_total_frames(...)` |
+| **utils** | `timecodes.py` | `parse_timecode(...)` | `parse_timecode_to_seconds(...)` |
+| **utils** | `media_resolver.py` | `load_image(...)` | `resolve_video_input_image(...)` |
+| **utils** | `media_resolver.py` | `get_output_path(...)` | `get_video_output_path(...)` |
+
+---
+
 ## 3. Standardized Function Specifications (Every File Defined)
 
 ---

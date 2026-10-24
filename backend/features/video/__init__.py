@@ -1,0 +1,173 @@
+"""
+backend/features/video/__init__.py
+─────────────────────────────────────────────────────────────────────────────
+Unified first-class Video domain package.
+Exposes router, service facade, schemas, compiler pipeline, motion engines,
+and atomic FFmpeg operations.
+─────────────────────────────────────────────────────────────────────────────
+"""
+
+from features.video.router import router, video_router, ffmpeg_router
+from features.video.service import VideoService, video_service
+from features.video.compiler import (
+    compile_video,
+    compile_video_from_panels,
+    compile_panels_to_video_file,
+    run_render_job,
+    process_render_job,
+    build_timeline,
+    build_multi_track_timeline,
+    sync_dialogue,
+    align_dialogue_with_audio,
+    MoviePyCompileLogger,
+)
+from features.video.composition import (
+    build_frame,
+    build_panel_frame_image,
+    create_subtitles,
+    create_subtitle_overlay,
+    SubtitleOverlay,
+    add_sfx_text,
+    overlay_manga_sfx,
+    add_watermark,
+    apply_video_watermark,
+)
+from features.video.motion import (
+    apply_motion,
+    build_cinematic_motion_clip,
+    apply_shake,
+    build_camera_shake_clip,
+    apply_parallax,
+    build_parallax_motion_clip,
+    apply_transition,
+    apply_clip_transition,
+)
+from features.video.operations import (
+    cut_video,
+    cut_video_clip,
+    concat_videos,
+    concatenate_video_clips,
+    apply_filter,
+    apply_video_filter,
+    change_speed,
+    adjust_video_speed,
+    extract_audio,
+    extract_audio_from_video,
+    mix_audio,
+    mix_audio_into_video,
+    burn_subtitles,
+    burn_subtitles_into_video,
+    get_thumbnail,
+    extract_video_thumbnail,
+    get_video_info,
+    probe_video_metadata,
+)
+from features.video.export import (
+    get_export_preset,
+    get_platform_export_profile,
+    export_gif,
+    export_animated_teaser,
+    save_video,
+    package_and_store_video,
+)
+from features.video.utils import (
+    make_even_dimensions,
+    ensure_even_dimensions,
+    get_resolution,
+    resolve_resolution,
+    get_bitrate,
+    calculate_video_bitrate,
+    get_total_frames,
+    calculate_total_frames,
+    format_timecode,
+    parse_timecode,
+    parse_timecode_to_seconds,
+    load_image,
+    resolve_video_input_image,
+    get_output_path,
+    get_video_output_path,
+)
+from features.video import schemas
+types = schemas
+
+__all__ = [
+    "router",
+    "video_router",
+    "ffmpeg_router",
+    "VideoService",
+    "video_service",
+    # Compiler
+    "compile_video",
+    "compile_video_from_panels",
+    "compile_panels_to_video_file",
+    "run_render_job",
+    "process_render_job",
+    "build_timeline",
+    "build_multi_track_timeline",
+    "sync_dialogue",
+    "align_dialogue_with_audio",
+    "MoviePyCompileLogger",
+    # Composition
+    "build_frame",
+    "build_panel_frame_image",
+    "create_subtitles",
+    "create_subtitle_overlay",
+    "SubtitleOverlay",
+    "add_sfx_text",
+    "overlay_manga_sfx",
+    "add_watermark",
+    "apply_video_watermark",
+    # Motion
+    "apply_motion",
+    "build_cinematic_motion_clip",
+    "apply_shake",
+    "build_camera_shake_clip",
+    "apply_parallax",
+    "build_parallax_motion_clip",
+    "apply_transition",
+    "apply_clip_transition",
+    # Operations
+    "cut_video",
+    "cut_video_clip",
+    "concat_videos",
+    "concatenate_video_clips",
+    "apply_filter",
+    "apply_video_filter",
+    "change_speed",
+    "adjust_video_speed",
+    "extract_audio",
+    "extract_audio_from_video",
+    "mix_audio",
+    "mix_audio_into_video",
+    "burn_subtitles",
+    "burn_subtitles_into_video",
+    "get_thumbnail",
+    "extract_video_thumbnail",
+    "get_video_info",
+    "probe_video_metadata",
+    # Export
+    "get_export_preset",
+    "get_platform_export_profile",
+    "export_gif",
+    "export_animated_teaser",
+    "save_video",
+    "package_and_store_video",
+    # Utils
+    "make_even_dimensions",
+    "ensure_even_dimensions",
+    "get_resolution",
+    "resolve_resolution",
+    "get_bitrate",
+    "calculate_video_bitrate",
+    "get_total_frames",
+    "calculate_total_frames",
+    "format_timecode",
+    "parse_timecode",
+    "parse_timecode_to_seconds",
+    "load_image",
+    "resolve_video_input_image",
+    "get_output_path",
+    "get_video_output_path",
+    "schemas",
+    "types",
+]

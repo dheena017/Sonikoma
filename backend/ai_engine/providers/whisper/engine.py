@@ -168,8 +168,8 @@ class WhisperEngine:
         audio_path: str,
         language: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        from features.video_editor.audio.services.transcription import extract_words_with_timestamps as _ext_words
-        return await _ext_words(self, audio_path, language=language)
+        from features.audio.subtitles import get_word_times as _ext_words
+        return await _ext_words(audio_file=audio_path, language=language)
 
     async def generate_json_transcript(
         self,
@@ -178,16 +178,20 @@ class WhisperEngine:
         language: Optional[str] = None,
         include_words: bool = False
     ) -> str:
-        from features.video_editor.audio.services.transcription import generate_json_transcript as _gen_json
-        return await _gen_json(self, audio_path, output_path, language=language, include_words=include_words)
+        from features.audio.subtitles import turn_speech_into_text
+        res = await turn_speech_into_text(audio_file=audio_path, language=language)
+        import json
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(res, f, indent=2)
+        return output_path
 
     async def batch_transcribe(
         self,
         audio_paths: List[str],
         language: Optional[str] = None
     ) -> List[Optional[TranscriptionResult]]:
-        from features.video_editor.audio.services.transcription import batch_transcribe as _batch_transcribe
-        return await _batch_transcribe(self, audio_paths, language=language)
+        from features.audio.subtitles import turn_many_files_into_text as _batch_transcribe
+        return await _batch_transcribe(audio_files=audio_paths, language=language)
 
 
 _whisper_instance: Optional[WhisperEngine] = None

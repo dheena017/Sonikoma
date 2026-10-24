@@ -21,9 +21,9 @@ from features.platform.scraper import scraper_router
 from features.platform.scraper.proxy import proxy_router
 from features.image_editor.router import panels_router, ocr_router, image_router
 from features.workspace.router import storyboard_router
-from features.intelligence.ai.router import ai_router
-from features.video_editor.audio import audio_router
-from features.video_editor.video.router import video_router
+from features.ai.router import ai_router
+from features.audio.router import audio_router
+from features.video.router import video_router
 from features.platform.jobs import jobs_router
 from features.creative.export.router import export_router
 from features.creative.router import creative_router

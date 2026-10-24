@@ -128,6 +128,9 @@ def split_strip_by_gutters(
         return [image_bytes]
 
 
+split_vertical_strip_into_panels = split_strip_by_gutters
+
 __all__ = [
     "split_strip_by_gutters",
+    "split_vertical_strip_into_panels",
 ]

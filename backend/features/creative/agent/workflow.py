@@ -31,14 +31,12 @@ from features.creative.agent.schemas import (
 )
 from features.creative.agent.cast_manager import CharacterCastManager
 from features.platform.scraper.services.scraper_service import scrape_chapter_service
-from features.image_editor.services.processing.compose import merge_images_service
-from features.image_editor.services.detector import detect_long_panels
+from features.image.stitching.merge_service import merge_image_panels as merge_images_service
+from features.image.detector import detect_long_panels
 from features.platform.projects.schemas_project import DetectLongPanelsRequest
-from features.image_editor.services.crop.long_panels_crop_service import crop_long_panels_batch
-from features.image_editor.schemas import LongPanelsCropRequest
-from features.intelligence.ai.services.facade import facade_analyze_batch
-from features.video_editor.audio.services.tts import batch_synthesize_panels_service
-from features.video_editor.video.services.video_compiler import compile_video_from_panels
+from features.image.crop.long_panels_crop_service import crop_long_panels_batch
+from features.audio import make_all_panel_speech as batch_synthesize_panels_service
+from features.video import compile_video_from_panels
 from features.creative.service import creative_service
 from ai_engine.core.hub import AIHub
 from app.core.config import (
@@ -572,6 +570,7 @@ class AutonomousAgentWorkflow:
             try:
                 # Delegate to facade_analyze_batch which concurrently chunks (up to 8 panels per chunk)
                 # and analyzes all panels in parallel via asyncio.gather
+                from features.intelligence.ai.services.facade import facade_analyze_batch
                 batch_res = await facade_analyze_batch(
                     panels=panel_dict_list,
                     voice=self.request.voice,

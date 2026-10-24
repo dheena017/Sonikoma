@@ -204,5 +204,6 @@ Return STRICT JSON:
 
 
 translation_service = CreativeTranslationService()
+creative_translation_service = translation_service
 
-__all__ = ["CreativeTranslationService", "translation_service"]
+__all__ = ["CreativeTranslationService", "translation_service", "creative_translation_service"]

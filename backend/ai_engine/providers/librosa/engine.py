@@ -86,20 +86,22 @@ class LibrosaEngine:
         )
 
     async def detect_silence(self, audio_path: str, threshold_db: float = -40, min_duration: float = 0.5) -> List[SilenceSegment]:
-        from features.video_editor.audio.services.processing import detect_silence
-        return await detect_silence(self, audio_path, threshold_db=threshold_db, min_duration=min_duration)
+        from features.audio.analysis import find_silent_parts
+        parts = find_silent_parts(audio_file=audio_path, min_silence_seconds=min_duration, silence_threshold_db=threshold_db)
+        return [SilenceSegment(start_time=p["start_time"], end_time=p["end_time"], duration=p["duration"]) for p in parts]
 
     async def segment_by_energy(self, audio_path: str, num_segments: int = 10, energy_threshold: Optional[float] = None) -> List[EnergySegment]:
-        from features.video_editor.audio.services.processing import segment_by_energy
-        return await segment_by_energy(self, audio_path, num_segments=num_segments, energy_threshold=energy_threshold)
+        from features.audio.analysis import split_audio_by_energy
+        pieces = split_audio_by_energy(audio_file=audio_path, max_pieces=num_segments, energy_threshold=energy_threshold)
+        return [EnergySegment(start_time=p["start_time"], end_time=p["end_time"], duration=p["duration"], avg_energy=p.get("avg_energy", 0.0), is_peak=p.get("is_peak", False)) for p in pieces]
 
     async def extract_summary_stats(self, audio_path: str) -> Dict[str, Any]:
-        from features.video_editor.audio.services.processing import extract_summary_stats
-        return await extract_summary_stats(self, audio_path)
+        from features.audio.analysis import check_sound_details
+        return check_sound_details(audio_file=audio_path)
 
     async def save_audio_segment(self, audio_path: str, start_time: float, end_time: float, output_path: str) -> str:
-        from features.video_editor.audio.services.processing import save_audio_segment
-        return await save_audio_segment(self, audio_path, start_time, end_time, output_path)
+        from features.audio.analysis import cut_audio_clip
+        return cut_audio_clip(audio_file=audio_path, start_second=start_time, end_second=end_time, output_file=output_path)
 
 
 _librosa_instance: Optional[LibrosaEngine] = None

@@ -14,9 +14,12 @@ from .long_panels_crop_service import crop_long_panels_batch
 from .panel_splitter_service import split_strip_by_gutters
 from .manual_split_service import cut_strip_at_positions
 
+split_vertical_strip_into_panels = split_strip_by_gutters
+
 __all__ = [
     "crop_panel_margins",
     "crop_long_panels_batch",
     "split_strip_by_gutters",
+    "split_vertical_strip_into_panels",
     "cut_strip_at_positions",
 ]

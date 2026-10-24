@@ -149,6 +149,9 @@ def crop_panel_margins(
     return result_bytes, metadata
 
 
+crop_single_panels_margins = crop_panel_margins
+
 __all__ = [
     "crop_panel_margins",
+    "crop_single_panels_margins",
 ]

@@ -766,7 +766,7 @@ class YouTubeService:
 
                         # Log real token usage
                         try:
-                            from features.intelligence.ai.router.analytics import log_ai_token_usage
+                            from features.ai.catalog import log_ai_token_usage
                             p_tok = getattr(getattr(response, "usage_metadata", None), "prompt_token_count", 420) or 420
                             c_tok = getattr(getattr(response, "usage_metadata", None), "candidates_token_count", 190) or 190
                             log_ai_token_usage(

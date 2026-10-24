@@ -582,7 +582,7 @@ async def execute_provider_call(
         })
 
     elif provider in ("edgetts", "edge_tts"):
-        from features.video_editor.audio.services.tts import generate_panel_audio
+        from features.audio import make_panel_speech as generate_panel_audio
         output_path = kwargs.get("output_path") or os.path.join(tempfile.gettempdir(), f"edgetts_{uuid.uuid4().hex[:8]}.mp3")
         voice = kwargs.get("voice", "en-US-GuyNeural")
         saved_path, dur = await generate_panel_audio(
