@@ -39,7 +39,7 @@ try:
         _HAS_EASYOCR,
     )
 except (ImportError, ValueError):
-    from features.image_editor.services.ocr.ocr_geometry import (
+    from features.image.ocr.ocr_geometry import (
         DEFAULT_CONFIDENCE_THRESHOLD,
         MAX_SINGLE_PASS_DIMENSION_PX,
         SLIDING_TILE_HEIGHT_PX,
@@ -55,7 +55,7 @@ except (ImportError, ValueError):
         reproject_box_to_original_canvas,
         deduplicate_ocr_segments_nms,
     )
-    from features.image_editor.services.ocr.ocr_reader import (
+    from features.image.ocr.ocr_reader import (
         get_ocr_reader,
         _HAS_EASYOCR,
     )

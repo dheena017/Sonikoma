@@ -21,31 +21,31 @@ from typing import Any, Dict, List
 import cv2
 import numpy as np
 
-from features.image_editor.services.detector.main_service_detector.panel_detector import (
+from features.image.detector.main_service_detector.panel_detector import (
     detect_background_color_and_threshold,
 )
-from features.image_editor.services.layer_separation.character_layer_extractor import (
+from features.image.layer_separation.character_layer_extractor import (
     extract_characters_and_background,
 )
-from features.image_editor.services.layer_separation.inpainting import (
+from features.image.layer_separation.inpainting import (
     create_blank_png,
     create_blank_webp,
     pyramid_guided_inpaint,
     smooth_contour,
 )
-from features.image_editor.services.layer_separation.layer_metadata import (
+from features.image.layer_separation.layer_metadata import (
     build_motion_presets,
     build_text_nodes,
 )
-from features.image_editor.services.layer_separation.layer_storage import (
+from features.image.layer_separation.layer_storage import (
     persist_panel_layers,
 )
-from features.image_editor.services.layer_separation.sam import (
+from features.image.layer_separation.sam import (
     extract_character_layer,
     has_rembg,
     has_sam,
 )
-from features.image_editor.services.ocr.dialogue_text_detector import extract_full_ocr_data
+from features.image.ocr.dialogue_text_detector import extract_full_ocr_data
 
 logger = logging.getLogger("sonikoma.services.image.layer_separation.layer_segmentation")
 
@@ -108,7 +108,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, Any]:
         logger.error(f"[Global Detection] Character pre-scan failed: {e}", exc_info=True)
 
     # Phase 2: Multi-Layer Text & Sound Effects Separation
-    from features.image_editor.services.layer_separation.text_layer_extractor import (
+    from features.image.layer_separation.text_layer_extractor import (
         extract_text_and_sfx_layers,
     )
     (

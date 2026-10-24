@@ -133,6 +133,13 @@ from .main_service_detector.panel_detector import (
     detect_panels_service,
 )
 
+from .speech_bubble_cleaner import (
+    clean_speech_bubbles,
+    clean_speech_bubbles_async,
+    remove_speech_bubbles,
+    remove_speech_bubbles_sync,
+)
+
 from .main_service_detector.speech_bubble_detector import (
     detect_speech_bubbles,
     detect_speech_bubbles_service,
@@ -202,6 +209,10 @@ __all__ = [
     "detect_panels_service",
     "detect_speech_bubbles",
     "detect_speech_bubbles_service",
+    "clean_speech_bubbles",
+    "clean_speech_bubbles_async",
+    "remove_speech_bubbles",
+    "remove_speech_bubbles_sync",
     "detect_yolo_entities",
     "detect_chat_ui_bubbles",
     "_detect_chat_ui_bubbles",

@@ -43,7 +43,7 @@ from common.media import resolve_image_to_buffer
 from features.platform.jobs import job_manager, JobType, JobStage, JobStatusResponse
 
 # Specialized Panel Detection Services
-from features.image_editor.services.detector import (
+from features.image.detector import (
     detect_small_panels,
     detect_long_panels,
     detect_batch_panels,

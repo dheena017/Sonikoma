@@ -18,13 +18,13 @@ from typing import Any, Dict, List, Optional
 from PIL import Image
 
 from common.media import resolve_image_to_buffer
-from features.image_editor.schemas import (
+from features.image.schemas import (
     DetectTextRequest,
     DetectTextResponse,
     OcrTextItem,
     OcrTextType,
 )
-from features.image_editor.services.detector.main_service_detector.speech_bubble_detector import (
+from features.image.detector.main_service_detector.speech_bubble_detector import (
     detect_speech_bubbles as detect_yolo_bubbles,
 )
 try:
@@ -44,17 +44,17 @@ try:
         extract_text_from_image_bytes,
     )
 except (ImportError, ValueError):
-    from features.image_editor.services.ocr.ocr_engine import (
+    from features.image.ocr.ocr_engine import (
         extract_full_ocr_data,
     )
-    from features.image_editor.services.ocr.ocr_geometry import (
+    from features.image.ocr.ocr_geometry import (
         DEFAULT_BUBBLE_CONFIDENCE,
         DEFAULT_BUBBLE_PADDING_RATIO,
         DEFAULT_CONFIDENCE_THRESHOLD,
         MIN_IMAGE_DIMENSION_PX,
         compute_axis_aligned_bbox,
     )
-    from features.image_editor.services.ocr.ocr_reader import (
+    from features.image.ocr.ocr_reader import (
         _HAS_EASYOCR,
         clean_transcript_whitespace,
         extract_text_from_image_bytes,

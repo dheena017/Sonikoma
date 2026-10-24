@@ -46,19 +46,19 @@ try:
     from .panel_fusion_service import fuse_panels_and_bubbles
     from .detect_type_service import detect_image_layout_type
 except (ImportError, ValueError):
-    from features.image_editor.services.detector.main_service_detector.panel_detector import (
+    from features.image.detector.main_service_detector.panel_detector import (
         detect_opencv_panels,
     )
-    from features.image_editor.services.detector.main_service_detector.speech_bubble_detector import (
+    from features.image.detector.main_service_detector.speech_bubble_detector import (
         detect_speech_bubbles as detect_yolo_entities,
     )
-    from features.image_editor.services.detector.main_service_detector.detect_characters_service import (
+    from features.image.detector.main_service_detector.detect_characters_service import (
         detect_character_entities,
     )
-    from features.image_editor.services.detector.panel_fusion_service import (
+    from features.image.detector.panel_fusion_service import (
         fuse_panels_and_bubbles,
     )
-    from features.image_editor.services.detector.detect_type_service import (
+    from features.image.detector.detect_type_service import (
         detect_image_layout_type,
     )
 

@@ -16,14 +16,14 @@ from typing import Any, Dict, List, Sequence, Tuple, Union
 import cv2
 import numpy as np
 
-from features.image_editor.services.detector.main_service_detector.speech_bubble_detector import (
+from features.image.detector.main_service_detector.speech_bubble_detector import (
     segment_speech_bubbles_and_text_balloons as segment_text_and_balloons,
 )
-from features.image_editor.services.layer_separation.inpainting import (
+from features.image.layer_separation.inpainting import (
     create_blank_png,
     smooth_contour,
 )
-from features.image_editor.services.ocr.ocr_geometry import OcrSegment
+from features.image.ocr.ocr_geometry import OcrSegment
 
 logger = logging.getLogger("sonikoma.services.image.layer_separation.text_layer_extractor")
 

@@ -15,7 +15,7 @@ from features.auth.repositories import (
     get_user_by_id,
     write_audit_log,
 )
-from features.image_editor.services.upload.image_uploader import upload_image_service
+from features.image.upload.image_uploader import upload_image_service
 
 logger = logging.getLogger("sonikoma.features.profile.services.avatar")
 

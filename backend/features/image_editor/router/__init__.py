@@ -8,7 +8,7 @@ Image Editor Router Package:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from .router import image_router, router
+from features.image.router import image_router, router
 from .panels import panels_router
 from .ocr import ocr_router
 

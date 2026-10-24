@@ -28,9 +28,9 @@ try:
     from .detect_small_panels_service import detect_small_panels
     from .detect_long_panels_service import detect_long_panels
 except ImportError:
-    from features.image_editor.services.detector.detect_type_service import detect_image_layout_type
-    from features.image_editor.services.detector.detect_small_panels_service import detect_small_panels
-    from features.image_editor.services.detector.detect_long_panels_service import detect_long_panels
+    from features.image.detector.detect_type_service import detect_image_layout_type
+    from features.image.detector.detect_small_panels_service import detect_small_panels
+    from features.image.detector.detect_long_panels_service import detect_long_panels
 
 logger = logging.getLogger("sonikoma.services.image.detector.batch")
 

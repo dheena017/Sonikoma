@@ -18,14 +18,14 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from features.image_editor.services.detector.main_service_detector.detect_characters_service import (
+from features.image.detector.main_service_detector.detect_characters_service import (
     segment_character_foreground as segment_characters,
 )
-from features.image_editor.services.layer_separation.inpainting import (
+from features.image.layer_separation.inpainting import (
     create_blank_png,
     pyramid_guided_inpaint,
 )
-from features.image_editor.services.layer_separation.sam import (
+from features.image.layer_separation.sam import (
     extract_character_layer,
     has_rembg,
     has_sam,

@@ -46,7 +46,7 @@ if _backend_dir not in sys.path:
 from PIL import Image
 import numpy as np
 
-from features.image_editor.schemas import (
+from features.image.schemas import (
     DetectedLayoutType,
     ReadingFlow,
     DetectTypeRequest,

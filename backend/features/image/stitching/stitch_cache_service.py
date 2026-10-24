@@ -26,7 +26,7 @@ if _backend_dir not in sys.path:
     sys.path.insert(0, _backend_dir)
 
 from app.core.cache import stitched_cache, edit_history
-import features.image_editor.services.utils.image_utils as img_utils
+import features.image.utils as img_utils
 from database.utils import unwrap_proxy_url
 from database.engine import get_db_connection
 from features.platform.projects.repositories.panels import get_panel_original_url, get_edit_history

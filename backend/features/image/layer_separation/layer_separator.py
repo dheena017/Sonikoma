@@ -21,12 +21,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from PIL import Image
 
-import features.image_editor.services.utils.image_utils as img_utils
-from features.image_editor.services.detector.main_service_detector.panel_detector import (
+import features.image.utils as img_utils
+from features.image.detector.main_service_detector.panel_detector import (
     run_cv_detection,
 )
-from features.image_editor.services.layer_separation.inpainting import create_blank_webp
-from features.image_editor.services.layer_separation.layer_segmentation import (
+from features.image.layer_separation.inpainting import create_blank_webp
+from features.image.layer_separation.layer_segmentation import (
     process_layers,
 )
 

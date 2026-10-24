@@ -5,7 +5,7 @@ from PIL import Image, ImageStat
 import numpy as np
 
 from common.media import resolve_image_to_buffer, resolve_url_to_buffer
-from ..stitching.image_stitcher import stitch_images_together, stack_vertical
+from features.image.stitching import stitch_images_together, stack_vertical
 
 logger = logging.getLogger("sonikoma.services.image.utils")
 

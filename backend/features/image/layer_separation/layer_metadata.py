@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Sequence, Union
 import cv2
 import numpy as np
 
-from features.image_editor.services.ocr.ocr_geometry import OcrSegment
+from features.image.ocr.ocr_geometry import OcrSegment
 
 
 def build_text_nodes(ocr_results: Union[List[OcrSegment], List[Dict[str, Any]], Sequence[Dict[str, Any]]]) -> List[Dict[str, Any]]:

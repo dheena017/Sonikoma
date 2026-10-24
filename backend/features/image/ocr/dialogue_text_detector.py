@@ -70,7 +70,7 @@ try:
         extract_script_from_panels,
     )
 except (ImportError, ValueError):
-    from features.image_editor.services.ocr.ocr_geometry import (
+    from features.image.ocr.ocr_geometry import (
         DEFAULT_CONFIDENCE_THRESHOLD,
         DEFAULT_BUBBLE_CONFIDENCE,
         DEFAULT_BUBBLE_PADDING_RATIO,
@@ -89,7 +89,7 @@ except (ImportError, ValueError):
         deduplicate_ocr_segments_nms,
     )
 
-    from features.image_editor.services.ocr.ocr_reader import (
+    from features.image.ocr.ocr_reader import (
         get_default_ocr_languages,
         get_ocr_reader,
         _load_ocr_reader,
@@ -100,7 +100,7 @@ except (ImportError, ValueError):
         HAS_TESSERACT,
     )
 
-    from features.image_editor.services.ocr.ocr_engine import (
+    from features.image.ocr.ocr_engine import (
         extract_full_ocr_data,
         extract_dialogue_from_panel,
         extract_text_lines_from_panel,
@@ -108,7 +108,7 @@ except (ImportError, ValueError):
         read_speech_bubble_dialogue,
     )
 
-    from features.image_editor.services.ocr.ocr_service import (
+    from features.image.ocr.ocr_service import (
         detect_text_service,
         extract_bubble_guided_ocr,
         extract_direct_image_ocr,
@@ -163,7 +163,7 @@ __all__ = [
 
 if __name__ == "__main__":
     from PIL import Image, ImageDraw
-    from features.image_editor.schemas import DetectTextRequest
+    from features.image.schemas import DetectTextRequest
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     print("\n" + "=" * 78)
