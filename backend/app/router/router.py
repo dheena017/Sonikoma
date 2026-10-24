@@ -19,7 +19,7 @@ from features.auth.router import auth_router
 from features.platform.projects.router import project_router
 from features.platform.scraper import scraper_router
 from features.platform.scraper.proxy import proxy_router
-from features.image_editor.router import panels_router, ocr_router, image_router
+from features.image.router import image_router
 from features.workspace.router import storyboard_router
 from features.ai.router import ai_router
 from features.audio.router import audio_router
@@ -28,8 +28,11 @@ from features.platform.jobs import jobs_router
 from features.creative.export.router import export_router
 from features.creative.router import creative_router
 from features.platform.health import health_router
-from features.intelligence.series.router import ai_series_master_router
+from features.ai.series import ai_series_master_router
 from ai_engine.providers.router import providers_router
+
+panels_router = APIRouter()
+ocr_router = APIRouter()
 
 api_router = APIRouter()
 

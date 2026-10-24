@@ -38,7 +38,7 @@ BACKEND_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
-from features.image_editor.services.detector.detect_type_service import (
+from features.image.detector.detect_type_service import (
     detect_image_layout_type,
     sample_background_palette,
     analyze_horizontal_gutters,

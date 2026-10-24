@@ -41,7 +41,7 @@ from features.platform.projects.schemas_project import (
     DetectPanelsBatchRequest,
     DetectPanelsBatchResponse,
 )
-from features.image_editor.services.detector.detect_batch_service import (
+from features.image.detector.detect_batch_service import (
     detect_batch_panels,
     process_single_url,
 )

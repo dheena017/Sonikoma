@@ -36,12 +36,12 @@ BACKEND_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
-from features.image_editor.services.ocr.dialogue_text_detector import (
+from features.image.ocr.dialogue_text_detector import (
     extract_direct_image_ocr,
     extract_bubble_guided_ocr,
     extract_script_from_panels,
 )
-from features.image_editor.schemas import DetectTextRequest, DetectTextResponse
+from features.image.schemas import DetectTextRequest, DetectTextResponse
 from common.media import resolve_image_to_buffer
 
 DEFAULT_OUTPUT_DIR = os.path.join(BACKEND_DIR, "data", "output", "ocr_dialogue")

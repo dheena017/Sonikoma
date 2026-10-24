@@ -13,13 +13,11 @@ _ROUTER_MAP = {
     "admin_router": ("features.admin.router", "router"),
     "platform_router": ("features.platform.router", "router"),
     "workspace_router": ("features.workspace.router", "router"),
-    "image_editor_router": ("features.image_editor.router", "router"),
-    "video_editor_router": ("features.video_editor.router", "router"),
+    "image_router": ("features.image.router", "router"),
     "video_router": ("features.video.router", "router"),
     "audio_router": ("features.audio.router", "router"),
     "ai_router": ("features.ai.router", "router"),
     "creative_router": ("features.creative.router", "router"),
-    "intelligence_router": ("features.intelligence.router", "router"),
     "landing_router": ("features.landing.router", "router"),
 }
 

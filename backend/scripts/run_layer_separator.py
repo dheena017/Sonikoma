@@ -38,12 +38,12 @@ BACKEND_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
-from features.image_editor.services.layer_separation import (
+from features.image.layer_separation import (
     process_layers,
     extract_panel_layers_service,
     extract_character_layer,
 )
-from features.image_editor.services.layer_separation.sam import has_sam, has_rembg
+from features.image.layer_separation.sam import has_sam, has_rembg
 from common.media import resolve_image_to_buffer
 
 DEFAULT_OUTPUT_DIR = os.path.join(BACKEND_DIR, "data", "output", "layer_separation")

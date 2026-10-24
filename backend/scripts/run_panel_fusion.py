@@ -51,13 +51,13 @@ from features.platform.projects.schemas_project import (
     CharacterEntityItem,
     BubblePlacementRelation,
 )
-from features.image_editor.services.detector.panel_fusion_service import (
+from features.image.detector.panel_fusion_service import (
     fuse_panels_and_bubbles,
     classify_speech_bubble_placement,
 )
-from features.image_editor.services.detector.main_service_detector.panel_detector import detect_opencv_panels
-from features.image_editor.services.detector.main_service_detector.speech_bubble_detector import detect_speech_bubbles
-from features.image_editor.services.detector.main_service_detector.detect_characters_service import detect_character_entities
+from features.image.detector.main_service_detector.panel_detector import detect_opencv_panels
+from features.image.detector.main_service_detector.speech_bubble_detector import detect_speech_bubbles
+from features.image.detector.main_service_detector.detect_characters_service import detect_character_entities
 from common.media import resolve_image_to_buffer
 
 DEFAULT_OUTPUT_DIR = os.path.join(BACKEND_DIR, "data", "output", "panel_fusion")

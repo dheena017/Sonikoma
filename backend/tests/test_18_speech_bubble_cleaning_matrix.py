@@ -20,7 +20,7 @@ import numpy as np
 import cv2
 import asyncio
 
-from features.image_editor.services.processing.panel_cleaner import (
+from features.image.detector.speech_bubble_cleaner import (
     remove_speech_bubbles,
     remove_speech_bubbles_sync,
 )

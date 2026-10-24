@@ -11,6 +11,10 @@ from .series_memory import save_series_memory
 from .chapter_builder import build_full_chapter
 from .repositories import AISeriesRepository
 
+from fastapi import APIRouter
+
+ai_series_master_router = APIRouter()
+
 __all__ = [
     "plan_story_arc",
     "write_chapter",
@@ -20,4 +24,6 @@ __all__ = [
     "save_series_memory",
     "build_full_chapter",
     "AISeriesRepository",
+    "ai_series_master_router",
 ]
+

@@ -138,7 +138,7 @@ async def resolve_url_to_buffer(
                 return {"data": cached_base["data"], "content_type": mime, "contentType": mime}
 
             try:
-                from features.image_editor.services.stitching.stitch_cache_service import retrieve_cached_stitch_service
+                from features.image.stitching.stitch_cache_service import retrieve_cached_stitch_service
                 data, content_type = await retrieve_cached_stitch_service(cache_id)
                 if data:
                     return {"data": data, "content_type": content_type, "contentType": content_type}

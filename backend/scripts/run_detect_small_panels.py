@@ -43,7 +43,7 @@ from features.platform.projects.schemas_project import (
     DetectSmallPanelsRequest,
     DetectSmallPanelsResponse,
 )
-from features.image_editor.services.detector.detect_small_panels_service import detect_small_panels
+from features.image.detector.detect_small_panels_service import detect_small_panels
 from common.media import resolve_image_to_buffer
 
 DEFAULT_OUTPUT_DIR = os.path.join(BACKEND_DIR, "data", "output", "small_panels")

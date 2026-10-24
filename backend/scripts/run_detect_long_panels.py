@@ -44,7 +44,7 @@ from features.platform.projects.schemas_project import (
     DetectLongPanelsRequest,
     DetectLongPanelsResponse,
 )
-from features.image_editor.services.detector.detect_long_panels_service import detect_long_panels
+from features.image.detector.detect_long_panels_service import detect_long_panels
 from common.media import resolve_image_to_buffer
 
 DEFAULT_OUTPUT_DIR = os.path.join(BACKEND_DIR, "data", "output", "long_panels")

@@ -53,7 +53,7 @@ from features.platform.projects.schemas_project import (
     DetectSmallPanelsRequest,
     DetectLongPanelsRequest,
 )
-from features.image_editor.services.detector import (
+from features.image.services.detector import (
     detect_image_layout_type,
     detect_small_panels,
     detect_long_panels,

@@ -400,7 +400,7 @@ async def proxy_image_stream_endpoint(
             )
 
         if tighter or crop_padding is not None:
-            from features.image_editor.services.utils.image_utils import crop_auto_borders
+            from features.image.utils.autotrim import crop_auto_borders
             crop_res = crop_auto_borders(buffer, tighter=tighter, crop_padding=crop_padding)
             buffer = crop_res["data"]
             content_type = crop_res["content_type"]

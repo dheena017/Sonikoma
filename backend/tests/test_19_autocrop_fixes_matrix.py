@@ -14,13 +14,17 @@ import numpy as np
 from PIL import Image, ImageDraw
 import pytest
 
-from features.image_editor.services.crop.long_panels_crop_service import _apply_color_distance_autotrim as long_autotrim
-from features.image_editor.services.crop.single_panels_crop_service import _apply_color_distance_autotrim as single_autotrim
-from features.image_editor.services.detector.main_service_detector.panel_detector import (
+from features.image.utils.autotrim import autotrim_solid_borders as long_autotrim
+from features.image.detector.main_service_detector.panel_detector import (
     detect_vertical_strip_panels,
     detect_vertical_subgutters,
     subdivide_continuous_tall_art_panel,
 )
+
+
+def single_autotrim(img, tolerance=15):
+    res_img, _, was_trimmed = long_autotrim(img, tolerance=tolerance)
+    return res_img, was_trimmed
 
 
 def test_issue_1_autotrim_preserves_artwork_and_margin():

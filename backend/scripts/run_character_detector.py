@@ -32,7 +32,7 @@ BACKEND_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
-from features.image_editor.services.detector.main_service_detector.detect_characters_service import (
+from features.image.detector.main_service_detector.detect_characters_service import (
     get_yolo_character_segmentation_model,
     detect_character_entities,
     segment_character_foreground,

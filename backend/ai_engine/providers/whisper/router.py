@@ -22,7 +22,7 @@ from ai_engine.providers.whisper import (
     WhisperModel,
 )
 from ai_engine.providers.whisper.helpers import segments_to_srt, segments_to_vtt
-from features.video_editor.audio.schemas import TranscribeRequest, SubtitleRequest
+from features.audio.schemas import TranscribeRequest, SubtitleRequest
 
 logger = logging.getLogger("sonikoma.api.providers.whisper")
 router = APIRouter()

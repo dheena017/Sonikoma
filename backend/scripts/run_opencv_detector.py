@@ -33,7 +33,7 @@ BACKEND_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
-from features.image_editor.services.panel_detection.opencv_detector import (
+from features.image.services.panel_detection.opencv_detector import (
     detect_opencv_panels,
     detect_opencv_panels,
 )

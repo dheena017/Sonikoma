@@ -30,12 +30,9 @@ from ai_engine.providers import (
     WHISPER_AVAILABLE,
     LIBROSA_AVAILABLE,
 )
-from features.intelligence.ai.schemas import (
-    ListModelsRequest,
-    EnhancePromptRequest,
-    TestModelLatencyRequest,
-)
-from features.intelligence.ai.services.facade import facade_list_models, facade_enhance_prompt
+from features.ai.schemas import ListModelsRequest, EnhancePromptRequest, TestModelLatencyRequest
+from features.ai.catalog.list_models import get_all_ai_models as facade_list_models
+from features.ai.prompts.improve_prompt import make_better_prompt as facade_enhance_prompt
 
 logger = logging.getLogger("sonikoma.api.providers.catalog")
 router = APIRouter()

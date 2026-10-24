@@ -43,7 +43,7 @@ from features.platform.projects.schemas_project import (
     DetectPanelsUrlRequest,
     DetectCompositeResponse,
 )
-from features.image_editor.services.detector.detect_composite_service import detect_composite_panels
+from features.image.detector.detect_composite_service import detect_composite_panels
 from common.media import resolve_image_to_buffer
 
 DEFAULT_OUTPUT_DIR = os.path.join(BACKEND_DIR, "data", "output", "composite")

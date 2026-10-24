@@ -17,16 +17,14 @@ from pydantic import BaseModel
 from app.core.dependencies.auth import get_all_user_keys, clean_api_key
 from app.core.config import GEMINI_API_KEY, GEMINI_MODEL_PRIMARY, call_gemini_with_retry
 from ai_engine.providers.gemini import GeminiClient, GEMINI_AVAILABLE
-from features.intelligence.ai.schemas import (
+from features.ai.schemas import (
     AnalyzeImageRequest,
     AnalyzeSequenceRequest,
     SmartCropRequest,
 )
-from features.intelligence.ai.services.facade import (
-    facade_analyze_image,
-    facade_analyze_narrative_sequence,
-    facade_smart_crop,
-)
+from features.ai.analysis import read_panel as facade_analyze_image
+from features.ai.narrative import write_story_script as facade_analyze_narrative_sequence
+from features.ai.analysis import cut_out_panels as facade_smart_crop
 
 logger = logging.getLogger("sonikoma.api.providers.gemini")
 router = APIRouter()

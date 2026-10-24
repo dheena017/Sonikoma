@@ -569,16 +569,10 @@ class AutonomousAgentWorkflow:
             ]
             try:
                 # Delegate to facade_analyze_batch which concurrently chunks (up to 8 panels per chunk)
-                # and analyzes all panels in parallel via asyncio.gather
-                from features.intelligence.ai.services.facade import facade_analyze_batch
-                batch_res = await facade_analyze_batch(
+                from features.ai.analysis import read_many_panels
+                all_analyze_results = await read_many_panels(
                     panels=panel_dict_list,
-                    voice=self.request.voice,
-                    narration_style="dramatic_recap",
-                    story_context=f"Title: {title}. Script Language: {self.request.language}.",
-                    generate_audio=False,
                 )
-                all_analyze_results = batch_res.get("results", []) if batch_res else []
 
                 results_map = {r.get("id"): r for r in all_analyze_results}
                 for idx, p in enumerate(self.state.panels):

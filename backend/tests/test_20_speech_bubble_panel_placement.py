@@ -17,7 +17,7 @@ from features.platform.projects.schemas_project import (
     EntityLabel,
     EntityCategory,
 )
-from features.image_editor.services.detector.panel_fusion_service import (
+from features.image.detector.panel_fusion_service import (
     is_bubble_inside_panel,
     is_bubble_crossing_panel_border,
     is_bubble_outside_panel_gutter,

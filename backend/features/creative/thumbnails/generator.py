@@ -16,7 +16,7 @@ import logging
 from typing import List, Tuple, Optional
 from PIL import Image
 
-from features.image_editor.services.utils.image_utils import save_image_to_cache
+from features.image.utils.media_utils import save_image_to_cache
 from features.creative.thumbnails.schemas import (
     ThumbnailGenerateRequest,
     GeneratedThumbnailItem,

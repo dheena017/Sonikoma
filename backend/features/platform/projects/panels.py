@@ -22,20 +22,14 @@ try:
     from features.platform.projects.repositories import get_project, get_project_by_slug
     from features.auth.repositories import write_audit_log
     from features.platform.projects.services.project_service import ProjectService
-    try:
-        from features.image.detector.main_service_detector.panel_detector import run_cv_detection
-    except ImportError:
-        from features.image_editor.services.detector.main_service_detector.panel_detector import run_cv_detection
+    from features.image.detector.main_service_detector.panel_detector import run_cv_detection
 except ImportError:
     from app.core.dependencies.auth import get_current_user
     from features.platform.projects.schemas_project import PanelsSaveRequest, DetectPanelsBase64Request
     from features.platform.projects.repositories import get_project, get_project_by_slug
     from features.auth.repositories import write_audit_log
     from features.platform.projects.services.project_service import ProjectService
-    try:
-        from features.image.detector.main_service_detector.panel_detector import run_cv_detection
-    except ImportError:
-        from features.image_editor.services.detector.main_service_detector.panel_detector import run_cv_detection
+    from features.image.detector.main_service_detector.panel_detector import run_cv_detection
 
 logger = logging.getLogger("sonikoma.routes.projects.panels")
 router = APIRouter()

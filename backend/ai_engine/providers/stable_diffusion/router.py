@@ -23,7 +23,7 @@ from ai_engine.providers.stable_diffusion import (
     get_stable_diffusion_engine,
     DIFFUSERS_AVAILABLE,
 )
-from features.intelligence.ai.schemas import (
+from features.ai.schemas import (
     GenerateAIRequest,
     InpaintRequest,
     UpscaleRequest,

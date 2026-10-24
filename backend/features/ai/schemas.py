@@ -438,3 +438,45 @@ class SeriesArcRequest(BaseModel):
     model: Optional[str] = Field(None, description="Gemini or LLM model override")
     project_id: Optional[str] = None
     job_id: Optional[str] = None
+
+
+class AnalyzeImageRequest(BaseModel):
+    url: str
+    model: Optional[str] = None
+    voice: Optional[str] = None
+    narration_style: Optional[str] = None
+    story_context: Optional[str] = None
+    story_memory: Optional[str] = None
+    panel_index: Optional[int] = 0
+    generate_audio: Optional[bool] = True
+
+
+class AnalyzeSequenceRequest(BaseModel):
+    panels: List[str] = []
+    genre: Optional[str] = None
+
+
+class SmartCropRequest(BaseModel):
+    url: str
+    aspect_ratio: Optional[str] = "free"
+    model: Optional[str] = None
+    strategy: Optional[str] = "local-cv"
+
+
+class ListModelsRequest(BaseModel):
+    provider: Optional[str] = "gemini"
+    apiKey: Optional[str] = None
+
+
+class EnhancePromptRequest(BaseModel):
+    prompt: str
+    target: Optional[str] = "image"
+    style: Optional[str] = "anime"
+    provider: Optional[str] = "gemini"
+    api_key: Optional[str] = None
+
+
+class TestModelLatencyRequest(BaseModel):
+    provider: str = "gemini"
+    model: Optional[str] = None
+

@@ -129,10 +129,10 @@ async def lifespan(app: FastAPI):
         # Start automatic training background monitor service if enabled
         if os.getenv("ENABLE_TRAINING_MONITOR", "false").lower() == "true":
             try:
-                from features.intelligence.services_training.training_monitor import start_background_monitor
+                from features.ai.training.training_monitor import start_background_monitor
                 start_background_monitor()
             except Exception as e:
-                logger.warning(f"[Startup] Failed to start training data monitor service: {e}")
+                logger.warning(f"[Startup] Training data monitor service not available: {e}")
         else:
             logger.info("[Startup] Training monitor is disabled via ENABLE_TRAINING_MONITOR.")
 
