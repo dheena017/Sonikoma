@@ -186,16 +186,22 @@ def segment_with_sam(
             predict_kwargs["labels"] = [1] * len(points)
 
     try:
-        results = model.predict(np_rgb, **predict_kwargs)
+        pred_output = model.predict(np_rgb, **predict_kwargs)
+        results: List[Any] = list(pred_output) if pred_output is not None else []
         if not results:
             return None
 
-        result = results[0]
-        if not hasattr(result, "masks") or result.masks is None or len(result.masks) == 0:
+        result: Any = results[0]
+        raw_masks = getattr(result, "masks", None)
+        if raw_masks is None or len(raw_masks) == 0:
             return None
 
         combined_mask = np.zeros((h, w), dtype=np.uint8)
-        mask_data = result.masks.data.cpu().numpy()
+        raw_mask_data: Any = raw_masks.data
+        if hasattr(raw_mask_data, "cpu"):
+            mask_data = raw_mask_data.cpu().numpy()
+        else:
+            mask_data = np.asarray(raw_mask_data)
 
         for mask in mask_data:
             # Resize mask to original image dimensions if necessary

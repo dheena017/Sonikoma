@@ -1449,7 +1449,7 @@ def sort_panels_reading_order(
 # ─────────────────────────────────────────────────────────────────────────────
 
 def run_cv_detection(
-    image_input: Union[str, Image.Image, bytes, np.ndarray],
+    image_input: Optional[Union[str, Image.Image, bytes, np.ndarray]] = None,
     sensitivity: float = DEFAULT_SENSITIVITY,
     bg_mode: str = "auto",
     min_width_pct: float = DEFAULT_MIN_WIDTH_PCT,
@@ -1459,6 +1459,7 @@ def run_cv_detection(
     canny_high: int = DEFAULT_CANNY_HIGH,
     close_kernel_size: int = DEFAULT_CLOSE_KERNEL,
     padding_px: int = DEFAULT_PADDING_PX,
+    image_path: Optional[str] = None,
     **kwargs: Any,
 ) -> List[Dict[str, Any]]:
     """
@@ -1468,7 +1469,7 @@ def run_cv_detection(
     and forwards tuning parameters to the appropriate specialized vision detector.
 
     Args:
-        image_input (Union[str, Image.Image, bytes, np.ndarray]): Image file path, PIL Image, bytes, or array.
+        image_input (Optional[Union[str, Image.Image, bytes, np.ndarray]]): Image file path, PIL Image, bytes, or array.
         sensitivity (float, optional): Detection sensitivity. Defaults to 30.0.
         bg_mode (str, optional): Target background mode ('auto', 'white', or 'black'). Defaults to 'auto'.
         min_width_pct (float, optional): Minimum width ratio. Defaults to 0.15.
@@ -1478,12 +1479,18 @@ def run_cv_detection(
         canny_high (int, optional): Upper Canny edge detection threshold. Defaults to 100.
         close_kernel_size (int, optional): Morphological closing kernel size. Defaults to 15.
         padding_px (int, optional): Safety border padding in pixels. Defaults to 10.
+        image_path (Optional[str], optional): Backward-compatible alias for image_input filepath.
         **kwargs (Any): Additional detector arguments.
 
     Returns:
         List[Dict[str, Any]]: List of detected panel dictionary items.
     """
     # ── Stage 1: Input Normalization & Guard Clauses ────────────────────────
+    if image_input is None and image_path is not None:
+        image_input = image_path
+    if image_input is None and "image_path" in kwargs:
+        image_input = kwargs.pop("image_path")
+
     if image_input is None:
         logger.debug("[Panel Detector] Input image is None, returning empty list.")
         return []

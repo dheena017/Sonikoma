@@ -146,7 +146,7 @@ async def extract_panel_layers_service(panel_id: str, url: str) -> Dict[str, Any
 
         # Detect comic panel boxes
         detected_panels = run_cv_detection(
-            image_path=tmp_in_path,
+            image_input=tmp_in_path,
             sensitivity=30.0,
             bg_mode="auto",
             min_width_pct=0.15,

@@ -217,30 +217,77 @@ def render_annotated_ocr_image(
 def generate_binary_text_mask(
     image_shape: Tuple[int, int],
     segments: list,
+    source_bgr: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """
     Renders a single-channel uint8 binary alpha inpainting mask.
     Positive pixels (255) represent dialogue text regions for inpainting/cleaning.
+    When source_bgr is provided, isolates exact text strokes inside the speech bubble
+    rather than covering the entire bubble with solid white.
     """
     h, w = image_shape
     mask = np.zeros((h, w), dtype=np.uint8)
 
     for seg in segments:
-        if hasattr(seg, "polygon") and seg.polygon and len(seg.polygon) >= 3:
-            pts = np.array(seg.polygon, dtype=np.int32).reshape((-1, 1, 2))
-            cv2.fillPoly(mask, [pts], 255)
-        elif hasattr(seg, "x"):
-            cv2.rectangle(mask, (seg.x, seg.y), (seg.x + seg.width, seg.y + seg.height), 255, -1)
-        elif isinstance(seg, dict) and "box" in seg:
+        bx = int(getattr(seg, "x", 0) if hasattr(seg, "x") else (seg.get("x", 0) if isinstance(seg, dict) else 0))
+        by = int(getattr(seg, "y", 0) if hasattr(seg, "y") else (seg.get("y", 0) if isinstance(seg, dict) else 0))
+        bw = int(getattr(seg, "width", 0) if hasattr(seg, "width") else (seg.get("width", 0) if isinstance(seg, dict) else 0))
+        bh = int(getattr(seg, "height", 0) if hasattr(seg, "height") else (seg.get("height", 0) if isinstance(seg, dict) else 0))
+
+        if source_bgr is not None and bw > 0 and bh > 0:
+            crop = source_bgr[by:by + bh, bx:bx + bw]
+            if crop.size > 0:
+                gray_crop = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+                # Adaptive threshold to isolate dark text strokes on colored/tinted bubble backgrounds
+                thresh = cv2.adaptiveThreshold(
+                    gray_crop, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 8
+                )
+                kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+                dilated = cv2.dilate(thresh, kernel, iterations=1)
+
+                # Focus on inner dialogue text region (avoid outer bubble outline/glows)
+                pad_y = int(bh * 0.12)
+                pad_x = int(bw * 0.12)
+                clean_crop = np.zeros_like(dilated)
+                clean_crop[pad_y:bh - pad_y, pad_x:bw - pad_x] = dilated[pad_y:bh - pad_y, pad_x:bw - pad_x]
+
+                if np.count_nonzero(clean_crop) > 5:
+                    mask[by:by + bh, bx:bx + bw] = cv2.bitwise_or(mask[by:by + bh, bx:bx + bw], clean_crop)
+                    continue
+
+        # Fallback to polygon or bounding box if stroke detection didn't apply
+        if isinstance(seg, dict) and "box" in seg:
             box = seg["box"]
             if len(box) >= 3:
                 pts = np.array(box, dtype=np.int32).reshape((-1, 1, 2))
                 cv2.fillPoly(mask, [pts], 255)
+        elif hasattr(seg, "polygon") and seg.polygon and len(seg.polygon) == 4:
+            pts = np.array(seg.polygon, dtype=np.int32).reshape((-1, 1, 2))
+            cv2.fillPoly(mask, [pts], 255)
+        elif bw > 0 and bh > 0:
+            cv2.rectangle(mask, (bx, by), (bx + bw, by + bh), 255, -1)
 
-    # Apply slight 3px morphological dilation to fully cover font antialiasing edges
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-    dilated_mask = cv2.dilate(mask, kernel, iterations=1)
+    # Slight dilation for antialiasing coverage
+    dilated_mask = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)), iterations=1)
     return dilated_mask
+
+
+def generate_cleaned_dialogue_image(
+    source_img_rgb: Image.Image,
+    text_mask: np.ndarray,
+) -> Image.Image:
+    """
+    Erases dialogue text seamlessly without applying harsh white color:
+    Inpaints using surrounding bubble colors, gradients, and natural shading.
+    """
+    src_bgr = cv2.cvtColor(np.array(source_img_rgb), cv2.COLOR_RGB2BGR)
+    if np.any(text_mask > 0):
+        try:
+            cleaned_bgr = cv2.inpaint(src_bgr, text_mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
+            return Image.fromarray(cv2.cvtColor(cleaned_bgr, cv2.COLOR_BGR2RGB))
+        except Exception:
+            pass
+    return source_img_rgb.copy()
 
 
 def to_file_uri(path_str: str) -> str:
@@ -275,6 +322,7 @@ def process_and_save_ocr_dialogue(
         pil_img, base_name, file_path_for_ref = create_demo_manga_canvas()
 
     img_w, img_h = pil_img.size
+    src_bgr = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
     buf = io.BytesIO()
     pil_img.save(buf, format="PNG")
     raw_bytes = buf.getvalue()
@@ -307,14 +355,16 @@ def process_and_save_ocr_dialogue(
         res_direct: DetectTextResponse = asyncio.run(extract_direct_image_ocr(req_direct))
         dur_direct = int((time.perf_counter() - t0) * 1000)
 
-        # Generate Mask & Annotations
-        mask_np_direct = generate_binary_text_mask((img_h, img_w), res_direct.segments)
+        # Generate Text Stroke Mask, Annotations & Cleaned Inpainted Image
+        mask_np_direct = generate_binary_text_mask((img_h, img_w), res_direct.segments, source_bgr=src_bgr)
         annotated_img_direct = render_annotated_ocr_image(pil_img, res_direct.segments)
+        cleaned_img_direct = generate_cleaned_dialogue_image(pil_img, mask_np_direct)
 
         # Save artifacts
         p_json = os.path.join(output_dir, f"{base_name}_direct_dialogue.json")
         p_img = os.path.join(output_dir, f"{base_name}_direct_annotated.png")
         p_mask = os.path.join(output_dir, f"{base_name}_direct_mask.png")
+        p_clean = os.path.join(output_dir, f"{base_name}_direct_cleaned.png")
 
         with open(p_json, "w", encoding="utf-8") as f:
             json.dump({
@@ -330,6 +380,7 @@ def process_and_save_ocr_dialogue(
                 "segments": [s.model_dump() if hasattr(s, "model_dump") else s for s in res_direct.segments],
             }, f, indent=2, ensure_ascii=False)
         annotated_img_direct.save(p_img)
+        cleaned_img_direct.save(p_clean)
         cv2.imwrite(p_mask, mask_np_direct)
 
         print(f"  [OK] Segments: {len(res_direct.segments)} | Time: {dur_direct}ms | Transcript: \"{res_direct.full_transcript}\"")
@@ -341,6 +392,7 @@ def process_and_save_ocr_dialogue(
             "json_path": p_json,
             "annotated_path": p_img,
             "mask_path": p_mask,
+            "cleaned_path": p_clean,
         }
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -357,14 +409,16 @@ def process_and_save_ocr_dialogue(
         res_bubble: DetectTextResponse = asyncio.run(extract_bubble_guided_ocr(req_bubble))
         dur_bubble = int((time.perf_counter() - t0) * 1000)
 
-        # Generate Mask & Annotations
-        mask_np_bubble = generate_binary_text_mask((img_h, img_w), res_bubble.segments)
+        # Generate Text Stroke Mask, Annotations & Cleaned Inpainted Image
+        mask_np_bubble = generate_binary_text_mask((img_h, img_w), res_bubble.segments, source_bgr=src_bgr)
         annotated_img_bubble = render_annotated_ocr_image(pil_img, res_bubble.segments)
+        cleaned_img_bubble = generate_cleaned_dialogue_image(pil_img, mask_np_bubble)
 
         # Save artifacts
         p_json = os.path.join(output_dir, f"{base_name}_bubble_dialogue.json")
         p_img = os.path.join(output_dir, f"{base_name}_bubble_annotated.png")
         p_mask = os.path.join(output_dir, f"{base_name}_bubble_mask.png")
+        p_clean = os.path.join(output_dir, f"{base_name}_bubble_cleaned.png")
 
         with open(p_json, "w", encoding="utf-8") as f:
             json.dump({
@@ -380,6 +434,7 @@ def process_and_save_ocr_dialogue(
                 "segments": [s.model_dump() if hasattr(s, "model_dump") else s for s in res_bubble.segments],
             }, f, indent=2, ensure_ascii=False)
         annotated_img_bubble.save(p_img)
+        cleaned_img_bubble.save(p_clean)
         cv2.imwrite(p_mask, mask_np_bubble)
 
         print(f"  [OK] Segments: {len(res_bubble.segments)} | Time: {dur_bubble}ms | Transcript: \"{res_bubble.full_transcript}\"")
@@ -391,6 +446,7 @@ def process_and_save_ocr_dialogue(
             "json_path": p_json,
             "annotated_path": p_img,
             "mask_path": p_mask,
+            "cleaned_path": p_clean,
         }
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -455,6 +511,8 @@ def process_and_save_ocr_dialogue(
             print(f"  • [{key.upper()}] Visual   : {to_file_uri(data['annotated_path'])}")
         if "mask_path" in data:
             print(f"  • [{key.upper()}] Mask     : {to_file_uri(data['mask_path'])}")
+        if "cleaned_path" in data:
+            print(f"  • [{key.upper()}] Cleaned  : {to_file_uri(data['cleaned_path'])}")
     print("─" * 78 + "\n")
 
     return {

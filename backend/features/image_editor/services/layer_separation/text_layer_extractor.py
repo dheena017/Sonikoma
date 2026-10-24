@@ -11,7 +11,7 @@ Speech Bubble, Dialogue & SFX Text Layer Extraction Service:
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Sequence, Tuple, Union
 
 import cv2
 import numpy as np
@@ -23,6 +23,7 @@ from features.image_editor.services.layer_separation.inpainting import (
     create_blank_png,
     smooth_contour,
 )
+from features.image_editor.services.ocr.ocr_geometry import OcrSegment
 
 logger = logging.getLogger("sonikoma.services.image.layer_separation.text_layer_extractor")
 
@@ -30,7 +31,7 @@ logger = logging.getLogger("sonikoma.services.image.layer_separation.text_layer_
 def extract_text_and_sfx_layers(
     original_img: np.ndarray,
     gray_img: np.ndarray,
-    ocr_results: List[Dict[str, Any]],
+    ocr_results: Union[List[OcrSegment], List[Dict[str, Any]], Sequence[Dict[str, Any]]],
     global_char_mask: np.ndarray,
     is_white_bg: bool,
     threshold_val: int,

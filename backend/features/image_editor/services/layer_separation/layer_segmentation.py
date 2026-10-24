@@ -90,7 +90,8 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, Any]:
 
     ocr_results: List[Dict[str, Any]] = []
     try:
-        ocr_results = await extract_full_ocr_data(image_path, langs=["en"])
+        raw_ocr = await extract_full_ocr_data(image_path, langs=["en"])
+        ocr_results = [dict(seg) for seg in raw_ocr]
     except Exception as e:
         logger.error(f"[Global Detection] EasyOCR scan failed: {e}", exc_info=True)
 

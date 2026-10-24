@@ -8,14 +8,16 @@ Layer Metadata & 3D Motion Presets Generation Service:
 """
 
 from __future__ import annotations
-
-from typing import Any, Dict, List
+ 
+from typing import Any, Dict, List, Sequence, Union
 
 import cv2
 import numpy as np
 
+from features.image_editor.services.ocr.ocr_geometry import OcrSegment
 
-def build_text_nodes(ocr_results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+
+def build_text_nodes(ocr_results: Union[List[OcrSegment], List[Dict[str, Any]], Sequence[Dict[str, Any]]]) -> List[Dict[str, Any]]:
     """
     Builds structured reading-order OCR text nodes for auto-TTS voiceover
     and dynamic subtitle alignment.

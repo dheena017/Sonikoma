@@ -56,23 +56,24 @@ def persist_panel_layers(
     # Production Mode: Upload to Supabase Storage
     if ENVIRONMENT == "production":
         logger.info(f"[Layer Storage] ENVIRONMENT=production — uploading layers to Supabase (panel_id={panel_id})")
-        bg_url = upload_to_supabase_bucket(bg_bytes, "panels", f"{folder_prefix}bg.png", "image/png")
-        effects_url = upload_to_supabase_bucket(effects_bytes, "panels", f"{folder_prefix}effects.png", "image/png")
-        sfx_url = upload_to_supabase_bucket(sfx_bytes, "panels", f"{folder_prefix}sfx.png", "image/png")
-        text_url = upload_to_supabase_bucket(text_bytes, "panels", f"{folder_prefix}text.png", "image/png")
+        bg_url = upload_to_supabase_bucket(bg_bytes, "panels", f"{folder_prefix}bg.png", "image/png") or ""
+        effects_url = upload_to_supabase_bucket(effects_bytes, "panels", f"{folder_prefix}effects.png", "image/png") or ""
+        sfx_url = upload_to_supabase_bucket(sfx_bytes, "panels", f"{folder_prefix}sfx.png", "image/png") or ""
+        text_url = upload_to_supabase_bucket(text_bytes, "panels", f"{folder_prefix}text.png", "image/png") or ""
 
         char_urls: List[str] = []
         char_metadata: List[Dict[str, Any]] = []
         for c_item in char_layers:
             fname = c_item["filename"]
             c_url = upload_to_supabase_bucket(c_item["bytes"], "panels", f"{folder_prefix}{fname}", "image/png")
-            char_urls.append(c_url)
-            char_metadata.append({
-                "id": f"char_{c_item['char_num']}",
-                "name": c_item["name"],
-                "url": c_url,
-                "index": 2 + len(char_metadata),
-            })
+            if c_url is not None:
+                char_urls.append(c_url)
+                char_metadata.append({
+                    "id": f"char_{c_item['char_num']}",
+                    "name": c_item["name"],
+                    "url": c_url,
+                    "index": 2 + len(char_metadata),
+                })
 
     # Development / Local Mode: Save to local filesystem
     else:
