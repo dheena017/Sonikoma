@@ -21,6 +21,7 @@ import io
 import time
 import json
 import asyncio
+import base64
 import argparse
 from pathlib import Path
 from typing import Optional, List, Tuple
@@ -36,10 +37,9 @@ if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
 from features.image_editor.services.ocr.dialogue_text_detector import (
-    extract_full_ocr_data,
-    detect_text_service,
-    get_ocr_reader,
-    clean_transcript_whitespace,
+    extract_direct_image_ocr,
+    extract_bubble_guided_ocr,
+    extract_script_from_panels,
 )
 from features.image_editor.schemas import DetectTextRequest, DetectTextResponse
 from common.media import resolve_image_to_buffer
@@ -253,14 +253,14 @@ def process_and_save_ocr_dialogue(
     output_dir: str = DEFAULT_OUTPUT_DIR,
     languages: Optional[List[str]] = None,
     conf_threshold: float = 0.20,
-    bubble_guided: bool = False,
+    api_mode: str = "direct",
 ) -> dict:
     """
-    Main dialogue OCR runner pipeline:
-    - Loads input image (file path, URL, or demo canvas)
-    - Runs OCR text detection (direct or bubble-guided)
-    - Saves 3 standardized output files: JSON metadata, Annotated image, Binary mask
-    - Prints human-readable summary table and clickable URIs
+    Main dialogue OCR runner pipeline executing any of the 3 backend OCR APIs:
+    - API 1 ('direct' / '/detect-text'): Synchronous full-frame direct OCR
+    - API 2 ('bubble' / '/bubble-dialogue'): YOLO speech-bubble-guided isolated dialogue OCR
+    - API 3 ('script' / '/extract'): Multi-panel chapter script extraction
+    - 'all': Executes all 3 APIs side-by-side and prints comparative summary
     """
     os.makedirs(output_dir, exist_ok=True)
     start_total_time = time.perf_counter()
@@ -268,131 +268,205 @@ def process_and_save_ocr_dialogue(
     if languages is None:
         languages = ["en"]
 
-    # 1. Load image
+    # 1. Load input image
     if input_source and input_source.strip():
         pil_img, base_name, file_path_for_ref = load_input_image(input_source)
     else:
         pil_img, base_name, file_path_for_ref = create_demo_manga_canvas()
 
     img_w, img_h = pil_img.size
-    print("\n" + "=" * 78)
-    print(f"▶ RUNNING DIALOGUE TEXT OCR DETECTOR ON: {base_name} ({img_w}x{img_h}px)")
-    print(f"  Mode: {'Bubble-Guided YOLO Isolation' if bubble_guided else 'Full-Frame Direct OCR'}")
-    print(f"  Languages: {languages} | Confidence Floor: {conf_threshold}")
-    print("=" * 78)
-
-    # Encode image buffer
     buf = io.BytesIO()
     pil_img.save(buf, format="PNG")
     raw_bytes = buf.getvalue()
-
-    # 2. Call OCR service orchestrator
-    print("\n[Step 1/3] Executing Dialogue OCR Vision Processing...")
-    t0 = time.perf_counter()
-    import base64
     b64_str = base64.b64encode(raw_bytes).decode("utf-8")
-    req = DetectTextRequest(
-        image_base64=b64_str,
-        languages=languages,
-        bubble_guided=bubble_guided,
-    )
-    ocr_response: DetectTextResponse = asyncio.run(detect_text_service(req))
-    detect_ms = int((time.perf_counter() - t0) * 1000)
 
-    segments = ocr_response.segments
-    full_transcript = ocr_response.full_transcript
-    print(f"  [OK] Extracted {len(segments)} text segment(s) in {detect_ms}ms")
-    print(f"  [OK] Joined Transcript: \"{full_transcript}\"")
+    api_mode_normalized = api_mode.lower().strip()
+    run_all = api_mode_normalized in ("all", "both", "all-apis")
 
-    # 3. Generate Binary Inpainting Mask
-    print("\n[Step 2/3] Generating Binary Text Inpainting Alpha Mask...")
-    t0 = time.perf_counter()
-    mask_np = generate_binary_text_mask((img_h, img_w), segments)
-    mask_ms = int((time.perf_counter() - t0) * 1000)
-    active_mask_pixels = int(np.count_nonzero(mask_np))
-    coverage_pct = (active_mask_pixels / float(max(1, img_w * img_h))) * 100
-    print(f"  [OK] Mask generated: {active_mask_pixels:,} positive text pixels ({coverage_pct:.2f}% coverage) in {mask_ms}ms")
+    apis_to_run = ["direct", "bubble", "script"] if run_all else [api_mode_normalized]
 
-    # 4. Generate Standardized Output Files
-    print("\n[Step 3/3] Saving standardized output artifacts...")
+    print("\n" + "=" * 78)
+    print(f"▶ RUNNING DIALOGUE TEXT OCR DETECTOR ON: {base_name} ({img_w}x{img_h}px)")
+    print(f"  Target API(s): {', '.join(apis_to_run).upper()}")
+    print(f"  Languages: {languages} | Confidence Floor: {conf_threshold}")
+    print("=" * 78)
 
-    # Output File 1: JSON metadata
-    json_filename = f"{base_name}_dialogue.json"
-    json_path = os.path.join(output_dir, json_filename)
-    json_payload = {
-        "source_image": base_name,
-        "image_width": img_w,
-        "image_height": img_h,
-        "mode": "bubble_guided" if bubble_guided else "direct_full_frame",
-        "languages": languages,
-        "confidence_threshold": conf_threshold,
-        "total_segments": len(segments),
-        "full_transcript": full_transcript,
-        "execution_time_ms": int((time.perf_counter() - start_total_time) * 1000),
-        "segments": [s.model_dump() if hasattr(s, "model_dump") else s for s in segments],
-    }
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(json_payload, f, indent=2, ensure_ascii=False)
+    results_bundle = {}
 
-    print(f"  [1] JSON Dialogue Data -> {json_path}")
-    print(f"      URI: {to_file_uri(json_path)}")
+    # ─────────────────────────────────────────────────────────────────────────
+    # API 1: Direct Synchronous Image OCR (/api/ocr/detect-text)
+    # ─────────────────────────────────────────────────────────────────────────
+    if "direct" in apis_to_run or "1" in apis_to_run:
+        print("\n[API 1/3] POST /api/ocr/detect-text (extract_direct_image_ocr)...")
+        t0 = time.perf_counter()
+        req_direct = DetectTextRequest(
+            image_base64=b64_str,
+            languages=languages,
+            bubble_guided=False,
+        )
+        res_direct: DetectTextResponse = asyncio.run(extract_direct_image_ocr(req_direct))
+        dur_direct = int((time.perf_counter() - t0) * 1000)
 
-    # Output File 2: Annotated Image
-    annotated_filename = f"{base_name}_annotated.png"
-    annotated_path = os.path.join(output_dir, annotated_filename)
-    annotated_img = render_annotated_ocr_image(pil_img, segments)
-    annotated_img.save(annotated_path)
-    print(f"  [2] Annotated Visual   -> {annotated_path}")
-    print(f"      URI: {to_file_uri(annotated_path)}")
+        # Generate Mask & Annotations
+        mask_np_direct = generate_binary_text_mask((img_h, img_w), res_direct.segments)
+        annotated_img_direct = render_annotated_ocr_image(pil_img, res_direct.segments)
 
-    # Output File 3: Binary Inpainting Mask
-    mask_filename = f"{base_name}_mask.png"
-    mask_path = os.path.join(output_dir, mask_filename)
-    cv2.imwrite(mask_path, mask_np)
-    print(f"  [3] Binary Text Mask   -> {mask_path}")
-    print(f"      URI: {to_file_uri(mask_path)}")
+        # Save artifacts
+        p_json = os.path.join(output_dir, f"{base_name}_direct_dialogue.json")
+        p_img = os.path.join(output_dir, f"{base_name}_direct_annotated.png")
+        p_mask = os.path.join(output_dir, f"{base_name}_direct_mask.png")
+
+        with open(p_json, "w", encoding="utf-8") as f:
+            json.dump({
+                "api": "POST /api/ocr/detect-text",
+                "function": "extract_direct_image_ocr",
+                "source_image": base_name,
+                "image_width": img_w,
+                "image_height": img_h,
+                "languages": languages,
+                "execution_time_ms": dur_direct,
+                "total_segments": len(res_direct.segments),
+                "full_transcript": res_direct.full_transcript,
+                "segments": [s.model_dump() if hasattr(s, "model_dump") else s for s in res_direct.segments],
+            }, f, indent=2, ensure_ascii=False)
+        annotated_img_direct.save(p_img)
+        cv2.imwrite(p_mask, mask_np_direct)
+
+        print(f"  [OK] Segments: {len(res_direct.segments)} | Time: {dur_direct}ms | Transcript: \"{res_direct.full_transcript}\"")
+        results_bundle["direct"] = {
+            "api": "POST /api/ocr/detect-text",
+            "segments": len(res_direct.segments),
+            "time_ms": dur_direct,
+            "transcript": res_direct.full_transcript,
+            "json_path": p_json,
+            "annotated_path": p_img,
+            "mask_path": p_mask,
+        }
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # API 2: Bubble-Guided Isolated OCR (/api/ocr/bubble-dialogue)
+    # ─────────────────────────────────────────────────────────────────────────
+    if "bubble" in apis_to_run or "2" in apis_to_run:
+        print("\n[API 2/3] POST /api/ocr/bubble-dialogue (extract_bubble_guided_ocr)...")
+        t0 = time.perf_counter()
+        req_bubble = DetectTextRequest(
+            image_base64=b64_str,
+            languages=languages,
+            bubble_guided=True,
+        )
+        res_bubble: DetectTextResponse = asyncio.run(extract_bubble_guided_ocr(req_bubble))
+        dur_bubble = int((time.perf_counter() - t0) * 1000)
+
+        # Generate Mask & Annotations
+        mask_np_bubble = generate_binary_text_mask((img_h, img_w), res_bubble.segments)
+        annotated_img_bubble = render_annotated_ocr_image(pil_img, res_bubble.segments)
+
+        # Save artifacts
+        p_json = os.path.join(output_dir, f"{base_name}_bubble_dialogue.json")
+        p_img = os.path.join(output_dir, f"{base_name}_bubble_annotated.png")
+        p_mask = os.path.join(output_dir, f"{base_name}_bubble_mask.png")
+
+        with open(p_json, "w", encoding="utf-8") as f:
+            json.dump({
+                "api": "POST /api/ocr/bubble-dialogue",
+                "function": "extract_bubble_guided_ocr",
+                "source_image": base_name,
+                "image_width": img_w,
+                "image_height": img_h,
+                "languages": languages,
+                "execution_time_ms": dur_bubble,
+                "total_segments": len(res_bubble.segments),
+                "full_transcript": res_bubble.full_transcript,
+                "segments": [s.model_dump() if hasattr(s, "model_dump") else s for s in res_bubble.segments],
+            }, f, indent=2, ensure_ascii=False)
+        annotated_img_bubble.save(p_img)
+        cv2.imwrite(p_mask, mask_np_bubble)
+
+        print(f"  [OK] Segments: {len(res_bubble.segments)} | Time: {dur_bubble}ms | Transcript: \"{res_bubble.full_transcript}\"")
+        results_bundle["bubble"] = {
+            "api": "POST /api/ocr/bubble-dialogue",
+            "segments": len(res_bubble.segments),
+            "time_ms": dur_bubble,
+            "transcript": res_bubble.full_transcript,
+            "json_path": p_json,
+            "annotated_path": p_img,
+            "mask_path": p_mask,
+        }
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # API 3: Chapter / Multi-Panel Script Extraction (/api/ocr/extract)
+    # ─────────────────────────────────────────────────────────────────────────
+    if "script" in apis_to_run or "3" in apis_to_run:
+        print("\n[API 3/3] POST /api/ocr/extract (extract_script_from_panels)...")
+        t0 = time.perf_counter()
+        script_res = asyncio.run(extract_script_from_panels([raw_bytes], languages=languages))
+        dur_script = int((time.perf_counter() - t0) * 1000)
+
+        p_json = os.path.join(output_dir, f"{base_name}_script_panels.json")
+        with open(p_json, "w", encoding="utf-8") as f:
+            json.dump({
+                "api": "POST /api/ocr/extract",
+                "function": "extract_script_from_panels",
+                "source_image": base_name,
+                "total_panels": len(script_res),
+                "execution_time_ms": dur_script,
+                "panels": script_res,
+            }, f, indent=2, ensure_ascii=False)
+
+        first_panel_txt = script_res[0].get("text", "") if script_res else ""
+        print(f"  [OK] Panels: {len(script_res)} | Time: {dur_script}ms | Panel 1 Text: \"{first_panel_txt}\"")
+        results_bundle["script"] = {
+            "api": "POST /api/ocr/extract",
+            "panels": len(script_res),
+            "time_ms": dur_script,
+            "transcript": first_panel_txt,
+            "json_path": p_json,
+        }
 
     total_time_ms = int((time.perf_counter() - start_total_time) * 1000)
 
-    # 5. Human-Readable Results Summary Table
+    # ─────────────────────────────────────────────────────────────────────────
+    # Summary Table & Clickable Output File Links
+    # ─────────────────────────────────────────────────────────────────────────
     print("\n" + "─" * 78)
-    print("  DIALOGUE OCR DETECTION SUMMARY")
+    print("  SONIKOMA OCR APIS EXECUTION SUMMARY")
     print("─" * 78)
     print(f"  Source Image     : {base_name} ({img_w}x{img_h}px)")
-    print(f"  Total Segments   : {len(segments)}")
-    print(f"  Full Transcript  : \"{full_transcript}\"")
-    print(f"  Processing Time  : {total_time_ms} ms")
-    print("─" * 78)
-    for s in segments:
-        order = getattr(s, "reading_order", 0)
-        s_id = getattr(s, "segment_id", "text")
-        txt = getattr(s, "text", "")
-        conf = getattr(s, "confidence", 1.0)
-        x, y, w, h = getattr(s, "x", 0), getattr(s, "y", 0), getattr(s, "width", 0), getattr(s, "height", 0)
-        print(f"  • #{order:<2} | {s_id:<8} | Conf: {conf:<4.2f} | Box: ({x}, {y}, {w}, {h}) | \"{txt}\"")
+    print(f"  Total Duration   : {total_time_ms} ms")
     print("─" * 78)
 
+    for key, data in results_bundle.items():
+        api_name = data.get("api", key)
+        count = data.get("segments") if "segments" in data else data.get("panels", 0)
+        unit = "seg(s)" if "segments" in data else "panel(s)"
+        t_ms = data.get("time_ms", 0)
+        t_snippet = data.get("transcript", "")
+        if len(t_snippet) > 40:
+            t_snippet = t_snippet[:37] + "..."
+        print(f"  • {api_name:<30} | {count} {unit} in {t_ms:>5}ms | \"{t_snippet}\"")
+
+    print("─" * 78)
     print("\n📂 CLICKABLE OUTPUT FILES:")
     print(f"  • Output Folder : {to_file_uri(output_dir)}")
-    print(f"  • JSON Data     : {to_file_uri(json_path)}")
-    print(f"  • Annotated PNG : {to_file_uri(annotated_path)}")
-    print(f"  • Text Mask PNG : {to_file_uri(mask_path)}")
+    for key, data in results_bundle.items():
+        if "json_path" in data:
+            print(f"  • [{key.upper()}] JSON     : {to_file_uri(data['json_path'])}")
+        if "annotated_path" in data:
+            print(f"  • [{key.upper()}] Visual   : {to_file_uri(data['annotated_path'])}")
+        if "mask_path" in data:
+            print(f"  • [{key.upper()}] Mask     : {to_file_uri(data['mask_path'])}")
     print("─" * 78 + "\n")
 
     return {
         "success": True,
-        "total_segments": len(segments),
-        "transcript": full_transcript,
-        "json_path": json_path,
-        "annotated_path": annotated_path,
-        "mask_path": mask_path,
+        "results": results_bundle,
         "total_time_ms": total_time_ms,
     }
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Run Sonikoma Dialogue Text OCR Detector on an image and save structured output files."
+        description="Run Sonikoma Comic Dialogue OCR APIs on an image and save structured output files."
     )
     parser.add_argument(
         "-i", "--input",
@@ -419,9 +493,36 @@ def main():
         help="Minimum OCR confidence threshold 0.0 - 1.0 (default: 0.20)"
     )
     parser.add_argument(
+        "--api",
+        choices=["1", "2", "3", "direct", "bubble", "script", "all"],
+        default=None,
+        help=(
+            "Select which OCR API to execute: "
+            "'direct' (API 1: /detect-text), "
+            "'bubble' (API 2: /bubble-dialogue), "
+            "'script' (API 3: /extract), "
+            "or 'all' to run all 3 APIs."
+        )
+    )
+    parser.add_argument(
         "-b", "--bubble-guided",
         action="store_true",
-        help="Engage YOLO speech-bubble-guided dialogue isolation (filters background artwork noise)."
+        help="Shortcut to run API 2 (Bubble-Guided Dialogue OCR)."
+    )
+    parser.add_argument(
+        "-d", "--direct",
+        action="store_true",
+        help="Shortcut to run API 1 (Direct Synchronous Full-Frame OCR)."
+    )
+    parser.add_argument(
+        "-s", "--script",
+        action="store_true",
+        help="Shortcut to run API 3 (Multi-Panel Script Extraction OCR)."
+    )
+    parser.add_argument(
+        "-a", "--all-apis",
+        action="store_true",
+        help="Run and compare all 3 OCR APIs side-by-side."
     )
     parser.add_argument(
         "--demo",
@@ -447,12 +548,24 @@ def main():
 
     parsed_langs = [l.strip() for l in args.langs.split(",") if l.strip()] or ["en"]
 
+    # Determine API mode
+    if args.all_apis or args.api == "all":
+        selected_mode = "all"
+    elif args.api in ("1", "direct") or args.direct:
+        selected_mode = "direct"
+    elif args.api in ("2", "bubble") or args.bubble_guided:
+        selected_mode = "bubble"
+    elif args.api in ("3", "script") or args.script:
+        selected_mode = "script"
+    else:
+        selected_mode = "direct"
+
     process_and_save_ocr_dialogue(
         input_source=input_arg,
         output_dir=args.output_dir,
         languages=parsed_langs,
         conf_threshold=args.conf,
-        bubble_guided=args.bubble_guided,
+        api_mode=selected_mode,
     )
 
 
