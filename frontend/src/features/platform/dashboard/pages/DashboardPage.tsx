@@ -2,17 +2,9 @@ import React from "react";
 import DashboardHeader from "@/features/platform/dashboard/components/DashboardHeader";
 import DashboardStats from "@/features/platform/dashboard/components/DashboardStats";
 import DashboardQuickIngest from "@/features/platform/dashboard/components/DashboardQuickIngest";
-import DashboardQuickLinks from "@/features/platform/dashboard/components/DashboardQuickLinks";
-import DashboardStarterTemplates from "@/features/platform/dashboard/components/DashboardStarterTemplates";
-import DashboardSystemHealth from "@/features/platform/dashboard/components/DashboardSystemHealth";
 import DashboardOnboardingGuide from "@/features/platform/dashboard/components/DashboardOnboardingGuide";
 import DashboardProjectSection from "@/features/platform/dashboard/components/DashboardProjectSection";
 import useDashboardPage from "@/features/platform/dashboard/hooks/useDashboardPage";
-import {
-  WelcomeUserModal,
-  WelcomeBackUserModal,
-  ComeBackUserModal,
-} from "@/shared/ui/modal";
 
 export default function DashboardPage() {
   const {
@@ -20,8 +12,6 @@ export default function DashboardPage() {
     projects,
     loading,
     error,
-    latency,
-    analytics,
     searchQuery,
     setSearchQuery,
     onboardingTasks,
@@ -41,52 +31,6 @@ export default function DashboardPage() {
     toggleMenu,
     saveProjectName,
   } = useDashboardPage();
-
-  const [showWelcomeUser, setShowWelcomeUser] = React.useState(() => {
-    return sessionStorage.getItem("sonikoma_show_welcome_user") === "true";
-  });
-
-  const [showWelcomeBack, setShowWelcomeBack] = React.useState(() => {
-    return sessionStorage.getItem("sonikoma_show_welcome_back") === "true";
-  });
-
-  React.useEffect(() => {
-    const isNew =
-      sessionStorage.getItem("sonikoma_show_welcome_user") === "true";
-    const isBack =
-      sessionStorage.getItem("sonikoma_show_welcome_back") === "true";
-
-    if (isNew) {
-      setShowWelcomeUser(true);
-      setShowWelcomeBack(false);
-    } else if (isBack) {
-      setShowWelcomeBack(true);
-      setShowWelcomeUser(false);
-    }
-  }, []);
-
-  const [showComeBack, setShowComeBack] = React.useState(() => {
-    const isReturning =
-      localStorage.getItem("sonikoma_returning_user") === "true";
-    const alreadyShown =
-      sessionStorage.getItem("sonikoma_comeback_shown") === "true";
-    return isReturning && !alreadyShown && !showWelcomeUser && !showWelcomeBack;
-  });
-
-  const handleConfirmWelcomeUser = () => {
-    sessionStorage.removeItem("sonikoma_show_welcome_user");
-    setShowWelcomeUser(false);
-  };
-
-  const handleConfirmWelcomeBack = () => {
-    sessionStorage.removeItem("sonikoma_show_welcome_back");
-    setShowWelcomeBack(false);
-  };
-
-  const handleConfirmComeBack = () => {
-    sessionStorage.setItem("sonikoma_comeback_shown", "true");
-    setShowComeBack(false);
-  };
 
   return (
     <div className="w-full flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-4 sm:py-6 max-w-7xl mx-auto">
@@ -113,7 +57,12 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* 3. Recent Series Workspace (Normal Projects & AI Series tabs) */}
+        {/* 3. Direct Chapter & Strip URL Ingestion Bar */}
+        <div className="relative z-10">
+          <DashboardQuickIngest />
+        </div>
+
+        {/* 4. Recent Series Workspace (Normal Projects & AI Series tabs) */}
         <div className="relative z-10">
           <DashboardProjectSection
             themeMode={themeMode}
@@ -136,11 +85,6 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* 4. Direct Chapter & Strip URL Ingestion Bar */}
-        <div className="relative z-10">
-          <DashboardQuickIngest />
-        </div>
-
         {/* 5. Getting Started Checklist (Only for new creators with no active projects) */}
         {!loading && projects.length === 0 && (
           <div className="relative z-10">
@@ -150,52 +94,7 @@ export default function DashboardPage() {
             />
           </div>
         )}
-
-        {/* 6. Studio Creation Suite (6 Interactive Workspaces Launchpad) */}
-        <div className="relative z-10">
-          <DashboardQuickLinks
-            onGoToWorkspace={handleNewSeries}
-            onGoToAudioLab={() =>
-              (window as any).navigateTo?.("/creative-suite")
-            }
-            onGoToCharacters={() => (window as any).navigateTo?.("/characters")}
-          />
-        </div>
-
-        {/* 7. Starter Manga Packs & Demos */}
-        <div className="relative z-10">
-          <DashboardStarterTemplates />
-        </div>
-
-        {/* 8. System Telemetry, Engine Health & Resource Quotas */}
-        <div className="relative z-10">
-          <DashboardSystemHealth latency={latency} analytics={analytics} />
-        </div>
       </div>
-
-      {/* New User Welcome Onboarding Modal */}
-      <WelcomeUserModal
-        isOpen={showWelcomeUser}
-        onConfirm={handleConfirmWelcomeUser}
-        onCancel={handleConfirmWelcomeUser}
-      />
-
-      {/* Returning User Welcome Back Login Modal */}
-      <WelcomeBackUserModal
-        isOpen={showWelcomeBack}
-        onConfirm={handleConfirmWelcomeBack}
-        onCancel={handleConfirmWelcomeBack}
-      />
-
-      {/* Come Back User Re-engagement Modal */}
-      <ComeBackUserModal
-        isOpen={showComeBack}
-        onConfirm={handleConfirmComeBack}
-        onCancel={() => {
-          sessionStorage.setItem("sonikoma_comeback_shown", "true");
-          setShowComeBack(false);
-        }}
-      />
     </div>
   );
 }
