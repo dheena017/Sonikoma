@@ -1,8 +1,10 @@
-# Pages (`features/landing/pages`)
+# Landing Pages (`features/landing/pages/`)
 
-## Overview
-This folder is a standardized component of the Sonikoma frontend architecture.
+## 1. Overview
+Contains route-level entry pages for the landing feature.
 
-## Responsibilities
-- Encapsulates module-specific logic, interfaces, or presentation artifacts.
-- Conforms to Sonikoma's 10-domain isolation rules and public export boundaries.
+## 2. Page Inventory
+- `LandingPage.tsx`: Layout assembler orchestrating header, hero, showcases, pricing, FAQ, and footer. It connects `useLandingPage()` state with individual domain components.
+
+## 3. Export Boundary
+Exported publicly through `pages/index.ts`.

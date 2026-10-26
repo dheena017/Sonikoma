@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import ProjectCard from "@/features/platform/projects/components/ProjectCard";
 import { ProjectCardSkeleton } from "@/shared/ui/loading";
-import type { Project } from "@/features/platform/projects/hooks/ProjectTypes";
+import type { Project } from "@/features/platform/projects/types";
 import { aiSeriesApi, AISeriesProject } from "@/features/intelligence/series/api/aiSeries";
 
 interface StoredProject {

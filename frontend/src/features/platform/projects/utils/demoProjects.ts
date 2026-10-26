@@ -1,4 +1,4 @@
-import type { Project } from "../hooks/ProjectTypes";
+import type { Project } from "../types";
 
 export const DEMO_PROJECTS: Project[] = [
   {

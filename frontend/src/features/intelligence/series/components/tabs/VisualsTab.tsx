@@ -51,7 +51,7 @@ export const VisualsTab: React.FC<VisualsTabProps> = ({
           <button
             type="button"
             onClick={handleCopyPrompt}
-            className="px-2.5 py-1 rounded-lg bg-[#141414] hover:bg-[#202020] border border-[#2A2A2A] hover:border-neutral-500 text-[11px] font-mono text-neutral-300 hover:text-white flex items-center gap-1.5 cursor-pointer transition-colors"
+            className="px-2.5 py-1 rounded-lg bg-[#141414] hover:bg-[#2A2A2A] border border-[#2A2A2A] hover:border-neutral-500 text-[11px] font-mono text-neutral-300 hover:text-white flex items-center gap-1.5 cursor-pointer transition-colors"
           >
             {copiedPrompt ? (
               <>

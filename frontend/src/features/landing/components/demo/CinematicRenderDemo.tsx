@@ -18,19 +18,19 @@ export function CinematicRenderDemo({
   return (
     <div
       className={`w-full rounded-2xl border overflow-hidden shadow-xl p-5 md:p-6 space-y-5 transition-all duration-300 ${
-        isLight ? "border-slate-200 bg-white" : "border-white/10 bg-neutral-950"
+        isLight ? "border-slate-200 bg-white" : "border-[#2F2F2F] bg-[#181818]"
       }`}
     >
       {/* Editor Header */}
       <div
         className={`flex items-center justify-between border-b pb-4 transition-colors ${
-          isLight ? "border-slate-200" : "border-white/10"
+          isLight ? "border-slate-200" : "border-[#2F2F2F]"
         }`}
       >
         <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-          <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+          <div className="w-2.5 h-2.5 rounded-full bg-neutral-600" />
+          <div className="w-2.5 h-2.5 rounded-full bg-neutral-500" />
+          <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
           <span
             className={`text-xs font-mono ml-3 font-semibold transition-colors ${
               isLight ? "text-slate-700" : "text-neutral-300"
@@ -42,7 +42,7 @@ export function CinematicRenderDemo({
         <div className="flex items-center gap-2">
           <button
             onClick={onGetStarted}
-            className="px-3.5 py-1.5 bg-[#2A2A2A] text-white text-xs font-bold rounded-lg hover:bg-[#3B82F6] transition-colors cursor-pointer"
+            className="h-9 px-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold rounded-xl transition-all duration-200 shadow-sm shadow-blue-500/20 active:scale-95 inline-flex items-center justify-center cursor-pointer"
           >
             Export Video
           </button>
@@ -70,7 +70,7 @@ export function CinematicRenderDemo({
                       : "bg-[#2A2A2A] border-[#3B82F6] text-white font-bold"
                     : isLight
                     ? "bg-slate-50 border-slate-200 text-slate-800 hover:border-slate-300 hover:text-slate-950 font-medium"
-                    : "bg-neutral-900 border-neutral-800 text-neutral-200 hover:border-neutral-700 font-medium"
+                    : "bg-[#141414] border-[#2F2F2F] text-neutral-200 hover:border-blue-500/30 font-medium"
                 }`}
               >
                 Panel {i + 1}
@@ -88,25 +88,25 @@ export function CinematicRenderDemo({
           >
             Viewport Preview
           </div>
-          <div className="relative w-full aspect-video bg-gradient-to-br from-neutral-900 to-black rounded-xl border border-white/10 flex items-center justify-center overflow-hidden">
-            <div className="w-28 h-44 bg-gradient-to-br from-[#2A2A2A] to-indigo-900 rounded-lg border border-white/20 shadow-xl relative overflow-hidden flex flex-col items-center justify-center text-center p-2">
+          <div className="relative w-full aspect-video bg-gradient-to-br from-neutral-900 to-black rounded-xl border border-[#2F2F2F] flex items-center justify-center overflow-hidden">
+            <div className="w-28 h-44 bg-gradient-to-br from-[#2A2A2A] to-[#181818] rounded-lg border border-white/20 shadow-xl relative overflow-hidden flex flex-col items-center justify-center text-center p-2">
               <span className="text-white text-xs font-bold">
                 Panel 1 Motion
               </span>
-              <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/70 text-emerald-400 text-[9px] font-mono font-bold">
+              <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/70 text-blue-400 text-[9px] font-mono font-bold">
                 {aspect}
               </div>
             </div>
             <div
               className={`absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full backdrop-blur-sm ${
                 isPlaying
-                  ? "bg-emerald-500/20 border border-emerald-400 text-emerald-300"
-                  : "bg-neutral-900/50 border border-white/10 text-neutral-400"
+                  ? "bg-blue-500/20 border border-blue-400 text-blue-300"
+                  : "bg-neutral-900/50 border border-[#2F2F2F] text-neutral-400"
               }`}
             >
               <div
                 className={`w-1.5 h-1.5 rounded-full ${
-                  isPlaying ? "bg-emerald-400 animate-pulse" : "bg-neutral-500"
+                  isPlaying ? "bg-blue-400 animate-pulse" : "bg-neutral-500"
                 }`}
               />
               <span className="text-[10px] font-mono font-bold">
@@ -194,7 +194,7 @@ export function CinematicRenderDemo({
         className={`p-3.5 rounded-xl border flex flex-col md:flex-row items-center justify-between gap-3 transition-all ${
           isLight
             ? "bg-slate-50 border-slate-200 text-slate-800"
-            : "bg-neutral-900/80 border-white/10 text-neutral-200"
+            : "bg-neutral-900/80 border-[#2F2F2F] text-neutral-200"
         }`}
       >
         <div className="flex items-center gap-2.5">

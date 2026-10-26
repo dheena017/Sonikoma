@@ -1,11 +1,8 @@
 import React from "react";
 import ForgotPasswordForm from "@/features/auth/components/ForgotPasswordForm";
+import type { ForgotPasswordPageProps } from "@/features/auth/types";
 
-interface ForgotPasswordPageProps {
-  onForgotPassword: (email: string) => Promise<void>;
-  onNavigateToLogin: () => void;
-  onNavigateHome?: () => void;
-}
+export type { ForgotPasswordPageProps };
 
 export default function ForgotPasswordPage(props: ForgotPasswordPageProps) {
   return <ForgotPasswordForm {...props} />;

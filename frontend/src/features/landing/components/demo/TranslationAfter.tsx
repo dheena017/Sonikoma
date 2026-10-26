@@ -22,8 +22,8 @@ export function TranslationAfter() {
         </div>
 
         {/* Audio Dub Status */}
-        <div className="absolute top-3 right-3 bg-emerald-950/80 border border-emerald-400/50 backdrop-blur-md px-2 py-1 rounded-xl text-emerald-300 text-[9px] font-mono font-bold flex items-center gap-1 shadow-lg">
-          <Volume2 className="w-3 h-3 text-emerald-400 animate-pulse" />
+        <div className="absolute top-3 right-3 bg-[#181818] border border-blue-500/40 backdrop-blur-md px-2 py-1 rounded-xl text-blue-300 text-[9px] font-mono font-bold flex items-center gap-1 shadow-lg">
+          <Volume2 className="w-3 h-3 text-blue-400 animate-pulse" />
           <span>TTS Ready</span>
         </div>
 
@@ -36,7 +36,7 @@ export function TranslationAfter() {
               <Check className="w-2.5 h-2.5 text-blue-400" />
               Synced Subtitles
             </span>
-            <span className="text-emerald-400">BrianNeural Voice</span>
+            <span className="text-blue-400">BrianNeural Voice</span>
           </div>
         </div>
       </div>

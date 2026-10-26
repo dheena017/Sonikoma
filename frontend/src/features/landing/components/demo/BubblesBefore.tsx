@@ -16,23 +16,23 @@ export function BubblesBefore() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
 
         {/* Detection Box Overlay on Top Speech Bubble */}
-        <div className="absolute top-3 right-3 w-32 h-16 border-2 border-dashed border-rose-500 bg-rose-500/20 rounded-xl flex items-center justify-center animate-pulse pointer-events-none">
-          <span className="text-[10px] font-mono font-bold text-rose-300 bg-black/80 px-1.5 py-0.5 rounded border border-rose-500/40">
+        <div className="absolute top-3 right-3 w-32 h-16 border-2 border-dashed border-neutral-700 bg-white/5 rounded-xl flex items-center justify-center animate-pulse pointer-events-none">
+          <span className="text-[10px] font-mono font-bold text-neutral-300 bg-black/80 px-1.5 py-0.5 rounded border border-neutral-700/40">
             Detected Bubble #1
           </span>
         </div>
 
         {/* Detection Box on SFX text */}
-        <div className="absolute top-4 left-4 w-28 h-12 border-2 border-dashed border-amber-500 bg-amber-500/20 rounded-xl flex items-center justify-center pointer-events-none">
-          <span className="text-[9px] font-mono font-bold text-amber-300 bg-black/80 px-1.5 py-0.5 rounded border border-amber-500/40">
+        <div className="absolute top-4 left-4 w-28 h-12 border-2 border-dashed border-neutral-700 bg-white/5 rounded-xl flex items-center justify-center pointer-events-none">
+          <span className="text-[9px] font-mono font-bold text-neutral-300 bg-black/80 px-1.5 py-0.5 rounded border border-neutral-700/40">
             SFX Sound Text
           </span>
         </div>
 
         {/* Bottom Tag */}
         <div className="absolute bottom-3 inset-x-3 flex items-center justify-between z-10">
-          <span className="text-[10px] font-mono font-bold text-rose-300 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-rose-500/40 flex items-center gap-1.5">
-            <AlertCircle className="w-3 h-3 text-rose-400" />
+          <span className="text-[10px] font-mono font-bold text-neutral-300 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-neutral-700/40 flex items-center gap-1.5">
+            <AlertCircle className="w-3 h-3 text-neutral-400" />
             2 Bubbles Covering Art
           </span>
           <span className="text-[10px] font-mono font-bold text-white bg-black/80 px-2 py-1 rounded-full border border-white/20">

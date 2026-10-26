@@ -55,7 +55,7 @@ export const AgentTerminalLogs: React.FC<AgentTerminalLogsProps> = ({ logs }) =>
           <button
             type="button"
             onClick={handleCopyLogs}
-            className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#252525] transition-colors text-xs font-mono flex items-center gap-1 cursor-pointer"
+            className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#2A2A2A] transition-colors text-xs font-mono flex items-center gap-1 cursor-pointer"
             title="Copy logs"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Copy className="w-3.5 h-3.5" />}
@@ -63,7 +63,7 @@ export const AgentTerminalLogs: React.FC<AgentTerminalLogsProps> = ({ logs }) =>
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#252525] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#2A2A2A] transition-colors cursor-pointer"
           >
             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>

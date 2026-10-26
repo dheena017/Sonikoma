@@ -214,7 +214,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
         <button
           type="button"
           onClick={onReset}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#121212] hover:bg-[#252525] border border-[#2F2F2F] text-xs font-mono text-[#9CA3AF] hover:text-[#E5E5E5] transition-all cursor-pointer self-start sm:self-center"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#121212] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-xs font-mono text-[#9CA3AF] hover:text-[#E5E5E5] transition-all cursor-pointer self-start sm:self-center"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           Generate Another Video
@@ -247,7 +247,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                     type="button"
                     onClick={handleTriggerReupload}
                     disabled={isReuploading}
-                    className="flex-1 sm:flex-initial px-4 py-3 rounded-xl bg-[#1E1E1E] hover:bg-[#252525] border border-[#2F2F2F] text-[#E5E5E5] text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                    className="flex-1 sm:flex-initial px-4 py-3 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-[#E5E5E5] text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
                     title="Re-upload this video to YouTube with current metadata"
                   >
                     {isReuploading ? (
@@ -267,7 +267,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className="flex-1 sm:flex-initial px-4 py-3 rounded-xl bg-[#1E1E1E] hover:bg-[#252525] border border-[#2F2F2F] text-[#E5E5E5] text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="flex-1 sm:flex-initial px-4 py-3 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-[#E5E5E5] text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   {copiedLink ? (
                     <>
@@ -548,7 +548,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                 className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold flex items-center gap-1.5 transition-all cursor-pointer border ${
                   isEditing
                     ?"bg-[#3B82F6] text-white border-[#3B82F6] shadow-sm"
-                    :"bg-[#181818] hover:bg-[#222] text-[#9CA3AF] hover:text-[#E5E5E5] border-[#2F2F2F]"
+                    :"bg-[#181818] hover:bg-[#2A2A2A] text-[#9CA3AF] hover:text-[#E5E5E5] border-[#2F2F2F]"
                 }`}
                 title="Edit video title and description before re-uploading"
               >
@@ -559,7 +559,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
               <button
                 type="button"
                 onClick={handleCopyAll}
-                className="px-2.5 py-1 rounded-lg bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] text-xs font-mono text-[#9CA3AF] hover:text-[#E5E5E5] flex items-center gap-1.5 transition-all cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-[#141414] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-xs font-mono text-[#9CA3AF] hover:text-[#E5E5E5] flex items-center gap-1.5 transition-all cursor-pointer"
                 title="Copy Title, Description, Timestamps and Tags together"
               >
                 {copiedAll ? (
@@ -746,7 +746,7 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
                       className={`text-[11px] px-2.5 py-0.5 rounded-md font-mono transition-all cursor-pointer border ${
                         isTagCopied
                           ?"bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
-                          :"bg-[#1E1E1E] hover:bg-[#252525] border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5]"
+                          :"bg-[#1E1E1E] hover:bg-[#2A2A2A] border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5]"
                       }`}
                       title="Click to copy tag"
                     >

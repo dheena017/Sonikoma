@@ -26,7 +26,7 @@ const MOTION_MODES = [
     image:"/demo-monarch.jpg",
     subtitle:"Maximum output! Shatter their defenses!",
     soundFx:"[Sound: High-Velocity Shockwave & Energy Explosion]",
-    icon: <Zap className="w-4 h-4 text-amber-400" />,
+    icon: <Zap className="w-4 h-4 text-blue-400" />,
     description:"Rapid optical zoom snap directly into character eyes or weapon impacts with built-in camera rumble micro-vibrations.",
     speed:"High velocity",
     bestFor:"Explosions, magic spells, cliffhanger reveals",
@@ -38,7 +38,7 @@ const MOTION_MODES = [
     image:"/demo-romance.jpg",
     subtitle:"Under the celestial starlight, our fate was sealed.",
     soundFx:"[Sound: Soft Wind & Orchestral Violins]",
-    icon: <Eye className="w-4 h-4 text-purple-400" />,
+    icon: <Eye className="w-4 h-4 text-blue-400" />,
     description:"A deliberate, slow creeping tilt downward that hides the bottom panel until the narrative climax strikes.",
     speed:"Slow & Tense",
     bestFor:"Palace reveals, romance moments, shocking discoveries",
@@ -50,7 +50,7 @@ const MOTION_MODES = [
     image:"/demo-cyberpunk.jpg",
     subtitle:"The city waits... only death is certain.",
     soundFx:"[Sound: Neon Rain & Katana Sheathing]",
-    icon: <FastForward className="w-4 h-4 text-emerald-400" />,
+    icon: <FastForward className="w-4 h-4 text-blue-400" />,
     description:"Intelligently cuts or pans between conversational characters in alternating rhythm with their generated voice lines.",
     speed:"Dialogue synced",
     bestFor:"Character arguments, confessions, comedic banter",
@@ -66,14 +66,14 @@ export function MotionShowcase({
 
   return (
     <section className="py-24 px-4 sm:px-6 relative z-10 scroll-mt-24">
-      <div className="max-w-6xl mx-auto space-y-16">
+      <div className="max-w-7xl mx-auto space-y-16">
         {/* SECTION HEADER */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <div
             className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider border ${
               isLight
-                ?"bg-indigo-50 border-indigo-200 text-indigo-700"
-                :"bg-indigo-500/10 border-indigo-500/20 text-indigo-400"
+                ? "bg-blue-50 border-blue-200 text-blue-700"
+                : "bg-blue-500/10 border-blue-500/20 text-blue-400"
             }`}
           >
             <Film className="w-3.5 h-3.5" />
@@ -82,11 +82,11 @@ export function MotionShowcase({
 
           <h2
             className={`text-3xl sm:text-4xl md:text-5xl font-black tracking-tight ${
-              isLight ?"text-slate-950" :"text-white"
+              isLight ? "text-slate-950" : "text-white"
             }`}
           >
-            Camera Movement That Feels Like{""}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-300">
+            Camera Movement That Feels Like{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">
               An Anime Studio
             </span>
           </h2>
@@ -115,10 +115,10 @@ export function MotionShowcase({
                     isSelected
                       ? isLight
                         ?"bg-white border-blue-500 shadow-md ring-2 ring-blue-500/15"
-                        :"bg-[#161822] border-blue-400/80 shadow-lg  ring-2 ring-blue-400/20"
+                        :"bg-[#181818] border-blue-500 shadow-lg ring-2 ring-blue-500/20"
                       : isLight
                       ?"bg-white/60 border-slate-200 hover:bg-white hover:border-slate-300"
-                      :"bg-white/[0.02] border-white/10 hover:bg-white/[0.05] hover:border-white/20"
+                      :"bg-[#141414] border-[#2F2F2F] hover:bg-[#1c1c1c] hover:border-blue-500/40"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
@@ -127,7 +127,7 @@ export function MotionShowcase({
                         className={`p-2 rounded-xl border ${
                           isLight
                             ?"bg-slate-100 border-slate-200"
-                            :"bg-white/5 border-white/10"
+                            :"bg-blue-500/10 border-blue-500/20 text-blue-400"
                         }`}
                       >
                         {mode.icon}
@@ -177,7 +177,7 @@ export function MotionShowcase({
               className={`w-full max-w-sm rounded-[36px] border p-4 shadow-2xl relative overflow-hidden backdrop-blur-xl ${
                 isLight
                   ?"bg-white border-slate-300 shadow-slate-300/60"
-                  :"bg-[#11131a] border-white/20 shadow-black/90"
+                  :"bg-[#181818] border-[#2F2F2F] shadow-xl"
               }`}
             >
               {/* Phone Notch */}
@@ -233,7 +233,7 @@ export function MotionShowcase({
               <div className="pt-4 text-center">
                 <button
                   onClick={onGetStarted}
-                  className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+                  className="w-full h-12 px-4 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-bold transition-all shadow-lg shadow-blue-500/25 active:scale-[0.98] cursor-pointer inline-flex items-center justify-center gap-2"
                 >
                   Render With This Camera Motion
                 </button>

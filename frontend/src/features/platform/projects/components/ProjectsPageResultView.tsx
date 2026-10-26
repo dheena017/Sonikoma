@@ -10,18 +10,14 @@ import {
   Scissors,
   Film,
   ArrowRight,
-  CheckCircle2,
   Layers,
-  ChevronRight,
-  ExternalLink,
+  Trash2,
 } from "lucide-react";
 import { ProjectCardSkeleton } from "@/shared/ui/loading";
 import ProjectsTableSkeleton from "@/features/platform/projects/components/ProjectsTableSkeleton";
-import type { Project } from "@/features/platform/projects/hooks/ProjectTypes";
-import type { Series } from "@/features/platform/projects/utils/seriesGrouping";
+import type { Project, Series } from "@/features/platform/projects/types";
 import SeriesCard from "@/features/platform/projects/components/SeriesCard";
-import ProjectsTable from "@/features/platform/projects/hooks/ProjectsTable";
-import BulkActionFooter from "@/features/platform/projects/components/BulkActionFooter";
+import ProjectsTable from "@/features/platform/projects/components/ProjectsTable";
 
 interface ProjectsPageResultViewProps {
   projectsLength: number;
@@ -47,7 +43,6 @@ interface ProjectsPageResultViewProps {
   onSaveRename: (projectId: string, newName: string) => Promise<void>;
   clearSelection: () => void;
   onBulkDelete: () => Promise<void>;
-  onLoadDemo?: () => void;
   onOpenScraper?: () => void;
   onOpenAiStudio?: () => void;
   onClearFilters?: () => void;
@@ -77,7 +72,6 @@ export default function ProjectsPageResultView({
   onSaveRename,
   clearSelection,
   onBulkDelete,
-  onLoadDemo,
   onOpenScraper,
   onOpenAiStudio,
   onClearFilters,
@@ -156,17 +150,6 @@ export default function ProjectsPageResultView({
                 </p>
               </div>
             </div>
-
-            {onLoadDemo && (
-              <button
-                type="button"
-                onClick={onLoadDemo}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141414] hover:bg-[#252525] border border-[#2F2F2F] text-xs font-mono font-semibold text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer"
-              >
-                <Play className="w-3.5 h-3.5 fill-emerald-400" />
-                <span>Load Sample Demo</span>
-              </button>
-            )}
           </div>
 
           {/* Progress Bar */}
@@ -342,33 +325,6 @@ export default function ProjectsPageResultView({
           </div>
         </div>
 
-        {/* Demo Starter Callout Matching Image 1 */}
-        {onLoadDemo && (
-          <div className="rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] p-5 sm:p-6 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                <Play className="w-5 h-5 fill-emerald-400" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-[#E5E5E5]">
-                  Want to explore without scraping?
-                </h3>
-                <p className="text-xs text-[#9CA3AF] mt-0.5">
-                  Load pre-configured sample series ("Shadow Monarch: Rebirth" &amp; "Neon District 2088") with 50+ sliced panels.
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={onLoadDemo}
-              className="self-start sm:self-auto px-4 py-2 rounded-xl bg-[#141414] hover:bg-[#252525] border border-[#2F2F2F] text-xs font-mono font-bold text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer flex items-center gap-1.5"
-            >
-              <Play className="w-3.5 h-3.5 fill-emerald-400" />
-              <span>Load Sample Demo Projects</span>
-            </button>
-          </div>
-        )}
       </div>
     );
   }
@@ -473,11 +429,32 @@ export default function ProjectsPageResultView({
       )}
 
       {selectedProjects.size > 0 && (
-        <BulkActionFooter
-          selectedCount={selectedProjects.size}
-          clearSelection={clearSelection}
-          onBulkDelete={onBulkDelete}
-        />
+        <div className="fixed bottom-0 left-0 right-0 md:left-64 p-4 z-50 animate-fade-in">
+          <div className="max-w-4xl mx-auto bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-4 flex items-center justify-between shadow-2xl">
+            <div className="flex items-center gap-3">
+              <div className="bg-[#141414] text-[#3B82F6] border border-[#2F2F2F] w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs font-mono">
+                {selectedProjects.size}
+              </div>
+              <div className="text-[#E5E5E5] text-sm font-medium">projects selected</div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={clearSelection}
+                className="px-4 py-2 text-xs font-mono font-medium text-neutral-400 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                Clear Selection
+              </button>
+              <button
+                type="button"
+                onClick={onBulkDelete}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Delete Selected
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

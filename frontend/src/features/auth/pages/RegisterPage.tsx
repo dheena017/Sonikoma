@@ -1,11 +1,8 @@
 import React from "react";
 import RegisterForm from "@/features/auth/components/RegisterForm";
+import type { RegisterPageProps } from "@/features/auth/types";
 
-interface RegisterPageProps {
-  onRegister: (data: any) => Promise<any>;
-  onNavigateToLogin: () => void;
-  onNavigateHome?: () => void;
-}
+export type { RegisterPageProps };
 
 export default function RegisterPage(props: RegisterPageProps) {
   return <RegisterForm {...props} />;

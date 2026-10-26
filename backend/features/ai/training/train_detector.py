@@ -21,12 +21,16 @@ def _check_training_files(dataset_folder: str) -> bool:
 
 
 async def train_bubble_model(
-    dataset_folder: str,
+    dataset_folder: str = "data/training_data",
     target: Literal["bubble", "panel"] = "bubble",
     rounds: int = 50,
-    batch_size: int = 16
+    batch_size: int = 16,
+    epochs: int | None = None,
+    **kwargs: Any,
 ) -> Dict[str, Any]:
     """Launches background training for a custom YOLO comic detection model."""
+    if epochs is not None:
+        rounds = epochs
     valid = _check_training_files(dataset_folder)
     job_id = str(uuid.uuid4())
 

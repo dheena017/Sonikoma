@@ -11,10 +11,7 @@ import {
 } from"lucide-react";
 import { SonikomaLogo } from"@/shared/ui/branding";
 
-export interface AuthSuccessPageProps {
-  navigateTo: (path: string) => void;
-  checkAuth?: () => Promise<any>;
-}
+import type { AuthSuccessPageProps } from "../types";
 
 export default function AuthSuccessPage({
   navigateTo,

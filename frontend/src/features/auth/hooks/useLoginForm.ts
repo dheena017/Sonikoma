@@ -6,23 +6,7 @@ import {
   TRANSLATIONS,
 } from "@/features/auth/components/constants";
 
-export type Language = "en" | "ko" | "ja";
-
-export type AuthErrorType =
-  | "invalid_credentials"
-  | "user_not_found"
-  | "rate_limited"
-  | "network"
-  | "unverified"
-  | "general"
-  | null;
-
-export interface LoginFormProps {
-  onLogin: (data: any) => Promise<any>;
-  onNavigateToRegister: () => void;
-  onNavigateToForgotPassword: () => void;
-  onNavigateHome?: () => void;
-}
+import type { Language, AuthErrorType, LoginFormProps } from "../types";
 
 export default function useLoginForm(props: LoginFormProps) {
   const [email, setEmailState] = React.useState("");

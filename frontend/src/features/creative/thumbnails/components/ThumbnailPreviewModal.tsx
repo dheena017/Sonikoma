@@ -62,7 +62,7 @@ export const ThumbnailPreviewModal: React.FC<ThumbnailPreviewModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#252525] border border-transparent hover:border-[#2F2F2F] transition-colors cursor-pointer"
+            className="p-2 rounded-xl text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#2A2A2A] border border-transparent hover:border-[#2F2F2F] transition-colors cursor-pointer"
             title="Close (Esc)"
           >
             <X className="w-5 h-5" />

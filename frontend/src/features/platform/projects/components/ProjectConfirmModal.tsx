@@ -2,10 +2,7 @@ import React, { useEffect, useState, useRef } from"react";
 import { createPortal } from"react-dom";
 import {
   X,
-  Video,
-  Crop,
   Globe,
-  FolderTree,
   Upload,
   BookOpen,
   Hash,
@@ -13,22 +10,23 @@ import {
   Tags,
   User,
   Image as ImageIcon,
-  AlignLeft,
   Sparkles,
   Loader2,
-  Eye,
-  Save,
-  Wand2,
   Mic,
   Music,
-  Zap,
   Film,
   Flame,
   Tv,
+  AlignLeft,
+  Eye,
+  Zap,
+  Video,
   CheckCircle2,
-  ChevronRight,
+  Wand2,
   Sliders,
-} from"lucide-react";
+  ChevronRight,
+  Save,
+} from "lucide-react";
 import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
 import { SonikomaLogo } from"@/shared/ui/branding";
 import { getProxyImageUrl, isApiUrl, isProxyUrl } from"@/features/image-editor/canvas/api/image";

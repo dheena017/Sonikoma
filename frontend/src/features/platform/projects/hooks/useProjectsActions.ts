@@ -1,11 +1,12 @@
 import { useCallback } from "react";
 import type { MouseEvent } from "react";
-import type { Project } from "@/features/platform/projects/hooks/ProjectTypes";
+import type { Project } from "@/features/platform/projects/types";
 import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
 
 export interface UseProjectsActionsHandlers {
   handleNewSeries: () => void;
   handleOpenProject: (project: Project) => void;
+  handleOpenSeries: (series: { id: string; slug?: string }) => void;
   handleOpenCreativeSuite: (e: MouseEvent, project: Project) => Promise<void>;
   handleExport: (e: MouseEvent, project: Project) => void;
   handleRename: (
@@ -91,6 +92,13 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
         `/scraper/editor?project_id=${encodeURIComponent(project.project_id)}`
       );
     }
+  }, []);
+
+  const handleOpenSeries = useCallback((series: { id: string; slug?: string }) => {
+    const target = series.slug
+      ? `/projects/${encodeURIComponent(series.slug)}`
+      : `/scraper?id=${encodeURIComponent(series.id)}`;
+    navigate(target);
   }, []);
 
   const handleOpenCreativeSuite = useCallback(
@@ -263,6 +271,7 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
   return {
     handleNewSeries,
     handleOpenProject,
+    handleOpenSeries,
     handleOpenCreativeSuite,
     handleExport,
     handleRename,

@@ -1,19 +1,7 @@
 import React from "react";
 import { THEMES, ThemeKey } from "@/features/auth/components/constants";
 
-export interface RegisterFormProps {
-  onRegister: (data: any) => Promise<any>;
-  onNavigateToLogin: () => void;
-  onNavigateHome?: () => void;
-}
-
-export interface RegisterFieldErrors {
-  fullName?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-  acceptTerms?: string;
-}
+import type { RegisterFormProps, RegisterFieldErrors } from "../types";
 
 export default function useRegisterForm(props: RegisterFormProps) {
   const [fullName, setFullName] = React.useState("");

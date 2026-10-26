@@ -1,22 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Project } from "@/features/platform/projects/hooks/ProjectTypes";
-import { notify } from "@/features/platform/notifications";
-import {
-  DEMO_PROJECTS,
-  getStoredDemoProjects,
-  saveDemoProjectsToStorage,
-  clearDemoProjectsFromStorage,
-} from "@/features/platform/projects/utils/demoProjects";
+import type { Project } from "@/features/platform/projects/types";
 
 export interface UseProjectsDataState {
   projects: Project[];
   loading: boolean;
   error: string | null;
-  isDemoActive: boolean;
   fetchProjects: () => Promise<void>;
   setProjects: (projects: Project[]) => void;
-  loadDemoProjects: () => void;
-  clearDemoProjects: () => void;
 }
 
 let cachedProjects: Project[] = [];
@@ -38,35 +28,11 @@ export function invalidateProjectsCache() {
 }
 
 export function useProjectsData(): UseProjectsDataState {
-  const [projects, setProjects] = useState<Project[]>(() => {
-    if (cachedProjects.length > 0) return cachedProjects;
-    return getStoredDemoProjects();
-  });
-  const [loading, setLoading] = useState(cachedProjects.length === 0 && projects.length === 0);
+  const [projects, setProjects] = useState<Project[]>(cachedProjects);
+  const [loading, setLoading] = useState(cachedProjects.length === 0);
   const [error, setError] = useState<string | null>(null);
 
-  const isDemoActive = projects.some((p) => p.project_id.startsWith("demo-"));
-
-  const loadDemoProjects = useCallback(() => {
-    saveDemoProjectsToStorage(DEMO_PROJECTS);
-    const existingNonDemo = projects.filter((p) => !p.project_id.startsWith("demo-"));
-    const updated = [...DEMO_PROJECTS, ...existingNonDemo];
-    setProjects(updated);
-    setGlobalCachedProjects(updated);
-    notify.success("Sample demo series loaded into workspace!");
-  }, [projects]);
-
-  const clearDemoProjects = useCallback(() => {
-    clearDemoProjectsFromStorage();
-    const remaining = projects.filter((p) => !p.project_id.startsWith("demo-"));
-    setProjects(remaining);
-    setGlobalCachedProjects(remaining);
-    notify.info("Sample demo projects cleared.");
-  }, [projects]);
-
   const fetchProjects = useCallback(async (force = false) => {
-    const storedDemos = getStoredDemoProjects();
-
     if (!force && cachedProjects.length > 0 && Date.now() - lastFetchTime < 10000) {
       setProjects(cachedProjects);
       setLoading(false);
@@ -76,10 +42,7 @@ export function useProjectsData(): UseProjectsDataState {
     if (inFlightProjectsPromise) {
       try {
         const list = await inFlightProjectsPromise;
-        const merged = storedDemos.length > 0
-          ? [...storedDemos, ...list.filter((p) => !storedDemos.some((d) => d.project_id === p.project_id))]
-          : list;
-        setProjects(merged);
+        setProjects(list);
       } catch (e) {
         // Handled in root fetcher
       } finally {
@@ -89,7 +52,7 @@ export function useProjectsData(): UseProjectsDataState {
     }
 
     try {
-      if (cachedProjects.length === 0 && storedDemos.length === 0) {
+      if (cachedProjects.length === 0) {
         setLoading(true);
       }
       setError(null);
@@ -113,26 +76,15 @@ export function useProjectsData(): UseProjectsDataState {
       })();
 
       const list = await inFlightProjectsPromise;
-      const merged = storedDemos.length > 0
-        ? [...storedDemos, ...list.filter((p) => !storedDemos.some((d) => d.project_id === p.project_id))]
-        : list;
-
-      cachedProjects = merged;
+      cachedProjects = list;
       lastFetchTime = Date.now();
-      setProjects(merged);
-      console.log(`[Projects Page] Loaded ${merged.length} studio projects.`);
+      setProjects(list);
     } catch (err: any) {
-      console.warn("Failed to fetch remote projects, checking local state:", err);
-      if (storedDemos.length > 0) {
-        setProjects(storedDemos);
-        cachedProjects = storedDemos;
-        setError(null);
-      } else {
-        const errMsg =
-          err.message || "An unexpected error occurred while loading projects.";
-        if (cachedProjects.length === 0) {
-          setError(errMsg);
-        }
+      console.warn("Failed to fetch remote projects:", err);
+      const errMsg =
+        err.message || "An unexpected error occurred while loading projects.";
+      if (cachedProjects.length === 0) {
+        setError(errMsg);
       }
     } finally {
       inFlightProjectsPromise = null;
@@ -148,10 +100,7 @@ export function useProjectsData(): UseProjectsDataState {
     projects,
     loading,
     error,
-    isDemoActive,
     fetchProjects,
     setProjects,
-    loadDemoProjects,
-    clearDemoProjects,
   };
 }

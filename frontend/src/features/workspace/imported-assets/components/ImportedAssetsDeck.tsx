@@ -236,7 +236,7 @@ export const HorizontalScrollContainer: React.FC<{
         aria-label="Scroll Left"
         title="Scroll Left"
         disabled={!canScrollLeft}
-        className={`flex absolute left-3 top-1/2 -translate-y-1/2 z-40 w-10 h-10 rounded-full bg-[#1E1E1E] hover:bg-[#252525] border border-[#2F2F2F] hover:border-neutral-600 text-neutral-300 hover:text-white shadow-xl items-center justify-center transition-all duration-200 cursor-pointer ${
+        className={`flex absolute left-3 top-1/2 -translate-y-1/2 z-40 w-10 h-10 rounded-full bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-600 text-neutral-300 hover:text-white shadow-xl items-center justify-center transition-all duration-200 cursor-pointer ${
           canScrollLeft
             ? "opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 pointer-events-auto"
             : "opacity-0 scale-75 pointer-events-none"
@@ -272,7 +272,7 @@ export const HorizontalScrollContainer: React.FC<{
         aria-label="Scroll Right"
         title="Scroll Right"
         disabled={!canScrollRight}
-        className={`flex absolute right-3 top-1/2 -translate-y-1/2 z-40 w-10 h-10 rounded-full bg-[#1E1E1E] hover:bg-[#252525] border border-[#2F2F2F] hover:border-neutral-600 text-neutral-300 hover:text-white shadow-xl items-center justify-center transition-all duration-200 cursor-pointer ${
+        className={`flex absolute right-3 top-1/2 -translate-y-1/2 z-40 w-10 h-10 rounded-full bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-600 text-neutral-300 hover:text-white shadow-xl items-center justify-center transition-all duration-200 cursor-pointer ${
           canScrollRight
             ? "opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 pointer-events-auto"
             : "opacity-0 scale-75 pointer-events-none"

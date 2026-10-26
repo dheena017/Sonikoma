@@ -68,7 +68,7 @@ export const AgentHeroBanner: React.FC<AgentHeroBannerProps> = ({
           <button
             type="button"
             onClick={onOpenHistory}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#121212] hover:bg-[#252525] border border-[#2F2F2F] text-xs font-mono text-[#9CA3AF] hover:text-[#E5E5E5] transition-all cursor-pointer active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#121212] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-xs font-mono text-[#9CA3AF] hover:text-[#E5E5E5] transition-all cursor-pointer active:scale-95"
           >
             <Film className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Past Publications</span>

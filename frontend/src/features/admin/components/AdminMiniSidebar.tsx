@@ -1,6 +1,5 @@
-import React, { useState } from"react";
+import React, { useState } from "react";
 import {
-  Menu,
   LayoutGrid,
   Mail,
   Users,
@@ -18,8 +17,8 @@ import {
   Coins,
   Activity,
   Brain,
-} from"lucide-react";
-import TooltipPortal from"@/shared/ui/common/TooltipPortal";
+} from "lucide-react";
+import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 
 interface AdminMiniSidebarProps {
   currentPath: string;
@@ -30,106 +29,117 @@ interface AdminMiniSidebarProps {
 const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
   currentPath,
   navigateTo,
-  onOpenSidebar,
 }) => {
   const groups = [
     {
-      name:"Core",
+      name: "Core",
       items: [
         {
-          id:"dashboard",
-          label:"Dashboard",
+          id: "dashboard",
+          label: "Dashboard",
           icon: LayoutGrid,
-          path:"/admin",
+          path: "/admin",
         },
         {
-          id:"announcements",
-          label:"Announcements",
+          id: "announcements",
+          label: "Announcements",
           icon: Mail,
-          path:"/admin/announcements",
+          path: "/admin/announcements",
         },
-        { id:"users", label:"Users", icon: Users, path:"/admin/users" },
+        { id: "users", label: "Users", icon: Users, path: "/admin/users" },
         {
-          id:"content",
-          label:"Content",
+          id: "content",
+          label: "Content",
           icon: FolderGit2,
-          path:"/admin/content",
+          path: "/admin/content",
         },
       ],
     },
     {
-      name:"Monitoring",
+      name: "Monitoring",
       items: [
         {
-          id:"jobs",
-          label:"Background Jobs",
+          id: "jobs",
+          label: "Background Jobs",
           icon: ActivitySquare,
-          path:"/admin/jobs",
+          path: "/admin/jobs",
         },
-        { id:"health", label:"Health", icon: Server, path:"/admin/health" },
+        { id: "health", label: "Health", icon: Server, path: "/admin/health" },
         {
-          id:"activity",
-          label:"Audit Logs",
+          id: "activity",
+          label: "Audit Logs",
           icon: Activity,
-          path:"/admin/activity",
+          path: "/admin/activity",
         },
-        { id:"usage", label:"Usage", icon: Cpu, path:"/admin/usage" },
+        { id: "usage", label: "Usage", icon: Cpu, path: "/admin/usage" },
         {
-          id:"training",
-          label:"AI Training",
+          id: "training",
+          label: "AI Training",
           icon: Brain,
-          path:"/admin/training",
+          path: "/admin/training",
         },
       ],
     },
     {
-      name:"Business",
+      name: "Business",
       items: [
         {
-          id:"finance",
-          label:"Finance",
-          icon: DollarSign,
-          path:"/admin/finance",
-        },
-        {
-          id:"scrapers",
-          label:"Scrapers",
-          icon: Globe,
-          path:"/admin/scrapers",
-        },
-        {
-          id:"credits",
-          label:"Credits",
+          id: "credits",
+          label: "Credits",
           icon: Coins,
-          path:"/admin/credits",
+          path: "/admin/credits",
+        },
+        {
+          id: "finance",
+          label: "Finance",
+          icon: DollarSign,
+          path: "/admin/finance",
+        },
+        {
+          id: "analytics",
+          label: "Analytics",
+          icon: BarChart3,
+          path: "/admin/analytics",
+        },
+        {
+          id: "scrapers",
+          label: "Scrapers",
+          icon: Globe,
+          path: "/admin/scrapers",
         },
       ],
     },
     {
-      name:"Technical",
+      name: "Technical",
       items: [
         {
-          id:"explorer",
-          label:"Explorer",
+          id: "explorer",
+          label: "Explorer",
           icon: Database,
-          path:"/admin/explorer",
+          path: "/admin/explorer",
         },
         {
-          id:"settings",
-          label:"Settings",
+          id: "console",
+          label: "Console",
+          icon: Terminal,
+          path: "/admin/console",
+        },
+        {
+          id: "settings",
+          label: "Settings",
           icon: Settings,
-          path:"/admin/settings",
+          path: "/admin/settings",
         },
       ],
     },
   ];
 
   const isActive = (path: string) => {
-    if (path ==="/admin") {
+    if (path === "/admin") {
       return (
-        currentPath ==="/admin" ||
-        currentPath ==="/admin/" ||
-        currentPath ==="/admin-dashboard"
+        currentPath === "/admin" ||
+        currentPath === "/admin/" ||
+        currentPath === "/admin-dashboard"
       );
     }
     return currentPath.startsWith(path);
@@ -147,8 +157,8 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
         <div
           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
             active
-              ?"h-5 bg-[#3B82F6]  opacity-100"
-              :"h-0 bg-transparent opacity-0"
+              ? "h-5 bg-[#3B82F6] opacity-100"
+              : "h-0 bg-transparent opacity-0"
           }`}
         />
 
@@ -165,15 +175,15 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               active
-                ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
-                :"bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
             }`}
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${
                 active
-                  ?"text-white"
-                  :"text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                  ? "text-white"
+                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
               }`}
             />
           </div>
@@ -185,8 +195,6 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
 
   const [returnHover, setReturnHover] = useState(false);
   const [returnRect, setReturnRect] = useState<DOMRect | null>(null);
-  const [menuHover, setMenuHover] = useState(false);
-  const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
 
   return (
     <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 hidden lg:flex flex-col items-center py-3 z-40 shadow-xl select-none overflow-hidden">
@@ -201,8 +209,8 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ?"0.6rem" :"0.2rem",
-                marginBottom:"0.4rem",
+                marginTop: groupIdx > 0 ? "0.6rem" : "0.2rem",
+                marginBottom: "0.4rem",
               }}
             >
               {groupIdx > 0 && (

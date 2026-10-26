@@ -56,17 +56,17 @@ export function TestimonialsSection({
 
   return (
     <section id="testimonials" className="py-24 px-4 sm:px-6 relative z-10 scroll-mt-24">
-      <div className="max-w-6xl mx-auto space-y-16">
+      <div className="max-w-7xl mx-auto space-y-16">
         {/* SECTION HEADER */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <div
             className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider border ${
               isLight
-                ? "bg-amber-50 border-amber-200 text-amber-700"
-                : "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                ? "bg-blue-50 border-blue-200 text-blue-700"
+                : "bg-blue-500/10 border-blue-500/20 text-blue-400"
             }`}
           >
-            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            <Star className="w-3.5 h-3.5 fill-blue-400 text-blue-400" />
             <span>Loved By Creators Worldwide</span>
           </div>
 
@@ -76,7 +76,7 @@ export function TestimonialsSection({
             }`}
           >
             Trusted by Comic Creators &{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">
               Short-Form Storytellers
             </span>
           </h2>

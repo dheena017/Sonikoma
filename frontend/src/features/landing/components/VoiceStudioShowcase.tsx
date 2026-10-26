@@ -49,49 +49,49 @@ const CHARACTERS: VoiceCharacter[] = [
     emotion:"Commanding & Intense",
   },
   {
-    id:"mage",
-    name:"Archmage Lyra",
-    archetype:"Imperial Sorceress",
-    avatar:"/demo-romance.jpg",
-    image:"/demo-romance.jpg",
-    badge:"Melodic & Elegant",
-    badgeColor:"bg-purple-500/10 text-purple-400 border-purple-500/20",
-    voiceModel:"en-US-JennyNeural (Expressive)",
-    sampleQuote:"Cast your eyes upon the northern barrier. Not even ancient dragon fire can shatter this celestial ward.",
-    context:"Spells & Incantations • Chapter 22",
-    pitch:"+1 Semitone (Bright)",
-    pace:"0.95x Poised",
-    emotion:"Mystical & Calm",
+    id: "mage",
+    name: "Archmage Lyra",
+    archetype: "Imperial Sorceress",
+    avatar: "/demo-romance.jpg",
+    image: "/demo-romance.jpg",
+    badge: "Melodic & Elegant",
+    badgeColor: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    voiceModel: "en-US-JennyNeural (Expressive)",
+    sampleQuote: "Cast your eyes upon the northern barrier. Not even ancient dragon fire can shatter this celestial ward.",
+    context: "Spells & Incantations • Chapter 22",
+    pitch: "+1 Semitone (Bright)",
+    pace: "0.95x Poised",
+    emotion: "Mystical & Calm",
   },
   {
-    id:"narrator",
-    name:"The Shadow Monarch",
-    archetype:"Dark Sovereign / Ruler",
-    avatar:"/demo-monarch.jpg",
-    image:"/demo-monarch.jpg",
-    badge:"Epic Cinematic",
-    badgeColor:"bg-amber-500/10 text-amber-400 border-amber-500/20",
-    voiceModel:"en-US-GuyNeural (Cinematic)",
-    sampleQuote:"In the twenty-fourth hour of the eclipse, the stone monolith groaned. All arise before the king.",
-    context:"Prologue / Throne Room",
-    pitch:"-2 Semitones (Warm)",
-    pace:"1.00x Steady",
-    emotion:"Solemn & Dramatic",
+    id: "narrator",
+    name: "The Shadow Monarch",
+    archetype: "Dark Sovereign / Ruler",
+    avatar: "/demo-monarch.jpg",
+    image: "/demo-monarch.jpg",
+    badge: "Epic Cinematic",
+    badgeColor: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    voiceModel: "en-US-GuyNeural (Cinematic)",
+    sampleQuote: "In the twenty-fourth hour of the eclipse, the stone monolith groaned. All arise before the king.",
+    context: "Prologue / Throne Room",
+    pitch: "-2 Semitones (Warm)",
+    pace: "1.00x Steady",
+    emotion: "Solemn & Dramatic",
   },
   {
-    id:"rogue",
-    name:"Ren - Shadow Blade",
-    archetype:"Cyberpunk Ninja",
-    avatar:"/demo-cyberpunk.jpg",
-    image:"/demo-cyberpunk-cleaned.jpg",
-    badge:"Fast & Edgy",
-    badgeColor:"bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-    voiceModel:"en-US-BrianNeural (Youthful)",
-    sampleQuote:"The city waits... only death is certain. You really thought you could land a strike on lightning?",
-    context:"Rooftop Duel • Chapter 15",
-    pitch:"Default",
-    pace:"1.20x Rapid",
-    emotion:"Sarcastic & Energetic",
+    id: "rogue",
+    name: "Ren - Shadow Blade",
+    archetype: "Cyberpunk Ninja",
+    avatar: "/demo-cyberpunk.jpg",
+    image: "/demo-cyberpunk-cleaned.jpg",
+    badge: "Fast & Edgy",
+    badgeColor: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    voiceModel: "en-US-BrianNeural (Youthful)",
+    sampleQuote: "The city waits... only death is certain. You really thought you could land a strike on lightning?",
+    context: "Rooftop Duel • Chapter 15",
+    pitch: "Default",
+    pace: "1.20x Rapid",
+    emotion: "Sarcastic & Energetic",
   },
 ];
 
@@ -135,14 +135,14 @@ export function VoiceStudioShowcase({
 
   return (
     <section id="voice-studio" className="py-24 px-4 sm:px-6 relative z-10 scroll-mt-24">
-      <div className="max-w-6xl mx-auto space-y-16">
+      <div className="max-w-7xl mx-auto space-y-16">
         {/* SECTION HEADER */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <div
             className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider border ${
               isLight
-                ?"bg-purple-50 border-purple-200 text-purple-700"
-                :"bg-purple-500/10 border-purple-500/20 text-purple-400"
+                ? "bg-blue-50 border-blue-200 text-blue-700"
+                : "bg-blue-500/10 border-blue-500/20 text-blue-400"
             }`}
           >
             <Headphones className="w-3.5 h-3.5" />
@@ -151,11 +151,11 @@ export function VoiceStudioShowcase({
 
           <h2
             className={`text-3xl sm:text-4xl md:text-5xl font-black tracking-tight ${
-              isLight ?"text-slate-950" :"text-white"
+              isLight ? "text-slate-950" : "text-white"
             }`}
           >
-            Give Every Character{""}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-300">
+            Give Every Character{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">
               Their Own Signature Voice
             </span>
           </h2>
@@ -194,7 +194,7 @@ export function VoiceStudioShowcase({
                         :"bg-blue-600/15 border-blue-400 ring-2 ring-blue-400/20 shadow-lg"
                       : isLight
                       ?"bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700"
-                      :"bg-white/[0.03] border-white/10 hover:bg-white/[0.07] text-neutral-300"
+                      :"bg-[#141414] border-[#2F2F2F] hover:bg-[#1c1c1c] hover:border-blue-500/40 text-neutral-300"
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-2.5">
@@ -232,7 +232,7 @@ export function VoiceStudioShowcase({
             className={`p-6 sm:p-8 rounded-2xl border ${
               isLight
                 ?"bg-slate-50 border-slate-200"
-                :"bg-[#161822] border-white/10"
+                :"bg-[#181818] border-[#2F2F2F]"
             }`}
           >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
@@ -260,7 +260,7 @@ export function VoiceStudioShowcase({
               <div className="lg:col-span-5 space-y-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
+                    <Radio className="w-4 h-4 text-blue-400 animate-pulse" />
                     <span
                       className={`text-xs font-mono font-bold ${
                         isLight ?"text-slate-600" :"text-neutral-300"
@@ -286,7 +286,7 @@ export function VoiceStudioShowcase({
                   className={`p-4 sm:p-5 rounded-2xl border relative ${
                     isLight
                       ?"bg-white border-slate-200 text-slate-900 shadow-sm"
-                      :"bg-[#0f1016] border-white/10 text-neutral-100"
+                      :"bg-[#141414] border-[#2F2F2F] text-neutral-100"
                   }`}
                 >
                   <p className="text-sm sm:text-base font-semibold italic leading-relaxed">"{selectedChar.sampleQuote}"
@@ -297,7 +297,7 @@ export function VoiceStudioShowcase({
                 <div className="flex items-center gap-3.5">
                   <button
                     onClick={handleTogglePlay}
-                    className="w-12 h-12 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white flex items-center justify-center shrink-0 shadow-lg active:scale-95 transition-all cursor-pointer"
+                    className="w-12 h-12 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/25 active:scale-95 transition-all cursor-pointer"
                     aria-label={isPlaying ?"Pause voice preview" :"Play voice preview"}
                   >
                     {isPlaying ? (
@@ -332,8 +332,8 @@ export function VoiceStudioShowcase({
                                 ? i % 3 === 0
                                   ?"bg-blue-400"
                                   : i % 2 === 0
-                                  ?"bg-cyan-400"
-                                  :"bg-indigo-400"
+                                  ?"bg-blue-400"
+                                  :"bg-blue-500"
                                 :"bg-neutral-600/40"
                             }`}
                           />
@@ -379,24 +379,24 @@ export function VoiceStudioShowcase({
                   <div>
                     <div className="flex justify-between text-neutral-400 mb-1">
                       <span>Pitch Offset:</span>
-                      <span className="font-bold text-cyan-400">
+                      <span className="font-bold text-blue-400">
                         {selectedChar.pitch}
                       </span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-cyan-500/20 overflow-hidden">
-                      <div className="w-1/2 h-full bg-cyan-500" />
+                    <div className="h-1.5 rounded-full bg-blue-500/20 overflow-hidden">
+                      <div className="w-1/2 h-full bg-blue-500" />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-neutral-400 mb-1">
                       <span>Speaking Speed:</span>
-                      <span className="font-bold text-purple-400">
+                      <span className="font-bold text-blue-400">
                         {selectedChar.pace}
                       </span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-purple-500/20 overflow-hidden">
-                      <div className="w-3/5 h-full bg-purple-500" />
+                    <div className="h-1.5 rounded-full bg-blue-500/20 overflow-hidden">
+                      <div className="w-3/5 h-full bg-blue-500" />
                     </div>
                   </div>
                 </div>
@@ -404,9 +404,9 @@ export function VoiceStudioShowcase({
                 <div className="pt-2">
                   <button
                     onClick={onGetStarted}
-                    className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
+                    className="w-full h-11 px-4 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-bold transition-all cursor-pointer shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 active:scale-[0.98]"
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Sparkles className="w-4 h-4" />
                     <span>Cast In Your Project</span>
                   </button>
                 </div>

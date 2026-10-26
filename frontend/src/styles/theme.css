@@ -128,10 +128,10 @@ a.btn-primary,
   background: #3b82f6 !important;
   background-color: #3b82f6 !important;
   color: #ffffff !important;
-  border: 1px solid rgba(59, 130, 246, 0.4) !important;
+  border: 1px solid rgba(59, 130, 246, 0.5) !important;
   border-radius: 0.75rem !important;
   font-weight: 700 !important;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3),
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   cursor: pointer !important;
@@ -154,7 +154,7 @@ button.btn-primary:not(:disabled):hover {
   background-color: #2563eb !important;
   border-color: #3b82f6 !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35) !important;
   filter: none !important;
 }
 
@@ -186,29 +186,39 @@ button.btn-primary[aria-disabled="true"] {
   box-shadow: none !important;
 }
 
-/* ── Secondary Button (Dark Gray Surface) ───────────────── */
+/* ── Secondary Button (Matching uploaded Start Free button: #141414, Hover: #2A2A2A) ── */
 .btn-secondary,
-button.btn-secondary {
-  background-color: #2a2a2a !important;
-  color: #e5e5e5 !important;
+button.btn-secondary,
+a.btn-secondary,
+[role="button"].btn-secondary {
+  background-color: #141414 !important;
+  background: #141414 !important;
+  color: #ffffff !important;
   border: 1px solid #2f2f2f !important;
   border-radius: 0.75rem !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   cursor: pointer !important;
 }
 
 .btn-secondary:hover,
-button.btn-secondary:hover {
-  background-color: #333333 !important;
-  border-color: #4b5563 !important;
+button.btn-secondary:hover,
+a.btn-secondary:hover,
+[role="button"].btn-secondary:hover,
+.btn-secondary:not(:disabled):hover,
+button.btn-secondary:not(:disabled):hover {
+  background-color: #2a2a2a !important;
+  background: #2a2a2a !important;
+  border-color: #525252 !important;
   color: #ffffff !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .btn-secondary:active,
-button.btn-secondary:active {
+button.btn-secondary:active,
+a.btn-secondary:active,
+[role="button"].btn-secondary:active {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
 }
 

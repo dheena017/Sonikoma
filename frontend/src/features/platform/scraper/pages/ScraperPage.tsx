@@ -25,7 +25,7 @@ import WorkspaceStatsBar from "@/features/platform/scraper/components/WorkspaceS
 import RecentProjectsSection from "@/features/platform/scraper/components/RecentProjectsSection";
 import CreatorGuideSection from "@/features/platform/scraper/components/CreatorGuideSection";
 import ProjectConfirmModal from "@/features/platform/projects/components/ProjectConfirmModal";
-import type { Project } from "@/features/platform/projects/hooks/ProjectTypes";
+import type { Project } from "@/features/platform/projects/types";
 import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
 import { validateChapterUrl } from "@/shared/utils";
 

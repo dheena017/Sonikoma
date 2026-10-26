@@ -34,7 +34,7 @@ export function PricingCard({
         isPopular
           ? isLight
             ?"border-blue-500 bg-blue-50/60 shadow-lg hover:border-neutral-700 hover:shadow-xl"
-            :"border-blue-500 bg-[#161922] shadow-xl hover:border-neutral-700"
+            :"border-blue-500 bg-[#181818] shadow-xl hover:border-neutral-700"
           : isLight
           ?"border-slate-200 bg-white hover:border-slate-300 hover:shadow-md shadow-sm"
           :"border-[#2F2F2F] bg-[#181818] hover:border-neutral-600 hover:shadow-xl shadow-md"
@@ -86,8 +86,8 @@ export function PricingCard({
         >
           {features.map((feature, i) => (
             <div key={i} className="flex items-center gap-2.5">
-              <div className="w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0">
-                <Check className="w-3.5 h-3.5 text-emerald-500" />
+              <div className="w-5 h-5 rounded-full bg-blue-500/15 flex items-center justify-center shrink-0">
+                <Check className="w-3.5 h-3.5 text-blue-400" />
               </div>
               <span
                 className={`text-sm font-medium transition-colors ${
@@ -124,12 +124,12 @@ export function PricingCard({
       </div>
       <button
         onClick={onClick}
-        className={`w-full mt-7 py-3 rounded-xl text-sm font-bold transition-all duration-200 active:scale-95 cursor-pointer shadow-sm ${
+        className={`w-full mt-7 h-11 px-4 rounded-xl text-sm font-bold transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center shadow-sm ${
           isPopular
-            ?"bg-[#3B82F6] hover:bg-[#2563EB] text-white hover:shadow-md"
+            ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md shadow-blue-500/25"
             : isLight
-            ?"bg-slate-900 text-white hover:bg-slate-800"
-            :"bg-[#0E0E0E] border border-[#2F2F2F] text-white hover:bg-[#222] hover:border-neutral-600"
+            ? "bg-slate-900 text-white hover:bg-slate-800"
+            : "bg-[#141414] border border-[#2F2F2F] hover:bg-[#2A2A2A] hover:border-neutral-500 text-white font-bold shadow-sm"
         }`}
       >
         {btnText}

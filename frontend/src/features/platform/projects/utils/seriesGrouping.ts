@@ -1,18 +1,6 @@
-import type { Project } from "@/features/platform/projects/hooks/ProjectTypes";
+import type { Project, Series } from "../types";
 
-export interface Series {
-  id: string; // The series_slug or project_id (if no series_slug)
-  slug: string;
-  title: string;
-  cover?: string;
-  chapters: Project[];
-  chapterCount: number;
-  latestChapter?: Project;
-  latestUpdatedAt?: string;
-  genre?: string;
-  author?: string;
-  synopsis?: string;
-}
+export type { Series };
 
 export function groupProjectsIntoSeries(projects: Project[]): Series[] {
   const seriesMap = new Map<string, Project[]>();

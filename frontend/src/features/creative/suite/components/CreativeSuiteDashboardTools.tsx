@@ -32,7 +32,7 @@ const CreativeSuiteDashboardTools: React.FC<
           <div
             key={tool.id}
             onClick={() => navigateTo(tool.path)}
-            className={`bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-5 hover:border-neutral-700 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between group relative shadow-md ${
+            className={`bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-5 hover:border-neutral-700 hover:bg-[#2A2A2A] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between group relative shadow-md ${
               isLocked ? "opacity-75 hover:border-[#EF4444]/40" : ""
             }`}
           >

@@ -9,7 +9,6 @@ import {
   Link,
   MoreVertical,
   Play,
-  Scissors,
   Square,
   Trash2,
   Clock,
@@ -17,22 +16,20 @@ import {
   Film,
   Layers,
 } from "lucide-react";
-import type { Project } from "@/features/platform/projects/hooks/ProjectTypes";
-
-type ProjectCardItem = Project;
+import type { Project } from "@/features/platform/projects/types";
 import { getProxiedImageUrl, getSourceIcon, getSourceName } from "@/shared/utils";
 import { timeAgo } from "@/shared/utils/dateUtils";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface ProjectCardProps {
   project: Project;
-  onOpenProject: (project: ProjectCardItem) => void;
-  onRename?: (e: React.MouseEvent, project: ProjectCardItem) => void;
-  onExport?: (e: React.MouseEvent, project: ProjectCardItem) => void;
-  onOpenDetails?: (e: React.MouseEvent, project: ProjectCardItem) => void;
+  onOpenProject: (project: Project) => void;
+  onRename?: (e: React.MouseEvent, project: Project) => void;
+  onExport?: (e: React.MouseEvent, project: Project) => void;
+  onOpenDetails?: (e: React.MouseEvent, project: Project) => void;
   onDelete?: (e: React.MouseEvent, projectId: string) => void;
-  onCopyLink?: (e: React.MouseEvent, project: ProjectCardItem) => void;
-  onOpenCreativeSuite?: (e: React.MouseEvent, project: ProjectCardItem) => void;
+  onCopyLink?: (e: React.MouseEvent, project: Project) => void;
+  onOpenCreativeSuite?: (e: React.MouseEvent, project: Project) => void;
   isSelected?: boolean;
   onToggleSelect?: (e: React.MouseEvent, projectId: string) => void;
   showSelection?: boolean;

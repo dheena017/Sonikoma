@@ -10,7 +10,7 @@ export function LandingFooter() {
         isLight ? "border-slate-200 bg-white" : "border-[#2F2F2F] bg-[#0D0E12]"
       }`}
     >
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
         <div className="col-span-1 md:col-span-2 space-y-4">
           <SonikomaLogo size="sm" />
           <p
@@ -139,7 +139,7 @@ export function LandingFooter() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto pt-12 mt-12 border-t border-slate-200 dark:border-[#2F2F2F] flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto pt-12 mt-12 border-t border-slate-200 dark:border-[#2F2F2F] flex flex-col sm:flex-row items-center justify-between gap-4">
         <p
           className={`text-xs transition-colors ${
             isLight ? "text-slate-600" : "text-neutral-500"

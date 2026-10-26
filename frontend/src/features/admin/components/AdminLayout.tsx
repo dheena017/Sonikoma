@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import AdminHeaderPage from "@/features/admin/pages/AdminHeaderPage";
-import AdminMiniSidebar from "@/features/admin/components/AdminMiniSidebar";
-import AdminSidebar from "@/features/admin/components/AdminSidebar";
+import AdminHeader from "./AdminHeader";
+import AdminMiniSidebar from "./AdminMiniSidebar";
+import AdminSidebar from "./AdminSidebar";
+import { getTabMetadata } from "../utils/adminConstants";
 
-interface AdminLayoutProps {
+export interface AdminLayoutProps {
   children: React.ReactNode;
   currentPath: string;
   navigateTo: (path: string) => void;
@@ -19,7 +20,7 @@ interface AdminLayoutProps {
   addNotification?: (message: string, type?: string) => void;
 }
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({
+export const AdminLayout: React.FC<AdminLayoutProps> = ({
   children,
   currentPath,
   navigateTo,
@@ -41,92 +42,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
 
   const activeTabRaw = currentPath.split("/").pop() || "overview";
   const isOverview = activeTabRaw === "admin" || activeTabRaw === "overview";
-
-  const tabMetadata: Record<
-    string,
-    { title: string; desc: string; badge: string }
-  > = {
-    overview: {
-      title: "Root Telemetry Dashboard",
-      desc: "Real-time infrastructure, pipeline telemetry & active creator metrics",
-      badge: "Live Pulse",
-    },
-    users: {
-      title: "User Accounts & Role Management",
-      desc: "Inspect user accounts, manage creator roles, permissions, and security status",
-      badge: "Access Control",
-    },
-    credits: {
-      title: "Credits & Economy Control",
-      desc: "Manage studio generation credits, transaction ledger, and top-ups",
-      badge: "Ledger",
-    },
-    announcements: {
-      title: "System Broadcasts & Alerts",
-      desc: "Publish platform-wide broadcast alerts and scheduled maintenance notices",
-      badge: "Broadcast",
-    },
-    jobs: {
-      title: "Background Processing Jobs",
-      desc: "Monitor active async jobs, video renders, and panel extraction queue",
-      badge: "Workers",
-    },
-    scrapers: {
-      title: "Webtoon Engine Configuration",
-      desc: "Tune scraper workers, domain proxies, selectors, and rate limiting",
-      badge: "Engine",
-    },
-    health: {
-      title: "Infrastructure & Server Health",
-      desc: "Host CPU, GPU worker nodes, memory pools, and database connection latency",
-      badge: "Telemetry",
-    },
-    activity: {
-      title: "System Audit & Security Logs",
-      desc: "Real-time administrative actions, authentication attempts, and event trail",
-      badge: "Security Audit",
-    },
-    analytics: {
-      title: "Platform Growth Analytics",
-      desc: "User acquisition funnels, retention cohorts, and project creation velocity",
-      badge: "BI Insights",
-    },
-    finance: {
-      title: "Revenue & Subscription Ledger",
-      desc: "Track Monthly Recurring Revenue (MRR), subscription churn, and payouts",
-      badge: "Financials",
-    },
-    usage: {
-      title: "Resource Consumption & Quotas",
-      desc: "AI generation tokens, image rendering compute, and bandwidth utilization",
-      badge: "Quotas",
-    },
-    settings: {
-      title: "Platform Global Settings",
-      desc: "Tune AI model endpoints, webhook secrets, rate limits, and server environment",
-      badge: "System Config",
-    },
-    explorer: {
-      title: "Database Query Explorer",
-      desc: "Direct read-only schema navigation and table query workbench",
-      badge: "Database",
-    },
-    console: {
-      title: "Superuser Interactive Terminal",
-      desc: "Direct command execution and server process diagnostics console",
-      badge: "CLI Terminal",
-    },
-  };
-
-  const currentTabInfo = tabMetadata[activeTabRaw] || {
-    title: activeTabRaw.charAt(0).toUpperCase() + activeTabRaw.slice(1),
-    desc: "Administrative management module and system telemetry workbench",
-    badge: "Admin",
-  };
+  const currentTabInfo = getTabMetadata(activeTabRaw);
 
   return (
     <div className="min-h-screen bg-transparent text-white flex flex-col selection:bg-[#3B82F6]/30">
-      <AdminHeaderPage
+      <AdminHeader
         currentPath={currentPath}
         navigateTo={navigateTo}
         fetchWithInterceptor={fetchWithInterceptor}

@@ -1,11 +1,7 @@
 import React from "react";
 import { THEMES, ThemeKey } from "@/features/auth/components/constants";
 
-export interface ForgotPasswordFormProps {
-  onForgotPassword: (email: string) => Promise<void>;
-  onNavigateToLogin: () => void;
-  onNavigateHome?: () => void;
-}
+import type { ForgotPasswordFormProps } from "../types";
 
 export default function useForgotPasswordForm(props: ForgotPasswordFormProps) {
   const [email, setEmail] = React.useState("");

@@ -338,7 +338,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                     prev === 0 ? SIMPLE_SLIDES.length - 1 : prev - 1
                   )
                 }
-                className="w-7 h-7 rounded-lg bg-[#181818] hover:bg-[#222] text-neutral-300 hover:text-white transition-all cursor-pointer text-xs font-bold border border-[#2F2F2F] hover:border-neutral-500 flex items-center justify-center active:scale-95 shadow-2xs"
+                className="w-7 h-7 rounded-lg bg-[#181818] hover:bg-[#2A2A2A] text-neutral-300 hover:text-white transition-all cursor-pointer text-xs font-bold border border-[#2F2F2F] hover:border-neutral-500 flex items-center justify-center active:scale-95 shadow-2xs"
                 aria-label="Previous slide"
               >
                 &larr;
@@ -350,7 +350,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                 onClick={() =>
                   setCurrentSlide((prev) => (prev + 1) % SIMPLE_SLIDES.length)
                 }
-                className="w-7 h-7 rounded-lg bg-[#181818] hover:bg-[#222] text-neutral-300 hover:text-white transition-all cursor-pointer text-xs font-bold border border-[#2F2F2F] hover:border-neutral-500 flex items-center justify-center active:scale-95 shadow-2xs"
+                className="w-7 h-7 rounded-lg bg-[#181818] hover:bg-[#2A2A2A] text-neutral-300 hover:text-white transition-all cursor-pointer text-xs font-bold border border-[#2F2F2F] hover:border-neutral-500 flex items-center justify-center active:scale-95 shadow-2xs"
                 aria-label="Next slide"
               >
                 &rarr;

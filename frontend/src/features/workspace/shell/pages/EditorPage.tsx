@@ -824,7 +824,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                           .getState()
                           .setPlayerSettings({ isPlayerOpen: true });
                       }}
-                      className="w-full h-14 px-5 rounded-2xl bg-[#1E1E1E] hover:bg-[#252525] border border-[#2F2F2F] hover:border-[#3B82F6]/50 text-[#E5E5E5] transition-all flex items-center justify-between cursor-pointer group shadow-md"
+                      className="w-full h-14 px-5 rounded-2xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-[#3B82F6]/50 text-[#E5E5E5] transition-all flex items-center justify-between cursor-pointer group shadow-md"
                     >
                       <div className="flex items-center gap-3.5">
                         <div className="h-9 w-9 rounded-xl bg-[#3B82F6]/15 border border-[#3B82F6]/30 flex items-center justify-center text-[#3B82F6] group-hover:scale-105 transition-transform">

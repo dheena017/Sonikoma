@@ -63,7 +63,7 @@ export default function ForgotPasswordPage({
             <Tooltip text="Return to Sign In" placement="bottom">
               <button
                 onClick={onNavigateToLogin}
-                className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] hover:border-neutral-600 rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
+                className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 bg-[#141414] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-500 rounded-xl text-white text-xs font-bold transition-all cursor-pointer shadow-sm group"
               >
                 <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
                 <span>Back to Login</span>
@@ -106,7 +106,7 @@ export default function ForgotPasswordPage({
                   <Tooltip text="Go to Sign In" placement="bottom">
                     <button
                       onClick={onNavigateToLogin}
-                      className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] text-white font-bold py-3.5 rounded-xl transition-all cursor-pointer text-sm"
+                      className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-3.5 rounded-xl shadow-md shadow-blue-500/25 transition-all cursor-pointer text-sm"
                     >
                       Go to Login
                     </button>
@@ -264,7 +264,7 @@ export default function ForgotPasswordPage({
                     <button
                       type="submit"
                       disabled={isLoading || !isEmailValid}
-                      className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
+                      className="w-full bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md shadow-blue-500/25 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
                     >
                       {isLoading ? (
                         <>

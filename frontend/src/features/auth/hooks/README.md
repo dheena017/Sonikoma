@@ -1,8 +1,20 @@
-# Hooks (`features/auth/hooks`)
+# Auth Hooks (`features/auth/hooks`)
 
 ## Overview
-This folder is a standardized component of the Sonikoma frontend architecture.
+Custom React hooks managing authentication states, local storage persistence, session synchronization, and form input lifecycles.
 
-## Responsibilities
-- Encapsulates module-specific logic, interfaces, or presentation artifacts.
-- Conforms to Sonikoma's 10-domain isolation rules and public export boundaries.
+## Hooks
+- **`useAuth` / `useAppAuth`**: Manages global session authentication state, current user attributes, logout routines, and mock authentication parameters.
+- **`useLoginForm`**: Encapsulates login form states (email, password, remember-me, loading state, error reporting, theme, caps-lock detection).
+- **`useRegisterForm`**: Manages registration form steps, creator role selection, password strength verification, and terms acceptance.
+- **`useForgotPasswordForm`**: Manages password reset request submission, success messaging, and navigation triggers.
+
+## Usage
+```tsx
+import { useAuth, useLoginForm } from "@/features/auth/hooks";
+
+function LoginScreen() {
+  const { user, isAuthenticated } = useAuth();
+  const form = useLoginForm({ onLogin: async (data) => { ... } });
+}
+```

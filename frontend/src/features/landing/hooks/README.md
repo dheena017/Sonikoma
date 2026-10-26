@@ -1,8 +1,11 @@
-# Hooks (`features/landing/hooks`)
+# Landing Hooks (`features/landing/hooks/`)
 
-## Overview
-This folder is a standardized component of the Sonikoma frontend architecture.
+## 1. Overview
+Encapsulates reactive state management and controller logic for landing page interactions.
 
-## Responsibilities
-- Encapsulates module-specific logic, interfaces, or presentation artifacts.
-- Conforms to Sonikoma's 10-domain isolation rules and public export boundaries.
+## 2. Hook Inventory
+- `useLandingPage.ts`: Manages active demo tabs (`slicing`, `bubbles`, `translation`, `render`), comic link input URL, billing cycle toggle (`monthly` / `yearly`), and open FAQ accordion indices.
+- `useNewsletterForm.ts`: Handles newsletter email validation, submission states, and feedback messages.
+
+## 3. Export Boundary
+Exported publicly through `hooks/index.ts`.

@@ -23,8 +23,8 @@ const AdminSidebar = React.lazy(
 const AdminMiniSidebar = React.lazy(
   () => import("@/features/admin/components/AdminMiniSidebar")
 );
-const AdminHeaderPage = React.lazy(
-  () => import("@/features/admin/pages/AdminHeaderPage")
+const AdminHeader = React.lazy(
+  () => import("@/features/admin/components/AdminHeader")
 );
 const CreativeSuiteHeader = React.lazy(
   () => import("@/features/creative/suite/components/CreativeSuiteHeader")
@@ -490,7 +490,7 @@ export default function MainLayout(props: MainLayoutProps) {
         {showTopHeader && (
           <React.Suspense fallback={null}>
             {isAnyAdmin ? (
-              <AdminHeaderPage
+              <AdminHeader
                 currentPath={currentPath}
                 navigateTo={navigateTo}
                 fetchWithInterceptor={fetchWithInterceptor}

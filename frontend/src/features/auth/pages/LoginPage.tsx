@@ -1,12 +1,8 @@
 import React from "react";
 import LoginForm from "@/features/auth/components/LoginForm";
+import type { LoginPageProps } from "@/features/auth/types";
 
-interface LoginPageProps {
-  onLogin: (data: any) => Promise<any>;
-  onNavigateToRegister: () => void;
-  onNavigateToForgotPassword: () => void;
-  onNavigateHome?: () => void;
-}
+export type { LoginPageProps };
 
 export default function LoginPage(props: LoginPageProps) {
   return <LoginForm {...props} />;

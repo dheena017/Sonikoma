@@ -32,7 +32,7 @@ export default function ProjectsStats({
       {/* 4 Metric Cards Matching Image 1 */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* 1. Total Series */}
-        <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-neutral-700 hover:bg-[#252525] transition-all duration-200 group">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-neutral-700 hover:bg-[#2A2A2A] transition-all duration-200 group">
           <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/25 flex items-center justify-center shrink-0">
             <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
@@ -47,7 +47,7 @@ export default function ProjectsStats({
         </div>
 
         {/* 2. Sliced Panels */}
-        <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-[#F59E0B]/60 hover:bg-[#252525] transition-all duration-200 group">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-[#F59E0B]/60 hover:bg-[#2A2A2A] transition-all duration-200 group">
           <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/25 flex items-center justify-center shrink-0">
             <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
@@ -62,7 +62,7 @@ export default function ProjectsStats({
         </div>
 
         {/* 3. Estimated Reel Duration */}
-        <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-[#10B981]/60 hover:bg-[#252525] transition-all duration-200 group">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-[#10B981]/60 hover:bg-[#2A2A2A] transition-all duration-200 group">
           <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/25 flex items-center justify-center shrink-0">
             <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
@@ -77,7 +77,7 @@ export default function ProjectsStats({
         </div>
 
         {/* 4. Production Health with Progress Bar */}
-        <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-neutral-700 hover:bg-[#252525] transition-all duration-200 group">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-neutral-700 hover:bg-[#2A2A2A] transition-all duration-200 group">
           <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/25 flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>

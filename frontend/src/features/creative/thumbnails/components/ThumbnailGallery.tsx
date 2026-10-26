@@ -88,7 +88,7 @@ export const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
                     e.stopPropagation();
                     onPreview(item);
                   }}
-                  className="p-3 rounded-xl bg-[#1E1E1E]/90 text-white hover:bg-[#252525] border border-[#2F2F2F] transition-all shadow-lg hover:scale-110 cursor-pointer"
+                  className="p-3 rounded-xl bg-[#1E1E1E]/90 text-white hover:bg-[#2A2A2A] border border-[#2F2F2F] transition-all shadow-lg hover:scale-110 cursor-pointer"
                   title="Full resolution preview"
                 >
                   <Maximize2 className="w-4 h-4" />
@@ -165,7 +165,7 @@ export const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
                 <button
                   type="button"
                   onClick={() => onDownload(item)}
-                  className="flex-1 py-2 px-3 rounded-xl bg-[#121212] hover:bg-[#252525] border border-[#2F2F2F] hover:border-neutral-700 text-[#E5E5E5] text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="flex-1 py-2 px-3 rounded-xl bg-[#121212] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-700 text-[#E5E5E5] text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download</span>

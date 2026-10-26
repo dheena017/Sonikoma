@@ -4,7 +4,6 @@ import {
   MoreVertical,
   Clock,
   Play,
-  Scissors,
   CheckCircle2,
   Trash2,
   ArrowRight,
@@ -17,7 +16,7 @@ import {
 } from "lucide-react";
 import type { Series } from "@/features/platform/projects/utils/seriesGrouping";
 import { timeAgo } from "@/shared/utils/dateUtils";
-import { getProxiedImageUrl } from "@/shared/utils";
+import { getProxiedImageUrl, getSourceIcon, getSourceName } from "@/shared/utils";
 
 interface SeriesCardProps {
   series: Series;
@@ -81,24 +80,7 @@ export default function SeriesCard({
   const seriesStatus = series.latestChapter?.status || "Draft";
   const statusColor = statusColors[seriesStatus] || statusColors["Draft"];
 
-  const getSourceIcon = (url?: string) => {
-    if (!url) return FolderOpen;
-    if (url.includes("webtoons.com")) return Globe;
-    if (url.includes("tapas.io")) return Globe;
-    return Globe;
-  };
-  const SourceIcon = getSourceIcon(series.latestChapter?.url);
-  const getSourceName = (url?: string) => {
-    if (!url) return "Local";
-    if (url.includes("webtoons.com")) return "Webtoon";
-    if (url.includes("tapas.io")) return "Tapas";
-    try {
-      const { hostname } = new URL(url);
-      return hostname.replace("www.", "");
-    } catch {
-      return "Web";
-    }
-  };
+  const SourceIcon = getSourceIcon(series.latestChapter?.url) || FolderOpen;
 
   const isProcessing =
     series.latestChapter?.status?.toLowerCase() === "processing";
@@ -106,11 +88,11 @@ export default function SeriesCard({
   return (
     <div
       onClick={() => onOpenSeries(series)}
-      className={`group relative flex flex-col bg-neutral-900/70 backdrop-blur-xl border ${
+      className={`group relative flex flex-col bg-[#1E1E1E] border ${
         isSelected
-          ? "border-neutral-600 shadow-lg shadow-black/50 bg-neutral-900/90"
-          : "border-white/10 hover:border-neutral-700 hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)]"
-      } rounded-3xl overflow-hidden transition-all duration-300 cursor-pointer shadow-xl`}
+          ? "border-[#3B82F6] shadow-lg shadow-black/50"
+          : "border-[#2F2F2F] hover:border-neutral-600"
+      } rounded-3xl overflow-hidden cursor-pointer shadow-md`}
     >
       {/* ─── Thumbnail / Header Section ────────────────── */}
       <div className="relative aspect-[16/10] w-full bg-neutral-950 overflow-hidden flex-shrink-0 rounded-t-3xl">
@@ -143,8 +125,8 @@ export default function SeriesCard({
             <img
               src={imgSrc}
               alt={series.title}
-              className={`relative z-[1] w-full h-full object-contain transition-transform duration-700 ease-out block ${
-                isSelected ? "scale-105 opacity-90" : "group-hover:scale-105"
+              className={`relative z-[1] w-full h-full object-contain block ${
+                isSelected ? "opacity-90" : ""
               }`}
               loading="lazy"
               onError={() => {
@@ -161,7 +143,7 @@ export default function SeriesCard({
           </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 bg-gradient-to-br from-[#2A2A2A] via-neutral-900 to-neutral-950 p-4 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-2xl bg-neutral-900/80 border border-[#3B82F6]/20 flex items-center justify-center shadow-lg shadow-black/50 transition-transform group-hover:scale-110 duration-300">
+            <div className="w-10 h-10 rounded-2xl bg-neutral-900/80 border border-[#3B82F6]/20 flex items-center justify-center shadow-lg shadow-black/50">
               <Sparkles className="w-5 h-5 text-[#3B82F6]/80" />
             </div>
             <span className="text-[11px] text-neutral-300 font-bold font-mono tracking-wider text-center line-clamp-1">
@@ -172,13 +154,6 @@ export default function SeriesCard({
             </span>
           </div>
         )}
-
-        {/* Hover play overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/20 backdrop-blur-[2px] z-10">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-black/50 scale-75 group-hover:scale-100 transition-transform duration-300 border border-[#60A5FA]/40">
-            <Play className="h-4 w-4 text-white fill-white ml-0.5" />
-          </div>
-        </div>
 
         {/* Top badges row */}
         <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
@@ -386,7 +361,7 @@ export default function SeriesCard({
           />
         ) : (
           <h3
-            className="text-sm sm:text-base font-extrabold text-white leading-snug line-clamp-1 group-hover:text-[#93C5FD] transition-colors duration-200"
+            className="text-sm sm:text-base font-extrabold text-white leading-snug line-clamp-1"
             title={titleText}
           >
             {titleText}

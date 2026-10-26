@@ -480,7 +480,7 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
                             ? "opacity-40 cursor-not-allowed text-neutral-600"
                             : isSelected
                             ? currentTheme.itemActive
-                            : "hover:bg-[#252525] text-neutral-300 hover:text-white border border-transparent"
+                            : "hover:bg-[#2A2A2A] text-neutral-300 hover:text-white border border-transparent"
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0 flex-1">

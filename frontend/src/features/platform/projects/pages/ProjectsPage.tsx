@@ -1,6 +1,8 @@
 import React from "react";
-import ProjectsPageContent from "@/features/platform/projects/components/ProjectsPageContent";
+import useProjectsPage from "@/features/platform/projects/hooks/useProjectsPage";
+import ProjectsPageView from "@/features/platform/projects/components/ProjectsPageView";
 
 export default function ProjectsPage() {
-  return <ProjectsPageContent />;
+  const page = useProjectsPage();
+  return <ProjectsPageView {...page} />;
 }

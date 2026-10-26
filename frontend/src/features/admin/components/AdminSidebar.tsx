@@ -1,27 +1,10 @@
 import React, { useEffect } from "react";
 import {
-  Shield,
-  LayoutGrid,
-  Mail,
-  Users,
-  FolderGit2,
-  Cpu,
-  Globe,
-  DollarSign,
-  BarChart3,
-  Database,
-  Terminal,
-  Settings,
-  Server,
-  ActivitySquare,
   X,
   ArrowLeft,
-  Coins,
-  Activity,
-  Brain,
 } from "lucide-react";
-import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { SonikomaLogo } from "@/shared/ui/branding";
+import { ADMIN_SIDEBAR_GROUPS } from "../utils/adminConstants";
 
 interface AdminSidebarProps {
   currentPath: string;
@@ -36,8 +19,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { themeMode } = useThemeMode();
-
   // Lock body scroll when drawer is open
   useEffect(() => {
     if (isOpen) {
@@ -50,113 +31,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       document.body.style.overflow = "";
     };
   }, [isOpen]);
-
-  const groups = [
-    {
-      name: "Core Infrastructure",
-      items: [
-        {
-          id: "dashboard",
-          label: "Root Dashboard",
-          icon: LayoutGrid,
-          path: "/admin",
-        },
-        {
-          id: "announcements",
-          label: "Announcements & Alerts",
-          icon: Mail,
-          path: "/admin/announcements",
-        },
-        {
-          id: "users",
-          label: "User Accounts",
-          icon: Users,
-          path: "/admin/users",
-        },
-        {
-          id: "content",
-          label: "Content Moderation",
-          icon: FolderGit2,
-          path: "/admin/content",
-        },
-      ],
-    },
-    {
-      name: "Workers & Telemetry",
-      items: [
-        {
-          id: "jobs",
-          label: "Background Jobs",
-          icon: Cpu,
-          path: "/admin/jobs",
-        },
-        {
-          id: "scrapers",
-          label: "Scraper Workers",
-          icon: Globe,
-          path: "/admin/scrapers",
-        },
-        {
-          id: "health",
-          label: "Node & Host Health",
-          icon: Server,
-          path: "/admin/health",
-        },
-        {
-          id: "activity",
-          label: "Audit Logs",
-          icon: Activity,
-          path: "/admin/activity",
-        },
-        {
-          id: "training",
-          label: "AI Training",
-          icon: Brain,
-          path: "/admin/training",
-        },
-      ],
-    },
-    {
-      name: "Financials & Quotas",
-      items: [
-        {
-          id: "credits",
-          label: "Credits Ledger",
-          icon: Coins,
-          path: "/admin/credits",
-        },
-        {
-          id: "finance",
-          label: "Revenue & MRR",
-          icon: DollarSign,
-          path: "/admin/finance",
-        },
-        {
-          id: "usage",
-          label: "Quota Limits",
-          icon: ActivitySquare,
-          path: "/admin/usage",
-        },
-      ],
-    },
-    {
-      name: "System Tools",
-      items: [
-        {
-          id: "explorer",
-          label: "Database Explorer",
-          icon: Database,
-          path: "/admin/explorer",
-        },
-        {
-          id: "settings",
-          label: "Global Settings",
-          icon: Settings,
-          path: "/admin/settings",
-        },
-      ],
-    },
-  ];
 
   const isActive = (path: string) => {
     if (path === "/admin") {
@@ -191,7 +65,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
       {/* Navigation Groups */}
       <div className="flex-1 overflow-y-auto py-4 px-4 space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {groups.map((group, groupIdx) => (
+        {ADMIN_SIDEBAR_GROUPS.map((group, groupIdx) => (
           <div key={group.name} className="space-y-2">
             {groupIdx > 0 && (
               <div className="w-full flex flex-col pt-1 pb-1">
@@ -204,13 +78,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             <ul className="space-y-1">
               {group.items.map((item) => {
                 const active = isActive(item.path);
+                const ItemIcon = item.icon;
                 return (
                   <li key={item.id} className="relative">
                     {/* Active Side Accent Indicator */}
                     <div
                       className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
                         active
-                          ? "h-5 bg-[#2A2A2A]  opacity-100"
+                          ? "h-5 bg-[#2A2A2A] opacity-100"
                           : "h-0 bg-transparent opacity-0"
                       }`}
                     />
@@ -227,7 +102,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <item.icon
+                        <ItemIcon
                           className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
                             active
                               ? "text-[#3B82F6]"

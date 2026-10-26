@@ -53,14 +53,14 @@ export function ComparisonSection({
 
   return (
     <section id="comparison" className="py-24 px-4 sm:px-6 relative z-10 scroll-mt-24">
-      <div className="max-w-6xl mx-auto space-y-16">
+      <div className="max-w-7xl mx-auto space-y-16">
         {/* SECTION HEADER */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <div
             className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider border ${
               isLight
-                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                ? "bg-blue-50 border-blue-200 text-blue-700"
+                : "bg-blue-500/10 border-blue-500/20 text-blue-400"
             }`}
           >
             <Zap className="w-3.5 h-3.5" />
@@ -73,7 +73,7 @@ export function ComparisonSection({
             }`}
           >
             Why Creators Switch to{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">
               Sonikoma
             </span>
           </h2>
@@ -93,20 +93,20 @@ export function ComparisonSection({
           className={`rounded-[32px] border overflow-hidden shadow-2xl backdrop-blur-xl transition-all ${
             isLight
               ? "bg-white border-slate-200 shadow-slate-200/60"
-              : "bg-[#11131a] border-white/10 shadow-black/80"
+              : "bg-[#181818] border-[#2F2F2F] shadow-xl"
           }`}
         >
           {/* Table Header */}
-          <div className="grid grid-cols-1 md:grid-cols-12 border-b border-black/5 dark:border-white/10">
+          <div className="grid grid-cols-1 md:grid-cols-12 border-b border-black/5 dark:border-[#2F2F2F]">
             <div className="md:col-span-4 p-5 sm:p-6 text-xs font-bold uppercase tracking-wider text-neutral-400 hidden md:block">
               Capability
             </div>
             <div
-              className={`md:col-span-4 p-5 sm:p-6 border-b md:border-b-0 md:border-l border-black/5 dark:border-white/10 text-center ${
-                isLight ? "bg-slate-50" : "bg-neutral-900/50"
+              className={`md:col-span-4 p-5 sm:p-6 border-b md:border-b-0 md:border-l border-black/5 dark:border-[#2F2F2F] text-center ${
+                isLight ? "bg-slate-50" : "bg-[#141414]"
               }`}
             >
-              <div className="flex items-center justify-center gap-2 text-rose-500 font-bold text-sm sm:text-base">
+              <div className="flex items-center justify-center gap-2 text-neutral-400 font-bold text-sm sm:text-base">
                 <X className="w-4 h-4" />
                 <span>Manual Video Editing</span>
               </div>
@@ -115,7 +115,7 @@ export function ComparisonSection({
               </p>
             </div>
             <div
-              className={`md:col-span-4 p-5 sm:p-6 border-b md:border-b-0 md:border-l border-black/5 dark:border-white/10 text-center ${
+              className={`md:col-span-4 p-5 sm:p-6 border-b md:border-b-0 md:border-l border-black/5 dark:border-[#2F2F2F] text-center ${
                 isLight ? "bg-blue-50/70" : "bg-blue-600/10"
               }`}
             >
@@ -157,11 +157,11 @@ export function ComparisonSection({
 
                 {/* Traditional Side */}
                 <div
-                  className={`md:col-span-4 p-4 sm:p-6 md:border-l border-black/5 dark:border-white/10 flex items-start gap-2.5 ${
+                  className={`md:col-span-4 p-4 sm:p-6 md:border-l border-black/5 dark:border-[#2F2F2F] flex items-start gap-2.5 ${
                     isLight ? "text-slate-600" : "text-neutral-400"
                   }`}
                 >
-                  <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                  <X className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
                   <span className="text-xs sm:text-sm font-medium">
                     {row.traditional}
                   </span>
@@ -169,11 +169,11 @@ export function ComparisonSection({
 
                 {/* Sonikoma Side */}
                 <div
-                  className={`md:col-span-4 p-4 sm:p-6 md:border-l border-black/5 dark:border-white/10 flex items-start gap-2.5 ${
+                  className={`md:col-span-4 p-4 sm:p-6 md:border-l border-black/5 dark:border-[#2F2F2F] flex items-start gap-2.5 ${
                     isLight ? "text-blue-900 font-semibold" : "text-blue-300 font-semibold"
                   }`}
                 >
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5 font-black" />
+                  <Check className="w-4 h-4 text-blue-400 shrink-0 mt-0.5 font-black" />
                   <span className="text-xs sm:text-sm">
                     {row.sonikoma}
                   </span>
@@ -184,12 +184,12 @@ export function ComparisonSection({
 
           {/* Bottom Callout */}
           <div
-            className={`p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-black/5 dark:border-white/10 ${
+            className={`p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-black/5 dark:border-[#2F2F2F] ${
               isLight ? "bg-slate-50" : "bg-neutral-900/40"
             }`}
           >
             <div className="flex items-center gap-3 text-center sm:text-left">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
                 <Clock className="w-5 h-5" />
               </div>
               <div>
@@ -208,7 +208,7 @@ export function ComparisonSection({
 
             <button
               onClick={onGetStarted}
-              className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer flex items-center gap-2 shrink-0"
+              className="h-11 px-6 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-sm shadow-md shadow-blue-500/25 transition-all active:scale-[0.98] cursor-pointer inline-flex items-center justify-center gap-2 shrink-0"
             >
               <span>Get Started Free</span>
               <ArrowRight className="w-4 h-4" />

@@ -43,7 +43,7 @@ export default function ProviderHeroBanner({
               href={currentProvider.docsUrl}
               target="_blank"
               rel="noreferrer"
-              className="px-3.5 py-2 rounded-xl bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] text-xs font-semibold text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all"
+              className="px-3.5 py-2 rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-xs font-semibold text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all"
             >
               <span>{currentProvider.name} Docs</span>
               <ExternalLink className="w-3 h-3" />

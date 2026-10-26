@@ -1,17 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import * as api from "@/shared/api";
-
-export interface AuthUser {
-  id?: string | number;
-  email?: string;
-  name?: string;
-  username?: string;
-  role?: string;
-  creator_role?: string;
-  avatar_url?: string;
-  credits?: number;
-  [key: string]: any;
-}
+import type { AuthUser } from "../types";
 
 export function useAppAuth() {
   const [user, setUser] = useState<AuthUser | null>(() => {

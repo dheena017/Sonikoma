@@ -1,23 +1,39 @@
-import React, { useEffect, useState, useMemo } from"react";
-import { ShieldAlert, Lock, ArrowLeft } from"lucide-react";
-import * as api from"@/shared/api";
+import React, { useEffect, useState, useMemo } from "react";
+import { ShieldAlert, Lock, ArrowLeft } from "lucide-react";
+import * as api from "@/shared/api";
 import {
-  AdminActivityTab,
-  AdminAnnouncementsTab,
-  AdminContentTab,
-  AdminExplorerTab,
-  AdminFinanceTab,
-  AdminHealthTab,
-  AdminJobsTab,
-  AdminScrapersTab,
-  AdminSettingsTab,
-  AdminUsageTab,
-  AdminUsersTab,
-  AdminCreditsTab,
-  AdminTrainingTab,
-} from"@/features/admin/components/Tabs";
-import AdminLayout from"@/features/admin/components/AdminLayout";
-import AdminDashboardPage from"@/features/admin/pages/AdminDashboardPage";
+  AdminActivityPage,
+  AdminAnalyticsPage,
+  AdminAnnouncementsPage,
+  AdminConsolePage,
+  AdminContentPage,
+  AdminCreditsPage,
+  AdminExplorerPage,
+  AdminFinancePage,
+  AdminHealthPage,
+  AdminJobsPage,
+  AdminScrapersPage,
+  AdminSettingsPage,
+  AdminTrainingPage,
+  AdminUsagePage,
+  AdminUsersPage,
+} from "./index";
+import AdminDashboardPage from "./AdminDashboardPage";
+import { isUserAdmin, selfPromoteToAdmin } from "../utils/adminAuth";
+import { getTabMetadata } from "../utils/adminConstants";
+
+export interface AdminPageProps {
+  user?: any;
+  navigateTo: (path: string) => void;
+  currentPath: string;
+  isAuthenticated: boolean;
+  fetchWithInterceptor: (
+    url: string,
+    options?: RequestInit
+  ) => Promise<Response>;
+  addNotification?: any;
+  audioFeedback?: any;
+}
 
 const AdminPage = React.memo(
   ({
@@ -28,25 +44,14 @@ const AdminPage = React.memo(
     fetchWithInterceptor,
     addNotification,
     audioFeedback,
-  }: {
-    user?: any;
-    navigateTo: (path: string) => void;
-    currentPath: string;
-    isAuthenticated: boolean;
-    fetchWithInterceptor: (
-      url: string,
-      options?: RequestInit
-    ) => Promise<Response>;
-    addNotification?: any;
-    audioFeedback?: any;
-  }) => {
+  }: AdminPageProps) => {
     const [analytics, setAnalytics] = useState<any>(null);
     const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
-    const activeTab = useMemo(() => {
-      if (currentPath ==="/admin" || currentPath ==="/admin/")
-        return"overview";
-      return currentPath.split("/").pop() ||"overview";
+    const activeSection = useMemo(() => {
+      if (currentPath === "/admin" || currentPath === "/admin/")
+        return "overview";
+      return currentPath.split("/").pop() || "overview";
     }, [currentPath]);
 
     const fetchAnalytics = async () => {
@@ -69,17 +74,17 @@ const AdminPage = React.memo(
 
     useEffect(() => {
       if (
-        activeTab ==="analytics" ||
-        activeTab ==="finance" ||
-        activeTab ==="usage"
-      )
+        activeSection === "analytics" ||
+        activeSection === "finance" ||
+        activeSection === "usage"
+      ) {
         fetchAnalytics();
-    }, [activeTab]);
+      }
+    }, [activeSection]);
 
-    // PREMIUM UPGRADE: High-end"Access Denied" security screen
-    const isUserAdmin =
-      user?.creator_role ==="admin" || user?.role ==="admin";
-    if (!isAuthenticated || (user && !isUserAdmin)) {
+    // High-end "Access Denied" security screen
+    const userIsAdmin = isUserAdmin(user);
+    if (!isAuthenticated || (user && !userIsAdmin)) {
       return (
         <div className="fixed inset-0 z-50 w-full h-full bg-[#050507] flex flex-col items-center justify-center p-6 overflow-hidden selection:bg-rose-500/30">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-rose-900/20 via-[#050507] to-[#050507] pointer-events-none" />
@@ -107,24 +112,11 @@ const AdminPage = React.memo(
               </button>
               <button
                 onClick={async () => {
-                  try {
-                    const token =
-                      localStorage.getItem("sonikoma_token") ||
-                      sessionStorage.getItem("sonikoma_token");
-                    const res = await fetch("/api/v1/auth/profile", {
-                      method:"PUT",
-                      headers: {"Content-Type":"application/json",
-                        Authorization:`Bearer ${token}`,
-                      },
-                      body: JSON.stringify({ creator_role:"admin" }),
-                    });
-                    if (res.ok) {
-                      window.location.reload();
-                    } else {
-                      alert("Failed to self-promote to admin");
-                    }
-                  } catch (e) {
-                    alert("Error self-promoting to admin");
+                  const success = await selfPromoteToAdmin();
+                  if (success) {
+                    window.location.reload();
+                  } else {
+                    alert("Failed to self-promote to admin");
                   }
                 }}
                 className="btn-primary w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold shadow-md cursor-pointer"
@@ -137,103 +129,12 @@ const AdminPage = React.memo(
       );
     }
 
-    const isOverview = activeTab ==="overview";
+    const isOverview = activeSection === "overview";
+    const sectionInfo = getTabMetadata(activeSection);
 
-    const tabMetadata: Record<
-      string,
-      { title: string; desc: string; badge: string }
-    > = {
-      overview: {
-        title:"Root Telemetry Dashboard",
-        desc:"Real-time infrastructure, pipeline telemetry & active creator metrics",
-        badge:"Live Pulse",
-      },
-      users: {
-        title:"User Accounts & Role Management",
-        desc:"Inspect user accounts, manage creator roles, permissions, and security status",
-        badge:"Access Control",
-      },
-      credits: {
-        title:"Credits & Economy Control",
-        desc:"Manage studio generation credits, transaction ledger, and top-ups",
-        badge:"Ledger",
-      },
-      announcements: {
-        title:"System Broadcasts & Alerts",
-        desc:"Publish platform-wide broadcast alerts and scheduled maintenance notices",
-        badge:"Broadcast",
-      },
-      content: {
-        title:"Content Moderation & Projects",
-        desc:"Inspect public and private storyboards, project status, and storage quotas",
-        badge:"Assets",
-      },
-      jobs: {
-        title:"Background Jobs & Task Execution",
-        desc:"Monitor live processing queues, cancel hung tasks, and audit completed workers",
-        badge:"Workers",
-      },
-      scrapers: {
-        title:"Webtoon Engine Configuration",
-        desc:"Tune scraper workers, domain proxies, selectors, and rate limiting",
-        badge:"Engine",
-      },
-      health: {
-        title:"Infrastructure & Server Health",
-        desc:"Host CPU, GPU worker nodes, memory pools, and database connection latency",
-        badge:"Telemetry",
-      },
-      activity: {
-        title:"System Audit & Security Logs",
-        desc:"Real-time administrative actions, authentication attempts, and event trail",
-        badge:"Security Audit",
-      },
-      analytics: {
-        title:"Platform Growth Analytics",
-        desc:"User acquisition funnels, retention cohorts, and project creation velocity",
-        badge:"BI Insights",
-      },
-      finance: {
-        title:"Revenue & Subscription Ledger",
-        desc:"Track Monthly Recurring Revenue (MRR), subscription churn, and payouts",
-        badge:"Financials",
-      },
-      usage: {
-        title:"Resource Consumption & Quotas",
-        desc:"AI generation tokens, image rendering compute, and bandwidth utilization",
-        badge:"Quotas",
-      },
-      settings: {
-        title:"Platform Global Settings",
-        desc:"Tune AI model endpoints, webhook secrets, rate limits, and server environment",
-        badge:"System Config",
-      },
-      explorer: {
-        title:"Database Query Explorer",
-        desc:"Direct read-only schema navigation and table query workbench",
-        badge:"Database",
-      },
-      console: {
-        title:"Superuser Interactive Terminal",
-        desc:"Direct command execution and server process diagnostics console",
-        badge:"CLI Terminal",
-      },
-      training: {
-        title:"AI Training & Data Flywheel",
-        desc:"Manage the YOLO fine-tuning pipeline, dataset gallery, and auto-trigger configuration for speech bubble detection",
-        badge:"ML Engine",
-      },
-    };
-
-    const currentTabInfo = tabMetadata[activeTab] || {
-      title: activeTab.charAt(0).toUpperCase() + activeTab.slice(1),
-      desc:"Administrative management module and system telemetry workbench",
-      badge:"Admin",
-    };
-
-    const renderActiveModule = () => {
-      switch (activeTab) {
-        case"overview":
+    const renderActivePage = () => {
+      switch (activeSection) {
+        case "overview":
           return (
             <AdminDashboardPage
               user={user}
@@ -245,81 +146,89 @@ const AdminPage = React.memo(
               isTab={true}
             />
           );
-        case"announcements":
+        case "announcements":
           return (
-            <AdminAnnouncementsTab
+            <AdminAnnouncementsPage
               fetchWithInterceptor={fetchWithInterceptor}
             />
           );
-        case"users":
+        case "users":
           return (
-            <AdminUsersTab
-              fetchWithInterceptor={fetchWithInterceptor}
-              addNotification={addNotification}
-            />
-          );
-        case"credits":
-          return (
-            <AdminCreditsTab
+            <AdminUsersPage
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />
           );
-        case"content":
+        case "credits":
           return (
-            <AdminContentTab
+            <AdminCreditsPage
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />
           );
-        case"usage":
+        case "content":
           return (
-            <AdminUsageTab
+            <AdminContentPage
+              fetchWithInterceptor={fetchWithInterceptor}
+              addNotification={addNotification}
+            />
+          );
+        case "usage":
+          return (
+            <AdminUsagePage
               fetchWithInterceptor={fetchWithInterceptor}
               analytics={analytics}
             />
           );
-        case"scrapers":
+        case "scrapers":
           return (
-            <AdminScrapersTab
+            <AdminScrapersPage
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />
           );
-        case"jobs":
+        case "jobs":
           return (
-            <AdminJobsTab
+            <AdminJobsPage
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />
           );
-        case"finance":
+        case "finance":
           return (
-            <AdminFinanceTab
+            <AdminFinancePage
               fetchWithInterceptor={fetchWithInterceptor}
               analytics={analytics}
             />
           );
-        case"settings":
+        case "analytics":
           return (
-            <AdminSettingsTab
+            <AdminAnalyticsPage
+              fetchWithInterceptor={fetchWithInterceptor}
+            />
+          );
+        case "console":
+          return <AdminConsolePage />;
+        case "settings":
+          return (
+            <AdminSettingsPage
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />
           );
-        case"health":
-          return <AdminHealthTab fetchWithInterceptor={fetchWithInterceptor} />;
-        case"activity":
+        case "health":
+          return <AdminHealthPage fetchWithInterceptor={fetchWithInterceptor} />;
+        case "activity":
           return (
-            <AdminActivityTab fetchWithInterceptor={fetchWithInterceptor} />
+            <AdminActivityPage fetchWithInterceptor={fetchWithInterceptor} />
           );
-        case"explorer":
+        case "explorer":
           return (
-            <AdminExplorerTab fetchWithInterceptor={fetchWithInterceptor} />
+            <AdminExplorerPage fetchWithInterceptor={fetchWithInterceptor} />
           );
-        case"training":
+        case "training":
           return (
-            <AdminTrainingTab
+            <AdminTrainingPage
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />
@@ -342,20 +251,20 @@ const AdminPage = React.memo(
     return (
       <div className="w-full max-w-7xl mx-auto py-4 sm:py-6 space-y-6 animate-fade-in relative z-10 text-left">
         {isOverview ? (
-          renderActiveModule()
+          renderActivePage()
         ) : (
           <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-7 relative overflow-hidden text-left">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2F2F2F] pb-5">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight">
-                  {currentTabInfo.title}
+                  {sectionInfo.title}
                 </h1>
                 <p className="text-xs text-[#9CA3AF] font-sans mt-1">
-                  {currentTabInfo.desc}
+                  {sectionInfo.desc}
                 </p>
               </div>
             </div>
-            {renderActiveModule()}
+            {renderActivePage()}
           </div>
         )}
       </div>

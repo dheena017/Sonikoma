@@ -1,41 +1,77 @@
 # Admin Domain (`features/admin/`)
 
 ## 1. Executive Overview & Scope
-The **Admin Domain** provides administrative back-office controls, user account management, model training dashboards, system resource metrics, and elevated access configuration for Sonikoma operators.
+The **Admin Domain** provides administrative back-office controls, user account management, model training dashboards, system resource metrics, billing/credits control, webtoon scraper worker engines, and elevated access configuration for Sonikoma superusers.
 
-## 2. Directory & File Inventory
-- **`components/`**:
-  - `AdminLayout.tsx`: Dedicated admin shell layout with header, sidebar, and tab navigation.
-  - `AdminSidebar.tsx`: Expanded sidebar containing admin-specific navigation routes.
-  - `AdminMiniSidebar.tsx`: Collapsed compact sidebar for administrative workflows.
-  - `Tabs/`: Tabbed sub-views (Settings, Training, Usage, Users).
-- **`pages/`**:
-  - `AdminPage.tsx`: Root admin gateway.
-  - `AdminDashboardPage.tsx`: Primary telemetry and system metrics board.
-  - `AdminHeaderPage.tsx`: Dedicated administrative navigation bar view.
-- **`hooks/`**: Admin permissions and metric collection hooks.
-- **`utils/`**: Metric aggregation and user permission validators.
+Following strict architectural separation, the domain contains **Pages** and **Components** only (no "tabs" abstraction).
 
-## 3. State Architecture & Reactive Flow
-Admin state tracks elevated user credentials and polling data for system operations, server load, and active worker pools.
+## 2. Directory & Architecture Inventory
+- **`pages/`**: 17 dedicated administrative page views:
+  - `AdminPage.tsx`: Gateway router with route guards
+  - `AdminDashboardPage.tsx`: Primary telemetry & live metric board
+  - `AdminActivityPage.tsx`: Security audit trail & auth logs
+  - `AdminAnalyticsPage.tsx`: Growth funnels & platform analytics
+  - `AdminAnnouncementsPage.tsx`: System broadcasts & alerts
+  - `AdminConsolePage.tsx`: Interactive superuser terminal
+  - `AdminContentPage.tsx`: Moderation & project quotas
+  - `AdminCreditsPage.tsx`: Credit ledger & economy management
+  - `AdminExplorerPage.tsx`: Database query explorer
+  - `AdminFinancePage.tsx`: Financial MRR & transactions
+  - `AdminHealthPage.tsx`: Server & node infrastructure health
+  - `AdminJobsPage.tsx`: Background queue worker management
+  - `AdminScrapersPage.tsx`: Webtoon scraper engine config
+  - `AdminSettingsPage.tsx`: Global system environment settings
+  - `AdminTrainingPage.tsx`: AI YOLO fine-tuning pipeline
+  - `AdminUsagePage.tsx`: Compute & token quota limits
+  - `AdminUsersPage.tsx`: User accounts & role permissions
+  - `index.ts`: Unified pages export
+- **`components/`**: Reusable layout compounds:
+  - `AdminLayout.tsx`: Shell layout with header, sidebar, and page container
+  - `AdminHeader.tsx`: Navigation bar with command palette, health status, and user profile
+  - `AdminSidebar.tsx`: Expanded drawer navigation
+  - `AdminMiniSidebar.tsx`: Compact quick navigation rail
+  - `index.ts`: Unified components export
+- **`types/`**:
+  - `index.ts`: Strong TypeScript definitions for pages, navigation, metrics, users
+- **`api/`**:
+  - `admin.ts`: CRUD endpoints
+  - `analytics.ts`: Telemetry & analytics endpoints
+  - `index.ts`: Unified API export
+- **`utils/`**:
+  - `adminConstants.ts`: Centralized page metadata and sidebar navigation groups
+  - `adminFormatters.ts`: Date, duration, elapsed, and byte normalizers
+  - `adminAuth.ts`: RBAC permission evaluation & elevation
+  - `index.ts`: Unified utils export
+- **`hooks/`**:
+  - `useAdminAuth.ts`: Admin status determination and elevation
+  - `useAdminAnalytics.ts`: Platform analytics state & fetcher
+  - `useAdminStats.ts`: Backend telemetry polling
+  - `index.ts`: Unified hooks export
+- **`index.ts`**: Root feature domain barrel export
 
-## 4. UI Hierarchy Blueprint
+## 3. UI Hierarchy Blueprint
 ```
 AdminLayout
-├── AdminHeaderPage
+├── AdminHeader
 ├── AdminSidebar / AdminMiniSidebar
-└── Tab Container (Settings | Training | Usage | Users)
+└── Page Container (17 Dedicated Pages)
+    ├── Overview / AdminDashboardPage
+    ├── Users & Permissions
+    ├── Credits & Economy
+    ├── System Broadcasts
+    ├── Content Moderation
+    ├── Background Jobs
+    ├── Scrapers Engine
+    ├── Node Health & Telemetry
+    ├── Security Audit Logs
+    ├── Growth Analytics
+    ├── Revenue & MRR
+    ├── Quota Limits
+    ├── Global Settings
+    ├── Database Explorer
+    ├── Superuser Console
+    └── AI Training Flywheel
 ```
 
-## 5. Utilities & Algorithms
-Role-based access evaluation, quota usage math, and server telemetry calculation.
-
-## 6. Routing & Navigation
-Mounted under `/admin`, `/admin/dashboard`, `/admin/users`, `/admin/settings`. Guarded by superuser / administrator role verifications.
-
-## 7. Dependencies & Public API
-Exports: `AdminPage`, `AdminDashboardPage`, `AdminHeaderPage`, `AdminLayout`, `AdminSidebar`.
-Allowed Imports: `@/shared/`, `@/api`.
-
-## 8. Testing & Quality Assurance
-Strict role checking, mock user elevation, and telemetry parsing test cases.
+## 4. Routing & Navigation
+Mounted under `/admin`, `/admin/:page` (e.g., `/admin/users`, `/admin/settings`, `/admin/scrapers`, `/admin/training`, `/admin/console`). Guarded by superuser / administrator role verifications.

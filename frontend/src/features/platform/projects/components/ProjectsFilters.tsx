@@ -3,15 +3,14 @@ import {
   Filter,
   LayoutGrid,
   List,
-  Search,
   ChevronDown,
   Check,
 } from "lucide-react";
-import type { ViewMode } from "@/features/platform/projects/hooks/ProjectTypes";
+import type { ViewMode } from "@/features/platform/projects/types";
 
 interface ProjectsFiltersProps {
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (value: string) => void;
   genreFilter: string;
   onGenreChange: (value: string) => void;
   genres: string[];
@@ -19,8 +18,6 @@ interface ProjectsFiltersProps {
   onSortChange: (value: string) => void;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
-  isDemoActive?: boolean;
-  onClearDemo?: () => void;
   totalCount?: number;
 }
 
@@ -32,8 +29,6 @@ const SORT_OPTIONS = [
 ];
 
 export default function ProjectsFilters({
-  searchQuery,
-  onSearchChange,
   genreFilter,
   onGenreChange,
   genres,
@@ -41,8 +36,6 @@ export default function ProjectsFilters({
   onSortChange,
   viewMode,
   onViewModeChange,
-  isDemoActive,
-  onClearDemo,
   totalCount,
 }: ProjectsFiltersProps) {
   const [isGenreOpen, setIsGenreOpen] = useState(false);
@@ -69,41 +62,17 @@ export default function ProjectsFilters({
 
   return (
     <div className="mb-6 flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-      {/* Search Input */}
-      <div className="relative min-w-0 flex-1 sm:min-w-[240px]">
-        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#71717A]" />
-        <input
-          type="text"
-          aria-label="Search projects by title, series, or author"
-          placeholder="Search projects by title, series, or author..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="h-11 w-full rounded-lg border border-white/10 bg-[#141414] py-2 pl-10 pr-9 text-sm text-white outline-none transition-colors placeholder:text-[#71717A] hover:border-white/20 focus:border-white/30"
-        />
-        {searchQuery && (
-          <button
-            type="button"
-            onClick={() => onSearchChange("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors cursor-pointer text-xs"
-            title="Clear search"
-          >
-            ✕
-          </button>
+      {/* Left side: Results Count */}
+      <div className="flex items-center gap-3">
+        {totalCount !== undefined && (
+          <span className="text-xs font-mono text-[#9CA3AF]">
+            Showing <strong className="text-white font-bold">{totalCount}</strong> series
+          </span>
         )}
       </div>
 
       {/* Filters and Controls */}
       <div className="flex min-w-0 flex-wrap items-center gap-2">
-        {isDemoActive && onClearDemo && (
-          <button
-            type="button"
-            onClick={onClearDemo}
-            className="h-11 px-3 text-xs font-mono font-medium rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition-colors cursor-pointer flex items-center gap-1.5"
-            title="Remove sample demo projects"
-          >
-            <span>Reset Demo Data</span>
-          </button>
-        )}
         {/* Custom Genre Dropdown */}
         <div className="relative" ref={genreRef}>
           <button

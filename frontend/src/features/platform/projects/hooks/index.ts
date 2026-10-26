@@ -1,9 +1,6 @@
-export * from "./ProjectsTable";
-export * from "./ProjectTypes";
-export * from "./useProjectsActions";
-export * from "./useProjectsComputed";
-export * from "./useProjectsData";
-export * from "./useProjectsFilters";
-export * from "./useProjectsMenu";
+export { default as useProjectsPage } from "./useProjectsPage";
 export * from "./useProjectsPage";
-export * from "./useProjectsSelection";
+export * from "./useSeriesDetails";
+export * from "./useProjectsActions";
+export * from "./useProjectsData";
+export * from "./usePipelineActions";

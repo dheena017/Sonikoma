@@ -1,6 +1,5 @@
 import React from "react";
-import { Skeleton } from "@/shared/ui/loading";
-import { ProjectCardSkeleton } from "./ProjectCardSkeleton";
+import { Skeleton, ProjectCardSkeleton } from "@/shared/ui/loading";
 
 export function SeriesDetailsSkeleton() {
   return (

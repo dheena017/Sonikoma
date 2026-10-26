@@ -4,7 +4,7 @@ export function SlicingBefore() {
   return (
     <div className="w-full h-full bg-[#0d0e15] p-3 sm:p-4 flex flex-col items-center justify-start gap-3 overflow-y-auto custom-scrollbar">
       <div className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider flex items-center gap-1.5 self-start shrink-0">
-        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+        <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
         Raw Vertical Webtoon Strip (Continuous Scroll)
       </div>
 

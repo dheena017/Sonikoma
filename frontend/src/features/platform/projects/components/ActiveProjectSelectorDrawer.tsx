@@ -22,7 +22,6 @@ import {
   BookOpen,
 } from"lucide-react";
 import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
-import { useThemeMode } from"@/shared/hooks/useThemeMode";
 import { SonikomaLogo } from"@/shared/ui/branding";
 import { getProxiedImageUrl, getSourceIcon, getSourceName } from"@/shared/utils";
 import { timeAgo } from"@/shared/utils/dateUtils";
@@ -64,7 +63,6 @@ function formatDuration(seconds: number): string {
 export const ActiveProjectSelectorDrawer: React.FC<
   ActiveProjectSelectorDrawerProps
 > = ({ fetchWithInterceptor, navigateTo }) => {
-  const { themeMode } = useThemeMode();
   const {
     activeProjectId,
     activeProjectData,

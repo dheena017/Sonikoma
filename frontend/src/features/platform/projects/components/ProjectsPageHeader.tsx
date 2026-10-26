@@ -1,31 +1,19 @@
 import React from "react";
-import { Search, Plus, X, Play, Globe, Sparkles } from "lucide-react";
+import { Search, Plus, X } from "lucide-react";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface ProjectsPageHeaderProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onNewSeries: () => void;
-  stats?: {
-    totalProjects: number;
-    completedProjects: number;
-    totalPanels: number;
-  };
   onOpenScraper?: () => void;
   onOpenAiStudio?: () => void;
-  onLoadDemo?: () => void;
-  isDemoActive?: boolean;
 }
 
 export default function ProjectsPageHeader({
   searchQuery,
   onSearchChange,
   onNewSeries,
-  stats,
-  onOpenScraper,
-  onOpenAiStudio,
-  onLoadDemo,
-  isDemoActive,
 }: ProjectsPageHeaderProps) {
   return (
     <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#2F2F2F] text-left">
@@ -70,18 +58,6 @@ export default function ProjectsPageHeader({
 
       {/* Right CTA Actions */}
       <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-        {onLoadDemo && (
-          <button
-            type="button"
-            onClick={onLoadDemo}
-            className="flex items-center gap-2 bg-[#1E1E1E] hover:bg-[#252525] border border-[#2F2F2F] text-neutral-300 hover:text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer active:scale-95"
-            title="Load or reset sample demo projects"
-          >
-            <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
-            <span>{isDemoActive ? "Reset Demo" : "Sample Demo"}</span>
-          </button>
-        )}
-
         <button
           type="button"
           onClick={onNewSeries}

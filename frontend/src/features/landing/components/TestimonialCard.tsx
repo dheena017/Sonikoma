@@ -29,7 +29,7 @@ export function TestimonialCard({
       className={`p-8 rounded-[32px] border transition-all duration-300 flex flex-col justify-between space-y-6 ${
         isLight
           ? "bg-white border-slate-200 shadow-lg shadow-slate-200/40 hover:border-[#2F2F2F] hover:shadow-black/50"
-          : "bg-neutral-900/40 border-white/10 hover:border-neutral-700 hover:bg-neutral-900/80 shadow-xl shadow-black/20"
+          : "bg-[#181818] border-[#2F2F2F] hover:border-blue-500/40 hover:shadow-xl hover:shadow-black/20"
       }`}
     >
       <div className="space-y-4">
@@ -40,7 +40,7 @@ export function TestimonialCard({
                 key={i}
                 className={`w-4 h-4 ${
                   i < Math.round(rating)
-                    ? "fill-amber-400 text-amber-400"
+                    ? "fill-blue-400 text-blue-400"
                     : isLight
                     ? "text-slate-200"
                     : "text-neutral-700"
