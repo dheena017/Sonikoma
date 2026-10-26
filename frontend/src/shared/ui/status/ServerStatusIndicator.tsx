@@ -79,8 +79,8 @@ export const ServerStatusIndicator: React.FC<ServerStatusIndicatorProps> = ({
         type="button"
         onClick={handleToggle}
         title={`Server Status: ${status.toUpperCase()} (Click to view full diagnostics)`}
-        className={`h-8.5 flex items-center gap-2 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
-          isOpen ? "bg-[#282a32]" : ""
+        className={`h-8.5 flex items-center gap-2 px-3 rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-500 text-xs font-bold text-white transition-all shadow-sm select-none shrink-0 cursor-pointer active:scale-95 ${
+          isOpen ? "bg-[#2A2A2A]" : ""
         }`}
       >
         {showLabel && (

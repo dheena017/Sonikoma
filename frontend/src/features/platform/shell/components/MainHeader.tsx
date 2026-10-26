@@ -459,7 +459,7 @@ const HeaderInner = ({
           >
             <button
               onClick={onToggleSidebar}
-              className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
+              className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-500 text-white transition-all shadow-sm cursor-pointer active:scale-95 shrink-0"
               aria-label="Toggle Navigation Menu"
             >
               <Menu className="h-4 w-4" />
@@ -518,9 +518,9 @@ const HeaderInner = ({
                   setShowStats(false);
                 }}
                 aria-label="Your credit balance & daily rewards"
-                className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
+                className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-500 text-xs font-bold text-white transition-all shadow-sm select-none shrink-0 cursor-pointer active:scale-95 ${
                   showCreditsPopover
-                    ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]"
+                    ? "border-amber-500/60 bg-[#2A2A2A]"
                     : ""
                 }`}
               >
@@ -556,9 +556,9 @@ const HeaderInner = ({
                 setShowNotifications(!showNotifications);
                 setShowStats(false);
               }}
-              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
+              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-500 text-white transition-all shadow-sm cursor-pointer active:scale-95 shrink-0 relative ${
                 showNotifications
-                  ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]"
+                  ? "border-blue-500 bg-[#2A2A2A]"
                   : ""
               }`}
               aria-label="Notifications"
@@ -617,12 +617,12 @@ const HeaderInner = ({
           >
             <button
               onClick={() => setDrawerOpen(true)}
-              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
+              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border transition-all shadow-sm cursor-pointer active:scale-95 shrink-0 relative group ${
                 projectState === "active"
-                  ? "text-white border-white/30 bg-white/10"
+                  ? "border-[#383838] bg-[#1C1C1C] text-[#3B82F6] hover:border-neutral-500"
                   : projectState === "missing"
                   ? "text-rose-400 border-rose-500/40 bg-rose-500/10"
-                  : ""
+                  : "border-[#2F2F2F] hover:border-neutral-500 text-neutral-400 hover:text-white"
               }`}
               aria-label="Active Project Selector"
             >
@@ -631,11 +631,17 @@ const HeaderInner = ({
               ) : projectState === "loading" ? (
                 <Loader2 className="h-4 w-4 text-white animate-spin" />
               ) : (
-                <FolderSync className="h-4 w-4" />
+                <FolderSync
+                  className={`h-4 w-4 transition-colors ${
+                    projectState === "active"
+                      ? "text-[#3B82F6]"
+                      : "text-neutral-300 group-hover:text-white"
+                  }`}
+                />
               )}
 
               {projectState === "active" && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#0D0E12] animate-pulse" />
+                <span className="absolute bottom-1 w-3.5 h-[2px] rounded-full bg-[#3B82F6]" />
               )}
             </button>
           </Tooltip>
@@ -645,16 +651,16 @@ const HeaderInner = ({
         <Tooltip text="View Profile & Settings" placement="bottom">
           <button
             onClick={() => navigateTo && navigateTo("/profile")}
-            className="group flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full border border-[#2b2d35] bg-[#171a20] hover:border-[#3b82f6]/40 hover:bg-[#1c2028] transition-all duration-200 cursor-pointer select-none shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
+            className="group flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full border border-[#2F2F2F] bg-[#141414] hover:border-neutral-500 hover:bg-[#2A2A2A] transition-all duration-200 cursor-pointer select-none shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none"
             data-no-transform
             aria-label="Open User profile"
           >
-            <span className="hidden sm:inline-flex max-w-[130px] truncate items-center rounded-full border border-white/5 bg-[#1f2430] px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] text-white/90 uppercase transition-colors group-hover:text-[#c7d2fe]">
+            <span className="hidden sm:inline-flex max-w-[130px] truncate items-center rounded-full border border-[#2F2F2F] bg-[#181818] px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] text-white/90 uppercase transition-colors group-hover:text-white">
               {user?.full_name ||
                 user?.username ||
                 (user?.email ? user.email.split("@")[0] : "Studio Creator")}
             </span>
-            <div className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#2f3440] bg-[#1a1d25] transition-all duration-200 group-hover:border-[#3b82f6]/50">
+            <div className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#2F2F2F] bg-[#181818] transition-all duration-200 group-hover:border-neutral-400">
               <img
                 key={user?.avatar_url || user?.full_name || "avatar"}
                 src={getUserAvatarUrl(user)}

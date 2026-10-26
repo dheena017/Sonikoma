@@ -471,12 +471,22 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           >
             <button
               onClick={() => setDrawerOpen(true)}
-              className="h-8.5 w-8.5 rounded-xl border border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white transition-all cursor-pointer active:scale-95 flex items-center justify-center relative shrink-0"
+              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border transition-all shadow-sm cursor-pointer active:scale-95 shrink-0 relative group ${
+                activeProjectId && activeProjectData
+                  ? "border-[#383838] bg-[#1C1C1C] text-[#3B82F6] hover:border-neutral-500"
+                  : "border-[#2F2F2F] hover:border-neutral-500 text-neutral-400 hover:text-white"
+              }`}
               aria-label="Active Project Selector"
             >
-              <FolderSync className="h-4 w-4 text-neutral-400" />
+              <FolderSync
+                className={`h-4 w-4 transition-colors ${
+                  activeProjectId && activeProjectData
+                    ? "text-[#3B82F6]"
+                    : "text-neutral-300 group-hover:text-white"
+                }`}
+              />
               {activeProjectId && activeProjectData && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+                <span className="absolute bottom-1 w-3.5 h-[2px] rounded-full bg-[#3B82F6]" />
               )}
             </button>
           </Tooltip>

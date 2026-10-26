@@ -423,11 +423,11 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
             fetchRealProjects();
           }}
           onKeyDown={handleKeyDown}
-          className="w-full h-9 pl-9 pr-11 bg-[#121216] hover:bg-[#18181E] focus:bg-[#16161C] text-xs text-white placeholder:text-[#6B7280] rounded-full border border-white/[0.08] focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 focus:outline-none transition-all shadow-inner font-sans tracking-wide"
+          className="w-full h-9 pl-9 pr-11 bg-[#141414] hover:bg-[#181818] focus:bg-[#181818] text-xs text-white placeholder:text-[#6B7280] rounded-full border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition-all shadow-inner font-sans tracking-wide"
         />
 
         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center">
-          <kbd className="px-1.5 py-0.5 text-[9px] font-mono font-bold text-[#9CA3AF] bg-[#1E1E26] border border-white/[0.1] rounded-md shadow-sm">
+          <kbd className="px-1.5 py-0.5 text-[9px] font-mono font-bold text-[#9CA3AF] bg-[#181818] border border-[#2F2F2F] rounded-md shadow-sm">
             ⌘K
           </kbd>
         </div>

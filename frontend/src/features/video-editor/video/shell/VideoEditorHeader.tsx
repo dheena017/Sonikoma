@@ -638,18 +638,28 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           <div className="relative">
             <button
               onClick={() => setDrawerOpen(true)}
-              className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-xl border border-neutral-700/60 bg-neutral-800/80 text-neutral-300 hover:text-white hover:bg-neutral-800 transition-all cursor-pointer flex items-center justify-center relative shadow-sm shrink-0"
+              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border transition-all shadow-sm cursor-pointer active:scale-95 shrink-0 relative group ${
+                activeProjectId && activeProjectData
+                  ? "border-[#383838] bg-[#1C1C1C] text-[#3B82F6] hover:border-neutral-500"
+                  : "border-[#2F2F2F] hover:border-neutral-500 text-neutral-400 hover:text-white"
+              }`}
               title={
                 activeProjectId && activeProjectData
-                  ?`Active Project: ${
-                      activeProjectData.project?.title ||"Active"
+                  ? `Active Project: ${
+                      activeProjectData.project?.title || "Active"
                     } — Click to switch`
-                  :"Select Active Project"
+                  : "Select Active Project"
               }
             >
-              <FolderSync className="h-4 w-4 text-neutral-400" />
+              <FolderSync
+                className={`h-4 w-4 transition-colors ${
+                  activeProjectId && activeProjectData
+                    ? "text-[#3B82F6]"
+                    : "text-neutral-300 group-hover:text-white"
+                }`}
+              />
               {activeProjectId && activeProjectData && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+                <span className="absolute bottom-1 w-3.5 h-[2px] rounded-full bg-[#3B82F6]" />
               )}
             </button>
           </div>

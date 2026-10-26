@@ -8,8 +8,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-import { WORKFLOW_LOGOS } from "@/shared/constants/workflowLogos";
-
 interface CreatorGuideSectionProps {
   activeGuideTab: string;
   setActiveGuideTab: (value: string) => void;
@@ -36,31 +34,35 @@ const CreatorGuideSection: React.FC<CreatorGuideSectionProps> = ({
         </div>
       </div>
 
-      <div className="flex border-b border-[#2F2F2F] overflow-x-auto">
+      <div className="flex border-b border-[#2F2F2F] overflow-x-auto gap-1.5 px-1">
         {[
-          { id: "general", label: "General Workflow", logo: WORKFLOW_LOGOS.scrape, icon: Layout },
-          { id: "cropping", label: "Panel Extraction", logo: WORKFLOW_LOGOS.crop, icon: Scissors },
-          { id: "audio", label: "Voice & Audio Sync", logo: WORKFLOW_LOGOS.voice, icon: Music },
-          { id: "rendering", label: "HD Rendering & Output", logo: WORKFLOW_LOGOS.render, icon: Settings },
+          { id: "general", label: "General Workflow", icon: Layout },
+          { id: "cropping", label: "Panel Extraction", icon: Scissors },
+          { id: "audio", label: "Voice & Audio Sync", icon: Music },
+          { id: "rendering", label: "HD Rendering & Output", icon: Settings },
         ].map((tab) => {
           const isActive = activeGuideTab === tab.id;
+          const Icon = tab.icon;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveGuideTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+              className={`group flex items-center gap-2.5 px-4 py-3 text-xs font-bold transition-all duration-200 cursor-pointer whitespace-nowrap -mb-px rounded-t-xl ${
                 isActive
-                  ? "border-[#3B82F6] text-[#3B82F6] bg-[#3B82F6]/10"
-                  : "border-transparent text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#262626]"
+                  ? "border-b-2 border-[#3B82F6] text-[#3B82F6] bg-blue-500/10 shadow-[inset_0_1px_0_rgba(59,130,246,0.2)]"
+                  : "border-b-2 border-transparent text-[#9CA3AF] hover:text-white hover:bg-[#2A2A2A]/70"
               }`}
             >
-              <img
-                src={tab.logo}
-                alt={tab.label}
-                className="w-4 h-4 rounded-md object-cover border border-white/10 shrink-0"
-                loading="lazy"
-              />
-              {tab.label}
+              <div
+                className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
+                  isActive
+                    ? "bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/40"
+                    : "bg-[#181818] text-neutral-400 border border-[#2F2F2F] group-hover:text-white group-hover:border-neutral-500"
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+              </div>
+              <span>{tab.label}</span>
             </button>
           );
         })}

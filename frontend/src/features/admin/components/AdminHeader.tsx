@@ -313,9 +313,9 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
                   setShowNotifications(false);
                 }}
                 aria-label="Your credit balance & daily rewards"
-                className={`h-10 flex items-center gap-2 px-3.5 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs sm:text-[13px] font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
+                className={`h-10 flex items-center gap-2 px-3.5 rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-500 text-xs sm:text-[13px] font-bold text-white transition-all shadow-sm select-none shrink-0 cursor-pointer active:scale-95 ${
                   showCreditsPopover
-                    ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]"
+                    ? "border-amber-500/60 bg-[#2A2A2A]"
                     : ""
                 }`}
               >
@@ -351,9 +351,9 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
                 setShowNotifications(!showNotifications);
                 setShowCreditsPopover(false);
               }}
-              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
+              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-500 text-white transition-all shadow-sm cursor-pointer active:scale-95 shrink-0 relative ${
                 showNotifications
-                  ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]"
+                  ? "border-blue-500 bg-[#2A2A2A]"
                   : ""
               }`}
               aria-label="Notifications"
@@ -406,12 +406,22 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
           >
             <button
               onClick={() => setDrawerOpen(true)}
-              className="icon-pill cursor-pointer transition-all relative hover:bg-[#1E1E1E] hover:text-[#3B82F6]"
+              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border transition-all shadow-sm cursor-pointer active:scale-95 shrink-0 relative group ${
+                activeProjectId && activeProjectData
+                  ? "border-[#383838] bg-[#1C1C1C] text-[#3B82F6] hover:border-neutral-500"
+                  : "border-[#2F2F2F] hover:border-neutral-500 text-neutral-400 hover:text-white"
+              }`}
               aria-label="Active Project Selector"
             >
-              <FolderSync className="h-4 w-4 text-[#3B82F6]" />
+              <FolderSync
+                className={`h-4 w-4 transition-colors ${
+                  activeProjectId && activeProjectData
+                    ? "text-[#3B82F6]"
+                    : "text-neutral-300 group-hover:text-white"
+                }`}
+              />
               {activeProjectId && activeProjectData && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-black animate-pulse" />
+                <span className="absolute bottom-1 w-3.5 h-[2px] rounded-full bg-[#3B82F6]" />
               )}
             </button>
           </Tooltip>
@@ -421,15 +431,15 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         <Tooltip text="View Profile & Settings" placement="bottom">
           <button
             onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-neutral-700 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-500 hover:bg-[#2A2A2A] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none"
             aria-label="Open User profile"
           >
-            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+            <span className="text-xs font-bold text-white truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-full bg-[#181818] border border-[#2F2F2F]">
               {user?.full_name ||
                 user?.username ||
                 (user?.email ? user.email.split("@")[0] : "Admin")}
             </span>
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border border-[#2F2F2F] bg-[#181818] shrink-0 flex items-center justify-center group-hover:border-neutral-400 transition-all duration-300">
               <img
                 key={user?.avatar_url || user?.full_name || "avatar"}
                 src={getUserAvatarUrl(user)}

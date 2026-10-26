@@ -407,7 +407,11 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         <div className="hidden min-[480px]:block relative shrink-0">
           <button
             onClick={() => setDrawerOpen(true)}
-            className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative"
+            className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border transition-all shadow-sm cursor-pointer active:scale-95 shrink-0 relative group ${
+              activeProjectId && activeProjectData
+                ? "border-[#383838] bg-[#1C1C1C] text-[#3B82F6] hover:border-neutral-500"
+                : "border-[#2F2F2F] hover:border-neutral-500 text-neutral-400 hover:text-white"
+            }`}
             title={
               activeProjectId && activeProjectData
                 ? `Active Project: ${
@@ -416,9 +420,15 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
                 : "Select Active Project"
             }
           >
-            <FolderSync className="h-4 w-4 text-[#3B82F6]" />
+            <FolderSync
+              className={`h-4 w-4 transition-colors ${
+                activeProjectId && activeProjectData
+                  ? "text-[#3B82F6]"
+                  : "text-neutral-300 group-hover:text-white"
+              }`}
+            />
             {activeProjectId && activeProjectData && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-black animate-pulse" />
+              <span className="absolute bottom-1 w-3.5 h-[2px] rounded-full bg-[#3B82F6]" />
             )}
           </button>
         </div>

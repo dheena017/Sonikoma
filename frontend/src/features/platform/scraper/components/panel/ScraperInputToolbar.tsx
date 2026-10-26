@@ -429,10 +429,10 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
           <Tooltip
             text={
               isSeriesCatalog
-                ?"Series catalog detected — use 'Import Chapter Scraper' to browse chapters"
+                ? "Series catalog detected — use 'Import Chapter Scraper' to browse chapters"
                 : hasValidationError
-                ? urlValidation?.error ||"Please enter a valid chapter viewer link"
-                :"Extract and import panel images directly from this chapter URL"
+                ? urlValidation?.error || "Please enter a valid chapter viewer link"
+                : "Extract and import panel images directly from this chapter URL"
             }
             placement="top"
             offset={8}
@@ -442,10 +442,10 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               type="button"
               onClick={handleImportClick}
               disabled={isScraping || !targetUrl.trim() || hasValidationError || isSeriesCatalog}
-              className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold active:scale-95 transition-all font-mono ${
-                !isSeriesCatalog
-                  ?"bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-lg  border border-blue-400/30 disabled:opacity-35 disabled:pointer-events-none cursor-pointer"
-                  :"bg-[#13151f] text-neutral-400 border border-[#1e2230] opacity-40 pointer-events-none"
+              className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all font-mono select-none ${
+                isScraping || !targetUrl.trim() || hasValidationError || isSeriesCatalog
+                  ? "bg-[#141414] text-neutral-500 border border-[#2F2F2F] cursor-not-allowed"
+                  : "bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-blue-400/40 shadow-md shadow-blue-500/25 cursor-pointer active:scale-95"
               }`}
               aria-label="Import Chapter Images"
             >
@@ -456,7 +456,13 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                 </>
               ) : (
                 <>
-                  <ImageIcon className="h-4 w-4 text-white" />
+                  <ImageIcon
+                    className={`h-4 w-4 ${
+                      isScraping || !targetUrl.trim() || hasValidationError || isSeriesCatalog
+                        ? "text-neutral-500"
+                        : "text-white"
+                    }`}
+                  />
                   <span>Import Chapter Images</span>
                 </>
               )}
@@ -473,16 +479,16 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               type="button"
               onClick={handleOpenChapterScraperClick}
               disabled={isScraping}
-              className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold active:scale-95 transition-all font-mono group cursor-pointer ${
+              className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all font-mono group select-none ${
                 isSeriesCatalog
-                  ?"bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-lg  border border-blue-400/30 ring-2 ring-blue-500/30"
-                  :"bg-[#13151f] hover:bg-[#181d2a] hover:border-[#2563eb]/50 text-neutral-200 hover:text-white border border-[#1e2230] shadow-md disabled:opacity-35 disabled:pointer-events-none"
+                  ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-blue-400/40 shadow-md shadow-blue-500/25 cursor-pointer active:scale-95"
+                  : "bg-[#141414] hover:bg-[#2A2A2A] text-white border border-[#2F2F2F] hover:border-neutral-500 shadow-sm cursor-pointer active:scale-95"
               }`}
               aria-label="Import Chapter Scraper"
             >
               <Zap
                 className={`h-4 w-4 transition-transform group-hover:scale-110 ${
-                  isSeriesCatalog ?"text-white" :"text-[#38bdf8]"
+                  isSeriesCatalog ? "text-white" : "text-blue-400 group-hover:text-blue-300"
                 }`}
               />
               <span>Import Chapter Scraper</span>

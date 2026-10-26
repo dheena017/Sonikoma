@@ -282,3 +282,30 @@ input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
   display: none !important;
 }
+
+/* ── Underline & Segmented Tab Navigation System ─────────── */
+.tab-underline {
+  position: relative;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  color: #9ca3af;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.tab-underline:hover {
+  color: #ffffff;
+  background-color: rgba(42, 42, 42, 0.6);
+}
+
+.tab-underline.active,
+.tab-underline--active {
+  color: #3b82f6 !important;
+  border-bottom-color: #3b82f6 !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  font-weight: 700 !important;
+}
+

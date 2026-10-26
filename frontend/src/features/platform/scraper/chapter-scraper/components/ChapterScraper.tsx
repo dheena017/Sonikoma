@@ -1420,7 +1420,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                             e.stopPropagation();
                             handleChapterClick(chapter);
                           }}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-mono font-bold text-xs transition-all shadow-md cursor-pointer active:scale-95 whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-mono font-bold text-xs transition-all shadow-md shadow-blue-500/25 cursor-pointer active:scale-95 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Import Chapter Images"
                         >
                           {importingChapterUrl === chapter.url ? (
