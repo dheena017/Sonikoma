@@ -131,46 +131,49 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           />
         ))}
 
-      {/* Fixed Premium Header */}
-      {!isFocusMode && (
-        <EditorPageHeader
-          title={title}
-          subtitle={subtitle}
-          onBackToApp={onBackToApp}
-          onSave={onSave}
-          isSaving={isSaving}
-          isDirty={isDirty}
-          isFocusMode={isFocusMode}
-          setIsFocusMode={setIsFocusMode}
-          onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          isSidebarCollapsed={isSidebarCollapsed}
-          isSidebarOpen={isSidebarOpen}
-          notifications={notifications}
-          markNotificationAsRead={markNotificationAsRead}
-          markAllNotificationsAsRead={markAllNotificationsAsRead}
-          deleteNotification={deleteNotification}
-          clearAllNotifications={clearAllNotifications}
-          notificationsMuted={notificationsMuted}
-          setNotificationsMuted={setNotificationsMuted}
-          onNavigateToAll={onNavigateToAll}
-          fetchWithInterceptor={fetchWithInterceptor}
-          navigateTo={navigateTo}
-          user={user}
-        />
-      )}
-
-      {/* Main content sits directly below the fixed header without reserving extra blank space. */}
+      {/* Main page layout container sitting beside mini sidebar */}
       <div
-        id="main-scroll-container"
-        className={`flex flex-1 flex-col min-w-0 transition-[padding] duration-300 ease-out custom-purple-scrollbar overflow-y-auto overflow-x-hidden [contain:layout_style] ${
-          isFocusMode
-            ? "h-screen pl-0 pr-0"
-            : "h-screen pt-16 pl-0 pr-0 md:pl-14 md:pr-0"
+        className={`flex-1 flex flex-col min-h-0 h-screen overflow-hidden transition-[padding] duration-300 ease-out ${
+          isFocusMode ? "pl-0" : "pl-0 md:pl-14"
         }`}
       >
-        <div className="relative flex-1 w-full min-w-0 flex flex-col">
-          <div className="w-full flex flex-col flex-1 min-h-0 min-w-0 pb-8">
-            {children}
+        {/* Fixed Premium Header */}
+        {!isFocusMode && (
+          <EditorPageHeader
+            title={title}
+            subtitle={subtitle}
+            onBackToApp={onBackToApp}
+            onSave={onSave}
+            isSaving={isSaving}
+            isDirty={isDirty}
+            isFocusMode={isFocusMode}
+            setIsFocusMode={setIsFocusMode}
+            onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            isSidebarCollapsed={isSidebarCollapsed}
+            isSidebarOpen={isSidebarOpen}
+            notifications={notifications}
+            markNotificationAsRead={markNotificationAsRead}
+            markAllNotificationsAsRead={markAllNotificationsAsRead}
+            deleteNotification={deleteNotification}
+            clearAllNotifications={clearAllNotifications}
+            notificationsMuted={notificationsMuted}
+            setNotificationsMuted={setNotificationsMuted}
+            onNavigateToAll={onNavigateToAll}
+            fetchWithInterceptor={fetchWithInterceptor}
+            navigateTo={navigateTo}
+            user={user}
+          />
+        )}
+
+        {/* Main content sits directly below the fixed header without reserving extra blank space. */}
+        <div
+          id="main-scroll-container"
+          className="flex flex-1 flex-col min-w-0 transition-[padding] duration-300 ease-out custom-purple-scrollbar overflow-y-auto overflow-x-hidden [contain:layout_style]"
+        >
+          <div className="relative flex-1 w-full min-w-0 flex flex-col">
+            <div className="w-full flex flex-col flex-1 min-h-0 min-w-0 pb-8">
+              {children}
+            </div>
           </div>
         </div>
       </div>
