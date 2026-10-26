@@ -212,7 +212,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 md:left-14 right-0 z-[100] h-16 flex min-w-0 flex-nowrap items-center justify-between gap-1 sm:gap-2.5 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl pl-0 pr-3 sm:pr-6 md:pr-8 shadow-md shadow-black/20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
+      className={`relative w-full min-w-0 h-16 shrink-0 z-50 flex flex-nowrap items-center justify-between gap-1 sm:gap-2.5 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl pl-0 pr-3 sm:pr-6 md:pr-8 shadow-md shadow-black/20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
         className || ""
       }`}
       style={style}
