@@ -10,15 +10,12 @@ import {
   CreditCard,
   ShieldCheck,
   LogOut,
-  Home,
   Sparkles,
   Zap,
   Award,
   Flame,
-  ChevronRight,
   Globe,
-  Pencil,
-} from"lucide-react";
+} from "lucide-react";
 
 import {
   ProfileAccountTab,
@@ -148,41 +145,22 @@ export default function ProfilePage(props: ProfilePageProps) {
     <div className="w-full flex-1 text-[#E5E5E5] flex flex-col font-sans py-4 sm:py-6 max-w-7xl mx-auto animate-fade-in text-left">
       {/* ── MAIN COVER WRAPPER CARD ── */}
       <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 lg:p-9 shadow-2xl space-y-7 relative overflow-hidden text-left">
-        {/* Compact Breadcrumb & Quick Actions Bar */}
-        <div className="flex items-center justify-between border-b border-neutral-800 pb-3.5">
-          <div className="flex items-center gap-2 text-xs font-mono text-neutral-400">
-            <Tooltip text="Return to Main Dashboard" placement="bottom">
-              <button
-                onClick={onNavigateHome}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-900/70 border border-neutral-800 hover:border-neutral-700 hover:text-white transition-all cursor-pointer text-neutral-400 shadow-sm"
-                aria-label="Dashboard Home"
-              >
-                <Home className="w-3.5 h-3.5 text-[#3B82F6]" />
-                <span>Dashboard</span>
-              </button>
-            </Tooltip>
-            <ChevronRight className="w-3.5 h-3.5 text-neutral-600" />
-            <span className="px-2.5 py-1 rounded-lg bg-[#3B82F6]/10 border border-[#3B82F6]/25 text-[#60A5FA] font-bold">
-              User Profile & Settings
-            </span>
-          </div>
-
-          {onLogout && (
-            <Tooltip text="Safely sign out of your creator session" placement="bottom">
-              <button
-                onClick={handleSignOutClick}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/80 hover:bg-rose-500/10 hover:border-rose-500/30 text-neutral-400 hover:text-rose-400 text-xs font-mono font-medium transition-all cursor-pointer shadow-sm"
-                aria-label="Sign Out"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Sign Out</span>
-              </button>
-            </Tooltip>
-          )}
-        </div>
-
         {/* Premium Glassmorphic Hero Banner */}
         <div className="relative w-full rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900/90 via-neutral-900/50 to-neutral-950 p-5 sm:p-6 shadow-xl overflow-hidden">
+          {onLogout && (
+            <div className="absolute top-4 right-4 z-20">
+              <Tooltip text="Safely sign out of your creator session" placement="bottom">
+                <button
+                  onClick={handleSignOutClick}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/80 hover:bg-rose-500/10 hover:border-rose-500/30 text-neutral-400 hover:text-rose-400 text-xs font-mono font-medium transition-all cursor-pointer shadow-sm"
+                  aria-label="Sign Out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Sign Out</span>
+                </button>
+              </Tooltip>
+            </div>
+          )}
 
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
             {/* User Profile Identity Block */}
@@ -201,15 +179,6 @@ export default function ProfilePage(props: ProfilePageProps) {
                     }}
                   />
                 </div>
-                <Tooltip text="Change avatar image" placement="top">
-                  <button
-                    onClick={() => state.setActiveTab("account")}
-                    aria-label="Edit Avatar"
-                    className="absolute -bottom-1.5 -right-1.5 flex h-6 w-6 items-center justify-center rounded-full border border-neutral-700 bg-[#111827] text-neutral-200 shadow-[0_0_0_2px_rgba(17,24,39,1)] transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-800 hover:text-white cursor-pointer sm:h-7 sm:w-7"
-                  >
-                    <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  </button>
-                </Tooltip>
               </div>
 
               <div className="space-y-1">
@@ -300,7 +269,7 @@ export default function ProfilePage(props: ProfilePageProps) {
 
         {/* Modern Segmented Navigation Bar */}
         <div className="w-full">
-          <div className="bg-neutral-950/90 p-1.5 rounded-2xl border border-neutral-800/90 inline-flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto no-scrollbar shadow-inner">
+          <div className="bg-[#121212] p-1.5 rounded-xl border border-[#262626] inline-flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto no-scrollbar shadow-sm">
             {tabsList.map((tab) => {
               const Icon = tab.icon;
               const isActive = state.activeTab === tab.id;
@@ -308,15 +277,15 @@ export default function ProfilePage(props: ProfilePageProps) {
                 <button
                   key={tab.id}
                   onClick={() => state.setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap select-none active:scale-95 ${
                     isActive
-                      ?"bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white shadow-md  border border-blue-400/30 font-bold"
-                      :"text-neutral-400 hover:text-white hover:bg-neutral-900 border border-transparent"
+                      ? "bg-[#222222] text-white shadow-sm font-bold border border-[#383838]"
+                      : "text-neutral-400 hover:text-white hover:bg-[#1A1A1A] border border-transparent"
                   }`}
                 >
                   <Icon
                     className={`w-3.5 h-3.5 ${
-                      isActive ?"text-white" :"text-neutral-400"
+                      isActive ? "text-[#3B82F6]" : "text-neutral-500"
                     }`}
                   />
                   <span>{tab.label}</span>
@@ -324,8 +293,8 @@ export default function ProfilePage(props: ProfilePageProps) {
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                         isActive
-                          ?"bg-white/20 text-white"
-                          :"bg-neutral-900 text-neutral-400 border border-neutral-800"
+                          ? "bg-[#3B82F6]/15 text-[#60A5FA] border border-[#3B82F6]/30"
+                          : "bg-[#181818] text-neutral-400 border border-[#282828]"
                       }`}
                     >
                       {tab.badge}

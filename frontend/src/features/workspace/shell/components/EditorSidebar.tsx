@@ -164,7 +164,7 @@ const EditorSidebar = ({
 
   return (
     <aside
-      className={`fixed top-0 bottom-0 left-0 h-screen bg-[#06060c]/90 backdrop-blur-3xl border-r border-white/8 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(59,130,246,0.06)] overflow-hidden select-none ${isCollapsed ?"w-20" :"w-[280px]"
+      className={`fixed top-0 bottom-0 left-0 h-screen bg-[#06060c]/90 backdrop-blur-3xl border-r border-white/8 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(59,130,246,0.06)] overflow-hidden select-none ${isCollapsed ? "w-14" : "w-[280px]"
         }`}
     >
       {/* Top Header / Close Area */}

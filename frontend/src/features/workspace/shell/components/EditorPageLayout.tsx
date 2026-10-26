@@ -165,7 +165,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
         className={`flex flex-1 flex-col min-w-0 transition-[padding] duration-300 ease-out custom-purple-scrollbar overflow-y-auto overflow-x-hidden [contain:layout_style] ${
           isFocusMode
             ? "h-screen pl-0 pr-0"
-            : "h-screen pt-16 pl-0 pr-0 md:pl-20 md:pr-0"
+            : "h-screen pt-16 pl-0 pr-0 md:pl-14 md:pr-0"
         }`}
       >
         <div className="relative flex-1 w-full min-w-0 flex flex-col">

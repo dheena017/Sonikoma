@@ -119,22 +119,22 @@ const EditorMiniSidebarInner = ({
           aria-label={tool.label}
         >
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${isActive
-                ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white shadow-lg  scale-105"
-                :"bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700"
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${isActive
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white shadow-lg  scale-105"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700"
               }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-200 ${isActive
-                  ?"text-white"
-                  :"text-[#9CA3AF] group-hover:text-[#3B82F6]"
+              className={`w-4 h-4 transition-colors duration-200 ${isActive
+                  ? "text-white"
+                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
                 }`}
             />
           </div>
 
           {/* Crop Slices Count Badge */}
-          {tool.key ==="crop" && slicesCount > 0 && (
-            <span className="absolute -top-1 -right-1 h-5 min-w-[20px] bg-[#3B82F6] text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1.5 border-2 border-neutral-950 shadow-md z-20">
+          {tool.key === "crop" && slicesCount > 0 && (
+            <span className="absolute -top-1 -right-1 h-4 min-w-[16px] bg-[#3B82F6] text-[9px] text-white font-bold rounded-full flex items-center justify-center px-1 border-2 border-neutral-950 shadow-md z-20">
               {slicesCount}
             </span>
           )}
@@ -189,9 +189,30 @@ const EditorMiniSidebarInner = ({
 
     return (
       <aside
-        style={{ top:`${topOffsetPx}px` }}
-        className="hidden md:flex fixed bottom-0 left-0 w-20 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex-col items-center py-3 z-[60] shadow-xl select-none overflow-hidden"
+        className="hidden md:flex fixed top-0 bottom-0 left-0 w-14 h-screen bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex-col items-center z-[60] shadow-xl select-none overflow-hidden"
       >
+        {/* Top Header / Menu Toggle Button Area (Matches Header h-16) */}
+        <div className="h-16 w-full flex items-center justify-center border-b border-white/10 shrink-0">
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            onMouseEnter={(e) => {
+              setMenuRect(e.currentTarget.getBoundingClientRect());
+              setMenuHover(true);
+            }}
+            onMouseLeave={() => setMenuHover(false)}
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-white/10 hover:border-neutral-500 text-neutral-300 hover:text-white transition-all shadow-sm cursor-pointer active:scale-95 shrink-0"
+            aria-label="Toggle navigation menu"
+            title="Toggle Navigation Menu"
+          >
+            <Menu className="h-4.5 w-4.5" />
+          </button>
+          <TooltipPortal
+            text="Toggle Navigation Menu"
+            visible={menuHover}
+            anchorRect={menuRect}
+          />
+        </div>
+
         <div className="flex-1 w-full flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
           {cropToolGroups.map((group, gi) => (
             <div
@@ -202,14 +223,14 @@ const EditorMiniSidebarInner = ({
               <div
                 className="w-full flex flex-col items-center"
                 style={{
-                  marginTop: gi > 0 ?"0.6rem" :"0.2rem",
-                  marginBottom:"0.4rem",
+                  marginTop: gi > 0 ? "0.6rem" : "0.2rem",
+                  marginBottom: "0.4rem",
                 }}
               >
                 {gi > 0 && (
                   <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
                 )}
-                <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-neutral-400 select-none text-center w-full px-1">
+                <span className="text-[8px] font-mono font-bold uppercase tracking-[0.14em] text-neutral-400 select-none text-center w-full px-0.5 truncate">
                   {group.label}
                 </span>
               </div>
@@ -404,22 +425,22 @@ const EditorMiniSidebarInner = ({
           aria-label={item.label}
         >
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${isActive
-                ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105 shadow-lg"
-                :"bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700"
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${isActive
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105 shadow-lg"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700"
               }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-200 ${isActive
-                  ?"text-white"
-                  :"text-[#9CA3AF] group-hover:text-[#3B82F6]"
+              className={`w-4 h-4 transition-colors duration-200 ${isActive
+                  ? "text-white"
+                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
                 }`}
             />
           </div>
 
           {/* Notification Badge */}
           {item.badge !== undefined && (
-            <span className="absolute -top-1 -right-1 h-5 min-w-[20px] bg-[#3B82F6] text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1.5 border-2 border-neutral-950 shadow-md z-20">
+            <span className="absolute -top-1 -right-1 h-4 min-w-[16px] bg-[#3B82F6] text-[9px] text-white font-bold rounded-full flex items-center justify-center px-1 border-2 border-neutral-950 shadow-md z-20">
               {item.badge}
             </span>
           )}
@@ -439,9 +460,30 @@ const EditorMiniSidebarInner = ({
 
   return (
     <aside
-      style={{ top:`${topOffsetPx}px` }}
-      className="hidden md:flex fixed bottom-0 left-0 w-20 bg-[#0A0A0A]/95 backdrop-blur-2xl border-r border-[#2F2F2F] flex-col items-center py-3 z-[90] shadow-xl select-none overflow-hidden"
+      className="hidden md:flex fixed top-0 bottom-0 left-0 w-14 h-screen bg-[#0A0A0A]/95 backdrop-blur-2xl border-r border-[#2F2F2F] flex-col items-center z-[90] shadow-xl select-none overflow-hidden"
     >
+      {/* Top Header / Menu Toggle Button Area (Matches Header h-16) */}
+      <div className="h-16 w-full flex items-center justify-center border-b border-[#2F2F2F] shrink-0">
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          onMouseEnter={(e) => {
+            setMenuRect(e.currentTarget.getBoundingClientRect());
+            setMenuHover(true);
+          }}
+          onMouseLeave={() => setMenuHover(false)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-700 text-neutral-300 hover:text-white transition-all shadow-sm cursor-pointer active:scale-95 shrink-0"
+          aria-label="Toggle navigation menu"
+          title="Toggle Navigation Menu"
+        >
+          <Menu className="h-4.5 w-4.5" />
+        </button>
+        <TooltipPortal
+          text="Toggle Navigation Menu"
+          visible={menuHover}
+          anchorRect={menuRect}
+        />
+      </div>
+
       {/* Scrollable Tools Area */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {menuGroups.map((group, gi) => (
@@ -453,14 +495,14 @@ const EditorMiniSidebarInner = ({
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: gi > 0 ?"0.6rem" :"0.2rem",
-                marginBottom:"0.4rem",
+                marginTop: gi > 0 ? "0.6rem" : "0.2rem",
+                marginBottom: "0.4rem",
               }}
             >
               {gi > 0 && (
                 <div className="w-6 h-[1px] bg-[#2F2F2F] rounded-full mb-1.5" />
               )}
-              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#9CA3AF] select-none text-center w-full px-1">
+              <span className="text-[8px] font-mono font-bold uppercase tracking-[0.14em] text-[#9CA3AF] select-none text-center w-full px-0.5 truncate">
                 {group.label}
               </span>
             </div>
@@ -485,9 +527,9 @@ const EditorMiniSidebarInner = ({
             }}
             onMouseLeave={() => setReturnHover(false)}
             aria-label="Return to Workspace"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center group"
+            className="w-9 h-9 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center group"
           >
-            <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
+            <ExternalLink className="w-4 h-4 shrink-0 text-white" />
           </button>
           <TooltipPortal
             text="Return to Workspace"

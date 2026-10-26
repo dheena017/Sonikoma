@@ -45,6 +45,8 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
 }) => {
   const [returnHover, setReturnHover] = useState(false);
   const [returnRect, setReturnRect] = useState<DOMRect | null>(null);
+  const [menuHover, setMenuHover] = useState(false);
+  const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
 
   const handleReturn = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -138,15 +140,15 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
           aria-label={item.label}
         >
           <div
-            className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${active
-                ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white"
-                :"bg-[#1E1E1E] border border-[#2F2F2F] text-neutral-400 group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${active
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-neutral-400 group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
               }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-200 ${active
-                  ?"text-white"
-                  :"text-[#9CA3AF] group-hover:text-[#3B82F6]"
+              className={`w-4 h-4 transition-colors duration-200 ${active
+                  ? "text-white"
+                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
                 }`}
             />
           </div>
@@ -164,7 +166,29 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
   };
 
   return (
-    <div className="w-20 h-full flex flex-col items-center py-3 bg-[#0A0A0A]/95 border-r border-[#2F2F2F] select-none shrink-0 z-30 overflow-hidden">
+    <div className="w-14 h-full flex flex-col items-center bg-[#0A0A0A]/95 border-r border-[#2F2F2F] select-none shrink-0 z-30 overflow-hidden">
+      {/* Top Header / Menu Toggle Button Area (Matches Header h-16) */}
+      <div className="h-16 w-full flex items-center justify-center border-b border-[#2F2F2F] shrink-0">
+        <button
+          onClick={onToggleSidebar}
+          onMouseEnter={(e) => {
+            setMenuRect(e.currentTarget.getBoundingClientRect());
+            setMenuHover(true);
+          }}
+          onMouseLeave={() => setMenuHover(false)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
+          aria-label="Toggle Navigation Menu"
+          title="Toggle Navigation Menu"
+        >
+          <Menu className="h-4.5 w-4.5" />
+        </button>
+        <TooltipPortal
+          text="Toggle Navigation Menu"
+          visible={menuHover}
+          anchorRect={menuRect}
+        />
+      </div>
+
       {/* Tool Icons List */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
@@ -176,14 +200,14 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ?"0.6rem" :"0.2rem",
-                marginBottom:"0.4rem",
+                marginTop: groupIdx > 0 ? "0.6rem" : "0.2rem",
+                marginBottom: "0.4rem",
               }}
             >
               {groupIdx > 0 && (
                 <div className="w-6 h-[1px] bg-[#2F2F2F] rounded-full mb-1.5" />
               )}
-              <span className="text-[8.5px] font-sans font-bold uppercase tracking-[0.16em] text-neutral-400 select-none text-center w-full px-1">
+              <span className="text-[8px] font-sans font-bold uppercase tracking-[0.14em] text-neutral-400 select-none text-center w-full px-0.5 truncate">
                 {group.name}
               </span>
             </div>
@@ -205,9 +229,9 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
           }}
           onMouseLeave={() => setReturnHover(false)}
           aria-label="Return to Storyboard"
-          className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-lg flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90"
+          className="w-9 h-9 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-lg flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90"
         >
-          <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
+          <ExternalLink className="w-4 h-4 shrink-0 text-white" />
         </button>
         <TooltipPortal
           text="Return to Storyboard"

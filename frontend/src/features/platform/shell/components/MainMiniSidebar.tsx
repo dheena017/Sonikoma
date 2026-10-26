@@ -249,22 +249,22 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
         >
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               item.active
-                ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
-                :"bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700"
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700"
             }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-200 ${
+              className={`w-4 h-4 transition-colors duration-200 ${
                 item.active
-                  ?"text-white"
-                  :"text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                  ? "text-white"
+                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
               }`}
             />
           </div>
           {item.badge && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-[#3B82F6] text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1 border border-neutral-950 z-20">
+            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-[#3B82F6] text-[9px] text-white font-bold rounded-full flex items-center justify-center px-1 border border-neutral-950 z-20">
               {item.badge}
             </span>
           )}
@@ -276,9 +276,33 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 
   const [creativeHover, setCreativeHover] = useState(false);
   const [creativeRect, setCreativeRect] = useState<DOMRect | null>(null);
+  const [menuHover, setMenuHover] = useState(false);
+  const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
 
   return (
-    <aside className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-[#0A0A0A]/95 backdrop-blur-2xl border-r border-[#2F2F2F] hidden lg:flex flex-col items-center py-3 z-40 overflow-hidden select-none">
+    <aside className="fixed top-0 bottom-0 left-0 w-14 h-screen shrink-0 bg-[#0A0A0A]/95 backdrop-blur-2xl border-r border-[#2F2F2F] hidden lg:flex flex-col items-center z-40 overflow-hidden select-none">
+      {/* Top Header / Menu Toggle Button Area (Matches Header h-16) */}
+      <div className="h-16 w-full flex items-center justify-center border-b border-[#2F2F2F] shrink-0">
+        <button
+          onClick={onToggleSidebar}
+          onMouseEnter={(e) => {
+            setMenuRect(e.currentTarget.getBoundingClientRect());
+            setMenuHover(true);
+          }}
+          onMouseLeave={() => setMenuHover(false)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-500 text-white transition-all shadow-sm cursor-pointer active:scale-95 shrink-0"
+          aria-label="Toggle Navigation Menu"
+          title="Toggle Navigation Menu (Ctrl+B)"
+        >
+          <Menu className="h-4.5 w-4.5" />
+        </button>
+        <TooltipPortal
+          text="Toggle Navigation Menu"
+          visible={menuHover}
+          anchorRect={menuRect}
+        />
+      </div>
+
       {/* Navigation Groups */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
@@ -290,14 +314,14 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ?"0.6rem" :"0.2rem",
-                marginBottom:"0.4rem",
+                marginTop: groupIdx > 0 ? "0.6rem" : "0.2rem",
+                marginBottom: "0.4rem",
               }}
             >
               {groupIdx > 0 && (
                 <div className="w-6 h-[1px] bg-[#2F2F2F] rounded-full mb-1.5" />
               )}
-              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#9CA3AF] select-none text-center w-full px-1">
+              <span className="text-[8px] font-mono font-bold uppercase tracking-[0.14em] text-[#9CA3AF] select-none text-center w-full px-0.5 truncate">
                 {group.group}
               </span>
             </div>
@@ -320,9 +344,9 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             }}
             onMouseLeave={() => setCreativeHover(false)}
             aria-label="Creative Suite"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center group"
+            className="w-9 h-9 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center group"
           >
-            <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
+            <ExternalLink className="w-4 h-4 shrink-0 text-white" />
           </button>
           <TooltipPortal
             text="Creative Suite"

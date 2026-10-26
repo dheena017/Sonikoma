@@ -11,6 +11,7 @@ interface WorkspacePanelProps {
   onBackToApp?: () => void;
   navigateTo?: (path: string) => void;
   showContent?: boolean;
+  showMiniSidebar?: boolean;
   appLogic?: any;
 }
 
@@ -21,6 +22,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   onBackToApp,
   navigateTo,
   showContent = true,
+  showMiniSidebar = false,
   appLogic,
 }) => {
   const [internalActiveWorkspace, setInternalActiveWorkspace] =
@@ -59,14 +61,16 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
 
   return (
     <div className="w-full flex h-full overflow-hidden relative">
-      <div className="hidden lg:block h-full shrink-0">
-        <MiniSidebar
-          activeWorkspace={activeWorkspace}
-          onSelectWorkspace={handleSelectWorkspace}
-          onBackToApp={onBackToApp}
-          navigateTo={navigateTo}
-        />
-      </div>
+      {showMiniSidebar && (
+        <div className="hidden lg:block h-full shrink-0">
+          <MiniSidebar
+            activeWorkspace={activeWorkspace}
+            onSelectWorkspace={handleSelectWorkspace}
+            onBackToApp={onBackToApp}
+            navigateTo={navigateTo}
+          />
+        </div>
+      )}
 
       {showContent && (
         <div className="flex-1 w-full min-w-0 flex flex-col h-full bg-[#121212] backdrop-blur-2xl border-r border-[#2F2F2F] shadow-[inset_0_0_32px_rgba(0,0,0,0.22)]">

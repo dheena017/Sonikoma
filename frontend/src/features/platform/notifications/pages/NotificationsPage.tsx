@@ -98,16 +98,6 @@ const NotificationsPage = React.memo(
           {/* Unified Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2F2F2F] pb-5">
             <div>
-              <div className="flex items-center gap-2 text-xs font-mono text-[#9CA3AF] mb-1.5">
-                <span
-                  className="hover:text-white cursor-pointer"
-                  onClick={onNavigateHome}
-                >
-                  Dashboard
-                </span>
-                <span className="text-[#6B7280]">&gt;</span>
-                <span className="text-[#3B82F6] font-bold">Notifications</span>
-              </div>
               <h2 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#121212] border border-[#2F2F2F] flex items-center justify-center text-[#3B82F6] shadow-inner">
                   <Bell className="h-5 w-5" />

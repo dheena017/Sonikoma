@@ -45,24 +45,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const currentTabInfo = getTabMetadata(activeTabRaw);
 
   return (
-    <div className="min-h-screen bg-transparent text-white flex flex-col selection:bg-[#3B82F6]/30">
-      <AdminHeader
-        currentPath={currentPath}
-        navigateTo={navigateTo}
-        fetchWithInterceptor={fetchWithInterceptor}
-        onToggleSidebar={toggleSidebar}
-        notifications={notifications}
-        markNotificationAsRead={markNotificationAsRead}
-        markAllNotificationsAsRead={markAllNotificationsAsRead}
-        deleteNotification={deleteNotification}
-        clearAllNotifications={clearAllNotifications}
-        notificationsMuted={notificationsMuted}
-        setNotificationsMuted={setNotificationsMuted}
-        user={user}
-        addNotification={addNotification}
-        isSidebarOpen={isSidebarOpen}
-      />
-
+    <div className="min-h-screen bg-transparent text-white flex flex-col selection:bg-[#3B82F6]/30 relative">
       <AdminMiniSidebar
         currentPath={currentPath}
         navigateTo={navigateTo}
@@ -76,7 +59,24 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         onClose={closeSidebar}
       />
 
-      <div className="flex-1 flex flex-col pt-16 lg:pl-20 min-h-screen transition-all duration-300">
+      <div className="flex-1 flex flex-col lg:pl-14 min-h-screen transition-all duration-300">
+        <AdminHeader
+          currentPath={currentPath}
+          navigateTo={navigateTo}
+          fetchWithInterceptor={fetchWithInterceptor}
+          onToggleSidebar={toggleSidebar}
+          notifications={notifications}
+          markNotificationAsRead={markNotificationAsRead}
+          markAllNotificationsAsRead={markAllNotificationsAsRead}
+          deleteNotification={deleteNotification}
+          clearAllNotifications={clearAllNotifications}
+          notificationsMuted={notificationsMuted}
+          setNotificationsMuted={setNotificationsMuted}
+          user={user}
+          addNotification={addNotification}
+          isSidebarOpen={isSidebarOpen}
+        />
+
         <main className="flex-1 px-4 pb-6 pt-2 sm:px-6 md:px-8 md:pb-8 md:pt-4 max-w-7xl mx-auto w-full">
           <div className="w-full animate-[fadeIn_0.3s_ease-out]">
             {/* Subpage Header for non-overview admin tabs */}

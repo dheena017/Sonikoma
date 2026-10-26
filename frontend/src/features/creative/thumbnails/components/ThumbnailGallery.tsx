@@ -54,7 +54,7 @@ export const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
         {thumbnails.map((item, index) => (
           <div
             key={item.id}
-            className="group rounded-2xl overflow-hidden border border-[#2F2F2F] bg-[#1E1E1E] hover:border-[#3B82F6]/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col"
+            className="group rounded-2xl overflow-hidden border border-[#262626] bg-[#141414] hover:border-neutral-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col"
           >
             {/* Thumbnail Image Container */}
             <div

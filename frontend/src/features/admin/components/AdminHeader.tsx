@@ -201,11 +201,12 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
   return (
     <header
       id="header_pane"
-      className="w-full h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 shadow-md shadow-black/20"
+      className="w-full h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-3 sm:pl-4 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 shadow-md shadow-black/20"
     >
-      {/* Left side: Hamburger and Brand */}
+      {/* Left side: Hamburger (mobile only) and Brand */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
-        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-4">
+        {/* Mobile-only menu toggle */}
+        <div className="lg:hidden flex items-center justify-center shrink-0">
           <button
             onClick={onToggleSidebar}
             className="icon-pill cursor-pointer hover:icon-pill--blue transition-all"

@@ -446,25 +446,19 @@ const HeaderInner = ({
   return (
     <header
       id="header_pane"
-      className="w-full h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-1.5 sm:gap-4 select-none shadow-md shadow-black/20"
+      className="w-full h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-3 sm:pl-4 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-1.5 sm:gap-4 select-none shadow-md shadow-black/20"
     >
-      {/* Left side: Hamburger, Brand, and User Profile */}
+      {/* Left side: Hamburger (mobile only), Brand, and User Profile */}
       <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 h-full">
-        {/* Wrapper added here to perfectly match the width of the mini sidebar */}
-        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-0.5 sm:mr-4">
-          <Tooltip
-            text="Toggle Navigation Menu"
-            placement="bottom"
-            shortcut="Ctrl+B"
+        {/* Mobile-only Menu toggle (< lg) */}
+        <div className="lg:hidden flex items-center justify-center shrink-0">
+          <button
+            onClick={onToggleSidebar}
+            className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-500 text-white transition-all shadow-sm cursor-pointer active:scale-95 shrink-0"
+            aria-label="Toggle Navigation Menu"
           >
-            <button
-              onClick={onToggleSidebar}
-              className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-500 text-white transition-all shadow-sm cursor-pointer active:scale-95 shrink-0"
-              aria-label="Toggle Navigation Menu"
-            >
-              <Menu className="h-4 w-4" />
-            </button>
-          </Tooltip>
+            <Menu className="h-4 w-4" />
+          </button>
         </div>
 
         <SonikomaLogo size="sm" onClick={() => navigateTo("/dashboard")} />

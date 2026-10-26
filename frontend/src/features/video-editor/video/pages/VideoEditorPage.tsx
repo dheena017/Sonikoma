@@ -3,6 +3,7 @@ import { Film, FolderSync, Zap, Layers } from "lucide-react";
 // ── Subsystem imports (new architecture) ─────────────────────────────────────
 import VideoEditorHeader from "@/features/video-editor/video/shell/VideoEditorHeader";
 import VideoEditorSidebar from "@/features/video-editor/video/shell/VideoEditorSidebar";
+import { MiniSidebar } from "@/features/video-editor/video/shell/MiniSidebar";
 import { WorkspacePanel } from "@/features/video-editor/video/shell/WorkspacePanel";
 import { EditorViewport } from "@/features/video-editor/video/viewport/EditorViewport";
 import { Timeline } from "@/features/video-editor/video/timeline/Timeline";
@@ -278,29 +279,17 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
   >("player");
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#0A0A0A] text-white overflow-hidden select-none font-sans fixed inset-0 z-[100]">
-      {/* ── Top Header Bar ──────────────────────────────────────────────────── */}
-      <VideoEditorHeader
-        seriesTitle={seriesTitle}
-        chapterTitle={chapterTitle}
-        chapterNumber={chapterNumber ? String(chapterNumber) : undefined}
-        onBackToApp={handleReturn}
-        onExport={handleExport}
-        onSave={handleSave}
-        isRendering={isRendering}
-        renderProgress={renderProgress}
-        isSaving={isSaving}
-        isDirty={isDirty}
-        userCredits={userCredits}
-        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        layoutConfig={layoutConfig}
-        onTogglePanel={handleTogglePanel}
-        panelsCount={panels.length}
-        navigateTo={navigateTo}
-        user={user || appLogic?.user}
-        layoutMode={layoutMode}
-        onLayoutModeChange={setLayoutMode}
-      />
+    <div className="flex flex-row h-screen w-screen bg-[#0A0A0A] text-white overflow-hidden select-none font-sans fixed inset-0 z-[100]">
+      {/* ── Left: Full-Height Mini Sidebar Rail ────────────────────────────── */}
+      <div className="hidden lg:block h-full shrink-0 z-40">
+        <MiniSidebar
+          activeWorkspace={activeWorkspace}
+          onSelectWorkspace={handleSelectWorkspace}
+          onBackToApp={handleReturn}
+          navigateTo={navigateTo}
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
+      </div>
 
       {/* ── Slide-Out Full Sidebar Drawer ───────────────────────────────────── */}
       <VideoEditorSidebar
@@ -315,40 +304,60 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
         navigateTo={navigateTo}
       />
 
-      {/* ── Main Workspace Row ───────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col md:flex-row min-h-0 relative select-none overflow-hidden">
-        {/* Left: Workspace Panel (MiniSidebar + active workspace) */}
-        <div
-          className={`h-full shrink-0 overflow-hidden transition-all duration-200 ${
-            mobileTab === "assets"
-              ? "flex w-full min-w-0"
-              : layoutConfig.mediaBin
-              ? "hidden md:flex"
-              : "hidden md:flex md:w-20"
-          }`}
-          style={{
-            width:
-              typeof window !== "undefined" && window.innerWidth >= 768
-                ? layoutConfig.mediaBin
-                  ? leftWidth
-                  : 80
-                : undefined,
-          }}
-        >
-          <WorkspacePanel
-            defaultWorkspace="imported_assets"
-            activeWorkspace={activeWorkspace}
-            onSelectWorkspace={handleSelectWorkspace}
-            onBackToApp={handleReturn}
-            navigateTo={navigateTo}
-            showContent={
-              typeof window !== "undefined" && window.innerWidth < 768
-                ? true
-                : layoutConfig.mediaBin
-            }
-            appLogic={appLogic}
-          />
-        </div>
+      {/* ── Right Column: Header & Main Workspace ──────────────────────────── */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* ── Top Header Bar ──────────────────────────────────────────────────── */}
+        <VideoEditorHeader
+          seriesTitle={seriesTitle}
+          chapterTitle={chapterTitle}
+          chapterNumber={chapterNumber ? String(chapterNumber) : undefined}
+          onBackToApp={handleReturn}
+          onExport={handleExport}
+          onSave={handleSave}
+          isRendering={isRendering}
+          renderProgress={renderProgress}
+          isSaving={isSaving}
+          isDirty={isDirty}
+          userCredits={userCredits}
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          layoutConfig={layoutConfig}
+          onTogglePanel={handleTogglePanel}
+          panelsCount={panels.length}
+          navigateTo={navigateTo}
+          user={user || appLogic?.user}
+          layoutMode={layoutMode}
+          onLayoutModeChange={setLayoutMode}
+        />
+
+        {/* ── Main Workspace Row ───────────────────────────────────────────────── */}
+        <div className="flex-1 flex flex-col md:flex-row min-h-0 relative select-none overflow-hidden">
+          {/* Left: Media Bin Drawer / Workspace Content */}
+          {(mobileTab === "assets" || layoutConfig.mediaBin) && (
+            <div
+              className={`h-full shrink-0 overflow-hidden transition-all duration-200 ${
+                mobileTab === "assets"
+                  ? "flex w-full min-w-0"
+                  : "hidden md:flex"
+              }`}
+              style={{
+                width:
+                  typeof window !== "undefined" && window.innerWidth >= 768
+                    ? leftWidth
+                    : undefined,
+              }}
+            >
+              <WorkspacePanel
+                defaultWorkspace="imported_assets"
+                activeWorkspace={activeWorkspace}
+                onSelectWorkspace={handleSelectWorkspace}
+                onBackToApp={handleReturn}
+                navigateTo={navigateTo}
+                showContent={true}
+                showMiniSidebar={false}
+                appLogic={appLogic}
+              />
+            </div>
+          )}
 
         {/* Left Vertical Resizer Splitter - Hidden on mobile */}
         {layoutConfig.mediaBin && (
@@ -572,6 +581,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
           <Layers className="w-4 h-4 shrink-0" />
           <span className="leading-none mt-0.5">Inspector</span>
         </button>
+      </div>
       </div>
     </div>
   );

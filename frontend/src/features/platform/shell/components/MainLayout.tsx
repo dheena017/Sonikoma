@@ -473,6 +473,7 @@ export default function MainLayout(props: MainLayoutProps) {
                   projectId={projectId}
                   seriesSlug={seriesSlugState}
                   chapterSlug={chapterSlugState}
+                  onToggleSidebar={handleToggleSidebar}
                 />
               )}
           </>
@@ -482,8 +483,15 @@ export default function MainLayout(props: MainLayoutProps) {
       {/* --- Main Contents Controller & Router --- */}
       <div
         id="main-content-layout"
-        className={`relative z-10 h-screen max-h-screen overflow-hidden flex-1 flex flex-col max-w-full min-h-0 ${
+        className={`relative z-10 h-screen max-h-screen overflow-hidden flex-1 flex flex-col max-w-full min-h-0 transition-[padding] duration-200 ease-out ${
           showAutoCropModal || showBubbleModal ? "overflow-hidden" : ""
+        } ${
+          !isSidebarOpen &&
+          !isProEditorPage &&
+          !isImageEditorPage &&
+          !isVideoEditorPage
+            ? "lg:pl-14"
+            : ""
         }`}
       >
         {/* Top Header */}
@@ -626,11 +634,7 @@ export default function MainLayout(props: MainLayoutProps) {
             key={currentPath}
             className={`w-full max-w-full min-w-0 min-h-0 flex-1 flex flex-col ${
               isFullBleedNoScroll
-                ? !isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isVideoEditorPage
-                  ? "p-0 lg:pl-20 h-full min-h-0 overflow-hidden"
-                  : "p-0 h-full min-h-0 overflow-hidden"
-                : !isSidebarOpen
-                ? "pt-6 sm:pt-7 px-4 sm:px-6 lg:px-8 lg:pl-28 pb-8 page-view-transition stagger-container"
+                ? "p-0 h-full min-h-0 overflow-hidden"
                 : "pt-6 sm:pt-7 px-4 sm:px-6 lg:px-8 pb-8 page-view-transition stagger-container"
             }`}
           >

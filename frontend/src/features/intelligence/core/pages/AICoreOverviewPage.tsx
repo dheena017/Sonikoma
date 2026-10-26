@@ -182,13 +182,13 @@ export default function AICoreOverviewPage({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div
             onClick={() => handleNav("/ai-core/routing")}
-            className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 hover:bg-[#242424] transition-all cursor-pointer flex flex-col justify-between group shadow-md"
+            className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-600 hover:bg-[#242424] transition-all cursor-pointer flex flex-col justify-between group shadow-md"
           >
             <div>
-              <div className="p-3 w-fit rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 mb-4 group-hover:scale-105 transition-transform">
+              <div className="p-3 w-fit rounded-xl bg-[#141414] text-[#3B82F6] border border-[#2F2F2F] mb-4 group-hover:scale-105 transition-transform">
                 <Layers className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-[#E5E5E5] group-hover:text-[#3B82F6] transition-colors">
+              <h3 className="text-base font-bold text-[#E5E5E5] group-hover:text-white transition-colors">
                 Smart Model Routing
               </h3>
               <p className="text-xs text-[#9CA3AF] mt-2 leading-relaxed">
@@ -196,7 +196,7 @@ export default function AICoreOverviewPage({
                 storyboard, OCR, translation, and TTS tasks.
               </p>
             </div>
-            <div className="mt-6 flex items-center gap-2 text-xs font-bold font-mono text-[#3B82F6] uppercase tracking-wider group-hover:translate-x-1 transition-transform">
+            <div className="mt-6 flex items-center gap-2 text-xs font-bold font-mono text-neutral-300 group-hover:text-white uppercase tracking-wider group-hover:translate-x-1 transition-all">
               <span>Configure Routing</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
@@ -204,13 +204,13 @@ export default function AICoreOverviewPage({
 
           <div
             onClick={() => handleNav("/ai-core/usage")}
-            className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#10B981]/50 hover:bg-[#242424] transition-all cursor-pointer flex flex-col justify-between group shadow-md"
+            className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-600 hover:bg-[#242424] transition-all cursor-pointer flex flex-col justify-between group shadow-md"
           >
             <div>
-              <div className="p-3 w-fit rounded-xl bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20 mb-4 group-hover:scale-105 transition-transform">
+              <div className="p-3 w-fit rounded-xl bg-[#141414] text-emerald-400 border border-[#2F2F2F] mb-4 group-hover:scale-105 transition-transform">
                 <Activity className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-[#E5E5E5] group-hover:text-[#10B981] transition-colors">
+              <h3 className="text-base font-bold text-[#E5E5E5] group-hover:text-white transition-colors">
                 Usage Analytics
               </h3>
               <p className="text-xs text-[#9CA3AF] mt-2 leading-relaxed">
@@ -218,7 +218,7 @@ export default function AICoreOverviewPage({
                 and task-by-task generation logs.
               </p>
             </div>
-            <div className="mt-6 flex items-center gap-2 text-xs font-bold font-mono text-[#10B981] uppercase tracking-wider group-hover:translate-x-1 transition-transform">
+            <div className="mt-6 flex items-center gap-2 text-xs font-bold font-mono text-neutral-300 group-hover:text-white uppercase tracking-wider group-hover:translate-x-1 transition-all">
               <span>View Analytics</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
@@ -226,13 +226,13 @@ export default function AICoreOverviewPage({
 
           <div
             onClick={() => handleNav("/ai-core/rate-limits")}
-            className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 hover:bg-[#242424] transition-all cursor-pointer flex flex-col justify-between group shadow-md"
+            className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-600 hover:bg-[#242424] transition-all cursor-pointer flex flex-col justify-between group shadow-md"
           >
             <div>
-              <div className="p-3 w-fit rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 mb-4 group-hover:scale-105 transition-transform">
+              <div className="p-3 w-fit rounded-xl bg-[#141414] text-[#3B82F6] border border-[#2F2F2F] mb-4 group-hover:scale-105 transition-transform">
                 <ShieldCheck className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-[#E5E5E5] group-hover:text-[#3B82F6] transition-colors">
+              <h3 className="text-base font-bold text-[#E5E5E5] group-hover:text-white transition-colors">
                 Rate Limits & Quotas
               </h3>
               <p className="text-xs text-[#9CA3AF] mt-2 leading-relaxed">
@@ -240,7 +240,7 @@ export default function AICoreOverviewPage({
                 minute) limits across active providers.
               </p>
             </div>
-            <div className="mt-6 flex items-center gap-2 text-xs font-bold font-mono text-[#3B82F6] uppercase tracking-wider group-hover:translate-x-1 transition-transform">
+            <div className="mt-6 flex items-center gap-2 text-xs font-bold font-mono text-neutral-300 group-hover:text-white uppercase tracking-wider group-hover:translate-x-1 transition-all">
               <span>Check Limits</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>

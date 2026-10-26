@@ -238,10 +238,10 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
     <>
       <header className="relative w-full min-w-0 h-16 shrink-0 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-visible z-50">
         <div className="flex items-center shrink-0 h-full">
-          <div className="w-14 sm:w-16 md:w-20 flex items-center justify-center shrink-0 border-r border-[#2F2F2F] h-full">
+          <div className="lg:hidden w-14 sm:w-16 md:w-16 flex items-center justify-center shrink-0 border-r border-[#2F2F2F] h-full">
             <button
               onClick={onToggleSidebar}
-              className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-white/[0.04] border border-white/8 hover:bg-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white transition-all duration-300 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white transition-all duration-300 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
               title="Toggle Sidebar Drawer"
             >
               <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -664,21 +664,20 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             </button>
           </div>
 
-          {/* User Profile Pill at Far Right End */}
           <button
             onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-neutral-700 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-500 hover:bg-[#2A2A2A] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none"
             title="View Profile & Account Settings"
             aria-label="Open User profile"
           >
-            <span className="text-xs font-bold text-white group-hover:text-white truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#1E1E1E] border border-white/5">
+            <span className="text-xs font-bold text-white group-hover:text-white truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-full bg-[#181818] border border-[#2F2F2F]">
               {activeUser?.full_name ||
                 activeUser?.username ||
                 (activeUser?.email
                   ? activeUser.email.split("@")[0]
-                  :"Studio Creator")}
+                  : "Studio Creator")}
             </span>
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border border-neutral-700 bg-[#121212] shrink-0 flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border border-[#2F2F2F] bg-[#181818] shrink-0 flex items-center justify-center group-hover:border-neutral-400 transition-all duration-300">
               <img
                 key={
                   activeUser?.avatar_url || activeUser?.full_name ||"avatar"

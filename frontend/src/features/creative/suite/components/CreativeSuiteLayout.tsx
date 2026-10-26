@@ -100,22 +100,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#E5E5E5] flex flex-col selection:bg-[#3B82F6]/30">
-      <CreativeSuiteHeader
-        currentPath={currentPath}
-        navigateTo={navigateTo}
-        fetchWithInterceptor={fetchWithInterceptor}
-        onToggleSidebar={toggleSidebar}
-        notifications={notifications}
-        markNotificationAsRead={markNotificationAsRead}
-        markAllNotificationsAsRead={markAllNotificationsAsRead}
-        deleteNotification={deleteNotification}
-        clearAllNotifications={clearAllNotifications}
-        notificationsMuted={notificationsMuted}
-        setNotificationsMuted={setNotificationsMuted}
-        isSidebarOpen={isSidebarOpen}
-      />
-
+    <div className="min-h-screen bg-[#0A0A0A] text-[#E5E5E5] flex flex-col selection:bg-[#3B82F6]/30 relative">
       {/* Mini Sidebar (always visible on desktop, handles active indicator) */}
       <CreativeSuiteMiniSidebar
         currentPath={currentPath}
@@ -133,8 +118,23 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
         panels={activePanels}
       />
 
-      {/* Main page offset container */}
-      <div className="flex-1 flex flex-col pt-16 lg:pl-20 min-h-screen transition-all duration-300">
+      {/* Main page offset container sitting beside mini sidebar */}
+      <div className="flex-1 flex flex-col lg:pl-14 min-h-screen transition-all duration-300">
+        <CreativeSuiteHeader
+          currentPath={currentPath}
+          navigateTo={navigateTo}
+          fetchWithInterceptor={fetchWithInterceptor}
+          onToggleSidebar={toggleSidebar}
+          notifications={notifications}
+          markNotificationAsRead={markNotificationAsRead}
+          markAllNotificationsAsRead={markAllNotificationsAsRead}
+          deleteNotification={deleteNotification}
+          clearAllNotifications={clearAllNotifications}
+          notificationsMuted={notificationsMuted}
+          setNotificationsMuted={setNotificationsMuted}
+          isSidebarOpen={isSidebarOpen}
+        />
+
         <main className="flex-1 px-4 sm:px-6 pb-6 pt-4 md:px-8 md:pb-8">
           <div className="w-full animate-fade-in">{children}</div>
         </main>

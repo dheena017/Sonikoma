@@ -17,6 +17,7 @@ import {
   Coins,
   Activity,
   Brain,
+  Menu,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 
@@ -29,6 +30,7 @@ interface AdminMiniSidebarProps {
 const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
   currentPath,
   navigateTo,
+  onOpenSidebar,
 }) => {
   const groups = [
     {
@@ -173,14 +175,14 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
           className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none"
         >
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               active
                 ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
                 : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
             }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-200 ${
+              className={`w-4 h-4 transition-colors duration-200 ${
                 active
                   ? "text-white"
                   : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
@@ -195,9 +197,33 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
 
   const [returnHover, setReturnHover] = useState(false);
   const [returnRect, setReturnRect] = useState<DOMRect | null>(null);
+  const [menuHover, setMenuHover] = useState(false);
+  const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
 
   return (
-    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 hidden lg:flex flex-col items-center py-3 z-40 shadow-xl select-none overflow-hidden">
+    <aside className="fixed top-0 bottom-0 left-0 w-14 h-screen bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 hidden lg:flex flex-col items-center z-40 shadow-xl select-none overflow-hidden">
+      {/* Top Header / Menu Toggle Button Area (Matches Header h-16) */}
+      <div className="h-16 w-full flex items-center justify-center border-b border-white/10 shrink-0">
+        <button
+          onClick={onOpenSidebar}
+          onMouseEnter={(e) => {
+            setMenuRect(e.currentTarget.getBoundingClientRect());
+            setMenuHover(true);
+          }}
+          onMouseLeave={() => setMenuHover(false)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#141414] hover:bg-[#2A2A2A] border border-white/10 text-white transition-all shadow-sm cursor-pointer active:scale-95 shrink-0"
+          aria-label="Toggle Navigation Menu"
+          title="Toggle Navigation Menu"
+        >
+          <Menu className="h-4.5 w-4.5" />
+        </button>
+        <TooltipPortal
+          text="Toggle Navigation Menu"
+          visible={menuHover}
+          anchorRect={menuRect}
+        />
+      </div>
+
       {/* Navigation Groups */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
@@ -216,7 +242,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
               {groupIdx > 0 && (
                 <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
               )}
-              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] select-none text-center w-full px-1">
+              <span className="text-[8px] font-mono font-bold uppercase tracking-[0.14em] text-[#3B82F6] select-none text-center w-full px-0.5 truncate">
                 {group.name}
               </span>
             </div>
@@ -239,9 +265,9 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
             }}
             onMouseLeave={() => setReturnHover(false)}
             aria-label="Return to App"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
+            className="w-9 h-9 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
           >
-            <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
+            <ExternalLink className="w-4 h-4 shrink-0 text-white" />
           </button>
           <TooltipPortal
             text="Return to App"

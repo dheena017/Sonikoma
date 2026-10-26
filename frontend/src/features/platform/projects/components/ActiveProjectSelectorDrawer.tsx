@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from"react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   Search,
   X,
@@ -20,7 +20,8 @@ import {
   Tv,
   Swords,
   BookOpen,
-} from"lucide-react";
+  ChevronDown,
+} from "lucide-react";
 import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
 import { SonikomaLogo } from"@/shared/ui/branding";
 import { getProxiedImageUrl, getSourceIcon, getSourceName } from"@/shared/utils";
@@ -60,6 +61,16 @@ function formatDuration(seconds: number): string {
   return m > 0 ?`${m}m ${s}s` :`${s}s`;
 }
 
+const SORT_OPTIONS: {
+  id: "newest" | "oldest" | "panels" | "title";
+  label: string;
+}[] = [
+  { id: "newest", label: "Newest First" },
+  { id: "oldest", label: "Oldest First" },
+  { id: "panels", label: "Most Panels" },
+  { id: "title", label: "Title (A-Z)" },
+];
+
 export const ActiveProjectSelectorDrawer: React.FC<
   ActiveProjectSelectorDrawerProps
 > = ({ fetchWithInterceptor, navigateTo }) => {
@@ -79,12 +90,39 @@ export const ActiveProjectSelectorDrawer: React.FC<
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"all" |"ai_series" |"recent" |"draft" |"processing" |"completed" |"favorites"
+  const [activeTab, setActiveTab] = useState<
+    | "all"
+    | "ai_series"
+    | "recent"
+    | "draft"
+    | "processing"
+    | "completed"
+    | "favorites"
   >("all");
   const [aiSeriesList, setAiSeriesList] = useState<AISeriesProject[]>([]);
   const [loadingAiSeries, setLoadingAiSeries] = useState(false);
-  const [sortBy, setSortBy] = useState<"newest" |"oldest" |"panels" |"title"
+  const [sortBy, setSortBy] = useState<
+    "newest" | "oldest" | "panels" | "title"
   >("newest");
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setIsSortOpen(false);
+      }
+    };
+    if (isSortOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [isSortOpen]);
+
+  const currentSortLabel =
+    SORT_OPTIONS.find((s) => s.id === sortBy)?.label || "Newest First";
 
   // Favorites management via localStorage
   const [favorites, setFavorites] = useState<string[]>(() => {
@@ -549,24 +587,11 @@ export const ActiveProjectSelectorDrawer: React.FC<
             .join(" ·");
 
           return (
-            <div className="p-4 border-b border-[#2F2F2F] bg-[#181818] space-y-3.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] uppercase font-black text-[#3B82F6] tracking-wider flex items-center gap-2 font-mono">
-                  <span className="w-2 h-2 rounded-full bg-[#3B82F6]" />
-                  Active Project Context
-                </span>
-                <span
-                  className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1.5 font-mono capitalize ${statusColor}`}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                  {proj?.status ||"Active"}
-                </span>
-              </div>
-
-              {/* Title, Source, Cover & Actions */}
-              <div className="bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-md transition-all">
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-black border border-[#2F2F2F] shrink-0 relative shadow-md">
+            <div className="p-3 border-b border-[#262626] bg-[#141414]">
+              {/* Compact Active Project Card */}
+              <div className="bg-[#181818] border border-[#282828] hover:border-neutral-700 rounded-xl p-2.5 flex items-center justify-between gap-3 shadow-sm transition-all">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-black border border-[#282828] shrink-0 relative">
                     {activeCover ? (
                       <img
                         src={getProxiedImageUrl(activeCover, proj?.url)}
@@ -574,15 +599,15 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-[#121212] flex items-center justify-center text-[#3B82F6] font-black text-lg border border-[#2F2F2F]">
-                        {proj?.title?.charAt(0).toUpperCase() ||"P"}
+                      <div className="w-full h-full bg-[#121212] flex items-center justify-center text-[#3B82F6] font-bold text-sm">
+                        {proj?.title?.charAt(0).toUpperCase() || "P"}
                       </div>
                     )}
                   </div>
                   <div className="min-w-0 flex flex-col gap-0.5">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <ActiveSourceIcon className="w-3 h-3 text-[#9CA3AF] shrink-0" />
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-[#9CA3AF]">
+                      <ActiveSourceIcon className="w-3 h-3 text-neutral-400 shrink-0" />
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
                         {activeSourceName}
                       </span>
                       {hasVideo && (
@@ -590,264 +615,93 @@ export const ActiveProjectSelectorDrawer: React.FC<
                           VIDEO ✓
                         </span>
                       )}
+                      <span className="text-[9px] font-mono text-neutral-500">•</span>
+                      <span className="text-[10px] font-mono text-neutral-400">
+                        {activePanelsCount} panels
+                      </span>
+                      {importedCount > 0 && (
+                        <>
+                          <span className="text-[9px] font-mono text-neutral-500">•</span>
+                          <span className="text-[10px] font-mono text-[#3B82F6]">
+                            {importedCount} imported
+                          </span>
+                        </>
+                      )}
                     </div>
-                    <h4 className="font-extrabold text-sm text-[#E5E5E5] truncate font-sans leading-tight">
-                      {proj?.title ||"Untitled Project"}
+                    <h4 className="font-bold text-xs text-white truncate leading-tight">
+                      {proj?.title || "Untitled Project"}
                     </h4>
                     {infoLine && (
-                      <p className="text-[11px] text-[#9CA3AF] font-mono truncate">
+                      <p className="text-[10px] text-neutral-400 font-mono truncate">
                         {infoLine}
                       </p>
                     )}
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0">
                   {navigateTo && (
-                    <div className="grid grid-cols-2 gap-1.5">
+                    <div className="flex items-center gap-1">
                       <button
                         onClick={() => {
                           setDrawerOpen(false);
-                          navigateTo(`/scraper/editor?project_id=${encodeURIComponent(
+                          navigateTo(
+                            `/scraper/editor?project_id=${encodeURIComponent(
                               activeProjectId!
                             )}`
                           );
                         }}
-                        className="btn-primary px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 justify-center"
+                        className="px-2.5 py-1.5 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[11px] font-semibold flex items-center gap-1 transition-all shadow-xs cursor-pointer active:scale-95"
                         title="Open Studio Editor"
                       >
-                        <Film className="w-3.5 h-3.5" />
+                        <Film className="w-3 h-3" />
                         <span>Studio</span>
                       </button>
 
                       <button
                         onClick={() => {
                           setDrawerOpen(false);
-                          navigateTo(`/editor/image?project_id=${encodeURIComponent(
+                          navigateTo(
+                            `/editor/image?project_id=${encodeURIComponent(
                               activeProjectId!
                             )}`
                           );
                         }}
-                        className="btn-secondary px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 justify-center"
+                        className="px-2 py-1.5 rounded-lg bg-[#141414] hover:bg-[#222222] border border-[#282828] text-neutral-200 hover:text-white text-[11px] font-medium flex items-center gap-1 transition-all cursor-pointer active:scale-95"
                         title="Open Image Cropper & Cleaner"
                       >
-                        <Zap className="w-3.5 h-3.5 text-[#F59E0B]" />
+                        <Zap className="w-3 h-3 text-[#F59E0B]" />
                         <span>Image</span>
                       </button>
 
-
-                      {proj?.series_slug ? (
+                      {proj?.series_slug && (
                         <button
                           onClick={() => {
                             setDrawerOpen(false);
-                            navigateTo(`/projects/${encodeURIComponent(
+                            navigateTo(
+                              `/projects/${encodeURIComponent(
                                 proj.series_slug!
                               )}`
                             );
                           }}
-                          className="btn-secondary px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 justify-center"
+                          className="px-2 py-1.5 rounded-lg bg-[#141414] hover:bg-[#222222] border border-[#282828] text-neutral-200 hover:text-white text-[11px] font-medium flex items-center gap-1 transition-all cursor-pointer active:scale-95"
                           title="Open Series Details Page"
                         >
-                          <FolderOpen className="w-3.5 h-3.5 text-[#3B82F6]" />
+                          <FolderOpen className="w-3 h-3 text-[#3B82F6]" />
                           <span>Series</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => clearActiveProject()}
-                          className="btn-secondary px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 justify-center hover:text-[#EF4444]"
-                          title="Deactivate / Clear active project"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                          <span>Clear</span>
                         </button>
                       )}
                     </div>
                   )}
                   <button
                     onClick={() => clearActiveProject()}
-                    className="p-1 rounded-xl text-[#9CA3AF] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors cursor-pointer self-end"
+                    className="p-1.5 rounded-lg text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
                     title="Deactivate / Clear active project"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
-
-              {/* Composition Progress — shown only when panels exist */}
-              {activePanelsCount > 0 && (
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[11px] font-mono">
-                    <span className="text-[#9CA3AF]">Composition Progress</span>
-                    <span className="text-[#3B82F6] font-bold">
-                      {activeProgressPct}% · ~
-                      {formatDuration(activeDurationSeconds)}
-                    </span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-[#121212] overflow-hidden border border-[#2F2F2F]">
-                    <div
-                      className="h-full bg-gradient-to-r from-[#3B82F6] to-[#3B82F6] transition-all duration-500 rounded-full"
-                      style={{ width:`${activeProgressPct}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Real Stats Grid — 4 columns with contextual data */}
-              <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 p-2.5 rounded-xl transition-all">
-                  <span className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider block">
-                    Panels
-                  </span>
-                  <span className="font-bold text-[#E5E5E5] font-mono text-sm">
-                    {activePanelsCount}
-                  </span>
-                </div>
-                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 p-2.5 rounded-xl transition-all">
-                  <span className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider block">
-                    Imported
-                  </span>
-                  <span
-                    className={`font-bold font-mono text-sm ${
-                      importedCount > 0 ?"text-[#3B82F6]" :"text-[#6B7280]"
-                    }`}
-                  >
-                    {importedCount}
-                  </span>
-                </div>
-                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 p-2.5 rounded-xl transition-all">
-                  <span className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider block">
-                    Speech
-                  </span>
-                  <span
-                    className={`font-bold font-mono text-sm ${
-                      activeSpeechCount > 0
-                        ?"text-[#10B981]"
-                        :"text-[#6B7280]"
-                    }`}
-                  >
-                    {activeSpeechCount}
-                  </span>
-                </div>
-                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 p-2.5 rounded-xl transition-all">
-                  <span className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider block">
-                    Audio
-                  </span>
-                  <span
-                    className={`font-bold font-mono text-sm ${
-                      activeAudioCount > 0 ?"text-[#F59E0B]" :"text-[#6B7280]"
-                    }`}
-                  >
-                    {activeAudioCount}
-                  </span>
-                </div>
-              </div>
-
-              {/* Panel Storyboard Preview Reel Carousel */}
-              {activePanels.length > 0 && (
-                <div className="space-y-1.5 pt-1">
-                  <div className="flex items-center justify-between text-[10px] font-mono">
-                    <span className="text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1">
-                      <Film className="w-3 h-3 text-[#3B82F6]" /> Storyboard
-                      Panels
-                    </span>
-                    <span className="text-[#3B82F6] font-bold">
-                      {activePanels.length} panels
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                    {activePanels.slice(0, 10).map((panel: any, i: number) => (
-                      <button
-                        key={i}
-                        onClick={() => {
-                          setDrawerOpen(false);
-                          if (navigateTo) {
-                            navigateTo(`/scraper/editor?project_id=${encodeURIComponent(
-                                activeProjectId!
-                              )}&panel=${i}`
-                            );
-                          }
-                        }}
-                        className="w-11 h-11 rounded-lg overflow-hidden bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 shrink-0 relative transition-all group cursor-pointer"
-                        title={`Panel #${i + 1} — Click to edit`}
-                      >
-                        {panel.image_url ? (
-                          <img
-                            src={getProxiedImageUrl(panel.image_url, proj?.url)}
-                            alt={`Panel ${i + 1}`}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            onError={(e) => {
-                              (
-                                e.currentTarget as HTMLImageElement
-                              ).style.display ="none";
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[10px] text-[#6B7280] font-mono">
-                            #{i + 1}
-                          </div>
-                        )}
-                        <span className="absolute bottom-0.5 right-0.5 bg-black/80 px-1 rounded text-[8px] font-bold font-mono text-[#E5E5E5]">
-                          #{i + 1}
-                        </span>
-                      </button>
-                    ))}
-                    {activePanels.length > 10 && (
-                      <div className="w-11 h-11 rounded-lg bg-[#121212] border border-[#2F2F2F] shrink-0 flex items-center justify-center">
-                        <span className="text-[10px] text-[#3B82F6] font-bold font-mono">
-                          +{activePanels.length - 10}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Scraped Images Preview Strip — shown when scraped images are available */}
-              {(() => {
-                const scraped = activeProjectData.scrapedImages || [];
-                if (scraped.length === 0 || activePanels.length > 0)
-                  return null;
-                const preview = scraped.slice(0, 8);
-                const remaining = scraped.length - preview.length;
-                return (
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-[10px] font-mono">
-                      <span className="text-[#9CA3AF] uppercase tracking-wider">
-                        Scraped Images
-                      </span>
-                      <span className="text-[#3B82F6] font-bold">
-                        {scraped.length} images
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                      {preview.map((src, i) => (
-                        <div
-                          key={i}
-                          className="w-10 h-10 rounded-lg overflow-hidden bg-[#121212] border border-[#2F2F2F] shrink-0"
-                        >
-                          <img
-                            src={getProxiedImageUrl(src, proj?.url)}
-                            alt={`Scraped ${i + 1}`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              (
-                                e.currentTarget as HTMLImageElement
-                              ).style.display ="none";
-                            }}
-                          />
-                        </div>
-                      ))}
-                      {remaining > 0 && (
-                        <div className="w-10 h-10 rounded-lg bg-[#121212] border border-[#2F2F2F] shrink-0 flex items-center justify-center">
-                          <span className="text-[10px] text-[#3B82F6] font-bold font-mono">
-                            +{remaining}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })()}
             </div>
           );
         })()}
@@ -874,46 +728,81 @@ export const ActiveProjectSelectorDrawer: React.FC<
               )}
             </div>
 
-            {/* Sort Selector */}
-            <div className="relative">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] px-3 py-2 focus:outline-none focus:border-neutral-600 cursor-pointer font-mono"
+            {/* Custom Website Sort Dropdown */}
+            <div className="relative shrink-0" ref={sortRef}>
+              <button
+                type="button"
+                onClick={() => setIsSortOpen((prev) => !prev)}
+                className={`h-9 px-3.5 bg-[#121212] border rounded-xl text-xs font-medium flex items-center gap-2 transition-all cursor-pointer select-none active:scale-95 ${
+                  isSortOpen
+                    ? "border-neutral-500 text-white bg-[#1A1A1A]"
+                    : "border-[#2F2F2F] text-neutral-200 hover:border-neutral-500 hover:text-white"
+                }`}
+                title="Sort projects"
               >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="panels">Most Panels</option>
-                <option value="title">Title (A-Z)</option>
-              </select>
+                <span>{currentSortLabel}</span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
+                    isSortOpen ? "rotate-180 text-white" : ""
+                  }`}
+                />
+              </button>
+
+              {isSortOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-40 rounded-xl border border-[#2F2F2F] bg-[#181818] p-1 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
+                  {SORT_OPTIONS.map((opt) => {
+                    const isSelected = sortBy === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => {
+                          setSortBy(opt.id);
+                          setIsSortOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                          isSelected
+                            ? "bg-[#252525] text-white font-bold"
+                            : "text-neutral-300 hover:bg-[#202020] hover:text-white"
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {isSelected && (
+                          <Check className="w-3.5 h-3.5 text-[#3B82F6]" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Category Filter Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-xs">
             {[
-              { id:"all", label:"All Projects" },
+              { id: "all", label: "All Projects" },
               {
-                id:"ai_series",
-                label:"AI Series",
+                id: "ai_series",
+                label: "AI Series",
                 isAi: true,
                 count: aiSeriesList.length,
               },
-              { id:"favorites", label:"★ Favorites" },
-              { id:"recent", label:"Recent" },
-              { id:"draft", label:"Drafts" },
-              { id:"processing", label:"Processing" },
-              { id:"completed", label:"Completed" },
+              { id: "favorites", label: "★ Favorites" },
+              { id: "recent", label: "Recent" },
+              { id: "draft", label: "Drafts" },
+              { id: "processing", label: "Processing" },
+              { id: "completed", label: "Completed" },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-3 py-1.5 rounded-xl transition-all text-xs font-medium whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-xl transition-all text-xs font-semibold whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                     isActive
-                      ?"bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
-                      :"text-[#9CA3AF] bg-[#121212] border border-[#2F2F2F] hover:text-white hover:border-neutral-700 hover:bg-[#2A2A2A]"
+                      ? "bg-[#252525] text-white border border-[#3A3A3A] font-bold shadow-xs"
+                      : "text-neutral-400 bg-[#121212] border border-[#262626] hover:text-white hover:border-neutral-600 hover:bg-[#1E1E1E]"
                   }`}
                 >
                   {tab.isAi && (
@@ -986,7 +875,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   s.chapters_per_session ||
                   s.total_episodes ||
                   8;
-                const studioUrl =`/ai-series/${s.series_id}?format=${fmt}`;
+                const studioUrl = `/ai-series/${s.series_id}?format=${fmt}`;
 
                 return (
                   <div
@@ -995,7 +884,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                       setDrawerOpen(false);
                       navigateTo?.(studioUrl);
                     }}
-                    className="group relative p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 bg-[#181818] hover:bg-[#262626] border-[#2F2F2F] hover:border-[#3B82F6]/50 shadow-sm"
+                    className="group relative p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 bg-[#181818] hover:bg-[#262626] border-[#2F2F2F] hover:border-neutral-700 shadow-sm"
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
                       <div className="w-12 h-12 rounded-xl overflow-hidden bg-neutral-900 border border-[#2F2F2F] shrink-0 relative flex items-center justify-center">
@@ -1014,13 +903,13 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         <div className="flex items-center gap-1.5">
                           <FormatIcon className="w-3 h-3 text-[#3B82F6] shrink-0" />
                           <span className="text-[10px] text-[#60A5FA] font-mono uppercase font-bold truncate">
-                            {fmt.replace("_","")}
+                            {fmt.replace("_", "")}
                           </span>
                           <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md border font-mono capitalize text-[#10B981] bg-[#10B981]/10 border-[#10B981]/30">
                             Ready
                           </span>
                         </div>
-                        <h4 className="font-extrabold text-xs text-[#E5E5E5] truncate group-hover:text-[#3B82F6] transition-colors">
+                        <h4 className="font-extrabold text-xs text-[#E5E5E5] truncate group-hover:text-white transition-colors">
                           {s.title}
                         </h4>
 
@@ -1121,8 +1010,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   onClick={() => handleSelectProject(p.project_id)}
                   className={`group relative p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                     isActive
-                      ?"bg-[#1E1E1E] border-[#3B82F6] shadow-md ring-1 ring-[#3B82F6]/50"
-                      :"bg-[#181818] hover:bg-[#262626] border-[#2F2F2F] hover:border-neutral-700"
+                      ? "bg-[#1C1C1C] border-[#383838] shadow-md"
+                      : "bg-[#181818] hover:bg-[#222222] border-[#2A2A2A] hover:border-neutral-700"
                   }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
@@ -1135,7 +1024,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         />
                       ) : (
                         <div className="w-full h-full bg-[#121212] flex items-center justify-center text-[#3B82F6] font-bold text-sm border border-[#2F2F2F]">
-                          {p.title?.charAt(0).toUpperCase() ||"P"}
+                          {p.title?.charAt(0).toUpperCase() || "P"}
                         </div>
                       )}
                     </div>
@@ -1152,14 +1041,14 @@ export const ActiveProjectSelectorDrawer: React.FC<
                           {status}
                         </span>
                       </div>
-                      <h4 className="font-extrabold text-xs text-[#E5E5E5] truncate group-hover:text-[#3B82F6] transition-colors">
+                      <h4 className="font-extrabold text-xs text-[#E5E5E5] truncate group-hover:text-white transition-colors">
                         {p.title}
                       </h4>
 
                       <div className="flex items-center gap-2 text-[11px] text-[#9CA3AF] flex-wrap">
                         <span className="inline-flex items-center gap-1 font-mono">
                           <Layers className="w-3 h-3 text-[#9CA3AF]" />
-                          {panelCount} {panelCount === 1 ?"Panel" :"Panels"}
+                          {panelCount} {panelCount === 1 ? "Panel" : "Panels"}
                         </span>
                         {importedCount > 0 && (
                           <>
@@ -1184,21 +1073,21 @@ export const ActiveProjectSelectorDrawer: React.FC<
                       onClick={(e) => toggleFavorite(e, p.project_id)}
                       className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                         isFav
-                          ?"text-[#F59E0B]"
-                          :"text-[#6B7280] hover:text-[#9CA3AF]"
+                          ? "text-[#F59E0B]"
+                          : "text-[#6B7280] hover:text-[#9CA3AF]"
                       }`}
                       title={
-                        isFav ?"Remove from Favorites" :"Add to Favorites"
+                        isFav ? "Remove from Favorites" : "Add to Favorites"
                       }
                     >
                       <Star
-                        className={`w-4 h-4 ${isFav ?"fill-[#F59E0B]" :""}`}
+                        className={`w-4 h-4 ${isFav ? "fill-[#F59E0B]" : ""}`}
                       />
                     </button>
 
                     {isActive ? (
-                      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
-                        <Check className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#141414] text-neutral-200 border border-[#2F2F2F] shadow-sm select-none">
+                        <Check className="w-3.5 h-3.5 text-[#3B82F6]" />
                         <span>Active</span>
                       </span>
                     ) : (

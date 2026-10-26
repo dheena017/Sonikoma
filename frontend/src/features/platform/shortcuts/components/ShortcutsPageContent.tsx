@@ -50,16 +50,6 @@ const ShortcutsPageContent = React.memo(
         <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2F2F2F] pb-5">
             <div>
-              <div className="flex items-center gap-2 text-xs font-mono text-[#9CA3AF] mb-1.5">
-                <span
-                  className="hover:text-[#3B82F6] cursor-pointer"
-                  onClick={onNavigateHome}
-                >
-                  Dashboard
-                </span>
-                <span>&gt;</span>
-                <span className="text-[#3B82F6]">Keys</span>
-              </div>
               <h1 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight">
                 Keyboard Shortcuts
               </h1>

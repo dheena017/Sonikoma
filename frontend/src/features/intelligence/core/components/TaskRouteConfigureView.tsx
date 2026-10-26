@@ -269,14 +269,6 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
             <ArrowLeft className="w-3.5 h-3.5 text-blue-400" />
             <span>Routing Matrix</span>
           </button>
-
-          <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-neutral-400">
-            <span>AI Core</span>
-            <ChevronRight className="w-3.5 h-3.5 text-neutral-600" />
-            <span>Smart Routing</span>
-            <ChevronRight className="w-3.5 h-3.5 text-neutral-600" />
-            <span className="text-white font-bold">{taskRoute.name}</span>
-          </div>
         </div>
 
         {/* Action CTAs */}

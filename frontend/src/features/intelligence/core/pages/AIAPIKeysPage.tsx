@@ -34,8 +34,8 @@ interface ProviderItem {
   name: string;
   company?: string;
   category: string;
-  badge: string;
-  docs_url: string;
+  badge?: string;
+  docs_url?: string;
   console_url?: string;
   pricing_page_url?: string;
   placeholder?: string;
@@ -45,9 +45,118 @@ interface ProviderItem {
   health_status?: string;
   latency_ms?: number | null;
   supported_capabilities?: string[];
+  models?: string[];
   models_count?: number;
   primary_recommended_model?: string;
 }
+
+interface ProviderMetadata {
+  badge: string;
+  category: string;
+  console_url: string;
+  models: string[];
+  primary_recommended_model: string;
+  placeholder: string;
+}
+
+const PROVIDER_METADATA: Record<string, ProviderMetadata> = {
+  gemini: {
+    badge: "Official SDK",
+    category: "Foundation Multimodal",
+    console_url: "https://aistudio.google.com/app/apikey",
+    models: ["gemini-2.5-flash", "gemini-1.5-pro", "gemini-1.5-flash"],
+    primary_recommended_model: "gemini-2.5-flash",
+    placeholder: "Enter Google Gemini API Key (AIzaSy...)",
+  },
+  openai: {
+    badge: "Direct API",
+    category: "Foundation LLM",
+    console_url: "https://platform.openai.com/api-keys",
+    models: ["gpt-4o", "gpt-4o-mini", "o3-mini", "o1"],
+    primary_recommended_model: "gpt-4o",
+    placeholder: "Enter OpenAI API Key (sk-proj-...)",
+  },
+  anthropic: {
+    badge: "Direct API",
+    category: "Foundation Reasoning",
+    console_url: "https://console.anthropic.com/settings/keys",
+    models: ["claude-3-7-sonnet", "claude-3-5-haiku", "claude-3-opus"],
+    primary_recommended_model: "claude-3-7-sonnet",
+    placeholder: "Enter Anthropic API Key (sk-ant-...)",
+  },
+  deepseek: {
+    badge: "Fast Reasoning",
+    category: "Fast Reasoning",
+    console_url: "https://platform.deepseek.com/api_keys",
+    models: ["deepseek-chat", "deepseek-reasoner"],
+    primary_recommended_model: "deepseek-chat",
+    placeholder: "Enter DeepSeek API Key (sk-...)",
+  },
+  groq: {
+    badge: "Ultra Low Latency",
+    category: "Fast Inference",
+    console_url: "https://console.groq.com/keys",
+    models: ["llama-3.3-70b-versatile", "mixtral-8x7b-32768"],
+    primary_recommended_model: "llama-3.3-70b-versatile",
+    placeholder: "Enter Groq API Key (gsk_...)",
+  },
+  huggingface: {
+    badge: "Inference API",
+    category: "Image Diffusion",
+    console_url: "https://huggingface.co/settings/tokens",
+    models: ["FLUX.1-schnell", "stabilityai/sdxl-turbo"],
+    primary_recommended_model: "FLUX.1-schnell",
+    placeholder: "Enter Hugging Face Token (hf_...)",
+  },
+  pollinations: {
+    badge: "Free Built-in",
+    category: "Free Image Diffusion",
+    console_url: "https://pollinations.ai/",
+    models: ["flux", "turbo"],
+    primary_recommended_model: "flux",
+    placeholder: "Built-in (No key needed)",
+  },
+  stable_diffusion: {
+    badge: "Local Hardware",
+    category: "Local Diffusion",
+    console_url: "#",
+    models: ["sdxl-turbo", "sd-v1.5"],
+    primary_recommended_model: "sdxl-turbo",
+    placeholder: "Local GPU execution",
+  },
+  edge_tts: {
+    badge: "Free Engine",
+    category: "Neural Speech",
+    console_url: "#",
+    models: ["en-US-ChristopherNeural", "ja-JP-NanamiNeural"],
+    primary_recommended_model: "en-US-ChristopherNeural",
+    placeholder: "Built-in Microsoft Neural voices",
+  },
+  elevenlabs: {
+    badge: "Voice Cloning",
+    category: "Voice Synthesis",
+    console_url: "https://elevenlabs.io/app/speech-synthesis",
+    models: ["eleven_multilingual_v2", "eleven_turbo_v2_5"],
+    primary_recommended_model: "eleven_multilingual_v2",
+    placeholder: "Enter ElevenLabs API Key (sk_...)",
+  },
+  whisper: {
+    badge: "Local Speech",
+    category: "Speech-to-Text",
+    console_url: "#",
+    models: ["whisper-large-v3", "whisper-base"],
+    primary_recommended_model: "whisper-large-v3",
+    placeholder: "Local PyTorch Whisper",
+  },
+  deepl: {
+    badge: "Neural Translation",
+    category: "Neural Translation",
+    console_url: "https://www.deepl.com/pro-api",
+    models: ["deepl-v2-pro"],
+    primary_recommended_model: "deepl-v2-pro",
+    placeholder: "Enter DeepL API Key...",
+  },
+};
 
 const ICON_MAP: Record<string, any> = {
   gemini: Sparkles,
@@ -59,7 +168,10 @@ const ICON_MAP: Record<string, any> = {
   deepl: Languages,
   huggingface: Flame,
   edgetts: Layers,
+  edge_tts: Layers,
   stable_diffusion: Sparkles,
+  pollinations: Sparkles,
+  whisper: Mic,
 };
 
 export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
@@ -395,6 +507,12 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
+            <div className="px-3.5 py-2 rounded-xl bg-[#1C1C1C] border border-[#2F2F2F] text-xs font-mono text-neutral-300 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>
+                <strong className="text-white">{configuredCount}</strong> / {providers.length} Connected
+              </span>
+            </div>
             <button
               onClick={handleSaveAll}
               disabled={isSaving}
@@ -417,136 +535,247 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
               const isVisible = Boolean(visibleKeys[provider.id]);
               const testState = testingStatus[provider.id];
               const isLocal =
-                provider.id === "edgetts" || provider.id === "stable_diffusion";
-              const currentProject = projectNames[provider.id] || "";
+                provider.id === "edgetts" ||
+                provider.id === "edge_tts" ||
+                provider.id === "stable_diffusion" ||
+                provider.id === "whisper" ||
+                provider.id === "pollinations";
+
+              const meta = PROVIDER_METADATA[provider.id] || {
+                badge: "BYOK",
+                category: provider.category || "AI Engine",
+                console_url: "#",
+                models: [],
+                primary_recommended_model: "",
+                placeholder: `Enter ${provider.name} API Key...`,
+              };
+
+              const badgeText = provider.badge || meta.badge;
+              const consoleUrl = provider.console_url || meta.console_url;
+              const modelsList =
+                provider.models && provider.models.length > 0
+                  ? provider.models
+                  : meta.models;
+              const primaryModel =
+                provider.primary_recommended_model ||
+                meta.primary_recommended_model;
+              const placeholderText =
+                provider.placeholder ||
+                meta.placeholder ||
+                `Enter ${provider.name} API Key...`;
+              const isConfigured = Boolean(userKey && userKey.trim());
 
               return (
                 <div
                   key={provider.id}
-                  className="rounded-2xl bg-neutral-900/90 border border-neutral-800 p-5 space-y-4 hover:border-neutral-700 transition-all text-left"
+                  className="rounded-2xl bg-[#141414] border border-[#262626] p-5 space-y-4 hover:border-neutral-700 transition-all text-left shadow-sm flex flex-col justify-between"
                 >
-                  {/* Card Header */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-[#3B82F6]">
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-bold text-white font-sans">
-                            {provider.name}
-                          </h3>
-                          <span className="text-[9px] font-mono font-bold bg-neutral-950 px-2 py-0.5 rounded-full border border-neutral-800 text-neutral-300">
-                            {provider.badge}
-                          </span>
+                  <div className="space-y-4">
+                    {/* Card Header */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-[#1C1C1C] border border-[#2F2F2F] text-[#3B82F6] shrink-0">
+                          <Icon className="w-5 h-5" />
                         </div>
-                        <span className="text-[10px] text-neutral-400 font-mono">
-                          {provider.category}
-                        </span>
-                      </div>
-                    </div>
-
-                    {provider.console_url && provider.console_url !== "#" && (
-                      <a
-                        href={provider.console_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-1.5 rounded-lg bg-neutral-950 hover:bg-neutral-800 text-neutral-400 hover:text-[#93C5FD] transition-colors"
-                        title="Get API Key from provider console"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                  </div>
-
-                  {/* Input & Action Row */}
-                  {!isLocal ? (
-                    <div className="space-y-2.5">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-mono text-neutral-400 flex items-center gap-1">
-                          <Key className="w-3 h-3 text-[#3B82F6]" />{" "}
-                          {provider.name} API Key
-                        </label>
-                        <div className="relative">
-                          <input
-                            type={isVisible ? "text" : "password"}
-                            placeholder={`Enter ${provider.name} API Key...`}
-                            value={userKey}
-                            onChange={(e) =>
-                              handleKeyChange(provider.id, e.target.value)
-                            }
-                            className="w-full bg-neutral-950 border border-neutral-800 rounded-xl pl-3 pr-20 py-2 text-xs font-mono text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600"
-                          />
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={() => toggleVisibility(provider.id)}
-                              className="p-1 text-neutral-500 hover:text-neutral-300 transition-colors"
-                              title={isVisible ? "Hide Key" : "Reveal Key"}
-                            >
-                              {isVisible ? (
-                                <EyeOff className="w-3.5 h-3.5" />
-                              ) : (
-                                <Eye className="w-3.5 h-3.5" />
-                              )}
-                            </button>
-                            {userKey && (
-                              <button
-                                type="button"
-                                onClick={() => handleClearKey(provider.id)}
-                                className="p-1 text-neutral-500 hover:text-rose-400 transition-colors"
-                                title="Clear Key"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-sm font-bold text-white font-sans">
+                              {provider.name}
+                            </h3>
+                            {badgeText && (
+                              <span className="text-[10px] font-mono font-medium bg-[#1C1C1C] text-neutral-300 px-2 py-0.5 rounded-md border border-[#2F2F2F]">
+                                {badgeText}
+                              </span>
+                            )}
+                            {isConfigured ? (
+                              <span className="text-[10px] font-sans font-semibold text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                Active
+                              </span>
+                            ) : !isLocal ? (
+                              <span className="text-[10px] font-sans font-medium text-neutral-500 bg-[#181818] border border-[#262626] px-2 py-0.5 rounded-md">
+                                Unconfigured
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-sans font-semibold text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                Ready
+                              </span>
                             )}
                           </div>
+                          <span className="text-[11px] text-neutral-400 font-sans block mt-0.5">
+                            {provider.category || meta.category}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Real-time Live Validation Status */}
-                      <div className="flex items-center justify-between text-[11px] font-mono pt-1 min-h-[26px]">
-                        <div className="flex items-center gap-1.5">
-                          {testState?.loading ? (
-                            <span className="flex items-center gap-1.5 text-[#3B82F6] font-medium animate-pulse">
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />{" "}
-                              Verifying key...
-                            </span>
-                          ) : testState && testState.success ? (
-                            <span className="flex items-center gap-1.5 text-emerald-400 font-bold bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-0.5 rounded-lg">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Valid &
-                              Active{" "}
-                              {testState.latency
-                                ? `(${testState.latency}ms)`
-                                : ""}
-                            </span>
-                          ) : testState && !testState.success ? (
-                            <span className="flex items-center gap-1.5 text-rose-400 font-bold bg-rose-950/40 border border-rose-800/40 px-2.5 py-0.5 rounded-lg">
-                              <AlertCircle className="w-3.5 h-3.5" />{" "}
-                              {testState.message || "Invalid Key"}
-                            </span>
-                          ) : userKey ? (
-                            <span className="flex items-center gap-1.5 text-emerald-400 font-bold bg-emerald-950/30 border border-emerald-800/30 px-2 py-0.5 rounded-lg">
-                              <CheckCircle2 className="w-3 h-3" /> Configured
-                            </span>
-                          ) : (
-                            <span className="text-neutral-500 text-[10.5px]">
-                              Auto-validates on entering API key
+                      {consoleUrl && consoleUrl !== "#" && (
+                        <a
+                          href={consoleUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#1C1C1C] hover:bg-[#252525] border border-[#2F2F2F] text-neutral-400 hover:text-white text-[11px] font-medium transition-colors shrink-0"
+                          title={`Get API Key from ${provider.name} Console`}
+                        >
+                          <span>Get Key</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                    </div>
+
+                    {/* Models Badge Showcase */}
+                    {modelsList && modelsList.length > 0 && (
+                      <div className="p-3 rounded-xl bg-[#0F0F0F] border border-[#262626]/80 space-y-2">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-neutral-400 font-medium flex items-center gap-1.5">
+                            <Cpu className="w-3.5 h-3.5 text-[#3B82F6]" />
+                            <span>Supported Models ({modelsList.length})</span>
+                          </span>
+                          {primaryModel && (
+                            <span className="text-[10px] font-mono text-neutral-500">
+                              Default:{" "}
+                              <span className="text-neutral-300 font-semibold">
+                                {primaryModel}
+                              </span>
                             </span>
                           )}
                         </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {modelsList.map((modelName: string) => {
+                            const isPrimary = modelName === primaryModel;
+                            return (
+                              <span
+                                key={modelName}
+                                className={`inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded-lg border transition-colors ${
+                                  isPrimary
+                                    ? "bg-[#1A1A1A] border-[#3B82F6]/50 text-white font-medium"
+                                    : "bg-[#0A0A0A] border-[#262626] text-neutral-300 hover:border-neutral-600"
+                                }`}
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    isPrimary ? "bg-[#3B82F6]" : "bg-neutral-500"
+                                  }`}
+                                />
+                                {modelName}
+                                {isPrimary && (
+                                  <span className="text-[9px] uppercase tracking-wider text-[#3B82F6] font-bold">
+                                    Primary
+                                  </span>
+                                )}
+                              </span>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="p-3 rounded-xl bg-neutral-950/60 border border-neutral-850 flex items-center justify-between">
-                      <span className="text-xs text-neutral-400 font-mono">
-                        Built-in local engine (No API Key needed)
-                      </span>
-                      <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40">
-                        Ready
-                      </span>
-                    </div>
-                  )}
+                    )}
+
+                    {/* Input & Action Row */}
+                    {!isLocal ? (
+                      <div className="space-y-2.5">
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
+                              <Key className="w-3.5 h-3.5 text-[#3B82F6]" />
+                              <span>{provider.name} API Key</span>
+                            </label>
+                            {userKey && (
+                              <span className="text-[10px] font-mono text-neutral-500">
+                                {userKey.length} chars
+                              </span>
+                            )}
+                          </div>
+                          <div className="relative">
+                            <input
+                              type={isVisible ? "text" : "password"}
+                              placeholder={placeholderText}
+                              value={userKey}
+                              onChange={(e) =>
+                                handleKeyChange(provider.id, e.target.value)
+                              }
+                              className="w-full bg-[#0A0A0A] border border-[#262626] rounded-xl pl-3.5 pr-20 py-2.5 text-xs font-mono text-white placeholder-neutral-600 focus:outline-none focus:border-[#3B82F6] hover:border-[#383838] transition-colors"
+                            />
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => toggleVisibility(provider.id)}
+                                className="p-1.5 rounded-lg text-neutral-500 hover:text-white hover:bg-[#1C1C1C] transition-colors cursor-pointer"
+                                title={isVisible ? "Hide Key" : "Reveal Key"}
+                              >
+                                {isVisible ? (
+                                  <EyeOff className="w-3.5 h-3.5" />
+                                ) : (
+                                  <Eye className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                              {userKey && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleClearKey(provider.id)}
+                                  className="p-1.5 rounded-lg text-neutral-500 hover:text-rose-400 hover:bg-[#1C1C1C] transition-colors cursor-pointer"
+                                  title="Clear Key"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Real-time Live Validation Status */}
+                        <div className="flex items-center justify-between text-[11px] font-mono pt-1 min-h-[26px]">
+                          <div className="flex items-center gap-1.5">
+                            {testState?.loading ? (
+                              <span className="flex items-center gap-1.5 text-[#3B82F6] font-medium animate-pulse">
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />{" "}
+                                Verifying key...
+                              </span>
+                            ) : testState && testState.success ? (
+                              <span className="flex items-center gap-1.5 text-emerald-400 font-bold bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-0.5 rounded-lg">
+                                <CheckCircle2 className="w-3.5 h-3.5" /> Valid &
+                                Active{" "}
+                                {testState.latency
+                                  ? `(${testState.latency}ms)`
+                                  : ""}
+                              </span>
+                            ) : testState && !testState.success ? (
+                              <span className="flex items-center gap-1.5 text-rose-400 font-bold bg-rose-950/40 border border-rose-800/40 px-2.5 py-0.5 rounded-lg">
+                                <AlertCircle className="w-3.5 h-3.5" />{" "}
+                                {testState.message || "Invalid Key"}
+                              </span>
+                            ) : userKey ? (
+                              <span className="flex items-center gap-1.5 text-emerald-400 font-bold bg-emerald-950/30 border border-emerald-800/30 px-2 py-0.5 rounded-lg">
+                                <CheckCircle2 className="w-3 h-3" /> Configured
+                              </span>
+                            ) : (
+                              <span className="text-neutral-500 text-[10.5px]">
+                                Auto-validates on entering API key
+                              </span>
+                            )}
+                          </div>
+
+                          {!testState?.loading && userKey && (
+                            <button
+                              type="button"
+                              onClick={() => handleTestKey(provider.id)}
+                              className="text-[10px] font-sans font-medium text-neutral-400 hover:text-white px-2.5 py-1 rounded-lg bg-[#1C1C1C] hover:bg-[#252525] border border-[#2F2F2F] transition-colors cursor-pointer"
+                            >
+                              Test Connection
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-3.5 rounded-xl bg-[#0A0A0A] border border-[#262626] flex items-center justify-between">
+                        <span className="text-xs text-neutral-400 font-sans">
+                          Built-in engine (No external API key needed)
+                        </span>
+                        <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded-md border border-emerald-800/40">
+                          Ready
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })

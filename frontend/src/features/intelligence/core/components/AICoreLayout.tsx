@@ -37,26 +37,8 @@ export default function AICoreLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#07080c] text-white font-sans antialiased selection:bg-[#2A2A2A] selection:text-white">
-      {/* 1. FIXED HEADER (TOP 16 HEIGHT) */}
-      <AICoreHeader
-        currentPath={currentPath}
-        navigateTo={navigateTo}
-        fetchWithInterceptor={fetchWithInterceptor}
-        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        notifications={notifications}
-        markNotificationAsRead={markNotificationAsRead}
-        markAllNotificationsAsRead={markAllNotificationsAsRead}
-        deleteNotification={deleteNotification}
-        clearAllNotifications={clearAllNotifications}
-        notificationsMuted={notificationsMuted}
-        setNotificationsMuted={setNotificationsMuted}
-        isSidebarOpen={isSidebarOpen}
-        user={user}
-        addNotification={addNotification}
-      />
-
-      {/* 2. FIXED MINI SIDEBAR (LEFT 20 WIDTH RAIL) */}
+    <div className="min-h-screen bg-[#07080c] text-white font-sans antialiased selection:bg-[#2A2A2A] selection:text-white relative">
+      {/* 2. FIXED MINI SIDEBAR (FULL HEIGHT 16 WIDTH RAIL) */}
       <AICoreMiniSidebar
         currentPath={currentPath}
         navigateTo={navigateTo}
@@ -71,8 +53,26 @@ export default function AICoreLayout({
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      {/* 4. MAIN SCROLLABLE CONTENT VIEWPORT WITH HEADER & MINI-SIDEBAR OFFSETS */}
-      <div className="pt-16 lg:pl-20 min-h-screen flex flex-col bg-gradient-to-b from-[#07080c] via-[#090a10] to-[#050608]">
+      {/* 4. MAIN LAYOUT (HEADER + CONTENT SITTING BESIDE MINI-SIDEBAR) */}
+      <div className="lg:pl-14 min-h-screen flex flex-col bg-gradient-to-b from-[#07080c] via-[#090a10] to-[#050608]">
+        {/* 1. TOP HEADER (SITS BESIDE MINI-SIDEBAR ON DESKTOP) */}
+        <AICoreHeader
+          currentPath={currentPath}
+          navigateTo={navigateTo}
+          fetchWithInterceptor={fetchWithInterceptor}
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          notifications={notifications}
+          markNotificationAsRead={markNotificationAsRead}
+          markAllNotificationsAsRead={markAllNotificationsAsRead}
+          deleteNotification={deleteNotification}
+          clearAllNotifications={clearAllNotifications}
+          notificationsMuted={notificationsMuted}
+          setNotificationsMuted={setNotificationsMuted}
+          isSidebarOpen={isSidebarOpen}
+          user={user}
+          addNotification={addNotification}
+        />
+
         <main className="flex-1 p-4 sm:p-6 lg:p-8 pt-6 sm:pt-7">
           <div className="max-w-7xl mx-auto space-y-6">{children}</div>
         </main>

@@ -1,15 +1,17 @@
 import React from "react";
 import {
-  CheckCircle2,
   Award,
-  Link2,
-  ToggleLeft,
-  ToggleRight,
   Sparkles,
   Compass,
   Globe2,
   MapPin,
   Clock3,
+  User,
+  Mail,
+  Lock,
+  Check,
+  ChevronDown,
+  FileText,
 } from "lucide-react";
 
 interface ProfileAccountTabProps {
@@ -66,29 +68,25 @@ const ACHIEVEMENTS = [
     id: "1",
     title: "First Scrape",
     desc: "Parsed first vertical webtoon strip",
-    unlocked: true,
-    color: "from-[#3B82F6] to-[#2563EB]",
+    icon: Sparkles,
   },
   {
     id: "2",
     title: "Gemini Translator",
     desc: "Translated storyboard into Korean/Japanese",
-    unlocked: true,
-    color: "from-blue-500 to-blue-500",
+    icon: Globe2,
   },
   {
     id: "3",
     title: "Keyframe Director",
     desc: "Added camera pan-zoom animation routes",
-    unlocked: true,
-    color: "from-emerald-500 to-teal-500",
+    icon: Compass,
   },
   {
     id: "4",
     title: "Pro Producer",
     desc: "Compiled a 10-minute recap video stream",
-    unlocked: false,
-    color: "from-amber-500 to-orange-500",
+    icon: Award,
   },
 ];
 
@@ -115,31 +113,6 @@ export default function ProfileAccountTab({
       unlocked: (unlockedAchievements || []).includes(ach.title),
     }));
   }, [unlockedAchievements]);
-
-  // Profile completion score calculation
-  const completionItems = React.useMemo(() => {
-    return [
-      { label: "Display Name set", done: profileUser.fullName.length > 0 },
-      { label: "Biography written", done: profileUser.bio.length > 15 },
-      { label: "Creator Role picked", done: !!profileUser.role },
-      {
-        label: "Social Account linked",
-        done: connections.google || connections.discord,
-      },
-    ];
-  }, [profileUser, connections]);
-
-  const completionPct = React.useMemo(() => {
-    const doneCount = completionItems.filter((item) => item.done).length;
-    return Math.round((doneCount / completionItems.length) * 100);
-  }, [completionItems]);
-
-  const toggleLink = (provider: "google" | "discord") => {
-    setConnections((prev) => ({
-      ...prev,
-      [provider]: !prev[provider],
-    }));
-  };
 
   const handleClaimReward = async (cost: number, name: string) => {
     setRewardsToast(null);
@@ -169,18 +142,21 @@ export default function ProfileAccountTab({
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
       {/* Main Account details Form Card */}
-      <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
-
-        <div className="space-y-1 text-left mb-6">
-          <h3 className="text-lg font-bold text-white">Profile Details</h3>
-          <p className="text-xs text-neutral-400">
-            Edit account descriptions, names, and profiles
-          </p>
+      <div className="bg-[#141414] border border-[#262626] rounded-2xl p-6 sm:p-7 shadow-lg relative">
+        <div className="flex items-center justify-between pb-5 mb-6 border-b border-[#222222]">
+          <div className="space-y-1 text-left">
+            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2.5">
+              <User className="w-4 h-4 text-[#3B82F6]" />
+              <span>Profile Details</span>
+            </h3>
+            <p className="text-xs text-neutral-400">
+              Manage your creator identity, personal info, and preferences
+            </p>
+          </div>
         </div>
 
         {saveSuccess && (
-          <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold rounded-xl text-center mb-6 animate-pulse">
+          <div className="p-3 bg-blue-500/10 border border-blue-500/25 text-[#60A5FA] text-xs font-semibold rounded-xl text-center mb-6">
             Profile changes successfully updated!
           </div>
         )}
@@ -188,8 +164,9 @@ export default function ProfileAccountTab({
         <form noValidate onSubmit={handleProfileSave} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5 text-left">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1">
-                Full Display Name
+              <label className="text-[11px] font-semibold text-neutral-300 tracking-wider uppercase flex items-center gap-2">
+                <User className="w-3.5 h-3.5 text-neutral-500" />
+                <span>Full Display Name</span>
               </label>
               <input
                 type="text"
@@ -201,27 +178,33 @@ export default function ProfileAccountTab({
                     fullName: e.target.value,
                   }))
                 }
-                className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all"
+                className="w-full bg-[#0D0D0D] border border-[#262626] hover:border-[#383838] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/40 rounded-xl py-2.5 px-3.5 text-xs font-medium text-neutral-200 focus:outline-none transition-all shadow-inner"
               />
             </div>
 
-            <div className="space-y-1.5 text-left opacity-75">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 ml-1 flex items-center gap-1">
-                Email Address
-                <span className="text-[8px] bg-neutral-950 px-1 rounded border border-white/5 uppercase">
+            <div className="space-y-1.5 text-left">
+              <label className="text-[11px] font-semibold text-neutral-400 tracking-wider uppercase flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Email Address</span>
+                </span>
+                <span className="text-[9px] bg-[#1A1A1A] text-neutral-400 px-2 py-0.5 rounded border border-[#2A2A2A] uppercase font-mono">
                   Fixed
                 </span>
               </label>
-              <div className="w-full bg-neutral-900/50 border border-white/5 rounded-xl py-3 px-4 text-xs font-mono text-neutral-400 select-all cursor-not-allowed">
-                {profileUser.email}
+              <div className="relative flex items-center">
+                <div className="w-full bg-[#101010] border border-[#222222] rounded-xl py-2.5 pl-3.5 pr-9 text-xs font-mono text-neutral-400 select-all cursor-not-allowed">
+                  {profileUser.email}
+                </div>
+                <Lock className="w-3.5 h-3.5 text-neutral-600 absolute right-3.5 pointer-events-none" />
               </div>
             </div>
           </div>
 
           <div className="space-y-1.5 text-left">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1 flex items-center gap-1">
-              <Compass className="w-3.5 h-3.5 text-[#3B82F6]" />
-              Studio Creator Role
+            <label className="text-[11px] font-semibold text-neutral-300 tracking-wider uppercase flex items-center gap-2">
+              <Compass className="w-3.5 h-3.5 text-neutral-500" />
+              <span>Studio Creator Role</span>
             </label>
             <input
               type="text"
@@ -233,15 +216,15 @@ export default function ProfileAccountTab({
                   role: e.target.value,
                 }))
               }
-              className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all"
+              className="w-full bg-[#0D0D0D] border border-[#262626] hover:border-[#383838] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/40 rounded-xl py-2.5 px-3.5 text-xs font-medium text-neutral-200 focus:outline-none transition-all shadow-inner"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5 text-left">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-[#3B82F6]" />
-                Location
+              <label className="text-[11px] font-semibold text-neutral-300 tracking-wider uppercase flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5 text-neutral-500" />
+                <span>Location</span>
               </label>
               <input
                 type="text"
@@ -253,14 +236,14 @@ export default function ProfileAccountTab({
                     location: e.target.value,
                   }))
                 }
-                className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs font-semibold text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all"
+                className="w-full bg-[#0D0D0D] border border-[#262626] hover:border-[#383838] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/40 rounded-xl py-2.5 px-3.5 text-xs font-medium text-neutral-200 placeholder:text-neutral-600 focus:outline-none transition-all shadow-inner"
               />
             </div>
 
             <div className="space-y-1.5 text-left">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1 flex items-center gap-1">
-                <Globe2 className="w-3.5 h-3.5 text-[#3B82F6]" />
-                Website
+              <label className="text-[11px] font-semibold text-neutral-300 tracking-wider uppercase flex items-center gap-2">
+                <Globe2 className="w-3.5 h-3.5 text-neutral-500" />
+                <span>Website</span>
               </label>
               <input
                 type="url"
@@ -272,52 +255,57 @@ export default function ProfileAccountTab({
                     website: e.target.value,
                   }))
                 }
-                className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs font-semibold text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all"
+                className="w-full bg-[#0D0D0D] border border-[#262626] hover:border-[#383838] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/40 rounded-xl py-2.5 px-3.5 text-xs font-medium text-neutral-200 placeholder:text-neutral-600 focus:outline-none transition-all shadow-inner"
               />
             </div>
 
             <div className="space-y-1.5 text-left">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1 flex items-center gap-1">
-                <Clock3 className="w-3.5 h-3.5 text-[#3B82F6]" />
-                Timezone
+              <label className="text-[11px] font-semibold text-neutral-300 tracking-wider uppercase flex items-center gap-2">
+                <Clock3 className="w-3.5 h-3.5 text-neutral-500" />
+                <span>Timezone</span>
               </label>
-              <select
-                value={profileUser.timezone}
-                onChange={(e) =>
-                  setProfileUser((prev) => ({
-                    ...prev,
-                    timezone: e.target.value,
-                  }))
-                }
-                className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all"
-              >
-                <option value="UTC">UTC</option>
-                <option value="America/Los_Angeles">Pacific Time</option>
-                <option value="America/New_York">Eastern Time</option>
-                <option value="Europe/London">London</option>
-                <option value="Europe/Berlin">Central Europe</option>
-                <option value="Asia/Tokyo">Tokyo</option>
-                <option value="Asia/Seoul">Seoul</option>
-                <option value="Australia/Sydney">Sydney</option>
-              </select>
+              <div className="relative flex items-center">
+                <select
+                  value={profileUser.timezone}
+                  onChange={(e) =>
+                    setProfileUser((prev) => ({
+                      ...prev,
+                      timezone: e.target.value,
+                    }))
+                  }
+                  className="w-full bg-[#0D0D0D] border border-[#262626] hover:border-[#383838] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/40 rounded-xl py-2.5 pl-3.5 pr-9 text-xs font-medium text-neutral-200 focus:outline-none transition-all shadow-inner appearance-none cursor-pointer"
+                >
+                  <option value="UTC" className="bg-[#141414] text-white">UTC</option>
+                  <option value="America/Los_Angeles" className="bg-[#141414] text-white">Pacific Time (US & Canada)</option>
+                  <option value="America/New_York" className="bg-[#141414] text-white">Eastern Time (US & Canada)</option>
+                  <option value="Europe/London" className="bg-[#141414] text-white">London (GMT)</option>
+                  <option value="Europe/Berlin" className="bg-[#141414] text-white">Central Europe (CET)</option>
+                  <option value="Asia/Tokyo" className="bg-[#141414] text-white">Tokyo (JST)</option>
+                  <option value="Asia/Seoul" className="bg-[#141414] text-white">Seoul (KST)</option>
+                  <option value="Australia/Sydney" className="bg-[#141414] text-white">Sydney (AEST)</option>
+                </select>
+                <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-3 pointer-events-none" />
+              </div>
             </div>
           </div>
 
           <div className="space-y-1.5 text-left">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1">
-              Creator Biography
+            <label className="text-[11px] font-semibold text-neutral-300 tracking-wider uppercase flex items-center gap-2">
+              <FileText className="w-3.5 h-3.5 text-neutral-500" />
+              <span>Creator Biography</span>
             </label>
             <textarea
               rows={3}
               value={profileUser.bio}
+              placeholder="Tell other creators about your style, workflows, and current projects..."
               onChange={(e) =>
                 setProfileUser((prev) => ({ ...prev, bio: e.target.value }))
               }
-              className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-2.5 px-4 text-xs font-medium text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all resize-none"
+              className="w-full bg-[#0D0D0D] border border-[#262626] hover:border-[#383838] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/40 rounded-xl py-2.5 px-3.5 text-xs font-medium text-neutral-200 placeholder:text-neutral-600 focus:outline-none transition-all resize-none shadow-inner"
             />
           </div>
 
-          <div className="border-t border-white/5 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="border-t border-[#222222] pt-4.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <label className="flex items-center gap-2.5 cursor-pointer group select-none text-left">
               <input
                 type="checkbox"
@@ -331,17 +319,17 @@ export default function ProfileAccountTab({
                 className="sr-only"
               />
               <div
-                className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${
+                className={`w-4 h-4 rounded-md border transition-all flex items-center justify-center ${
                   profileUser.newsletter
-                    ? "bg-[#2A2A2A] border-[#3B82F6]"
-                    : "bg-black/40 border-white/10 group-hover:border-white/20"
+                    ? "bg-[#3B82F6] border-[#3B82F6]"
+                    : "bg-[#101010] border-[#2E2E2E] group-hover:border-neutral-500"
                 }`}
               >
                 {profileUser.newsletter && (
-                  <CheckCircle2 className="w-3 h-3 text-white" />
+                  <Check className="w-3 h-3 text-white stroke-[3]" />
                 )}
               </div>
-              <span className="text-[11px] text-neutral-400 group-hover:text-neutral-300 font-medium">
+              <span className="text-xs text-neutral-400 group-hover:text-neutral-300 font-medium">
                 Receive monthly creator roundups and core feature updates
               </span>
             </label>
@@ -349,54 +337,53 @@ export default function ProfileAccountTab({
             {isDirty ? (
               <button
                 type="submit"
-                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl border border-[#3B82F6]/30 bg-gradient-to-r from-[#2A2A2A] to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white text-xs font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-md shadow-black/50 hover:shadow-black/50 animate-pulse"
+                className="flex items-center gap-2 px-5 py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-semibold cursor-pointer transition-all active:scale-95 shadow-md shadow-blue-500/20"
               >
-                <span>✦</span>
-                <span>Save Profile Changes</span>
+                <span>Save Changes</span>
               </button>
             ) : (
-              <button
-                type="button"
-                disabled
-                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 text-xs font-bold tracking-wider select-none cursor-not-allowed"
-              >
-                <span className="text-emerald-400">✓</span>
+              <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[#282828] bg-[#141414] text-neutral-400 text-xs font-medium select-none cursor-default shadow-sm">
+                <Check className="w-3.5 h-3.5 text-[#3B82F6]" />
                 <span>Saved</span>
-              </button>
+              </div>
             )}
           </div>
         </form>
       </div>
 
       {/* Unlocked Creator Achievements badges */}
-      <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 space-y-6">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/5 pb-4">
-          <div className="space-y-1">
-            <h4 className="text-xs font-black uppercase text-neutral-400 tracking-wider flex items-center gap-1.5">
-              <Award className="w-4 h-4 text-[#3B82F6]" />
-              Creative Milestones & Achievements
-            </h4>
-            <p className="text-[10px] text-neutral-500 font-semibold">
-              Unlock milestones by using advanced studio configurations
-            </p>
+      <div className="bg-[#141414] border border-[#262626] rounded-2xl p-6 sm:p-7 shadow-lg space-y-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-[#222222] pb-5">
+          <div className="flex items-center gap-2.5 text-left">
+            <div className="w-8 h-8 rounded-xl bg-[#1C1C1C] border border-[#2E2E2E] flex items-center justify-center text-[#3B82F6]">
+              <Award className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-base font-bold text-white tracking-tight">
+                Creative Milestones & Achievements
+              </h4>
+              <p className="text-xs text-neutral-400">
+                Unlock milestones by using advanced studio configurations
+              </p>
+            </div>
           </div>
 
           {/* Points display & Exchange */}
-          <div className="flex items-center gap-4 bg-black/40 border border-white/5 p-2 rounded-2xl">
-            <div className="text-left">
-              <span className="text-[8px] text-neutral-500 block uppercase">
+          <div className="flex items-center gap-3 bg-[#101010] border border-[#262626] p-2 rounded-xl shadow-inner">
+            <div className="text-left px-2">
+              <span className="text-[9px] text-neutral-500 block uppercase font-bold tracking-wider">
                 Reward Points
               </span>
-              <span className="text-sm font-black text-[#3B82F6] font-mono">
-                {achievementPoints} pts
+              <span className="text-sm font-bold text-white font-mono">
+                {achievementPoints} <span className="text-xs text-[#3B82F6]">pts</span>
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => handleClaimReward(150, "+100 Smart Credits")}
-                className="bg-[#2A2A2A] hover:bg-[#333333] text-white py-1 px-3 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
+                className="bg-[#181818] hover:bg-[#222222] border border-[#2C2C2C] hover:border-neutral-500 text-neutral-200 hover:text-white py-1.5 px-3 rounded-lg text-xs font-medium transition-all cursor-pointer active:scale-95 shadow-sm"
                 title="Exchange 150 pts for 100 bonus trial credits"
               >
                 Claim Credits (150 pts)
@@ -404,7 +391,7 @@ export default function ProfileAccountTab({
               <button
                 type="button"
                 onClick={() => handleClaimReward(200, "Pro Editor Badge")}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white py-1 px-3 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
+                className="bg-[#3B82F6] hover:bg-[#2563EB] text-white py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
                 title="Unlock Pro Editor profile badge for 200 pts"
               >
                 Claim Badge (200 pts)
@@ -415,9 +402,9 @@ export default function ProfileAccountTab({
 
         {rewardsToast && (
           <div
-            className={`p-2.5 rounded-xl border text-[10px] font-bold text-center animate-pulse ${
+            className={`p-2.5 rounded-xl border text-xs font-semibold text-center ${
               rewardsToast.includes("Successfully")
-                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                ? "bg-blue-500/10 border-blue-500/20 text-[#60A5FA]"
                 : "bg-rose-500/10 border-rose-500/20 text-rose-400"
             }`}
           >
@@ -426,12 +413,12 @@ export default function ProfileAccountTab({
         )}
 
         {unlockedRewards.length > 0 && (
-          <div className="flex flex-wrap gap-2 text-[10px] font-bold text-neutral-400 items-center">
+          <div className="flex flex-wrap gap-2 text-xs font-medium text-neutral-400 items-center">
             <span>Redeemed:</span>
             {unlockedRewards.map((reward, idx) => (
               <span
                 key={idx}
-                className="bg-[#3B82F6]/15 border border-[#3B82F6]/20 text-[#3B82F6] px-2 py-0.5 rounded-full"
+                className="bg-blue-500/10 border border-blue-500/20 text-[#3B82F6] px-2.5 py-0.5 rounded-full text-xs font-mono font-bold"
               >
                 {reward}
               </span>
@@ -439,47 +426,57 @@ export default function ProfileAccountTab({
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {dynamicAchievements.map((ach) => (
-            <div
-              key={ach.id}
-              className={`p-4 rounded-2xl border flex flex-col justify-between transition-all ${
-                ach.unlocked
-                  ? "bg-black/30 border-white/5 shadow-inner"
-                  : "bg-black/60 border-white/5 opacity-55"
-              }`}
-            >
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`text-xs font-bold ${
-                      ach.unlocked ? "text-white" : "text-neutral-500"
-                    }`}
-                  >
-                    {ach.title}
-                  </span>
-                  {ach.unlocked && (
-                    <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
-                  )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {dynamicAchievements.map((ach) => {
+            const Icon = ach.icon || Sparkles;
+            return (
+              <div
+                key={ach.id}
+                className={`p-4 rounded-xl border flex flex-col justify-between transition-all ${
+                  ach.unlocked
+                    ? "bg-[#161616] border-[#2C2C2C] hover:border-neutral-500 shadow-sm"
+                    : "bg-[#101010] border-[#202020] opacity-60"
+                }`}
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                        ach.unlocked
+                          ? "bg-[#3B82F6]/10 border border-[#3B82F6]/25 text-[#3B82F6]"
+                          : "bg-[#181818] border border-[#282828] text-neutral-500"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </div>
+                    {ach.unlocked ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#60A5FA] bg-[#3B82F6]/10 border border-[#3B82F6]/25 px-2 py-0.5 rounded-full">
+                        <Check className="w-2.5 h-2.5" />
+                        Unlocked
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-neutral-500 bg-[#161616] border border-[#242424] px-2 py-0.5 rounded-full">
+                        <Lock className="w-2.5 h-2.5" />
+                        Locked
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <span
+                      className={`text-xs font-bold block ${
+                        ach.unlocked ? "text-white" : "text-neutral-400"
+                      }`}
+                    >
+                      {ach.title}
+                    </span>
+                    <p className="text-[11px] text-neutral-400 leading-relaxed mt-1">
+                      {ach.desc}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-[9px] text-neutral-500 leading-relaxed font-semibold">
-                  {ach.desc}
-                </p>
               </div>
-
-              <div className="mt-3 text-right">
-                <span
-                  className={`text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                    ach.unlocked
-                      ? "bg-[#2A2A2A] text-[#3B82F6] border border-[#3B82F6]/20"
-                      : "bg-neutral-800 text-neutral-500 border border-white/5"
-                  }`}
-                >
-                  {ach.unlocked ? "Unlocked" : "Locked"}
-                </span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

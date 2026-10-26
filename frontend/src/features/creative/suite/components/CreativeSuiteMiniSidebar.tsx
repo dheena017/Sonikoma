@@ -134,27 +134,27 @@ const CreativeSuiteMiniSidebarInner: React.FC<
           className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none"
         >
           <div
-            className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               active
-                ?"bg-[#3B82F6] border border-[#60A5FA]/40 text-white"
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white"
                 : isLocked
-                ?"bg-[#121212] border border-[#2F2F2F] opacity-40 cursor-not-allowed"
-                :"bg-transparent border border-transparent text-neutral-400 group-hover:bg-[#1E1E1E] group-hover:border-neutral-700 group-hover:text-white"
+                ? "bg-[#121212] border border-[#2F2F2F] opacity-40 cursor-not-allowed"
+                : "bg-transparent border border-transparent text-neutral-400 group-hover:bg-[#1E1E1E] group-hover:border-neutral-700 group-hover:text-white"
             }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-200 ${
+              className={`w-4 h-4 transition-colors duration-200 ${
                 active
-                  ?"text-white"
+                  ? "text-white"
                   : isLocked
-                  ?"text-neutral-700"
-                  :"text-neutral-400 group-hover:text-[#3B82F6]"
+                  ? "text-neutral-700"
+                  : "text-neutral-400 group-hover:text-[#3B82F6]"
               }`}
             />
           </div>
         </button>
         <TooltipPortal
-          text={`${item.label}${isLocked ?" 🔒 (Locked)" :""}`}
+          text={`${item.label}${isLocked ? " 🔒 (Locked)" : ""}`}
           visible={hover}
           anchorRect={rect}
         />
@@ -168,7 +168,29 @@ const CreativeSuiteMiniSidebarInner: React.FC<
   const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
 
   return (
-    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-neutral-950/85 backdrop-blur-2xl border-r border-white/10 hidden lg:flex flex-col items-center py-3 z-40 shadow-[8px_0_32px_rgba(0,0,0,0.6)] select-none overflow-hidden">
+    <aside className="fixed top-0 bottom-0 left-0 w-14 h-screen bg-neutral-950/85 backdrop-blur-2xl border-r border-white/10 hidden lg:flex flex-col items-center z-40 shadow-[8px_0_32px_rgba(0,0,0,0.6)] select-none overflow-hidden">
+      {/* Top Header / Menu Toggle Button Area (Matches Header h-16) */}
+      <div className="h-16 w-full flex items-center justify-center border-b border-white/10 shrink-0">
+        <button
+          onClick={onOpenSidebar}
+          onMouseEnter={(e) => {
+            setMenuRect(e.currentTarget.getBoundingClientRect());
+            setMenuHover(true);
+          }}
+          onMouseLeave={() => setMenuHover(false)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
+          aria-label="Toggle Navigation Menu"
+          title="Toggle Creative Menu"
+        >
+          <Menu className="h-4.5 w-4.5" />
+        </button>
+        <TooltipPortal
+          text="Toggle Navigation Menu"
+          visible={menuHover}
+          anchorRect={menuRect}
+        />
+      </div>
+
       {/* Navigation Groups */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
@@ -180,14 +202,14 @@ const CreativeSuiteMiniSidebarInner: React.FC<
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ?"0.6rem" :"0.2rem",
-                marginBottom:"0.4rem",
+                marginTop: groupIdx > 0 ? "0.6rem" : "0.2rem",
+                marginBottom: "0.4rem",
               }}
             >
               {groupIdx > 0 && (
                 <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
               )}
-              <span className="text-[8.5px] font-sans font-bold uppercase tracking-[0.16em] text-neutral-400 select-none text-center w-full px-1">
+              <span className="text-[8px] font-sans font-bold uppercase tracking-[0.14em] text-neutral-400 select-none text-center w-full px-0.5 truncate">
                 {group.name}
               </span>
             </div>
@@ -210,9 +232,9 @@ const CreativeSuiteMiniSidebarInner: React.FC<
             }}
             onMouseLeave={() => setReturnHover(false)}
             aria-label="Main Dashboard"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
+            className="w-9 h-9 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
           >
-            <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
+            <ExternalLink className="w-4 h-4 shrink-0 text-white" />
           </button>
           <TooltipPortal
             text="Main Dashboard"

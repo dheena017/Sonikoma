@@ -188,12 +188,12 @@ export default function AICoreHeader({
   return (
     <header
       id="ai_core_header_pane"
-      className="w-full min-w-0 h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-1.5 sm:gap-4 selection:bg-[#2A2A2A] shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="w-full min-w-0 h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-3 sm:pl-4 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-1.5 sm:gap-4 selection:bg-[#2A2A2A] shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
-      {/* Left side: Hamburger and Brand */}
+      {/* Left side: Hamburger (mobile only) and Brand */}
       <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 min-w-0 h-full">
-        {/* Wrapper added here to perfectly match the width of the mini sidebar */}
-        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-0.5 sm:mr-4">
+        {/* Mobile menu toggle only (< lg) */}
+        <div className="lg:hidden flex items-center justify-center shrink-0">
           <button
             onClick={onToggleSidebar}
             className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
@@ -342,17 +342,17 @@ export default function AICoreHeader({
         {/* User Profile Pill at Far Right End */}
         <button
           onClick={() => navigateTo && navigateTo("/profile")}
-          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-neutral-700 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
+          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-500 hover:bg-[#2A2A2A] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none"
           data-no-transform
           title="View Profile & Account Settings"
           aria-label="Open User profile"
         >
-          <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+          <span className="text-xs font-bold text-white group-hover:text-white truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-full bg-[#181818] border border-[#2F2F2F]">
             {user?.full_name ||
               user?.username ||
               (user?.email ? user.email.split("@")[0] : "Studio Creator")}
           </span>
-          <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
+          <div className="relative w-7 h-7 rounded-full overflow-hidden border border-[#2F2F2F] bg-[#181818] shrink-0 flex items-center justify-center group-hover:border-neutral-400 transition-all duration-300">
             <img
               key={user?.avatar_url || user?.full_name || "avatar"}
               src={getUserAvatarUrl(user)}
