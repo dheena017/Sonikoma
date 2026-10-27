@@ -226,7 +226,11 @@ async def compile_video(
 
         try:
             buf_meta = await resolve_image_to_buffer(image_url)
-            buf = buf_meta["buffer"]
+            buf = buf_meta.get("buffer")
+            if buf is None and "data" in buf_meta:
+                buf = io.BytesIO(buf_meta["data"])
+            if not buf:
+                raise ValueError(f"No image buffer or data returned for '{image_url}'")
             buf.seek(0)
             img = Image.open(buf).convert("RGB")
         except Exception as img_err:

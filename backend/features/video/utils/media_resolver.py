@@ -50,6 +50,8 @@ async def load_image(url_or_b64: str) -> Image.Image:
 
     buf_meta = await resolve_image_to_buffer(url_or_b64)
     buffer = buf_meta.get("buffer")
+    if buffer is None and "data" in buf_meta:
+        buffer = io.BytesIO(buf_meta["data"])
     if not buffer:
         raise ValueError(f"Failed to resolve image buffer for '{url_or_b64}'")
 

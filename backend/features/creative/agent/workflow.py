@@ -34,7 +34,7 @@ from features.platform.scraper.services.scraper_service import scrape_chapter_se
 from features.image.stitching.merge_service import merge_image_panels as merge_images_service
 from features.image.detector import detect_long_panels
 from features.platform.projects.schemas_project import DetectLongPanelsRequest
-from features.image.crop.long_panels_crop_service import crop_long_panels_batch
+from features.image.crop.long_panels_crop_service import crop_long_panels_batch, LongPanelsCropRequest
 from features.audio import make_all_panel_speech as batch_synthesize_panels_service
 from features.video import compile_video_from_panels
 from features.creative.service import creative_service
@@ -641,7 +641,9 @@ class AutonomousAgentWorkflow:
                 {
                     "id": f"panel_{p.index}",
                     "index": p.index,
-                    "dialogues": [p.speech_text] if p.speech_text else [],
+                    "panel_index": p.index,
+                    "dialogue_list": [p.speech_text] if p.speech_text else [],
+                    "text": p.speech_text or "",
                     "narrative": p.speech_text or "",
                     "target_duration": p.duration or 3.5,
                     "voice": p.voice or self.cast_manager.default_narrator,
@@ -654,8 +656,8 @@ class AutonomousAgentWorkflow:
                     voice=self.cast_manager.default_narrator,
                     speech_rate=1.0,
                     speech_pitch=1.0,
-                    generate_dialogue_audio=True,
-                    generate_narrative_audio=True,
+                    generate_dialogue=True,
+                    generate_narrative=True,
                     force_regenerate=True,
                 )
                 audio_map = {r.get("id"): r for r in (audio_res or [])}
@@ -663,8 +665,9 @@ class AutonomousAgentWorkflow:
                     r_audio = audio_map.get(f"panel_{p.index}") or {}
                     if r_audio.get("audio_url") or r_audio.get("narrative_audio_url"):
                         p.audio_url = r_audio.get("audio_url") or r_audio.get("narrative_audio_url")
-                    if r_audio.get("duration"):
-                        actual_dur = float(r_audio["duration"])
+                    dur_val = r_audio.get("duration") or r_audio.get("audio_duration")
+                    if dur_val:
+                        actual_dur = float(dur_val)
                         # Add +0.4s breathing room to guarantee 0 cutoff words
                         p.duration = max(3.5, round(actual_dur + 0.4, 2))
                 self.state.duration = round(sum(p.duration for p in self.state.panels if p.duration), 1)

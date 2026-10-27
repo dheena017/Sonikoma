@@ -197,4 +197,7 @@ async def crop_long_panels_batch(
 
 __all__ = [
     "crop_long_panels_batch",
+    "LongPanelsCropRequest",
+    "LongPanelsCropResponse",
+    "LongPanelCropSlice",
 ]

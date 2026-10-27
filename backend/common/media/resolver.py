@@ -34,6 +34,16 @@ except ImportError:
 logger = logging.getLogger("sonikoma.common.media.resolver")
 
 
+def _make_result(data: bytes, mime: str) -> Dict[str, Any]:
+    """Ensures media resolver returns both raw data bytes and seekable BytesIO buffer."""
+    return {
+        "data": data,
+        "buffer": io.BytesIO(data),
+        "content_type": mime,
+        "contentType": mime,
+    }
+
+
 def create_fallback_image_buffer(url: str, error_msg: str) -> Dict[str, Any]:
     """Generates an 800x300 placeholder PNG when remote image fetching fails."""
     try:
@@ -51,10 +61,10 @@ def create_fallback_image_buffer(url: str, error_msg: str) -> Dict[str, Any]:
         img.save(buf, format="PNG")
         buf.seek(0)
         data = buf.getvalue()
-        return {"data": data, "content_type": "image/png", "contentType": "image/png"}
+        return _make_result(data, "image/png")
     except Exception:
         transparent_png = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
-        return {"data": transparent_png, "content_type": "image/png", "contentType": "image/png"}
+        return _make_result(transparent_png, "image/png")
 
 
 def spoof_referer(url: str) -> str:
@@ -116,6 +126,8 @@ async def resolve_url_to_buffer(
     while '/api/v1/proxy' in working_url:
         parsed = urlparse(working_url)
         query = parse_qs(parsed.query)
+        if "referer" in query and query["referer"] and not referer:
+            referer = query["referer"][0]
         if "url" in query and query["url"][0]:
             working_url = query["url"][0]
         else:
@@ -129,19 +141,19 @@ async def resolve_url_to_buffer(
             cached = stitched_cache.get(cache_id) if hasattr(stitched_cache, "get") else None
             if cached:
                 mime = cached.get("content_type", "application/octet-stream")
-                return {"data": cached["data"], "content_type": mime, "contentType": mime}
+                return _make_result(cached["data"], mime)
 
             clean_id = re.sub(r'_full$', '', cache_id)
             cached_base = stitched_cache.get(clean_id) if hasattr(stitched_cache, "get") else None
             if cached_base:
                 mime = cached_base.get("content_type", "application/octet-stream")
-                return {"data": cached_base["data"], "content_type": mime, "contentType": mime}
+                return _make_result(cached_base["data"], mime)
 
             try:
                 from features.image.stitching.stitch_cache_service import retrieve_cached_stitch_service
                 data, content_type = await retrieve_cached_stitch_service(cache_id)
                 if data:
-                    return {"data": data, "content_type": content_type, "contentType": content_type}
+                    return _make_result(data, content_type)
             except Exception as e:
                 logger.warning(f"[resolve_url_to_buffer] Direct cache service resolution failed for '{cache_id}': {e}")
 
@@ -151,7 +163,7 @@ async def resolve_url_to_buffer(
         buf = base64.b64decode(rest)
         mime_match = re.match(r'^data:([^;]+);base64', header)
         mime = mime_match.group(1) if mime_match else "application/octet-stream"
-        return {"data": buf, "content_type": mime, "contentType": mime}
+        return _make_result(buf, mime)
 
     if working_url.startswith('blob:'):
         logger.warning(f"[ImageResolver] Cannot fetch browser-memory blob URL '{working_url[:60]}' from backend server.")
@@ -169,7 +181,7 @@ async def resolve_url_to_buffer(
 
         import mimetypes
         mime = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
-        return {"data": buf, "content_type": mime, "contentType": mime}
+        return _make_result(buf, mime)
 
     # 4b. Support direct absolute/relative filesystem paths
     if os.path.exists(working_url) and os.path.isfile(working_url):
@@ -177,7 +189,7 @@ async def resolve_url_to_buffer(
             buf = f.read()
         import mimetypes
         mime = mimetypes.guess_type(working_url)[0] or 'application/octet-stream'
-        return {"data": buf, "content_type": mime, "contentType": mime}
+        return _make_result(buf, mime)
 
     # 4c. Direct zero-latency filesystem resolution for /media/ and /videos/
     _project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
@@ -204,7 +216,7 @@ async def resolve_url_to_buffer(
                     buf = f.read()
                 ext = os.path.splitext(clean_name)[1].lower()
                 mime = "image/webp" if ext == ".webp" else ("image/png" if ext == ".png" else ("video/mp4" if ext == ".mp4" else "image/jpeg"))
-                return {"data": buf, "content_type": mime, "contentType": mime}
+                return _make_result(buf, mime)
 
     if "/videos/" in working_url or working_url.startswith("videos/"):
         clean_name = working_url.split("/videos/")[-1] if "/videos/" in working_url else working_url.split("videos/")[-1]
@@ -214,7 +226,7 @@ async def resolve_url_to_buffer(
             if os.path.exists(cand_path) and os.path.isfile(cand_path):
                 with open(cand_path, 'rb') as f:
                     buf = f.read()
-                return {"data": buf, "content_type": "video/mp4", "contentType": "video/mp4"}
+                return _make_result(buf, "video/mp4")
 
     # 5. Normalize internal hostnames to relative paths
     if re.match(r'^https?://', working_url, re.IGNORECASE):
@@ -238,7 +250,7 @@ async def resolve_url_to_buffer(
             r = await http_client.get(local_url, follow_redirects=True)
             r.raise_for_status()
             mime = r.headers.get("Content-Type", "application/octet-stream")
-            return {"data": r.content, "content_type": mime, "contentType": mime}
+            return _make_result(r.content, mime)
 
         try:
             if client:
@@ -308,7 +320,7 @@ async def resolve_url_to_buffer(
                 r = await http_client.get(working_url, headers=headers)
                 r.raise_for_status()
                 mime = r.headers.get("Content-Type", "application/octet-stream")
-                return {"data": r.content, "content_type": mime, "contentType": mime}
+                return _make_result(r.content, mime)
             except Exception as e:
                 last_err = e
 
@@ -327,7 +339,7 @@ async def resolve_url_to_buffer(
                                 res = await session.get(working_url, headers=headers, timeout=10)
                                 if res.status_code == 200 and len(res.content) > 500:
                                     mime = res.headers.get("Content-Type", "image/webp")
-                                    return {"data": res.content, "content_type": mime, "contentType": mime}
+                                    return _make_result(res.content, mime)
                             except Exception as ce:
                                 last_err = ce
                 except Exception as e:
