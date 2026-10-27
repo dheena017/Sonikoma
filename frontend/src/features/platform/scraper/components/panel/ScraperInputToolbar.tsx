@@ -416,11 +416,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             <span className="w-1.5 h-1.5 rounded-full bg-neutral-600 shrink-0" />
             <span>Checking URL…</span>
           </div>
-        ) : (
-          <span className="text-[11px] text-neutral-500 font-mono">
-            Supports Webtoons, MangaDex, Naver, Tapas, Bato.to, Asura, Flame Comics &amp; more
-          </span>
-        )}
+        ) : null}
       </div>
 
       {/* ── Action Buttons Row ── */}

@@ -23,7 +23,7 @@ export default function StoryboardEmptyState({
     return (
       <div
         id="panels_timeline_section_empty"
-        className="relative w-full flex-1 min-h-[220px] sm:min-h-[260px] flex flex-col items-center justify-center p-6 sm:p-8 rounded-2xl bg-transparent border border-transparent text-center space-y-3 select-none overflow-hidden"
+        className="relative w-full flex-1 min-h-[220px] sm:min-h-[260px] flex flex-col items-center justify-center p-6 sm:p-8 rounded-2xl border border-dashed border-neutral-700/70 bg-neutral-950/40 text-center space-y-3 select-none overflow-hidden transition-colors"
       >
         <div className="relative z-10 flex flex-col items-center justify-center space-y-3">
           <div className="h-12 w-12 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 ">
@@ -60,7 +60,7 @@ export default function StoryboardEmptyState({
   return (
     <div
       id="panels_timeline_section_empty"
-      className="relative w-full flex-1 min-h-[220px] sm:min-h-[260px] flex flex-col items-center justify-center p-6 sm:p-8 rounded-2xl bg-transparent border border-transparent text-center space-y-3 select-none overflow-hidden"
+      className="relative w-full flex-1 min-h-[220px] sm:min-h-[260px] flex flex-col items-center justify-center p-6 sm:p-8 rounded-2xl border border-dashed border-neutral-700/70 bg-neutral-950/40 text-center space-y-3 select-none overflow-hidden transition-colors"
     >
       <div className="relative z-10 flex flex-col items-center justify-center space-y-3">
         <div className="h-10 w-10 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6] ">

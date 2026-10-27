@@ -13,7 +13,7 @@ export default function ImportedAssetsDeckEmptyState({
   icon,
 }: ImportedAssetsDeckEmptyStateProps) {
   return (
-    <div className="relative w-full flex-1 min-h-[220px] sm:min-h-[260px] flex flex-col items-center justify-center p-6 sm:p-8 rounded-2xl bg-white/[0.02] border border-white/5 text-center space-y-3 select-none">
+    <div className="relative w-full flex-1 min-h-[220px] sm:min-h-[260px] flex flex-col items-center justify-center p-6 sm:p-8 rounded-2xl border border-dashed border-neutral-700/70 bg-neutral-950/40 text-center space-y-3 select-none transition-colors">
       <div className="h-9 w-9 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6]">
         {icon ?? <ImageIcon className="w-4.5 h-4.5" />}
       </div>
