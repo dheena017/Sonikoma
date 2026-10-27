@@ -8,7 +8,7 @@ voiceovers for all comic storyboard panels with bounded parallelism.
 
 import asyncio
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from features.audio.schemas import BatchPanelAudioItem
 from features.audio.speech.panel_speech_service import make_panel_speech
