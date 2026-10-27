@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from"react";
 import {
-  Search,
-  X,
   Filter,
   ChevronDown,
   Rows,
@@ -53,8 +51,8 @@ export interface StoryboardFilterCounts {
 }
 
 export interface StoryboardFilterBarProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
+  searchQuery?: string;
+  setSearchQuery?: (query: string) => void;
   filterStatus: StoryboardFilterStatus | string;
   setFilterStatus: (status: string) => void;
   viewLayout?:"scroll" |"grid";
@@ -130,28 +128,7 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between gap-1.5 sm:gap-2 flex-1 w-full min-w-0 max-w-none sm:max-w-xl mx-0 font-mono text-xs select-none">
-      {/* Search Input Box */}
-      <div className="relative flex-1 min-w-[80px] max-w-[240px] flex items-center">
-        <Search className="absolute left-2.5 w-3.5 h-3.5 text-neutral-400 pointer-events-none shrink-0" />
-        <input
-          type="text"
-          value={searchQuery ||""}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search scene..."
-          className="w-full h-8 pl-8 pr-6 bg-neutral-950/90 hover:bg-neutral-900 focus:bg-neutral-900 border border-neutral-800 focus:border-neutral-600 rounded-xl text-neutral-100 placeholder:text-neutral-500 text-[11px] font-mono focus:outline-none transition-colors duration-75 shadow-inner"
-        />
-        {searchQuery && (
-          <button
-            type="button"
-            onClick={() => setSearchQuery("")}
-            title="Clear search"
-            className="absolute right-1.5 p-0.5 rounded-md text-neutral-400 hover:text-white transition-colors duration-75 active:scale-90 active:duration-75 [touch-action:manipulation] cursor-pointer"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
+    <div className="flex items-center gap-2 font-mono text-xs select-none shrink-0">
 
       {/* Filter Status Dropdown Menu */}
       <div className="relative shrink-0 z-30" ref={dropdownRef}>
