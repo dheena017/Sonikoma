@@ -3,6 +3,7 @@ import { FetchClient, ApiResponse } from "@/shared/api/types";
 
 export type DetectedLayoutType =
   | "long_panels"
+  | "small_panels"
   | "single_panels"
   | "multi_grid_page"
   | "double_page_spread"
@@ -93,8 +94,6 @@ export interface SmallPanelsCropPayload {
   quality?: number;
 }
 
-export type SinglePanelsCropPayload = SmallPanelsCropPayload;
-
 export interface SmallPanelsCropResponse {
   success: boolean;
   crop_type: string;
@@ -107,8 +106,6 @@ export interface SmallPanelsCropResponse {
   processing_time_ms: number;
   message?: string;
 }
-
-export type SinglePanelsCropResponse = SmallPanelsCropResponse;
 
 /**
  * Step 1: 5-Layer Layout Classifier
@@ -160,5 +157,3 @@ export const cropSmallPanels = async (
     ...options,
   });
 };
-
-export const cropSinglePanels = cropSmallPanels;

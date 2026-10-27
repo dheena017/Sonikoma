@@ -293,7 +293,8 @@ def enforce_canvas_safety_limits(
 def encode_canvas_to_bytes(
     canvas: Image.Image,
     spacing_color: str = "white",
-    format_override: Optional[str] = None
+    format_override: Optional[str] = None,
+    quality: int = DEFAULT_JPEG_QUALITY
 ) -> bytes:
     """
     Serializes a PIL Image into optimized binary bytes.
@@ -304,6 +305,7 @@ def encode_canvas_to_bytes(
         canvas (Image.Image): The PIL image to encode.
         spacing_color (str): Background color specification.
         format_override (Optional[str]): Explicit image format (e.g., "PNG", "JPEG").
+        quality (int): Compression quality for JPEG/WEBP.
 
     Returns:
         bytes: Encoded image file bytes.
@@ -315,7 +317,7 @@ def encode_canvas_to_bytes(
         fmt = format_override.upper()
         if fmt == "JPEG" and canvas.mode == "RGBA":
             canvas = canvas.convert("RGB")
-        canvas.save(out, format=fmt, quality=DEFAULT_JPEG_QUALITY if fmt == "JPEG" else None)
+        canvas.save(out, format=fmt, quality=quality if fmt in ("JPEG", "WEBP") else None)
         return out.getvalue()
 
     if is_transparent:
@@ -323,7 +325,7 @@ def encode_canvas_to_bytes(
     else:
         if canvas.mode == "RGBA":
             canvas = canvas.convert("RGB")
-        canvas.save(out, format="JPEG", quality=DEFAULT_JPEG_QUALITY)
+        canvas.save(out, format="JPEG", quality=quality)
 
     return out.getvalue()
 
@@ -333,13 +335,15 @@ def encode_canvas_to_bytes(
 # ─────────────────────────────────────────────────────────────────────────────
 
 def stitch_images_together(
-    image_buffers: List[bytes],
+    image_buffers: Optional[List[bytes]] = None,
     layout: Literal["vertical", "horizontal"] = "vertical",
     spacing: int = 0,
     spacing_color: str = "white",
     scale_to_fit: bool = True,
     align_mode: Literal["center", "start", "end"] = "center",
     padding: int = 0,
+    output_format: Optional[str] = None,
+    quality: int = DEFAULT_JPEG_QUALITY,
     **kwargs: Any
 ) -> bytes:
     """
@@ -353,29 +357,43 @@ def stitch_images_together(
         scale_to_fit (bool): Whether to normalize cross-axis dimensions. Defaults to True.
         align_mode (Literal["center", "start", "end"]): Cross-axis alignment mode.
         padding (int): Surrounding border padding. Defaults to 0.
-        **kwargs: Backward-compatible camelCase overrides (spacingColor, scaleToFit, alignMode).
+        output_format (Optional[str]): Output format (e.g., 'PNG', 'JPEG', 'WEBP').
+        quality (int): Compression quality for JPEG/WEBP. Defaults to 85.
+        **kwargs: Backward-compatible aliases (buffers, spacingColor, scaleToFit, alignMode).
 
     Returns:
         bytes: Encoded binary buffer of the unified stitched canvas.
     """
     # ── Stage 1: Argument Normalization ─────────────────────────────────────
+    if image_buffers is None and "buffers" in kwargs:
+        image_buffers = kwargs.pop("buffers")
+
     if kwargs:
         spacing_color = kwargs.get("spacingColor", spacing_color)
         scale_to_fit = kwargs.get("scaleToFit", scale_to_fit)
         align_mode = kwargs.get("alignMode", align_mode)
+        if not output_format:
+            output_format = kwargs.get("output_format") or kwargs.get("format_override") or kwargs.get("format")
+        if "quality" in kwargs:
+            quality = kwargs.get("quality", quality)
 
     # ── Stage 2: Short-circuit Guards ───────────────────────────────────────
     if not image_buffers:
         raise ValueError("No image buffers provided for stitching")
 
-    if len(image_buffers) == 1:
+    if len(image_buffers) == 1 and not output_format:
         return image_buffers[0]
 
     # ── Stage 3: Image Decoding & Validation ────────────────────────────────
     decoded_images = decode_and_validate_buffers(image_buffers)
 
     if len(decoded_images) == 1:
-        return encode_canvas_to_bytes(decoded_images[0], spacing_color="transparent")
+        return encode_canvas_to_bytes(
+            decoded_images[0],
+            spacing_color="transparent",
+            format_override=output_format,
+            quality=quality
+        )
 
     # ── Stage 4: Dimension Normalization ────────────────────────────────────
     prepared_images = normalize_image_dimensions(
@@ -396,7 +414,12 @@ def stitch_images_together(
 
     # ── Stage 6: Safety Limits & Serialization ──────────────────────────────
     safe_canvas = enforce_canvas_safety_limits(canvas)
-    return encode_canvas_to_bytes(safe_canvas, spacing_color=spacing_color)
+    return encode_canvas_to_bytes(
+        safe_canvas,
+        spacing_color=spacing_color,
+        format_override=output_format,
+        quality=quality
+    )
 
 
 def stack_vertical(

@@ -31,6 +31,11 @@ from .media_utils import (
     resolve_url_to_buffer,
 )
 
+from features.image.stitching.image_stitcher import (
+    stitch_images_together,
+    stack_vertical,
+)
+
 __all__ = [
     # Autotrim
     "autotrim_solid_borders",
@@ -49,4 +54,7 @@ __all__ = [
     "download_image_to_memory",
     "resolve_image_to_buffer",
     "resolve_url_to_buffer",
+    # Stitching
+    "stitch_images_together",
+    "stack_vertical",
 ]

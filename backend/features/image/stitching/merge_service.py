@@ -78,7 +78,7 @@ async def merge_image_panels(
 
     return await asyncio.to_thread(
         stitch_images_together,
-        buffers=buffers,
+        image_buffers=buffers,
         layout=layout,
         spacing=spacing,
         spacing_color=spacing_color,

@@ -31,6 +31,7 @@ except ImportError:
 from features.platform.scraper.repositories import save_scrape_session, get_latest_scrape_session
 from features.platform.projects.repositories.panels import save_edit_history, insert_panels
 from features.platform.projects.repositories.project import update_project, insert_project, get_project
+import features.image.utils as img_utils
 
 logger = logging.getLogger("sonikoma.services.scraper.service")
 

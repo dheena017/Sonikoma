@@ -279,7 +279,7 @@ def classify_layout_decision_tree(
         confidence = 0.95
         estimated_panel_count = max(1, estimated_valleys + 1)
         reading_flow = ReadingFlow.RIGHT_TO_LEFT
-        recommended_endpoint = "/api/v1/images/crop/single-panels"
+        recommended_endpoint = "/api/v1/images/crop/small-panels"
         suggested_strategy = "spread_split"
         message = f"Panoramic double-page spread detected ({width}x{height}px)."
         logger.debug(
@@ -307,7 +307,7 @@ def classify_layout_decision_tree(
         confidence = 0.94
         estimated_panel_count = max(2, estimated_valleys + 1)
         reading_flow = ReadingFlow.RIGHT_TO_LEFT if detected_bg_color == "white" else ReadingFlow.LEFT_TO_RIGHT
-        recommended_endpoint = "/api/v1/images/crop/single-panels"
+        recommended_endpoint = "/api/v1/images/crop/small-panels"
         suggested_strategy = "grid_split"
         message = f"Standard comic page detected with ~{estimated_panel_count} grid panels."
         logger.debug(

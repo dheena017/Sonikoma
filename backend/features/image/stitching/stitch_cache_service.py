@@ -21,12 +21,13 @@ from urllib.parse import urlparse, parse_qs
 from typing import Tuple, Optional, List, Dict, Any
 
 # Ensure backend root directory is in sys.path when executed directly
-_backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+_backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 if _backend_dir not in sys.path:
     sys.path.insert(0, _backend_dir)
 
 from app.core.cache import stitched_cache, edit_history
 import features.image.utils as img_utils
+from .image_stitcher import stitch_images_together
 from database.utils import unwrap_proxy_url
 from database.engine import get_db_connection
 from features.platform.projects.repositories.panels import get_panel_original_url, get_edit_history
@@ -342,7 +343,7 @@ async def dynamically_restitch_webtoon_strip(
             return None
 
         stitched_bytes = await asyncio.to_thread(
-            img_utils.stitch_images_together, resolved_buffers, layout="vertical"
+            stitch_images_together, resolved_buffers, layout="vertical"
         )
         save_to_memory_cache(cache_id, stitched_bytes, content_type="image/png")
         logger.info(f"[Cache Fallback] Re-stitch completed for '{cache_id}' ({len(stitched_bytes):,} bytes).")

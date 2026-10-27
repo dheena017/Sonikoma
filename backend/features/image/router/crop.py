@@ -127,14 +127,4 @@ async def small_panels_crop_endpoint(body: SmallPanelsCropRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/single-panels", response_model=SmallPanelsCropResponse, summary="[Alias] Crop single image margins")
-async def single_panels_crop_alias(body: SmallPanelsCropRequest):
-    return await small_panels_crop_endpoint(body)
-
-
-@router.post("/multi-slice", include_in_schema=False)
-async def multi_slice_alias(body: LongPanelsCropRequest):
-    return await crop_long_panels_batch(body)
-
-
 __all__ = ["router"]
