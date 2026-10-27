@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from"react";
 import {
-  Search,
-  X,
   ArrowDownUp,
   CheckCircle2,
   Layers,
@@ -29,8 +27,8 @@ export type AssetFilterStatus =
 export type AssetSortOrder ="asc" |"desc";
 
 export interface ImportedAssetsFilterBarProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
+  searchQuery?: string;
+  setSearchQuery?: (query: string) => void;
   filterStatus: AssetFilterStatus;
   setFilterStatus: (status: AssetFilterStatus) => void;
   sortOrder: AssetSortOrder;
@@ -99,29 +97,7 @@ export const ImportedAssetsFilterBar: React.FC<
   };
 
   return (
-    <div className="flex items-center justify-between gap-1.5 sm:gap-2 flex-1 w-full min-w-0 max-w-none sm:max-w-xl mx-0 font-mono text-xs select-none">
-      {/* Search Input Box */}
-      <div className="relative flex-1 min-w-[80px] max-w-[240px] flex items-center">
-        <Search className="absolute left-2.5 w-3.5 h-3.5 text-neutral-400 pointer-events-none shrink-0" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search frame..."
-          className="w-full h-8 pl-8 pr-6 bg-neutral-950/90 hover:bg-neutral-900 focus:bg-neutral-900 border border-neutral-800 focus:border-neutral-600 rounded-xl text-neutral-100 placeholder:text-neutral-500 text-[11px] font-mono focus:outline-none transition-all shadow-inner"
-        />
-        {searchQuery && (
-          <button
-            type="button"
-            onClick={() => setSearchQuery("")}
-            title="Clear search"
-            className="absolute right-1.5 p-0.5 rounded-md text-neutral-400 hover:text-white transition-colors cursor-pointer"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
-
+    <div className="flex items-center gap-2 font-mono text-xs select-none shrink-0">
       {/* Filter Status Dropdown Menu */}
       <div className="relative shrink-0 z-30" ref={dropdownRef}>
         <button

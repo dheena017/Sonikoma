@@ -374,11 +374,11 @@ export default function ImportedAssetsHeader({
         <button
           type="button"
           onClick={handleSelectAllToggle}
-          title={isAllSelected ?"Deselect all assets" :"Select all assets"}
+          title={isAllSelected ? "Deselect all assets" : "Select all assets"}
           className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-neutral-700 text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm"
         >
           <CheckSquare className="w-3.5 h-3.5 text-neutral-400" />
-          <span className="hidden 2xl:inline">Select All</span>
+          <span className="hidden xl:inline">Select All</span>
         </button>
       )}
 
@@ -390,7 +390,7 @@ export default function ImportedAssetsHeader({
           className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-neutral-700 bg-neutral-900 text-neutral-300 hover:text-white hover:border-neutral-700 transition-all cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          <span className="hidden 2xl:inline">Reload Assets</span>
+          <span className="hidden xl:inline">Reload Assets</span>
         </button>
       )}
 
@@ -401,13 +401,13 @@ export default function ImportedAssetsHeader({
           onClick={() => setIsEpisodeCollapsed(!isEpisodeCollapsed)}
           title={
             isEpisodeCollapsed
-              ?"Show Episode Navigator"
-              :"Hide Episode Navigator"
+              ? "Show Episode Navigator"
+              : "Hide Episode Navigator"
           }
           className={`h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
             isEpisodeCollapsed
-              ?"bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-blue-300 hover:border-blue-500/30"
-              :"bg-blue-600/20 border-blue-500/30 text-blue-300 hover:bg-blue-600/30"
+              ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-blue-300 hover:border-blue-500/30"
+              : "bg-blue-600/20 border-blue-500/30 text-blue-300 hover:bg-blue-600/30"
           }`}
         >
           {isEpisodeCollapsed ? (
@@ -442,7 +442,7 @@ export default function ImportedAssetsHeader({
       left={titleBlock}
       center={centerBlock}
       right={rightBlock}
-      centerClassName="order-3 w-full sm:order-none sm:w-auto sm:flex-1 sm:min-w-0"
+      centerClassName="order-3 w-full sm:order-none sm:w-auto sm:flex-1 sm:min-w-0 flex justify-center"
       className="flex-wrap sm:flex-nowrap"
     />
   );

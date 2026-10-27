@@ -25,6 +25,7 @@ import {
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import * as api from "@/shared/api";
+import { buildZipBlobFromUrls } from "@/features/platform/scraper/hooks/useLiveScraperZip";
 import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
 import { ImportedAssetsDeckProps } from "./types";
 import PanelCard from "./PanelCard";
@@ -140,52 +141,19 @@ export const HorizontalScrollContainer: React.FC<{
 
     el.addEventListener("wheel", handleNativeWheel, { passive: false });
 
-    // Mouse drag movement listeners
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (!isMouseDownRef.current || !scrollRef.current) return;
-      const dx = e.pageX - startXRef.current;
-
-      // Require > 5px drag distance before intercepting clicks (prevents swallowing card clicks)
-      if (Math.abs(dx) > 5) {
-        isDraggingRef.current = true;
-      }
-
-      if (isDraggingRef.current) {
-        scrollRef.current.scrollLeft = scrollLeftStartRef.current - dx;
-      }
-    };
-
-    const handleGlobalMouseUp = () => {
-      isMouseDownRef.current = false;
-      setTimeout(() => {
-        isDraggingRef.current = false;
-      }, 50);
-    };
-
-    window.addEventListener("mousemove", handleGlobalMouseMove);
-    window.addEventListener("mouseup", handleGlobalMouseUp);
-
     const observer = new ResizeObserver(() => checkScroll());
     observer.observe(el);
 
-    const mutObserver = new MutationObserver(() => checkScroll());
-    mutObserver.observe(el, { childList: true, subtree: true });
-
     const timer1 = setTimeout(checkScroll, 100);
-    const timer2 = setTimeout(checkScroll, 400);
 
     return () => {
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", checkScroll);
       el.removeEventListener("wheel", handleNativeWheel);
-      window.removeEventListener("mousemove", handleGlobalMouseMove);
-      window.removeEventListener("mouseup", handleGlobalMouseUp);
       observer.disconnect();
-      mutObserver.disconnect();
       clearTimeout(timer1);
-      clearTimeout(timer2);
     };
-  }, [checkScroll, children]);
+  }, [checkScroll]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     // Ignore clicks on buttons, inputs, links, textareas
@@ -197,6 +165,32 @@ export const HorizontalScrollContainer: React.FC<{
       isDraggingRef.current = false;
       startXRef.current = e.pageX;
       scrollLeftStartRef.current = scrollRef.current.scrollLeft;
+
+      const handleGlobalMouseMove = (moveEvent: MouseEvent) => {
+        if (!isMouseDownRef.current || !scrollRef.current) return;
+        const dx = moveEvent.pageX - startXRef.current;
+
+        // Require > 5px drag distance before intercepting clicks (prevents swallowing card clicks)
+        if (Math.abs(dx) > 5) {
+          isDraggingRef.current = true;
+        }
+
+        if (isDraggingRef.current) {
+          scrollRef.current.scrollLeft = scrollLeftStartRef.current - dx;
+        }
+      };
+
+      const handleGlobalMouseUp = () => {
+        isMouseDownRef.current = false;
+        setTimeout(() => {
+          isDraggingRef.current = false;
+        }, 50);
+        window.removeEventListener("mousemove", handleGlobalMouseMove);
+        window.removeEventListener("mouseup", handleGlobalMouseUp);
+      };
+
+      window.addEventListener("mousemove", handleGlobalMouseMove);
+      window.addEventListener("mouseup", handleGlobalMouseUp);
     }
   };
 
@@ -594,40 +588,52 @@ const ImportedAssetsDeck = React.memo(
       );
 
       setIsZipping(true);
+      const proj = useProjectStore.getState().activeProjectData?.project;
+      const seriesTitle = proj?.title || "";
+      const chapterNumber = proj?.episode || "";
+      const effectiveTargetUrl = targetUrl || proj?.url || "";
+
       try {
-        const zip = new JSZip();
-        const folder = zip.folder("webtoon_frames");
-        if (!folder) {
-          setIsZipping(false);
-          return;
-        }
-
-        for (let i = 0; i < toDownload.length; i++) {
-          try {
-            const url = toDownload[i];
-            const res = await activeFetch(url);
-            const blob = await res.blob();
-            const filename = `webtoon_frame_${String(i + 1).padStart(
-              3,
-              "0"
-            )}.png`;
-            folder.file(filename, blob);
-          } catch (err) {
-            console.error("Download failed for:", toDownload[i], err);
+        const { blob, zipFilename } = await buildZipBlobFromUrls(
+          toDownload,
+          activeFetch,
+          {
+            seriesTitle,
+            chapterNumber,
+            targetUrl: effectiveTargetUrl,
           }
-        }
-
-        const blobContent = await zip.generateAsync({ type: "blob" });
-        const targetFilename = getZipFilename();
-        saveAs(blobContent, targetFilename);
-        setConsoleLogs((prev) => [
+        );
+        saveAs(blob, zipFilename);
+        setConsoleLogs?.((prev) => [
           normalizeLog(
-            `[GUI] Successfully generated zip named ${targetFilename} for ${toDownload.length} images`
+            `[GUI] Successfully generated zip named ${zipFilename} for ${toDownload.length} images`
           ),
           ...prev,
         ]);
-      } catch (err) {
-        console.error("Zip generation failed:", err);
+      } catch (err: any) {
+        console.warn(
+          "[ImportedAssetsDeck] Client ZIP generation failed, falling back to server:",
+          err
+        );
+        try {
+          const zipBlob = await api.downloadZipBlob(activeFetch, {
+            urls: toDownload,
+            url: effectiveTargetUrl,
+          });
+          if (!zipBlob || zipBlob.size === 0) {
+            throw new Error("Server returned an empty ZIP archive.");
+          }
+          const targetFilename = getZipFilename();
+          saveAs(zipBlob, targetFilename);
+          setConsoleLogs?.((prev) => [
+            normalizeLog(
+              `[GUI] Successfully generated zip named ${targetFilename} via server for ${toDownload.length} images`
+            ),
+            ...prev,
+          ]);
+        } catch (fallbackErr: any) {
+          console.error("Zip generation failed:", fallbackErr);
+        }
       } finally {
         setIsZipping(false);
       }

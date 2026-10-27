@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from"react";
 import {
   Focus,
-  LayoutPanelTop,
   Save,
   Menu,
   Layers,
@@ -239,33 +238,33 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         >
           <SonikomaLogo iconOnly size="sm" />
 
-          <div className="min-w-0 hidden min-[540px]:block max-w-[180px] sm:max-w-[280px] md:max-w-[340px] lg:max-w-[420px]">
+          <div className="min-w-0 hidden min-[540px]:flex flex-col justify-center max-w-[260px] sm:max-w-[380px] md:max-w-[480px] lg:max-w-[640px]">
             {/* Top Workspace & Source Website Badge */}
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-neutral-400 leading-none">
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/25 text-[9px] font-mono font-bold uppercase tracking-wider text-blue-400 leading-none">
                 Editor Workspace
               </span>
 
               {websiteInfo && (
                 <a
-                  href={projectUrl ||"#"}
+                  href={projectUrl || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] font-bold tracking-wide transition-colors ${websiteInfo.badgeColor} hover:brightness-125`}
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-neutral-900 border border-neutral-700/80 text-[9px] font-mono font-bold tracking-wide text-neutral-300 hover:text-white hover:border-neutral-600 transition-colors shadow-sm leading-none"
                   title={`Source: ${websiteInfo.domain}`}
                 >
-                  <Globe className="w-2.5 h-2.5" />
-                  <span className="truncate max-w-[90px]">
+                  <Globe className="w-2.5 h-2.5 text-blue-400" />
+                  <span className="truncate max-w-[100px]">
                     {websiteInfo.name}
                   </span>
-                  <ExternalLink className="w-2 h-2 opacity-60" />
+                  <ExternalLink className="w-2 h-2 text-neutral-500" />
                 </a>
               )}
 
               {projectGenre && (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-neutral-800/80 border border-neutral-700/50 text-[9px] font-medium text-neutral-300 truncate max-w-[90px]">
-                  <Tag className="w-2.5 h-2.5 text-neutral-400 shrink-0" />
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-neutral-900 border border-neutral-700/80 text-[9px] font-mono font-medium text-neutral-300 truncate max-w-[100px] leading-none shadow-sm">
+                  <Tag className="w-2.5 h-2.5 text-purple-400 shrink-0" />
                   <span className="truncate">
                     {projectGenre.split(",")[0].trim()}
                   </span>
@@ -273,22 +272,28 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
               )}
             </div>
 
-            {/* Title & Layout Icon */}
-            <div className="mt-1 flex items-center gap-1.5">
-              <LayoutPanelTop className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
-              <h2 className="truncate text-sm font-bold text-white leading-none tracking-wide">
+            {/* Title & Author / Subtitle */}
+            <div className="mt-1 flex items-center gap-2 min-w-0 leading-none">
+              <h2 className="truncate text-sm font-bold text-white tracking-wide">
                 {title}
               </h2>
-            </div>
 
-            {/* Subtitle & Author */}
-            <div className="mt-1 flex items-center gap-2 truncate text-[10px] text-neutral-400 font-mono leading-none">
-              {subtitle && <span className="truncate">{subtitle}</span>}
-              {projectAuthor && (
-                <span className="inline-flex items-center gap-1 text-neutral-500 shrink-0">
-                  <User className="w-2.5 h-2.5 text-neutral-500" />
-                  <span className="truncate">{projectAuthor}</span>
-                </span>
+              {(subtitle || projectAuthor) && (
+                <>
+                  <span className="text-neutral-600 text-xs font-mono">•</span>
+                  <div className="flex items-center gap-1.5 text-[11px] text-neutral-400 font-mono truncate">
+                    {subtitle && <span className="truncate">{subtitle}</span>}
+                    {subtitle && projectAuthor && (
+                      <span className="text-neutral-600">•</span>
+                    )}
+                    {projectAuthor && (
+                      <span className="inline-flex items-center gap-1 text-neutral-400 shrink-0">
+                        <User className="w-3 h-3 text-neutral-500" />
+                        <span className="truncate">{projectAuthor}</span>
+                      </span>
+                    )}
+                  </div>
+                </>
               )}
             </div>
           </div>

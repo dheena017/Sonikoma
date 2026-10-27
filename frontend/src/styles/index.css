@@ -17,31 +17,7 @@
 @import "./scrollbars.css";
 @import "./animations.css";
 
-/* --- Complete Global Glow Elimination Override --- */
-*,
-*::before,
-*::after {
-  --tw-shadow-colored: 0 0 #0000 !important;
-}
-
-[class*="shadow-[0_0_"],
-[class*="drop-shadow-[0_0_"],
-[class*="shadow-blue-"],
-[class*="shadow-indigo-"],
-[class*="shadow-purple-"],
-[class*="shadow-violet-"],
-[class*="shadow-pink-"],
-[class*="shadow-rose-"],
-[class*="shadow-emerald-"],
-[class*="shadow-green-"],
-[class*="shadow-amber-"],
-[class*="shadow-yellow-"],
-[class*="shadow-cyan-"],
-[class*="shadow-sky-"],
-[class*="shadow-teal-"],
-[class*="shadow-fuchsia-"],
-[class*="shadow-red-"],
-[class*="shadow-[#"],
+/* --- Target Glow Elimination Classes --- */
 .loading-logo-glow,
 .anime-card-glow,
 .anime-card-glow::before,
@@ -51,5 +27,4 @@
 .pulse-glow {
   box-shadow: none !important;
   filter: none !important;
-  drop-shadow: none !important;
 }

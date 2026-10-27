@@ -108,17 +108,44 @@ export const processLayers = async (
   );
 };
 
-export const downloadZip = async (
+export const downloadZipBlob = async (
   fetchWithInterceptor: FetchClient,
-  data: any,
+  data: { urls: string[]; url?: string },
   options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/images/download-zip", {
+): Promise<Blob> => {
+  const res = await fetchWithInterceptor("/api/v1/images/download-zip", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
+  if (!res.ok) {
+    const errorText = await res.text().catch(() => res.statusText);
+    throw new Error(`Server failed to package ZIP: ${errorText || res.status}`);
+  }
+  return res.blob();
+};
+
+export const downloadZip = async (
+  fetchWithInterceptor: FetchClient,
+  data: any,
+  options?: RequestInit
+): Promise<ApiResponse<any>> => {
+  try {
+    const blob = await downloadZipBlob(fetchWithInterceptor, data, options);
+    const downloadUrl = URL.createObjectURL(blob);
+    return {
+      success: true,
+      data: { downloadUrl, blob, filename: "comic_panels_archive.zip" },
+      downloadUrl,
+      filename: "comic_panels_archive.zip",
+    } as any;
+  } catch (err: any) {
+    return {
+      success: false,
+      error: err?.message || "Failed to download zip",
+    } as any;
+  }
 };
 
 export const undoImageEdit = async (

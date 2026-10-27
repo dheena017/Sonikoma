@@ -59,3 +59,18 @@ def test_panels_detect_long_panels_validation(client):
     """POST /api/v1/panels/detect/long-panels - validates input structure."""
     response = client.post("/api/v1/panels/detect/long-panels", json={})
     assert response.status_code in (400, 422)
+
+
+def test_images_process_layers_endpoint(client, sample_image_base64):
+    """POST /api/v1/images/process-layers/20 - processes layers or returns fallback layers."""
+    data_uri = f"data:image/png;base64,{sample_image_base64}"
+    response = client.post(
+        "/api/v1/images/process-layers/20",
+        json={"url": data_uri},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data.get("success") is True
+    assert "layers" in data
+    assert "background_url" in data["layers"]
+

@@ -376,6 +376,8 @@ class RemoveBubblesBatchRequest(BaseModel):
 class ProcessLayersRequest(BaseModel):
     """Triggers image layer decomposition."""
     url: str
+    panel_id: Optional[str] = None
+    split_panels: Optional[bool] = False
 
 
 class CleanerBase64Request(BaseModel):

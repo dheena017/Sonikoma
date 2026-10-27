@@ -99,12 +99,41 @@ export function useCompileActions({
       panels.length,
       "panels"
     );
+
+    const proj = useProjectStore.getState().activeProjectData?.project;
+    const seriesTitle = proj?.title || "";
+    const chapterNumber = proj?.episode || "";
+    const effectiveTargetUrl = targetUrl || proj?.url || "";
+
+    const panelItems = panels.map((p, idx) => ({
+      index: idx + 1,
+      imageUrl: p.image_url,
+      audioUrl: p.speech_audio_url || p.audio_url || p.narrative_audio_url,
+      speechText: p.speech_text,
+      sfx: p.sfx,
+      visualPrompt: p.prompt || p.visual_description,
+      duration: p.duration,
+      motionType: p.motion_type,
+      episodeLabel: p.episode_label,
+      characterName: p.speaker_name || p.character_name,
+      emotion: p.emotion,
+    }));
+
+    const totalDuration = panels.reduce(
+      (acc, p) => acc + (Number(p.duration) || 0),
+      0
+    );
+
     try {
-      const urls = panels.map((p) => p.image_url);
       const { blob, zipFilename } = await buildZipBlobFromUrls(
-        urls,
+        panelItems,
         activeFetch,
-        { targetUrl }
+        {
+          seriesTitle,
+          chapterNumber,
+          targetUrl: effectiveTargetUrl,
+          totalDuration,
+        }
       );
       saveAs(blob, zipFilename);
       console.log(
@@ -118,28 +147,23 @@ export function useCompileActions({
         audioFeedback?.playSuccess();
       }
     } catch (err: any) {
-      console.error(
+      console.warn(
         "[Timeline] Client ZIP generation failed, falling back to API:",
         err
       );
       try {
         const urls = panels.map((p) => p.image_url);
-        const data = await api.downloadZip(activeFetch, {
+        const zipBlob = await api.downloadZipBlob(activeFetch, {
           urls,
-          url: targetUrl,
+          url: effectiveTargetUrl,
         });
-        if (data.success && data.downloadUrl) {
-          const link = document.createElement("a");
-          link.href = data.downloadUrl;
-          link.download = data.filename || "comic_panels_archive.zip";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          addNotification?.("ZIP archive downloaded successfully!", "success");
-          audioFeedback?.playSuccess();
-        } else {
-          throw new Error(data.error || "Failed to package ZIP archive.");
+        if (!zipBlob || zipBlob.size === 0) {
+          throw new Error("Server returned an empty ZIP archive.");
         }
+        const fallbackFilename = `${seriesTitle ? seriesTitle.replace(/[^\w\s-]/g, "").replace(/\s+/g, "_") : "comic_panels"}_archive.zip`;
+        saveAs(zipBlob, fallbackFilename);
+        addNotification?.("ZIP archive downloaded successfully via server!", "success");
+        audioFeedback?.playSuccess();
       } catch (fallbackErr: any) {
         console.error(
           "[Timeline] ZIP download failed completely:",

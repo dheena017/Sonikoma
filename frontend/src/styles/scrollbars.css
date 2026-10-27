@@ -4,10 +4,7 @@
    - Preserves 100% native smooth mousewheel, touchpad, touch & keyboard scrolling
    ========================================================================== */
 
-/* Global Default: Completely hide scrollbars across all elements & pages */
-*,
-*::before,
-*::after,
+/* Global Default: Hide scrollbars across main viewports & explicit scroll containers */
 html,
 body,
 #root,
@@ -17,12 +14,12 @@ body,
 .page-scrollbar,
 .custom-purple-scrollbar,
 .hide-scrollbar,
+.no-scrollbar,
 .mini-sidebar-scrollbar {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
 
-*::-webkit-scrollbar,
 html::-webkit-scrollbar,
 body::-webkit-scrollbar,
 #root::-webkit-scrollbar,
@@ -32,10 +29,17 @@ body::-webkit-scrollbar,
 .page-scrollbar::-webkit-scrollbar,
 .custom-purple-scrollbar::-webkit-scrollbar,
 .hide-scrollbar::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar,
 .mini-sidebar-scrollbar::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
+}
+
+/* Ensure smooth native momentum scrolling on main scrollable view */
+#main-scrollable-area {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Visible Sleek Scrollbar for Studios & Continuous Webtoon Canvas */

@@ -38,33 +38,20 @@ footer {
   user-select: none;
 }
 
-/* 3. Interactive clickable elements & all descendant children */
+/* 3. Interactive clickable elements */
 button,
-button *,
 a,
-a *,
 select,
-select *,
 summary,
-summary *,
 [role="button"],
-[role="button"] *,
 [role="tab"],
-[role="tab"] *,
 [role="menuitem"],
-[role="menuitem"] *,
 [role="checkbox"],
-[role="checkbox"] *,
 [role="switch"],
-[role="switch"] *,
 [role="option"],
-[role="option"] *,
 .cursor-pointer,
-.cursor-pointer *,
 .btn-clickable,
-.btn-clickable *,
 .clickable-card,
-.clickable-card *,
 input[type="button"],
 input[type="submit"],
 input[type="reset"],
@@ -76,51 +63,42 @@ input[type="file"] {
 }
 
 /* 4. Drag & Grab cursors (storyboard items, draggable clips, canvas panning) */
-.cursor-grab,
-.cursor-grab * {
+.cursor-grab {
   cursor: grab !important;
 }
 
-.cursor-grabbing,
-.cursor-grabbing * {
+.cursor-grabbing {
   cursor: grabbing !important;
 }
 
 /* 5. Directional resize cursors (timeline trim handles, splitters, scrubbers) */
-.cursor-ew-resize,
-.cursor-ew-resize * {
+.cursor-ew-resize {
   cursor: ew-resize !important;
 }
 
-.cursor-col-resize,
-.cursor-col-resize * {
+.cursor-col-resize {
   cursor: col-resize !important;
 }
 
-.cursor-row-resize,
-.cursor-row-resize * {
+.cursor-row-resize {
   cursor: row-resize !important;
 }
 
-.cursor-move,
-.cursor-move * {
+.cursor-move {
   cursor: move !important;
 }
 
 /* 6. Zoom in / Zoom out cursors (image viewers, reader modals, canvas inspect) */
-.cursor-zoom-in,
-.cursor-zoom-in * {
+.cursor-zoom-in {
   cursor: zoom-in !important;
 }
 
-.cursor-zoom-out,
-.cursor-zoom-out * {
+.cursor-zoom-out {
   cursor: zoom-out !important;
 }
 
 /* 7. Crosshair cursor (selection box, canvas crop, bubble bounding box) */
-.cursor-crosshair,
-.cursor-crosshair * {
+.cursor-crosshair {
   cursor: crosshair !important;
 }
 
@@ -141,12 +119,8 @@ textarea,
 
 /* 9. Disabled elements: not-allowed cursor */
 :disabled,
-:disabled *,
 [aria-disabled="true"],
-[aria-disabled="true"] *,
 .disabled,
-.disabled *,
-.cursor-not-allowed,
-.cursor-not-allowed * {
+.cursor-not-allowed {
   cursor: not-allowed !important;
 }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { makeSafeFilename } from "@/shared/utils/downloadNaming";
+import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 import { Download, X } from "lucide-react";
 import type { Chapter } from "../types/ChapterTypes";
 
@@ -66,18 +67,15 @@ export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
         }
 
         try {
-          const response = await fetch(coverUrl, {
-            mode: "cors",
-            credentials: "omit",
-          });
+          const proxiedUrl = getProxiedImageUrl(coverUrl, chapter.url);
+          const response = await fetch(proxiedUrl);
 
           if (response.ok) {
             const blob = await response.blob();
-            const ext = coverUrl.includes("jpg")
-              ? "jpg"
-              : coverUrl.includes("png")
-              ? "png"
-              : "webp";
+            let ext = "jpg";
+            const contentType = response.headers.get("content-type") || "";
+            if (contentType.includes("png") || coverUrl.includes(".png")) ext = "png";
+            else if (contentType.includes("webp") || coverUrl.includes(".webp")) ext = "webp";
             const filename = `${chapter.number}_${chapter.title
               .replace(/[/\\?*:|"<>]/g, "_")
               .substring(0, 30)}.${ext}`;

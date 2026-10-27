@@ -7,8 +7,10 @@ Unified Image Router Package:
 """
 
 from .router import image_router, router
+from .layers import router as layers_router
 
 __all__ = [
     "image_router",
     "router",
+    "layers_router",
 ]

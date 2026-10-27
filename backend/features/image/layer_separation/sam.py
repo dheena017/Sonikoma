@@ -184,6 +184,10 @@ def segment_with_sam(
             predict_kwargs["labels"] = labels
         else:
             predict_kwargs["labels"] = [1] * len(points)
+    elif not bboxes:
+        # Promptless SAM requires generating a dense 64x64 grid of point prompts, which
+        # causes CPU timeouts. Defer to U-2-Net for zero-shot promptless foreground extraction.
+        return None
 
     try:
         pred_output = model.predict(np_rgb, **predict_kwargs)

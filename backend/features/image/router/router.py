@@ -14,6 +14,7 @@ from .detect import router as detect_router
 from .transform import router as transform_router
 from .upload import router as upload_router
 from .metadata import router as metadata_router
+from .layers import router as layers_router
 
 image_router = APIRouter()
 
@@ -23,6 +24,7 @@ image_router.include_router(detect_router)
 image_router.include_router(transform_router)
 image_router.include_router(upload_router)
 image_router.include_router(metadata_router)
+image_router.include_router(layers_router)
 
 router = image_router
 

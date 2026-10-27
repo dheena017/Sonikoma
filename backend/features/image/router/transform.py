@@ -199,8 +199,15 @@ async def download_zip_endpoint(body: DownloadZipRequest):
         urls = body.urls or []
         if not urls:
             raise HTTPException(status_code=400, detail="List of image URLs cannot be empty.")
-        zip_bytes = await download_and_bundle_zip(urls)
-        return Response(content=zip_bytes, media_type="application/zip")
+        zip_bytes = await download_and_bundle_zip(urls, referer=body.url)
+        return Response(
+            content=zip_bytes,
+            media_type="application/zip",
+            headers={
+                "Content-Disposition": 'attachment; filename="comic_panels_archive.zip"',
+                "Content-Type": "application/zip",
+            },
+        )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 

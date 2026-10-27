@@ -635,7 +635,7 @@ export default function MainLayout(props: MainLayoutProps) {
             className={`w-full max-w-full min-w-0 min-h-0 flex-1 flex flex-col ${
               isFullBleedNoScroll
                 ? "p-0 h-full min-h-0 overflow-hidden"
-                : "pt-6 sm:pt-7 px-4 sm:px-6 lg:px-8 pb-8 page-view-transition stagger-container"
+                : "pt-6 sm:pt-7 px-4 sm:px-6 lg:px-8 pb-8 page-view-transition"
             }`}
           >
             {showAutoCropModal && !isProEditorPage && !isImageEditorPage ? (
