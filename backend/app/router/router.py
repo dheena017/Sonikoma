@@ -47,6 +47,8 @@ api_router.include_router(storyboard_router,     prefix="/api/v1/storyboard", ta
 api_router.include_router(ai_router,             prefix="/api/v1/ai")
 api_router.include_router(providers_router,      prefix="/api/v1/providers", tags=["07. AI Providers & Models"])
 api_router.include_router(image_router,          prefix="/api/v1/images", tags=["08. Image Canvas & Editing"])
+api_router.include_router(image_router,          prefix="/api/image", include_in_schema=False)
+api_router.include_router(image_router,          prefix="/image", include_in_schema=False)
 api_router.include_router(audio_router,          prefix="/api/v1/audio", tags=["09. Audio Synthesis"])
 api_router.include_router(video_router,          prefix="/api/v1/video", tags=["10. Video Rendering Engine"])
 api_router.include_router(jobs_router,           prefix="/api/v1/jobs", tags=["11. Background Jobs"])

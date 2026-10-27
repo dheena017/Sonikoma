@@ -10,7 +10,7 @@ Image Transformation & Compositing Router:
 import uuid
 import asyncio
 import logging
-from typing import Optional, List
+from typing import Optional, List, Literal, Union
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, Field
 
@@ -19,15 +19,19 @@ from features.image.schemas import (
     FilterType,
     ImagePathRequest,
     StitchImagesRequest,
+    SplitImagesRequest,
+    TransformImageRequest,
     DownloadZipRequest,
 )
 from features.image.utils.media_utils import download_image_to_memory
 from features.image.transform.resize_service import resize_image
 from features.image.transform.rotate_service import rotate_image
+from features.image.transform.flip_service import flip_image
 from features.image.transform.enhance_service import enhance_image
 from features.image.transform.background_remover_service import remove_solid_background
 from features.image.transform.text_overlay_service import overlay_text
 from features.image.stitching.merge_service import merge_image_panels
+from features.image.crop.manual_split_service import cut_strip_at_positions
 from features.image.archive.zip_downloader_service import download_and_bundle_zip
 from features.image.archive.archive_exporter_service import export_comic_archive
 from database.supabase import upload_to_supabase_bucket
@@ -104,7 +108,10 @@ async def _save_and_respond(data: bytes, prefix: str = "trans", fmt: str = "png"
 @router.post("/resize", summary="Resize image using Lanczos resampling")
 async def resize_endpoint(body: ResizeRequest):
     try:
-        buf = await download_image_to_memory(body.url)
+        target_url = body.url or body.image_path
+        if not target_url:
+            raise HTTPException(status_code=400, detail="Must provide an image URL or image_path.")
+        buf = await download_image_to_memory(target_url)
         res = resize_image(
             image_bytes=buf,
             width=body.width,
@@ -114,6 +121,8 @@ async def resize_endpoint(body: ResizeRequest):
             quality=body.quality or 85
         )
         return await _save_and_respond(res, prefix="resize")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -121,13 +130,18 @@ async def resize_endpoint(body: ResizeRequest):
 @router.post("/rotate", summary="Rotate image by specified degrees")
 async def rotate_endpoint(body: RotateRequest):
     try:
-        buf = await download_image_to_memory(body.url)
+        target_url = body.url or body.image_path
+        if not target_url:
+            raise HTTPException(status_code=400, detail="Must provide an image URL or image_path.")
+        buf = await download_image_to_memory(target_url)
         res = rotate_image(
             image_bytes=buf,
             angle=body.angle,
             background_color=body.background_color or "white"
         )
         return await _save_and_respond(res, prefix="rotate")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -135,7 +149,10 @@ async def rotate_endpoint(body: RotateRequest):
 @router.post("/enhance", summary="Adjust brightness, contrast, and saturation")
 async def enhance_endpoint(body: EnhanceRequest):
     try:
-        buf = await download_image_to_memory(body.url)
+        target_url = body.url or body.image_path
+        if not target_url:
+            raise HTTPException(status_code=400, detail="Must provide an image URL or image_path.")
+        buf = await download_image_to_memory(target_url)
         res = enhance_image(
             image_bytes=buf,
             brightness=body.brightness or 1.0,
@@ -144,6 +161,8 @@ async def enhance_endpoint(body: EnhanceRequest):
             sharpness=body.sharpness or 1.0
         )
         return await _save_and_respond(res, prefix="enhance")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -151,9 +170,14 @@ async def enhance_endpoint(body: EnhanceRequest):
 @router.post("/remove-bg", summary="Remove solid backdrop color with alpha transparency")
 async def remove_bg_endpoint(body: RemoveBgRequest):
     try:
-        buf = await download_image_to_memory(body.url)
+        target_url = body.url or body.image_path
+        if not target_url:
+            raise HTTPException(status_code=400, detail="Must provide an image URL or image_path.")
+        buf = await download_image_to_memory(target_url)
         res = remove_solid_background(image_bytes=buf, fuzz_threshold=body.fuzz_threshold or 30)
         return await _save_and_respond(res, prefix="nobg", fmt="png")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -161,7 +185,10 @@ async def remove_bg_endpoint(body: RemoveBgRequest):
 @router.post("/text-overlay", summary="Render typography or watermark onto image")
 async def text_overlay_endpoint(body: TextOverlayRequest):
     try:
-        buf = await download_image_to_memory(body.url)
+        target_url = body.url or body.image_path
+        if not target_url:
+            raise HTTPException(status_code=400, detail="Must provide an image URL or image_path.")
+        buf = await download_image_to_memory(target_url)
         res = overlay_text(
             image_bytes=buf,
             text=body.text,
@@ -171,25 +198,105 @@ async def text_overlay_endpoint(body: TextOverlayRequest):
             opacity=body.opacity or 1.0
         )
         return await _save_and_respond(res, prefix="text")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
 
 @router.post("/stitch", summary="Merge multiple images into a stitched canvas strip")
+@router.post("/merge", summary="Merge multiple images into a stitched canvas strip (alias)")
 async def stitch_endpoint(body: StitchImagesRequest):
     try:
-        urls = body.urls or (body.images if hasattr(body, "images") else [])
+        urls: List[Union[str, bytes]] = []
+        if body.urls:
+            urls.extend(body.urls)
+        elif body.url1 or body.imageUrl1:
+            u1 = body.url1 or body.imageUrl1
+            u2 = body.url2 or body.imageUrl2
+            urls.extend([u for u in [u1, u2] if u])
+        elif hasattr(body, "images") and getattr(body, "images"):
+            raw_imgs = getattr(body, "images")
+            if isinstance(raw_imgs, (list, tuple)):
+                urls.extend([str(img) for img in raw_imgs if img])
         if not urls:
             raise HTTPException(status_code=400, detail="Must provide a list of image URLs.")
 
+        raw_direction = str(body.layout or body.direction or "vertical").lower()
+        layout_mode: Literal["vertical", "horizontal"] = "horizontal" if raw_direction == "horizontal" else "vertical"
+
+        raw_gap = body.spacing if body.spacing is not None else getattr(body, "gap", 0)
+        gap: int = int(raw_gap) if raw_gap is not None else 0
+
+        bg_color = str(body.spacingColor or getattr(body, "backgroundColor", "white") or "white")
+
+        raw_align = str(body.alignMode or body.alignment or "center").lower()
+        align_mode: Literal["center", "start", "end"] = "start" if raw_align == "start" else ("end" if raw_align == "end" else "center")
+
+        raw_padding = body.padding if body.padding is not None else getattr(body, "padding", 0)
+        padding: int = int(raw_padding) if raw_padding is not None else 0
+
+        fmt = str(body.format or "PNG")
+
         res = await merge_image_panels(
             images=urls,
-            layout="vertical" if getattr(body, "direction", "vertical") == "vertical" else "horizontal",
-            spacing=getattr(body, "gap", 0) or 0,
-            spacing_color=getattr(body, "backgroundColor", "white") or "white"
+            layout=layout_mode,
+            spacing=gap,
+            spacing_color=bg_color,
+            align_mode=align_mode,
+            padding=padding,
+            output_format=fmt
         )
         return await _save_and_respond(res, prefix="stitch")
+    except HTTPException:
+        raise
     except Exception as exc:
+        logger.error(f"[Stitch API] Error: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/split", summary="Split continuous comic strip along user-specified percentage cut positions")
+async def split_endpoint(body: SplitImagesRequest):
+    try:
+        if not body.url or not body.url.strip():
+            raise HTTPException(status_code=400, detail="Must provide a valid source image URL.")
+        cuts = body.splitLines if body.splitLines is not None else (body.split_points or [])
+        res = await cut_strip_at_positions(
+            url=body.url,
+            split_lines=cuts,
+            output_format=body.format or "jpeg"
+        )
+        return {
+            "success": True,
+            "urls": res.get("urls", []),
+            "count": len(res.get("urls", []))
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error(f"[Split API] Error: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/transform", summary="Quick rotate or flip image transformation")
+async def transform_endpoint(body: TransformImageRequest):
+    try:
+        if not body.url or not body.url.strip():
+            raise HTTPException(status_code=400, detail="Must provide a valid source image URL.")
+        buf = await download_image_to_memory(body.url)
+        if body.type == "rotate":
+            angle = float(body.value)
+            res = rotate_image(image_bytes=buf, angle=angle)
+        elif body.type == "flip":
+            horizontal = (str(body.value).lower() in ("h", "horizontal", "true", "1"))
+            res = flip_image(image_bytes=buf, horizontal=horizontal)
+        else:
+            raise HTTPException(status_code=400, detail=f"Unsupported transform type: {body.type}")
+        return await _save_and_respond(res, prefix="trans")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error(f"[Transform API] Error: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
 
 

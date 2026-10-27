@@ -326,7 +326,7 @@ function PanelCard({
         addPanelsToStoryboard={addPanelsToStoryboard}
       />
 
-      {/* 3. PanelCardActions now only renders the Delete button (based on our previous step) */}
+      {/* 3. PanelCardActions renders Edit and Delete action buttons side by side */}
       <PanelCardActions
         idx={idx}
         imgUrl={imgUrl}

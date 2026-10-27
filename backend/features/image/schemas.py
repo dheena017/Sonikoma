@@ -177,9 +177,20 @@ class BatchResizeRequest(BaseModel):
 
 
 class ImagePathRequest(BaseModel):
-    """Local file path wrapper."""
-    image_path: str
+    """Image request wrapper supporting remote URLs, data URIs, and local file paths."""
+    url: Optional[str] = Field(default=None, description="Image URL or data URI")
+    image_path: Optional[str] = Field(default=None, description="Local or cloud image path")
     output_path: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def resolve_source(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            src = data.get("url") or data.get("imageUrl") or data.get("image_url") or data.get("image_path")
+            if src:
+                data.setdefault("url", src)
+                data.setdefault("image_path", src)
+        return data
 
 
 class MetadataRequest(BaseModel):

@@ -10,7 +10,7 @@ High-Level Image & Panel Merge Service:
 
 import asyncio
 import logging
-from typing import List, Union, Optional, Literal, Dict, Any
+from typing import List, Union, Optional, Literal, Dict, Any, Sequence
 
 from common.media import resolve_image_to_buffer
 from .image_stitcher import stitch_images_together, stack_vertical
@@ -32,7 +32,7 @@ async def _fetch_buffer(item: Union[str, bytes]) -> bytes:
     return b""
 
 
-async def _resolve_all_buffers(items: List[Union[str, bytes]]) -> List[bytes]:
+async def _resolve_all_buffers(items: Sequence[Union[str, bytes]]) -> List[bytes]:
     """Resolves all items asynchronously in parallel."""
     tasks = [_fetch_buffer(item) for item in items]
     results = await asyncio.gather(*tasks)
@@ -44,7 +44,7 @@ async def _resolve_all_buffers(items: List[Union[str, bytes]]) -> List[bytes]:
 # ─────────────────────────────────────────────────────────────────────────────
 
 async def merge_image_panels(
-    images: List[Union[str, bytes]],
+    images: Sequence[Union[str, bytes]],
     layout: Literal["vertical", "horizontal"] = "vertical",
     spacing: int = 0,
     spacing_color: str = "white",

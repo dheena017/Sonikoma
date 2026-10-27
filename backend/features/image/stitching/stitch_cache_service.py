@@ -82,9 +82,34 @@ def get_from_memory_cache(cache_id: str) -> Optional[Tuple[bytes, str]]:
         Optional[Tuple[bytes, str]]: (image_bytes, content_type) if found, else None.
     """
     cached = stitched_cache.get(cache_id)
+    if not cached:
+        base_id = re.sub(r"\.[a-zA-Z0-9]+$", "", cache_id)
+        if base_id != cache_id:
+            cached = stitched_cache.get(base_id)
+    if not cached:
+        clean_id = re.sub(r"_full$", "", cache_id)
+        if clean_id != cache_id:
+            cached = stitched_cache.get(clean_id)
+
     if cached and isinstance(cached, dict) and "data" in cached:
         logger.debug(f"[Stitch Cache] Cache hit for '{cache_id}' ({len(cached['data'])} bytes).")
         return cached["data"], cached.get("content_type", "image/png")
+    elif cached and isinstance(cached, (bytes, bytearray)):
+        return bytes(cached), "image/png"
+
+    # Disk cache fallback
+    try:
+        from app.core.cache import PERSISTENT_CACHE_DIR
+        disk_path = os.path.join(PERSISTENT_CACHE_DIR, cache_id)
+        if os.path.isfile(disk_path):
+            with open(disk_path, "rb") as f:
+                disk_data = f.read()
+            ext = os.path.splitext(cache_id)[1].lower().lstrip(".") or "png"
+            ctype = f"image/{ext}" if ext in ("png", "jpeg", "jpg", "webp", "gif") else "image/png"
+            return disk_data, ctype
+    except Exception:
+        pass
+
     return None
 
 

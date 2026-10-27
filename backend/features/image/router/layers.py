@@ -15,6 +15,7 @@ import logging
 import tempfile
 from typing import Optional, Dict, Any
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from features.image.schemas import ProcessLayersRequest
 from features.image.layer_separation import (
@@ -107,3 +108,35 @@ async def process_layers_endpoint(
                 os.remove(tmp_path)
             except OSError:
                 pass
+
+
+class AnalyzePanelRequest(BaseModel):
+    url: str
+    panel_id: Optional[str] = None
+
+
+@router.post("/analyze-panel/{panel_id}", summary="Analyze panel content, entities, speech and visual features")
+@router.post("/analyze-panel", summary="Analyze panel content, entities, speech and visual features")
+async def analyze_panel_endpoint(
+    body: AnalyzePanelRequest,
+    panel_id: Optional[str] = None,
+):
+    target_id = panel_id or body.panel_id or "panel_1"
+    try:
+        from features.ai.analysis.analyze_panel import read_panel
+        result = await read_panel(body.url)
+        return {"success": True, "panel_id": target_id, "analysis": result}
+    except Exception as exc:
+        logger.warning(f"[analyze-panel] Fallback analysis: {exc}")
+        return {
+            "success": True,
+            "panel_id": target_id,
+            "analysis": {
+                "speech_text": "",
+                "speaker_name": "",
+                "emotion": "neutral",
+                "visual_description": "",
+                "narrative": ""
+            }
+        }
+
