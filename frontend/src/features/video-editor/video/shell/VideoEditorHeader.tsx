@@ -30,9 +30,10 @@ import { Notification } from"@/features/platform/notifications";
 import { getUserCreditsPayload, claimDailyCredits } from"@/features/auth/api/auth";
 import { useProjectStore } from"@/features/platform/projects/store/useProjectStore";
 import { AIModelSelector } from"@/features/intelligence/core";
-import ServerStatusIndicator from"@/shared/ui/status/ServerStatusIndicator";
-import { SonikomaLogo } from"@/shared/ui/branding";
-import { useBackendHealth } from"@/shared/api/hooks/useBackendHealth";
+import ServerStatusIndicator from "@/shared/ui/status/ServerStatusIndicator";
+import { SonikomaLogo } from "@/shared/ui/branding";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import { useBackendHealth } from "@/shared/api/hooks/useBackendHealth";
 
 interface VideoEditorHeaderProps {
   seriesTitle?: string;
@@ -236,23 +237,72 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
   return (
     <>
-      <header className="relative w-full min-w-0 h-16 shrink-0 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-visible z-50">
+      <header className="relative w-full min-w-0 h-16 shrink-0 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-visible z-30">
         <div className="flex items-center shrink-0 h-full">
+          {/* Mobile menu toggle only (< lg) */}
           <div className="lg:hidden w-14 sm:w-16 md:w-16 flex items-center justify-center shrink-0 border-r border-[#2F2F2F] h-full">
             <button
               onClick={onToggleSidebar}
               className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white transition-all duration-300 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
-              title="Toggle Sidebar Drawer"
+              title="Toggle Navigation Menu"
+              aria-label="Toggle Navigation Menu"
             >
-              <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Menu className="h-4.5 w-4.5" />
             </button>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 pl-3 sm:pl-4">
-            <SonikomaLogo
-              size="sm"
-              onClick={() => navigateTo && navigateTo("/dashboard")}
-            />
+          {/* Logo with Back to Dashboard navigation */}
+          <div className="flex items-center gap-2 pl-3 sm:pl-4">
+            <Tooltip text="Back to Dashboard" placement="bottom">
+              <button
+                type="button"
+                onClick={() => (navigateTo ? navigateTo("/dashboard") : onBackToApp())}
+                className="flex items-center gap-2 rounded-xl p-1 -ml-1 hover:bg-neutral-800/80 border border-transparent hover:border-neutral-700/60 transition-all cursor-pointer group focus-visible:outline-none shrink-0"
+                aria-label="Back to Dashboard"
+              >
+                <SonikomaLogo size="sm" />
+              </button>
+            </Tooltip>
+          </div>
+
+          <div className="h-7 w-px bg-white/10 hidden sm:block shrink-0 mx-2 sm:mx-3" />
+
+          {/* Breadcrumb & Project / Chapter Title */}
+          <div className="min-w-0 hidden min-[540px]:flex flex-col justify-center max-w-[180px] sm:max-w-[260px] md:max-w-[340px] lg:max-w-[420px]">
+            {/* Top Row: Series Title with switch drawer trigger */}
+            <div className="flex items-center gap-1.5 flex-nowrap min-w-0">
+              <button
+                type="button"
+                onClick={() => setDrawerOpen(true)}
+                className="text-[11px] font-semibold text-neutral-400 hover:text-neutral-200 transition-colors truncate focus-visible:outline-none cursor-pointer flex items-center gap-1"
+                title="Switch Active Project"
+              >
+                <span className="truncate">
+                  {seriesTitle || activeProjectData?.project?.title || "Cyberpunk Story"}
+                </span>
+                <ChevronDown className="w-2.5 h-2.5 opacity-60 shrink-0" />
+              </button>
+
+              {panelsCount > 0 && (
+                <span className="hidden sm:inline-flex items-center px-1.5 py-0.2 rounded-full bg-neutral-900 border border-neutral-700/70 text-[9px] font-mono text-neutral-400 shrink-0 select-none">
+                  {panelsCount} panels
+                </span>
+              )}
+            </div>
+
+            {/* Bottom Row: Chapter / Video Title + Studio Badge */}
+            <div className="flex items-center gap-2 min-w-0 mt-0.5">
+              <h2
+                className="truncate text-xs sm:text-sm font-bold text-white tracking-tight leading-none whitespace-nowrap select-text"
+                title={chapterTitle || activeProjectData?.project?.chapter_title || "Video Timeline Studio"}
+              >
+                {chapterTitle || activeProjectData?.project?.chapter_title || "Video Timeline Studio"}
+              </h2>
+
+              <span className="inline-flex items-center px-1.5 py-0.2 rounded bg-blue-500/10 border border-blue-500/20 text-[9px] font-sans font-semibold tracking-wide text-blue-400 shrink-0 select-none">
+                Studio
+              </span>
+            </div>
           </div>
         </div>
 
@@ -663,6 +713,52 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               )}
             </button>
           </div>
+
+          {/* Quick Save Action Button */}
+          {onSave && (
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={isSaving}
+              className={`h-8.5 px-3 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm disabled:opacity-50 shrink-0 ${
+                isDirty
+                  ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30"
+                  : "bg-[#141414] hover:bg-[#242424] text-neutral-300 hover:text-white border-[#2F2F2F]"
+              }`}
+              title={isDirty ? "Save project changes" : "Project saved"}
+            >
+              <Save
+                className={`w-3.5 h-3.5 ${
+                  isDirty ? "text-amber-400" : "text-blue-400"
+                }`}
+              />
+              <span className="hidden sm:inline">
+                {isSaving ? "Saving..." : isDirty ? "Save*" : "Save"}
+              </span>
+            </button>
+          )}
+
+          {/* Export Video Action Button */}
+          {onExport && (
+            <button
+              type="button"
+              onClick={onExport}
+              disabled={isRendering}
+              className="h-8.5 px-3.5 rounded-xl border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md disabled:opacity-50 shrink-0"
+              title="Export and render final video"
+            >
+              {isRendering ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Film className="w-3.5 h-3.5" />
+              )}
+              <span className="hidden sm:inline">
+                {isRendering
+                  ? `Rendering ${Math.round(renderProgress)}%`
+                  : "Export Video"}
+              </span>
+            </button>
+          )}
 
           <button
             onClick={() => navigateTo && navigateTo("/profile")}

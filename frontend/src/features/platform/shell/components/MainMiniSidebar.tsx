@@ -20,6 +20,7 @@ import {
   Image,
   User,
   ExternalLink,
+  Tv,
 } from"lucide-react";
 import TooltipPortal from"@/shared/ui/common/TooltipPortal";
 import {
@@ -63,6 +64,10 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     currentPath ==="/video-editor" ||
     currentPath ==="/video-editor/" ||
     currentPath.startsWith("/video-editor/");
+  const isAISeriesPath =
+    currentPath.startsWith("/ai-series") ||
+    currentPath.startsWith("/studio/ai-series") ||
+    /^\/series\/[^/]+\/(manhwa|comic|anime)\/?$/.test(currentPath);
 
   const isShortcuts = currentPath.startsWith("/shortcuts");
   const isAdminPath = currentPath.startsWith("/admin");
@@ -154,6 +159,13 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           onClick: () => navigateTo("/ai-core"),
         },
         {
+          label:"AI Series Studio",
+          icon: Tv,
+          active: isAISeriesPath,
+          path:"/ai-series",
+          onClick: () => navigateTo("/ai-series"),
+        },
+        {
           label:"Image Editor",
           icon: Image,
           active: isImageEditorPath,
@@ -188,7 +200,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       ],
     },
     {
-      group:"Account & Alerts",
+      group:"Account",
       items: [
         {
           label:"Notifications",

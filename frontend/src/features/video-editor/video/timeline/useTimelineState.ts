@@ -181,19 +181,26 @@ export function useTimelineState(
 
       let x = e.clientX;
       let y = e.clientY;
-      let buttonTop = y;
-      let buttonBottom = y;
-      let buttonLeft = x;
-      let buttonRight = x;
+      let buttonTop: number | undefined;
+      let buttonBottom: number | undefined;
+      let buttonLeft: number | undefined;
+      let buttonRight: number | undefined;
 
-      const target = e.currentTarget as HTMLElement | null;
-      if (target && typeof target.getBoundingClientRect === "function") {
-        const rect = target.getBoundingClientRect();
+      const currentTarget = e.currentTarget as HTMLElement | null;
+      const target = e.target as HTMLElement | null;
+      // Detect if the click originated from an explicit button (like the 3-dots action button)
+      const buttonEl =
+        (currentTarget?.tagName?.toLowerCase() === "button" ? currentTarget : null) ||
+        currentTarget?.closest("button") ||
+        target?.closest("button");
+
+      if (buttonEl && typeof buttonEl.getBoundingClientRect === "function") {
+        const rect = buttonEl.getBoundingClientRect();
         buttonTop = rect.top;
         buttonBottom = rect.bottom;
         buttonLeft = rect.left;
         buttonRight = rect.right;
-        x = rect.right;
+        x = rect.left + rect.width / 2;
         y = rect.bottom;
       }
 
@@ -226,16 +233,23 @@ export function useTimelineState(
         closeContextMenu();
       }
     };
+    const onScrollOrResize = () => {
+      closeContextMenu();
+    };
 
     const timer = setTimeout(() => {
       window.addEventListener("mousedown", onMouseDown);
     }, 20);
     window.addEventListener("keydown", onKey);
+    window.addEventListener("resize", onScrollOrResize);
+    window.addEventListener("scroll", onScrollOrResize, true);
 
     return () => {
       clearTimeout(timer);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("resize", onScrollOrResize);
+      window.removeEventListener("scroll", onScrollOrResize, true);
     };
   }, [contextMenu, closeContextMenu]);
 

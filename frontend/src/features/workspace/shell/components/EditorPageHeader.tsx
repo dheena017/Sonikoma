@@ -38,6 +38,9 @@ import { SonikomaLogo } from"@/shared/ui/branding";
 interface EditorPageHeaderProps {
   title: string;
   subtitle?: string;
+  seriesTitle?: string;
+  chapterTitle?: string;
+  chapterNumber?: number | string;
 
   onSave: () => void;
   isSaving: boolean;
@@ -69,6 +72,9 @@ interface EditorPageHeaderProps {
 const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
   title,
   subtitle,
+  seriesTitle,
+  chapterTitle,
+  chapterNumber,
   onBackToApp,
   onSave,
   isSaving,
@@ -177,14 +183,31 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
   const projectGenre = project?.genre;
   const coverImage = project?.cover_image;
 
+  // Resolve Series & Chapter for crystal-clear breadcrumb hierarchy
+  const rawTitle = title || "Storyboard Editor";
+  const hasDelimiter = rawTitle.includes(" · ");
+
+  const resolvedSeriesTitle =
+    seriesTitle ||
+    project?.title ||
+    (hasDelimiter ? rawTitle.split(" · ")[0]?.trim() : null);
+
+  const resolvedChapterTitle =
+    chapterTitle ||
+    (hasDelimiter
+      ? rawTitle.split(" · ").slice(1).join(" · ")?.trim()
+      : !seriesTitle && !project?.title
+      ? rawTitle
+      : null);
+
   const websiteInfo = (() => {
     if (!projectUrl) return null;
     try {
       const host = new URL(
-        projectUrl.startsWith("http") ? projectUrl :`https://${projectUrl}`
+        projectUrl.startsWith("http") ? projectUrl : `https://${projectUrl}`
       ).hostname
         .toLowerCase()
-        .replace(/^www\./,"");
+        .replace(/^www\./, "");
 
       if (!host) return null;
 
@@ -202,7 +225,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       return {
         name: displayName,
         domain: host,
-        badgeColor:"bg-neutral-900 border border-neutral-800 text-neutral-300",
+        badgeColor: "bg-neutral-900 border border-neutral-800 text-neutral-300",
       };
     } catch {
       return null;
@@ -216,14 +239,14 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       }`}
       style={style}
     >
-      {/* Left Section - Menu Icon (mobile only) + Title + Metadata */}
-      <div className="flex items-center shrink-0 h-full">
+      {/* Left Section - Menu Icon (mobile only) + Brand Logo + Breadcrumb & Title */}
+      <div className="flex items-center min-w-0 shrink-0 h-full gap-2 sm:gap-3.5 pl-3 sm:pl-4">
         {/* Mobile menu toggle only (< md) */}
         {onToggleSidebar && (
-          <div className="md:hidden flex items-center justify-center shrink-0 pl-3">
+          <div className="md:hidden flex items-center justify-center shrink-0">
             <button
               onClick={onToggleSidebar}
-              className="w-9 h-9 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-neutral-300 hover:text-white cursor-pointer transition-all duration-200 active:scale-95 flex items-center justify-center shadow-sm"
+              className="w-8.5 h-8.5 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-neutral-300 hover:text-white cursor-pointer transition-all duration-200 active:scale-95 flex items-center justify-center shadow-sm"
               title={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
               aria-label="Toggle navigation menu"
             >
@@ -232,70 +255,89 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           </div>
         )}
 
-        <div
-          className="flex items-center gap-2 sm:gap-3 cursor-pointer pl-3 sm:pl-4"
-          onClick={onBackToApp}
-        >
-          <SonikomaLogo iconOnly size="sm" />
+        {/* Back to App / Logo Button */}
+        <Tooltip text="Back to Dashboard" placement="bottom">
+          <button
+            onClick={onBackToApp}
+            className="flex items-center gap-1.5 p-1 -ml-1 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-neutral-700/60 transition-all cursor-pointer group focus-visible:outline-none shrink-0"
+            aria-label="Back to Dashboard"
+          >
+            <SonikomaLogo iconOnly size="sm" />
+          </button>
+        </Tooltip>
 
-          <div className="min-w-0 hidden min-[540px]:flex flex-col justify-center max-w-[260px] sm:max-w-[380px] md:max-w-[480px] lg:max-w-[640px]">
-            {/* Top Workspace & Source Website Badge */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/25 text-[9px] font-mono font-bold uppercase tracking-wider text-blue-400 leading-none">
-                Editor Workspace
-              </span>
+        <div className="h-7 w-px bg-white/10 hidden sm:block shrink-0 mx-0.5" />
 
-              {websiteInfo && (
-                <a
-                  href={projectUrl || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-neutral-900 border border-neutral-700/80 text-[9px] font-mono font-bold tracking-wide text-neutral-300 hover:text-white hover:border-neutral-600 transition-colors shadow-sm leading-none"
-                  title={`Source: ${websiteInfo.domain}`}
+        {/* Two-tier Breadcrumb and Workspace Title */}
+        <div className="min-w-0 flex flex-col justify-center max-w-[210px] xs:max-w-[270px] sm:max-w-[370px] md:max-w-[480px] lg:max-w-[620px] xl:max-w-[760px]">
+          {/* Top Row: Series Breadcrumb & Metadata Badges */}
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-nowrap min-w-0">
+            {resolvedSeriesTitle ? (
+              <div className="flex items-center gap-1.5 min-w-0 shrink truncate">
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(true)}
+                  className="text-[11px] font-semibold text-neutral-400 hover:text-neutral-200 transition-colors truncate focus-visible:outline-none cursor-pointer"
+                  title={`Series: ${resolvedSeriesTitle} (Click to switch project)`}
                 >
-                  <Globe className="w-2.5 h-2.5 text-blue-400" />
-                  <span className="truncate max-w-[100px]">
-                    {websiteInfo.name}
-                  </span>
-                  <ExternalLink className="w-2 h-2 text-neutral-500" />
-                </a>
-              )}
+                  <span className="truncate">{resolvedSeriesTitle}</span>
+                </button>
+                <span className="text-neutral-600 text-xs shrink-0 select-none">/</span>
+              </div>
+            ) : (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/25 text-[9px] font-sans font-semibold uppercase tracking-wider text-blue-400 shrink-0 select-none">
+                Studio
+              </span>
+            )}
 
-              {projectGenre && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-neutral-900 border border-neutral-700/80 text-[9px] font-mono font-medium text-neutral-300 truncate max-w-[100px] leading-none shadow-sm">
-                  <Tag className="w-2.5 h-2.5 text-purple-400 shrink-0" />
-                  <span className="truncate">
-                    {projectGenre.split(",")[0].trim()}
-                  </span>
-                </span>
-              )}
-            </div>
+            {/* Source Badge */}
+            {websiteInfo && (
+              <a
+                href={projectUrl || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-neutral-900 border border-neutral-700/80 text-[10px] font-sans font-medium text-neutral-300 hover:text-white hover:border-neutral-600 transition-all shadow-sm shrink-0"
+                title={`Source: ${websiteInfo.domain}`}
+              >
+                <Globe className="w-2.5 h-2.5 text-blue-400 shrink-0" />
+                <span className="truncate max-w-[90px]">{websiteInfo.name}</span>
+                <ExternalLink className="w-2 h-2 text-neutral-500 shrink-0" />
+              </a>
+            )}
 
-            {/* Title & Author / Subtitle */}
-            <div className="mt-1 flex items-center gap-2 min-w-0 leading-none">
-              <h2 className="truncate text-sm font-bold text-white tracking-wide">
-                {title}
-              </h2>
+            {/* Genre Badge */}
+            {projectGenre && (
+              <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-[10px] font-sans font-medium text-purple-300 truncate max-w-[95px] shrink-0 shadow-sm select-none">
+                <Tag className="w-2.5 h-2.5 text-purple-400 shrink-0" />
+                <span className="truncate">{projectGenre.split(",")[0].trim()}</span>
+              </span>
+            )}
 
-              {(subtitle || projectAuthor) && (
-                <>
-                  <span className="text-neutral-600 text-xs font-mono">•</span>
-                  <div className="flex items-center gap-1.5 text-[11px] text-neutral-400 font-mono truncate">
-                    {subtitle && <span className="truncate">{subtitle}</span>}
-                    {subtitle && projectAuthor && (
-                      <span className="text-neutral-600">•</span>
-                    )}
-                    {projectAuthor && (
-                      <span className="inline-flex items-center gap-1 text-neutral-400 shrink-0">
-                        <User className="w-3 h-3 text-neutral-500" />
-                        <span className="truncate">{projectAuthor}</span>
-                      </span>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
+            {/* Author */}
+            {projectAuthor && (
+              <span
+                className="hidden lg:inline-flex items-center gap-1 text-[10px] font-sans text-neutral-400 truncate max-w-[110px] shrink-0"
+                title={`Author: ${projectAuthor}`}
+              >
+                <User className="w-2.5 h-2.5 text-neutral-500 shrink-0" />
+                <span className="truncate">{projectAuthor}</span>
+              </span>
+            )}
+          </div>
+
+          {/* Bottom Row: Active Chapter Title + Mode Badge */}
+          <div className="flex items-center gap-2 min-w-0 mt-0.5">
+            <h2
+              className="truncate text-xs sm:text-sm font-bold text-white tracking-tight leading-none whitespace-nowrap select-text"
+              title={resolvedChapterTitle || rawTitle}
+            >
+              {resolvedChapterTitle || rawTitle}
+            </h2>
+
+            <span className="inline-flex items-center px-1.5 py-0.2 rounded bg-blue-500/10 border border-blue-500/20 text-[9px] font-sans font-semibold tracking-wide text-blue-400 shrink-0 select-none">
+              Editor
+            </span>
           </div>
         </div>
       </div>

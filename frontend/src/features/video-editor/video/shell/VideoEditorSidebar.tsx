@@ -141,29 +141,40 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
 }) => {
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow ="hidden";
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow ="";
+      document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow ="";
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
+
+  // Close drawer on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   const workspaceGroups = getGroupedWorkspaces();
 
   const globalItems = [
     {
-      id:"dashboard",
-      title:"Main Dashboard",
+      id: "dashboard",
+      title: "Main Dashboard",
       icon: LayoutDashboard,
-      path:"/dashboard",
+      path: "/dashboard",
     },
     {
-      id:"projects",
-      title:"Projects Gallery",
+      id: "projects",
+      title: "Projects Gallery",
       icon: FolderOpen,
-      path:"/projects",
+      path: "/projects",
     },
   ];
 
@@ -171,31 +182,35 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-fade-in"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[70] transition-opacity animate-fade-in"
           onClick={onClose}
         />
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 left-0 h-screen w-[280px] sm:w-[300px] z-50 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
-          isOpen ?"translate-x-0" :"-translate-x-full"
+        className={`fixed top-0 bottom-0 left-0 h-screen w-[280px] sm:w-[300px] z-[80] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="w-full h-full bg-[#09090B]/95 backdrop-blur-3xl border-r border-white/8 flex flex-col justify-between shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(59,130,246,0.06)] select-none">
+        <div className="w-full h-full bg-[#09090B] backdrop-blur-3xl border-r border-white/10 flex flex-col justify-between shadow-[16px_0_48px_rgba(0,0,0,0.8),inset_-1px_0_0_rgba(59,130,246,0.06)] select-none">
           {/* Header */}
-          <div className="h-16 px-4 flex items-center justify-between border-b border-white/5 shrink-0">
+          <div className="h-16 px-4 flex items-center justify-between border-b border-white/10 shrink-0 bg-[#09090B]">
             <SonikomaLogo
               size="md"
               badge="Studio"
               showSubtitle={true}
-              subtitleText={seriesTitle ||"Comic to Video Studio"}
-              onClick={() => navigateTo?.("/dashboard")}
+              subtitleText={seriesTitle || "Comic to Video Studio"}
+              onClick={() => {
+                onClose();
+                navigateTo?.("/dashboard");
+              }}
             />
 
             <button
               onClick={onClose}
               aria-label="Close sidebar"
-              className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 border border-neutral-800 transition-colors cursor-pointer"
+              title="Close sidebar (Esc)"
+              className="p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-700/60 transition-all cursor-pointer active:scale-95 shadow-sm"
             >
               <X className="w-4 h-4" />
             </button>

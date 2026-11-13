@@ -935,31 +935,80 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
     );
   }
 
-  const format = (project.format_type ||"manhwa").toLowerCase();
-  const isManhwa = format ==="manhwa";
-  const isComic = format ==="comic_manga";
-  const isAnime = format ==="anime";
+  const format = (project.format_type || "manhwa").toLowerCase();
+  const isManhwa = format === "manhwa";
+  const isComic = format === "comic_manga";
+  const isAnime = format === "anime";
   const panels = currentChapter?.panels || [];
   const sessions = project.sessions || [];
   const currentSession = sessions.find((s) => s.session_number === selectedSessionNum) || sessions[0];
   const chapters = currentSession?.chapters || [];
+
+  // ── Create Blank Shot Action ──────────────────────────────────────────
+  const handleAddShot = () => {
+    const newPanelIdx = panels.length;
+    const newPanel: AISeriesPanel = {
+      id: `panel_${Date.now()}`,
+      panel_id: `panel_${Date.now()}`,
+      panel_index: newPanelIdx,
+      order_index: newPanelIdx,
+      image_url: "",
+      camera_angle: "medium_shot_entry",
+      prompt: `Cinematic 2D ${project.format_type || "manhwa"} panel, shot #${newPanelIdx + 1}, dynamic atmospheric lighting, detailed linework`,
+      speech_text: "",
+      speech_bubbles: [
+        {
+          bubble_id: `bubble_${Date.now()}`,
+          speaker_name: project?.cast?.[0]?.name || "Hero",
+          text: "",
+          bubble_type: "speech",
+          pos_x: 0.5,
+          pos_y: 0.75,
+          width: 220,
+          height: 90,
+          font_family: "font-comic",
+          font_size: 14,
+          bg_color: "#FFFFFF",
+          text_color: "#0F172A",
+          border_color: "#1E293B",
+        },
+      ],
+      duration: 3.5,
+    };
+    const updatedPanels = [...panels, newPanel];
+    if (currentChapter) {
+      setCurrentChapter({
+        ...currentChapter,
+        panels: updatedPanels,
+      });
+    }
+    setSelectedPanelIdx(newPanelIdx);
+    setIsPanelInspectorOpen(true);
+    addNotification(`Created Shot #${newPanelIdx + 1}`, "success");
+  };
 
   return (
     <div className="w-full flex-1 flex flex-row bg-[#07080C] text-[#E5E5E5] h-full min-h-0 max-h-full overflow-hidden">
       {/* ── MAIN VISUAL WORKSPACE CANVAS WRAPPER ─────────────────────── */}
       <div className="flex-1 min-w-0 relative h-full min-h-0 overflow-hidden flex flex-col">
         {/* Top Studio Bar: Left (Series Title & Format) | Right (Episode & Session) */}
-        <header className="h-12 pl-4 pr-2 bg-[#0A0B12]/95 backdrop-blur-md border-b border-white/10 flex items-center justify-between shrink-0 z-20">
+        <header className="h-12 pl-4 pr-3 bg-[#0A0B12]/95 backdrop-blur-md border-b border-white/10 flex items-center justify-between shrink-0 z-20">
           {/* Left: Format Badge + Series Title + Quick Studio Tools */}
-          <div className="flex items-center gap-3 min-w-0">
-            {project.format_type && (
-              <span className="text-[10px] font-mono font-black uppercase px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-400/30 shrink-0">
-                {project.format_type.replace(/_/g,"")}
-              </span>
-            )}
-            <h1 className="text-sm font-bold text-white truncate max-w-xs sm:max-w-sm" title={project.title}>
-              {project.title ||"AI Series Studio"}
-            </h1>
+          <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+            <div className="flex items-center gap-2 shrink-0 max-w-[200px] sm:max-w-[260px] md:max-w-xs lg:max-w-sm min-w-0">
+              {project.format_type && (
+                <span className="text-[10px] font-mono font-black uppercase px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-400/30 shrink-0 tracking-wider">
+                  {project.format_type.replace(/_/g, "")}
+                </span>
+              )}
+              <h1
+                className="text-sm font-bold text-white whitespace-nowrap overflow-hidden text-ellipsis leading-none shrink min-w-0"
+                style={{ textWrap: "nowrap", whiteSpace: "nowrap" }}
+                title={project.title}
+              >
+                {project.title || "AI Series Studio"}
+              </h1>
+            </div>
 
             <div className="h-4 w-px bg-white/10 shrink-0 hidden md:block" />
 
@@ -990,43 +1039,64 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                 onClick={() => setShowSpeechBubbles(!showSpeechBubbles)}
                 className={`px-2.5 py-1 rounded-lg border text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
                   showSpeechBubbles
-                    ?"bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
-                    :"bg-white/5 border-white/10 text-neutral-400 hover:text-white"
+                    ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
+                    : "bg-white/5 border-white/10 text-neutral-400 hover:text-white"
                 }`}
                 title="Toggle Speech Bubbles Overlay"
               >
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    showSpeechBubbles ?"bg-emerald-400 animate-pulse" :"bg-neutral-600"
+                    showSpeechBubbles ? "bg-emerald-400 animate-pulse" : "bg-neutral-600"
                   }`}
                 />
-                <span>Bubbles {showSpeechBubbles ?"ON" :"OFF"}</span>
+                <span>Bubbles {showSpeechBubbles ? "ON" : "OFF"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAddShot}
+                className="px-2.5 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/25 hover:border-cyan-400/50 text-cyan-300 hover:text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                title="Add New Blank Shot"
+              >
+                <Plus className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Add Shot</span>
               </button>
             </div>
 
-            {/* Active AI Smart Routing Pipeline Indicator */}
+            {/* Active AI Smart Routing Pipeline Indicator (Ultra-Wide screens) */}
             {project.image_model && (
-              <div className="hidden xl:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#141525] border border-cyan-500/25 text-[10px] font-mono shadow-sm">
-                <span className="flex items-center gap-1 text-cyan-300 font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              <div className="hidden 2xl:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#141525] border border-cyan-500/25 text-[10px] font-mono shadow-sm shrink-0">
+                <span className="flex items-center gap-1 text-cyan-300 font-bold whitespace-nowrap">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
                   {formatModelBadge(project.image_model)}
                 </span>
                 {project.storyboard_model && (
                   <>
-                    <span className="text-neutral-600">•</span>
-                    <span className="text-neutral-400 truncate max-w-[120px]" title={project.storyboard_model}>
+                    <span className="text-neutral-600 shrink-0">•</span>
+                    <span className="text-neutral-300 whitespace-nowrap" title={project.storyboard_model}>
                       {formatModelBadge(project.storyboard_model)}
                     </span>
                   </>
                 )}
-                {project.voice_model && project.voice_model !=="muted" && (
+                {project.voice_model && project.voice_model !== "muted" && (
                   <>
-                    <span className="text-neutral-600">•</span>
-                    <span className="text-emerald-400 truncate max-w-[100px]" title={project.voice_model}>
-                      🎙️ {project.voice_model.includes("eleven") ?"ElevenLabs" :"Edge-TTS"}
+                    <span className="text-neutral-600 shrink-0">•</span>
+                    <span className="text-emerald-400 whitespace-nowrap" title={project.voice_model}>
+                      🎙️ {project.voice_model.includes("eleven") ? "ElevenLabs" : "Edge-TTS"}
                     </span>
                   </>
                 )}
+              </div>
+            )}
+
+            {/* Compact AI Model Pill (For xl and up screens) */}
+            {project.image_model && (
+              <div
+                className="hidden xl:flex 2xl:hidden items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#141525] border border-cyan-500/25 text-[10px] font-mono text-cyan-300 font-bold whitespace-nowrap shadow-sm shrink-0"
+                title={`Diffusion: ${project.image_model} | Storyboard: ${project.storyboard_model || "Gemini"} | Voice: ${project.voice_model || "Edge-TTS"}`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                <span>{formatModelBadge(project.image_model)}</span>
               </div>
             )}
           </div>
@@ -1165,9 +1235,82 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
         <main
           id="ai-series-studio-canvas"
           tabIndex={0}
-          className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex flex-col items-center p-2 sm:p-3 space-y-2 bg-gradient-to-b from-[#090A10] via-[#07080C] to-[#050608] focus:outline-none relative"
+          className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center p-2 sm:p-4 space-y-2 bg-gradient-to-b from-[#090A10] via-[#07080C] to-[#050608] focus:outline-none relative min-h-0"
         >
-          {/* VIEWPORT 1: Webtoon Continuous Reading Strip (Uncropped, Natural Proportions) */}
+          {/* EMPTY STATE: When no storyboard shots exist yet in this chapter */}
+          {panels.length === 0 ? (
+            <div className="my-auto w-full max-w-xl mx-auto p-8 rounded-3xl bg-gradient-to-b from-[#121320] via-[#0D0E18] to-[#090A12] border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.8)] text-center flex flex-col items-center gap-6 animate-in fade-in zoom-in-95 duration-200">
+              {/* Glowing Icon Pod */}
+              <div className="relative">
+                <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-blue-600/30 via-indigo-600/20 to-purple-600/30 border border-blue-500/40 flex items-center justify-center shadow-xl backdrop-blur-md">
+                  <Film className="w-10 h-10 text-blue-400" />
+                </div>
+                <div className="absolute -inset-1 rounded-3xl bg-blue-500/20 blur-xl -z-10 animate-pulse" />
+                <span className="absolute -bottom-1 -right-1 px-2.5 py-0.5 rounded-full bg-purple-600 text-[10px] font-mono font-black text-white shadow-md border border-purple-400/40 uppercase">
+                  Ep {selectedChapterNum}
+                </span>
+              </div>
+
+              {/* Title & Description */}
+              <div className="space-y-2 max-w-md">
+                <h2 className="text-xl font-extrabold text-white tracking-tight">
+                  Ready to Direct Episode #{selectedChapterNum}
+                </h2>
+                <p className="text-xs text-neutral-400 leading-relaxed font-sans">
+                  Generate storyboards from your script or add your first panel shot to start directing.
+                </p>
+              </div>
+
+              {/* Primary Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => handleSynthesizeChapterVisuals()}
+                  disabled={isSynthesizingVisuals}
+                  className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-xs font-mono font-bold flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-lg shadow-blue-500/25 active:scale-95 disabled:opacity-50"
+                >
+                  {isSynthesizingVisuals ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Generating Storyboard...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 text-cyan-300" />
+                      <span>Auto-Generate Storyboard</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleAddShot}
+                  className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 hover:border-white/30 text-white text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
+                >
+                  <Plus className="w-4 h-4 text-emerald-400" />
+                  <span>Add First Blank Shot</span>
+                </button>
+              </div>
+
+              {/* Fast Info Chips */}
+              <div className="grid grid-cols-3 gap-2 w-full pt-3 border-t border-white/10 text-left">
+                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                  <span className="text-[10px] font-mono font-bold text-neutral-400 block uppercase">Format</span>
+                  <span className="text-xs font-semibold text-white capitalize">{project?.format_type || "Manhwa"}</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                  <span className="text-[10px] font-mono font-bold text-neutral-400 block uppercase">AI Model</span>
+                  <span className="text-xs font-semibold text-cyan-300 truncate block">{formatModelBadge(project?.image_model)}</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                  <span className="text-[10px] font-mono font-bold text-neutral-400 block uppercase">Cast DNA</span>
+                  <span className="text-xs font-semibold text-purple-300">{project?.cast?.length || 0} Registered</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* VIEWPORT 1: Webtoon Continuous Reading Strip (Uncropped, Natural Proportions) */}
           {viewportMode ==="strip" && (
             <div
               className="flex flex-col items-center gap-4 transition-all duration-200 shrink-0 pb-3 max-w-full"
@@ -1433,7 +1576,9 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
               </div>
             </div>
           )}
-        </main>
+        </>
+      )}
+    </main>
 
         {/* ── Middle Open Trigger (Portaled directly to document.body on the far right edge of viewport) ── */}
         {!isPanelInspectorOpen &&

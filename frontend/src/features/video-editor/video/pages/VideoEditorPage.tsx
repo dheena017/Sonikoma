@@ -281,7 +281,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
   return (
     <div className="flex flex-row h-screen w-screen bg-[#0A0A0A] text-white overflow-hidden select-none font-sans fixed inset-0 z-[100]">
       {/* ── Left: Full-Height Mini Sidebar Rail ────────────────────────────── */}
-      <div className="hidden lg:block h-full shrink-0 z-40">
+      <div className="hidden lg:block h-full shrink-0 z-20">
         <MiniSidebar
           activeWorkspace={activeWorkspace}
           onSelectWorkspace={handleSelectWorkspace}
@@ -320,6 +320,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
           isDirty={isDirty}
           userCredits={userCredits}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          isSidebarOpen={isSidebarOpen}
           layoutConfig={layoutConfig}
           onTogglePanel={handleTogglePanel}
           panelsCount={panels.length}

@@ -118,6 +118,16 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
 
   const tools = [
     {
+      id: "ai-series",
+      label: "AI Series Studio",
+      desc: "Direct multi-panel manhwa, manga & anime series with character DNA, continuous reading strips, and vocal dubbing.",
+      icon: Film,
+      path: "/ai-series",
+      requiresPanels: false,
+      badge: "Master Studio",
+      logo: WORKFLOW_LOGOS.render,
+    },
+    {
       id: "agent",
       label: "Autonomous Webtoon Agent",
       desc: "Zero-touch URL to YouTube pipeline: scrapes, crops panels, narrates & publishes video.",

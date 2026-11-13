@@ -482,6 +482,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
       panelsCount={panels.length}
       isBatchCropping={isBatchCropping}
       isCleaningBubbles={isCleaningBubbles}
+      seriesTitle={seriesTitle}
+      chapterTitle={chapterTitle}
+      chapterNumber={chapterNumber}
       title={
         seriesTitle && chapterTitle
           ? `${seriesTitle} · ${chapterTitle}`

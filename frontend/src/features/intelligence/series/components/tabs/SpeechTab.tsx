@@ -11,6 +11,7 @@ import {
   Languages,
   ChevronDown,
   ChevronRight,
+  Zap,
 } from "lucide-react";
 import type {
   AISeriesPanel,
@@ -25,6 +26,7 @@ const BUBBLE_TYPES = [
   { id: "thought", label: "Thought", icon: HelpCircle },
   { id: "whisper", label: "Whisper", icon: Volume2 },
   { id: "narration", label: "Narration", icon: Film },
+  { id: "sfx", label: "SFX Impact", icon: Zap },
 ];
 
 export interface SpeechTabProps {
@@ -211,12 +213,17 @@ export const SpeechTab: React.FC<SpeechTabProps> = ({
             </div>
 
             {/* IOPaint Bubble Cleaner & Inpainter Trigger */}
-            <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono text-neutral-300">
-                <span className="font-semibold text-white">IOPaint Bubble Inpainter</span>
-                <span className="text-[10px] text-amber-400 font-bold">Auto-Erase</span>
+            <div className="p-3.5 rounded-xl bg-gradient-to-b from-[#181824] to-[#12121A] border border-amber-500/20 shadow-md space-y-2.5">
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="font-bold text-amber-200 flex items-center gap-1.5">
+                  <Wand2 className="w-3.5 h-3.5 text-amber-400" />
+                  IOPaint Bubble Inpainter
+                </span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold tracking-wide uppercase font-mono">
+                  Auto-Erase
+                </span>
               </div>
-              <p className="text-[10px] text-neutral-400 font-sans">
+              <p className="text-[11px] text-neutral-400 font-sans leading-relaxed">
                 Uses ComicTextDetector deep-learning masks to cleanly erase hardcoded speech bubbles and inpaint background lineart.
               </p>
               <button
@@ -229,12 +236,12 @@ export const SpeechTab: React.FC<SpeechTabProps> = ({
                   }, 1100);
                 }}
                 disabled={isInpainting}
-                className="w-full py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all disabled:opacity-50"
+                className="w-full py-2 px-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 hover:border-amber-400/60 text-amber-200 hover:text-white text-[11px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50 shadow-sm active:scale-98"
               >
                 {isInpainting ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
                 ) : (
-                  <Wand2 className="w-3.5 h-3.5" />
+                  <Wand2 className="w-3.5 h-3.5 text-amber-400" />
                 )}
                 <span>{isInpainting ? "Inpainting Mask..." : "Clean Panel Art (IOPaint)"}</span>
               </button>

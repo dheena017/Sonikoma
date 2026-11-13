@@ -3,7 +3,8 @@
 // Specialized Canva & NLE context menus tailored uniquely per track type:
 // V1 (Story Panels), V2 (Camera FX), V3 (Subtitles), A1 (Music), A2 (SFX), A3 (Voiceover).
 
-import React, { useState } from "react";
+import React, { useState, useLayoutEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Copy,
   ClipboardPaste,
@@ -44,6 +45,83 @@ interface ContextMenuPopupProps {
 }
 
 const MENU_W = 240;
+
+interface PositionResult {
+  x: number;
+  y: number;
+}
+
+function computeAutoPosition(
+  contextMenu: ContextMenuState,
+  menuW: number,
+  menuH: number
+): PositionResult {
+  const winW = typeof window !== "undefined" ? window.innerWidth : 1920;
+  const winH = typeof window !== "undefined" ? window.innerHeight : 1080;
+
+  let x: number;
+  let y: number;
+
+  const hasButtonAnchor =
+    contextMenu.buttonTop !== undefined && contextMenu.buttonBottom !== undefined;
+
+  if (hasButtonAnchor) {
+    const bTop = contextMenu.buttonTop!;
+    const bBottom = contextMenu.buttonBottom!;
+    const bLeft = contextMenu.buttonLeft ?? contextMenu.x;
+    const bRight = contextMenu.buttonRight ?? contextMenu.x;
+
+    const spaceBelow = winH - bBottom - 8;
+    const spaceAbove = bTop - 8;
+
+    // Vertical Auto-Positioning:
+    // If opening above fits or if bottom doesn't have room (e.g. bottom timeline bar)
+    if (spaceBelow < menuH && spaceAbove >= menuH) {
+      y = bTop - menuH - 4;
+    } else if (spaceBelow >= menuH) {
+      y = bBottom + 4;
+    } else if (spaceAbove > spaceBelow) {
+      y = Math.max(8, bTop - menuH - 4);
+    } else {
+      y = bBottom + 4;
+    }
+
+    // Horizontal Auto-Positioning:
+    // Align menu's right edge to button's right edge
+    let idealX = bRight - menuW;
+    if (idealX < 12) {
+      // If right-alignment bleeds off left screen, align with button's left edge
+      idealX = bLeft;
+    }
+    if (idealX + menuW > winW - 12) {
+      idealX = winW - menuW - 12;
+    }
+
+    x = Math.max(12, Math.min(idealX, winW - menuW - 12));
+    y = Math.max(8, Math.min(y, winH - menuH - 8));
+  } else {
+    // Mouse contextmenu (right-click) at mouse coordinates
+    const mX = contextMenu.x;
+    const mY = contextMenu.y;
+
+    if (winH - mY < menuH + 10 && mY >= menuH) {
+      y = mY - menuH;
+    } else {
+      y = mY;
+    }
+
+    if (winW - mX < menuW + 10 && mX >= menuW) {
+      x = mX - menuW;
+    } else {
+      x = mX;
+    }
+
+    x = Math.max(12, Math.min(x, winW - menuW - 12));
+    y = Math.max(8, Math.min(y, winH - menuH - 8));
+  }
+
+  return { x, y };
+}
 
 const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
   contextMenu,
@@ -284,41 +362,24 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
   }
 
   const HeaderIcon = trackIcon;
-  const MENU_W = 240;
-  const MENU_H = items.length * 34 + 48;
+  const estimatedH = items.length * 34 + 48;
 
-  const bTop = contextMenu.buttonTop ?? contextMenu.y;
-  const bBottom = contextMenu.buttonBottom ?? contextMenu.y;
-  const bLeft = contextMenu.buttonLeft ?? contextMenu.x;
-  const bRight = contextMenu.buttonRight ?? contextMenu.x;
+  const [coords, setCoords] = useState<PositionResult>(() =>
+    computeAutoPosition(contextMenu, MENU_W, estimatedH)
+  );
 
-  const spaceBelow = window.innerHeight - bBottom;
-  const spaceAbove = bTop;
+  // Synchronously measure and refine position before browser paint
+  useLayoutEffect(() => {
+    if (!contextMenu) return;
+    const el = contextMenuRef.current;
+    const actualW = el?.offsetWidth || MENU_W;
+    const actualH = el?.offsetHeight || estimatedH;
+    setCoords(computeAutoPosition(contextMenu, actualW, actualH));
+  }, [contextMenu, items.length, contextMenuRef, estimatedH]);
 
-  // Decide open direction:
-  let y: number;
-  if (spaceBelow < MENU_H + 20 && spaceAbove >= MENU_H) {
-    // Open directly ABOVE the button
-    y = bTop - MENU_H - 4;
-  } else if (spaceBelow < MENU_H + 20 && spaceAbove > spaceBelow) {
-    // Open directly ABOVE the button
-    y = Math.max(12, bTop - MENU_H - 4);
-  } else {
-    // Open directly BELOW the button
-    y = bBottom + 4;
-  }
+  if (typeof document === "undefined") return null;
 
-  // Safety clamp so menu is always 100% on-screen
-  y = Math.max(12, Math.min(y, window.innerHeight - MENU_H - 12));
-
-  // Horizontal Positioning: Align to right edge of button
-  let x = bRight - MENU_W;
-  if (x < 12) {
-    x = Math.max(12, bLeft);
-  }
-  x = Math.max(12, Math.min(x, window.innerWidth - MENU_W - 12));
-
-  return (
+  return createPortal(
     <>
       {/* Invisible backdrop to capture all outside clicks safely */}
       <div
@@ -337,7 +398,7 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
       <div
         ref={contextMenuRef}
         className="fixed z-[9999] bg-[#18181B]/98 backdrop-blur-2xl rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-white/10 py-1.5 overflow-hidden text-neutral-200 select-none animate-in fade-in zoom-in-95 duration-100 max-h-[calc(100vh-24px)] flex flex-col"
-        style={{ left: `${x}px`, top: `${y}px`, width: `${MENU_W}px` }}
+        style={{ left: `${coords.x}px`, top: `${coords.y}px`, width: `${MENU_W}px` }}
       >
         {/* Track Category Header */}
         <div className="px-3 py-1.5 flex items-center justify-between border-b border-white/[0.08] mb-1 bg-white/[0.02]">
@@ -368,7 +429,11 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
             return (
               <button
                 key={`${label}-${i}`}
-                onClick={disabled ? undefined : action}
+                onClick={() => {
+                  if (disabled) return;
+                  action?.();
+                  onClose?.();
+                }}
                 className={`w-full flex items-center justify-between px-3 py-[6px] text-xs transition-colors ${
                   disabled
                     ? "text-neutral-500 cursor-not-allowed opacity-40"
@@ -395,7 +460,8 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
           })}
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 };
 

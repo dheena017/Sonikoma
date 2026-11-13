@@ -7,6 +7,7 @@ import {
   ExternalLink,
   Bot,
   Image as ImageIcon,
+  Film,
 } from"lucide-react";
 import TooltipPortal from"@/shared/ui/common/TooltipPortal";
 
@@ -49,6 +50,13 @@ const CreativeSuiteMiniSidebarInner: React.FC<
       name:"Visuals",
       items: [
         {
+          id:"ai-series",
+          label:"AI Series Studio",
+          icon: Film,
+          path:"/ai-series",
+          requiresPanels: false,
+        },
+        {
           id:"thumbnails",
           label:"Thumbnail Studio",
           icon: ImageIcon,
@@ -84,6 +92,14 @@ const CreativeSuiteMiniSidebarInner: React.FC<
         currentPath ==="/creative-suite" ||
         currentPath ==="/creative-suite/" ||
         currentPath ==="/creative-suite-dashboard"
+      );
+    }
+    if (path ==="/ai-series") {
+      return (
+        currentPath ==="/ai-series" ||
+        currentPath.startsWith("/ai-series") ||
+        currentPath.startsWith("/studio/ai-series") ||
+        /^\/series\/[^/]+\/(manhwa|comic|anime)\/?$/.test(currentPath)
       );
     }
     if (path ==="/creative-suite/translation") {

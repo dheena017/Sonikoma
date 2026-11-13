@@ -23,6 +23,7 @@ import {
   Database,
   Image,
   User,
+  Tv,
 } from"lucide-react";
 
 import { useThemeMode } from"@/shared/hooks/useThemeMode";
@@ -213,6 +214,10 @@ const SidebarInner = ({
     currentPath ==="/video-editor" ||
     currentPath ==="/video-editor/" ||
     currentPath.startsWith("/video-editor/");
+  const isAISeriesPath =
+    currentPath.startsWith("/ai-series") ||
+    currentPath.startsWith("/studio/ai-series") ||
+    /^\/series\/[^/]+\/(manhwa|comic|anime)\/?$/.test(currentPath);
   const isShortcuts = currentPath ==="/shortcuts";
   const isProjects = currentPath ==="/projects";
 
@@ -316,6 +321,14 @@ const SidebarInner = ({
             currentPath ==="/ai-core" || currentPath.startsWith("/ai-core/"),
           path:"/ai-core",
           onClick: () => navigateTo("/ai-core"),
+          enabled: true,
+        },
+        {
+          label:"AI Series Studio",
+          icon: Tv,
+          active: isAISeriesPath,
+          path:"/ai-series",
+          onClick: () => navigateTo("/ai-series"),
           enabled: true,
         },
         {

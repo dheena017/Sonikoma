@@ -10,6 +10,7 @@ import {
   FolderSync,
   Bot,
   Image as ImageIcon,
+  Film,
 } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
@@ -175,8 +176,15 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
       ],
     },
     {
-      name: "Visuals",
+      name: "Visuals & Series",
       items: [
+        {
+          id: "ai-series",
+          label: "AI Series Studio",
+          icon: Film,
+          path: "/ai-series",
+          requiresPanels: false,
+        },
         {
           id: "thumbnails",
           label: "Thumbnail Studio",
@@ -213,6 +221,14 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
         currentPath === "/creative-suite" ||
         currentPath === "/creative-suite/" ||
         currentPath === "/creative-suite-dashboard"
+      );
+    }
+    if (path === "/ai-series") {
+      return (
+        currentPath === "/ai-series" ||
+        currentPath.startsWith("/ai-series") ||
+        currentPath.startsWith("/studio/ai-series") ||
+        /^\/series\/[^/]+\/(manhwa|comic|anime)\/?$/.test(currentPath)
       );
     }
     if (path === "/creative-suite/translation") {

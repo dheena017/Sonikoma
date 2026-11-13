@@ -72,6 +72,13 @@ h6 {
   text-wrap: balance;
 }
 
+/* Ensure single-line utility overrides prevent multi-line wrap on headings */
+.truncate,
+.whitespace-nowrap {
+  text-wrap: nowrap !important;
+  white-space: nowrap !important;
+}
+
 p {
   color: #9ca3af;
   line-height: 1.6;

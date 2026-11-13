@@ -18,6 +18,9 @@ interface LayoutEditorPageProps {
   isCleaningBubbles: boolean;
   title: string;
   subtitle?: string;
+  seriesTitle?: string;
+  chapterTitle?: string;
+  chapterNumber?: number | string;
   onSave: () => void;
   isSaving: boolean;
   isDirty?: boolean;
@@ -53,6 +56,9 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
   isCleaningBubbles,
   title,
   subtitle,
+  seriesTitle,
+  chapterTitle,
+  chapterNumber,
   onSave,
   isSaving,
   isDirty,
@@ -142,6 +148,9 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           <EditorPageHeader
             title={title}
             subtitle={subtitle}
+            seriesTitle={seriesTitle}
+            chapterTitle={chapterTitle}
+            chapterNumber={chapterNumber}
             onBackToApp={onBackToApp}
             onSave={onSave}
             isSaving={isSaving}

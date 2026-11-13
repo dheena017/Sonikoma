@@ -176,10 +176,10 @@ export const RightSidePanelInspector: React.FC<RightSidePanelInspectorProps> = (
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono font-black uppercase tracking-wider text-white">
-                  Shot #{selectedPanelIdx + 1}
+                  {totalPanels === 0 ? "Shot #1 (Draft)" : `Shot #${selectedPanelIdx + 1}`}
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-300 font-bold border border-blue-500/30 shrink-0">
-                  {selectedPanelIdx + 1} / {totalPanels}
+                  {totalPanels === 0 ? "0 / 0" : `${selectedPanelIdx + 1} / ${totalPanels}`}
                 </span>
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
@@ -196,7 +196,7 @@ export const RightSidePanelInspector: React.FC<RightSidePanelInspectorProps> = (
             <button
               type="button"
               onClick={() => onSelectPanelIdx?.(Math.max(0, selectedPanelIdx - 1))}
-              disabled={selectedPanelIdx === 0}
+              disabled={totalPanels <= 1 || selectedPanelIdx === 0}
               className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white disabled:opacity-25 disabled:pointer-events-none transition-colors cursor-pointer"
               title="Previous Shot"
             >
@@ -205,7 +205,7 @@ export const RightSidePanelInspector: React.FC<RightSidePanelInspectorProps> = (
             <button
               type="button"
               onClick={() => onSelectPanelIdx?.(Math.min(totalPanels - 1, selectedPanelIdx + 1))}
-              disabled={selectedPanelIdx >= totalPanels - 1}
+              disabled={totalPanels <= 1 || selectedPanelIdx >= totalPanels - 1}
               className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white disabled:opacity-25 disabled:pointer-events-none transition-colors cursor-pointer"
               title="Next Shot"
             >
